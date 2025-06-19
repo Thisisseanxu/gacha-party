@@ -19,7 +19,7 @@ const routes = [
     component: GachaPage,
     props: true, // 将路由参数作为props传递给组件
   },
-  // 404页面（之后在写）
+  // TODO 404页面
   // { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }
 ];
 
