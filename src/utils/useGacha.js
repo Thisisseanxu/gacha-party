@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { getFullCardPoolData } from '@/data/cardPools' // 从 cardPools.js 导入获取完整卡池数据的函数
 import * as RARITY from '@/data/rarity.js'
 
@@ -61,6 +61,7 @@ export function useGacha(poolId) {
       [RARITY.SR]: 0,
       [RARITY.R]: 0,
     }
+
     gachaHistory.value.forEach((card) => {
       if (counts[card.rarity] !== undefined) {
         counts[card.rarity]++
@@ -69,82 +70,177 @@ export function useGacha(poolId) {
     return counts
   })
 
+  // 保底规则的抽数计数器
+  const pityCounters = ref(0)
+
+  // 递增概率规则的抽数计数器
+  const boostCounters = ref(0)
+
+  // UP保底状态：true表示下一次是UP，false表示正常判断
+  const nextIsUP = ref(false)
+
+  const pityRarity = ref(null)
+  const pityValue = ref(null)
+  const boostRarity = ref(null)
+  const boostAfter = ref(null)
+  const boostValue = ref(null)
+  const pityUP = ref(false)
+  watchEffect(() => {
+    // 当 currentPool.value 变化时，这个watchEffect会重新运行
+    // 它会追踪 currentPool.value 及其内部属性的变化
+    if (currentPool.value && currentPool.value.rules) {
+      // 重置，确保每次卡池规则变化时都重新计算
+      pityRarity.value = null
+      pityValue.value = null
+      pityUP.value = false
+      boostRarity.value = null
+      boostAfter.value = null
+      boostValue.value = null
+
+      // 遍历规则，查找哪个稀有度有pity规则
+      for (const [rarity, rule] of Object.entries(currentPool.value.rules)) {
+        if (rule) {
+          if (rule.pity) {
+            pityRarity.value = rarity
+            pityValue.value = rule.pity
+            pityUP.value = rule.pityUP || false
+          }
+          if (rule.boostAfter && rule.boost) {
+            boostRarity.value = rarity
+            boostAfter.value = rule.boostAfter
+            boostValue.value = rule.boost
+          }
+        }
+      }
+    }
+  })
+
   /**
    * 根据当前卡池的概率和累计抽卡次数，获取调整后的稀有度概率
-   * (这里是预留功能点，目前只返回基础概率)
    * @param {number} currentTotalPulls - 当前总抽卡次数
    * @returns {Object<string, number>} 调整后的稀有度概率对象
    */
-  const getAdjustedRates = (currentTotalPulls) => {
-    console.log(`当前总抽卡次数: ${currentTotalPulls}`)
-    // TODO: 在这里实现保底、概率提升等逻辑
-    // 例如：
-    // if (currentTotalPulls > 50 && !hasPulledSSRInLast(50)) {
-    //     adjustedRates[RARITY.SSR] += 0.01;
-    // }
-    // 目前返回基础概率
-    return currentPool.value.rates
+  const getAdjustedRates = () => {
+    if (!currentPool.value || !currentPool.value.rates) {
+      return {}
+    }
+
+    const baseRates = { ...currentPool.value.rates } // 复制基础概率
+
+    // 计算R的概率
+    baseRates[RARITY.R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
+
+    let adjustedRates = { ...baseRates } // 存储调整后的概率
+    // 如果有boost规则，且当前抽卡次数大于boostAfter，则调整概率
+    // 每抽额外提升boost值*（boostCounters-boostAfter）的概率
+    if (boostRarity.value && boostCounters.value > boostAfter.value) {
+      const boostIncrement = boostValue.value * (boostCounters.value - boostAfter.value)
+      adjustedRates[boostRarity.value] = +(
+        adjustedRates[boostRarity.value] + boostIncrement
+      ).toFixed(4)
+      // 其他稀有度的概率调整
+      Object.keys(adjustedRates).forEach((rarity) => {
+        if (rarity !== boostRarity.value) {
+          adjustedRates[rarity] = +(
+            adjustedRates[rarity] *
+            (1 - adjustedRates[boostRarity.value])
+          ).toFixed(4)
+        }
+      })
+      // DEBUG: 在触发boost机制时提示
+      console.log('Boost触发：当前稀有度概率:', adjustedRates)
+    }
+
+    return adjustedRates
   }
 
   /**
    * 执行一次抽卡操作
-   * @param {number} currentTotalPulls - 用于调整概率的当前总抽卡次数
    * @returns {Object} 抽到的角色对象
    */
-  const pullOne = (currentTotalPulls) => {
+  const pullOne = () => {
     if (!currentPool.value || !currentPool.value.cards) {
       console.error('卡池数据未加载或无效。')
       return null
     }
 
-    // 获取调整后的稀有度概率
-    const adjustedRates = getAdjustedRates(currentTotalPulls)
+    boostCounters.value++
+    pityCounters.value++
 
-    // const UpTrigger_SSR = currentPool.value.rules[RARITY.SSR]?.UpTrigger || false
-    const UpTrigger_SSR = false
-
-    // 构建加权稀有度列表
-    const rarityWeights = []
-
-    // 向稀有度权重列表中添加每个稀有度的概率
-    Object.entries(adjustedRates).forEach(([rarity, rate]) => {
-      rarityWeights.push({
+    let selectedRarity = RARITY.R // 默认稀有度为R;
+    // 如果pityRarity不为空且当前抽卡次数达到保底，直接选中对应的稀有度
+    if (pityRarity.value && pityCounters.value >= pityValue.value) {
+      selectedRarity = pityRarity.value
+      if (pityUP.value) {
+        nextIsUP.value = true // 如果是UP保底，则下次必定是UP角色
+        console.log('触发UP保底：必定抽到UP的角色')
+      } else {
+        console.log(`触发保底：抽到 ${selectedRarity} 稀有度角色`)
+      }
+      pityCounters.value = 0 // 重置保底计数器
+    } else {
+      // 否则计算稀有度概率并抽取
+      const adjustedRates = getAdjustedRates()
+      // 将概率转换为加权数组
+      const rarityWeights = Object.keys(adjustedRates).map((rarity) => ({
         value: rarity,
-        weight: rate,
-      })
-    })
+        weight: adjustedRates[rarity],
+      }))
+      // 抽卡！根据概率随机选择一个稀有度
+      selectedRarity = weightedRandom(rarityWeights)
+      // 如果选中的稀有度是保底稀有度，则重置保底计数器
+      if (selectedRarity === pityRarity.value) {
+        pityCounters.value = 0 // 重置保底计数器
+      }
+    }
 
-    // 自动计算最低稀有度 R 的权重，确保 R 稀有度的权重是剩余概率
-    const sumOfDefinedRates = rarityWeights.reduce((sum, item) => sum + item.weight, 0)
-    rarityWeights.push({
-      value: RARITY.R,
-      weight: Math.max(0, 1 - sumOfDefinedRates), // 确保概率不为负
-    })
-
-    // 抽卡！根据概率随机选择一个稀有度
-    const selectedRarity = weightedRandom(rarityWeights)
+    // 如果当前稀有度有boost规则，且没有选中对应的稀有度，则增加boost计数器
+    if (boostRarity.value && selectedRarity === boostRarity.value) {
+      boostCounters.value = 0 // 重置boost计数器
+    }
 
     let possibleCards = []
     // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
-    if (UpTrigger_SSR && selectedRarity === RARITY.SSR) {
-      // 如果是up机制，筛选出up角色
+    if (nextIsUP.value && currentPool.value.rules[selectedRarity]?.UpCards) {
       possibleCards = currentPool.value.cards.filter(
-        (card) => card.rarity === selectedRarity && card.isUp,
+        (card) =>
+          card.rarity === selectedRarity &&
+          currentPool.value.rules[selectedRarity].UpCards.includes(card.id),
       )
     } else {
-      // 如果不是up机制，获取所有该稀有度的角色
       possibleCards = currentPool.value.cards.filter((card) => card.rarity === selectedRarity)
     }
 
     // 如果某种稀有度没有角色，返回错误角色
     if (possibleCards.length === 0) {
-      console.warn(`当前卡池中没有 ${selectedRarity} 稀有度的角色。`)
-      return { id: 'error', name: '卡池出现错误', rarity: RARITY.R }
+      console.warn(`出现卡池没有对应卡的情况，请检查卡池设置和保底规则。`)
+      return { id: 404, name: '卡池出现错误', rarity: '', imageUrl: '/images/cards/404.png ' }
     }
 
     // 在该稀有度的角色中随机选择一张 (平分概率)
-    const randomIndex = Math.floor(Math.random() * possibleCards.length)
-    const pulledCard = possibleCards[randomIndex]
+    // 如果possible cards当前有doubleRateCards，则这张卡的概率会翻倍
+    if (currentPool.value.doubleRateCards && currentPool.value.doubleRateCards[selectedRarity]) {
+      const doubleRateCard = currentPool.value.doubleRateCards[selectedRarity]
+      possibleCards = possibleCards.map((card) => {
+        if (card.id === doubleRateCard) {
+          return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
+        }
+        return { value: card, weight: 1 } // 其他卡的权重为1
+      })
+    } else {
+      possibleCards = possibleCards.map((card) => ({ value: card, weight: 1 })) // 所有卡的权重为1
+    }
+    const pulledCard = weightedRandom(possibleCards)
+
+    // 如果卡池当前稀有度有UP规则并没有抽到角色，下次变为保底，抽到则重置保底状态
+    if (
+      currentPool.value.rules[selectedRarity]?.UpTrigger &&
+      !currentPool.value.rules[selectedRarity].UpCards.includes(pulledCard.id)
+    ) {
+      nextIsUP.value = true // 下次抽卡必定是UP角色
+    } else {
+      nextIsUP.value = false // 抽到UP角色后，重置UP状态
+    }
 
     return pulledCard
   }
@@ -153,7 +249,7 @@ export function useGacha(poolId) {
    * 执行单抽
    */
   const performSinglePull = () => {
-    const card = pullOne(totalPulls.value) // 传入当前总抽卡次数
+    const card = pullOne() // 传入当前总抽卡次数
     if (card) {
       gachaHistory.value.push(card)
       lastPulledCards.value = [card] // 单抽只显示一张
@@ -166,7 +262,7 @@ export function useGacha(poolId) {
   const performTenPulls = () => {
     const pulledCards = []
     for (let i = 0; i < 10; i++) {
-      const card = pullOne(totalPulls.value + i) // 每次抽卡时更新累计次数
+      const card = pullOne() // 每次抽卡时更新累计次数
       if (card) {
         pulledCards.push(card)
       }

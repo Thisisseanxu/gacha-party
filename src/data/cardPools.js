@@ -19,10 +19,10 @@ export const cardPools = {
       [RARITY.UR]: {
         pity: 60, // 60抽必出UR
         boostAfter: 40, // 40抽后每抽提升UR概率
-        boost: 0.02, // 每抽提升2%的UR概率
+        boost: 0.001, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
       },
       [RARITY.SSR]: {
-        doubleRateCards: [1307], // 双倍概率角色（限定池SSR概率提升）
+        doubleRateCards: [1307], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
@@ -45,12 +45,13 @@ export const cardPools = {
     rules: {
       [RARITY.SSR]: {
         pity: 60, // 60抽必出SSR
-        UpTrigger: true, // 触发UP机制
+        pityUP: true, // 触发保底时必定抽到UP的SSR
+        UpTrigger: true, // 该卡池有UP机制
         UpCards: [1105], // UP角色列表（如果这次SSR不是UP角色，则下次必定是列表中的角色）
       },
     },
     cardIds: {
-      [RARITY.SSR]: [1105],
+      [RARITY.SSR]: [1105, 1102],
       [RARITY.SR]: [1103],
       [RARITY.R]: [1101],
     },
