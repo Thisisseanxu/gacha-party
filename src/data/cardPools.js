@@ -19,7 +19,7 @@ export const cardPools = {
       [RARITY.UR]: {
         pity: 60, // 60抽必出UR
         boostAfter: 40, // 40抽后每抽提升UR概率
-        boost: 0.001, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
+        boost: 0.02, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
       },
       [RARITY.SSR]: {
         doubleRateCards: [1307], // 双倍概率SSR角色（限定池SSR概率提升）
