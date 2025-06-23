@@ -143,15 +143,15 @@ export const cardPools = {
             cards: [1401, 1402, 1403, 1504],
           },
           {
-            id: 5,
+            id: 6,
             name: '冰雪世界',
-            image_url: '/images/cardpools-icon/5.webp',
+            image_url: '/images/cardpools-icon/6.webp',
             cards: [1701, 1703, 1704, 1708],
           },
           {
-            id: 6,
+            id: 5,
             name: '火焰国度',
-            image_url: '/images/cardpools-icon/6.webp',
+            image_url: '/images/cardpools-icon/5.webp',
             cards: [1601, 1602, 1603, 1608],
           },
           {
