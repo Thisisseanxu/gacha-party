@@ -56,13 +56,13 @@ export const cardPools = {
   },
   // 只出UR池
   TestUpdate: {
-    name: '测试更新池',
+    name: '超绝卡池',
     // 基础概率
     rates: {
       [RARITY.UR]: 1.0,
     },
     cardIds: {
-      [RARITY.UR]: [11006, 1110, 1111, 1709],
+      [RARITY.UR]: [1110, 1111, 1709, 11006, 1211, 1609],
     },
   },
 }

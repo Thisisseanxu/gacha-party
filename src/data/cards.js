@@ -7,6 +7,9 @@ export const allCards = [
   { id: 1111, name: '小熊工程队', rarity: RARITY.UR, imageUrl: '/images/cards/1111.png' },
   { id: 1709, name: '雪人女王', rarity: RARITY.UR, imageUrl: '/images/cards/1709.png' },
   { id: 11006, name: '王牌发明家', rarity: RARITY.UR, imageUrl: '/images/cards/11006.png' },
+  { id: 1211, name: '阿芙洛', rarity: RARITY.UR, imageUrl: '/images/cards/1211.png' },
+  { id: 1609, name: '菜狗狗', rarity: RARITY.UR, imageUrl: '/images/cards/1609.png' },
+
   // SSR 角色
   { id: 1102, name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.png' },
   { id: 1301, name: '充电千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1301.png' },
