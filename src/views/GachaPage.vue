@@ -14,10 +14,10 @@
         <h2>抽卡统计：</h2>
         <p>总抽卡次数: {{ totalPulls }}</p>
         <ul>
-          <li v-if="currentPool.hasUR">限定: {{ rarityCounts[RARITY.UR] }} 次</li>
-          <li>SSR: {{ rarityCounts[RARITY.SSR] }} 次</li>
-          <li>SR: {{ rarityCounts[RARITY.SR] }} 次</li>
-          <li>R: {{ rarityCounts[RARITY.R] }} 次</li>
+          <li v-if="rarityCounts[RARITY.UR] > 0">限定: {{ rarityCounts[RARITY.UR] }} 次</li>
+          <li v-if="rarityCounts[RARITY.SSR] > 0">SSR: {{ rarityCounts[RARITY.SSR] }} 次</li>
+          <li v-if="rarityCounts[RARITY.SR] > 0">SR: {{ rarityCounts[RARITY.SR] }} 次</li>
+          <li v-if="rarityCounts[RARITY.R] > 0">R: {{ rarityCounts[RARITY.R] }} 次</li>
         </ul>
 
         <h3>完整抽卡历史：</h3>

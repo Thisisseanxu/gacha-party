@@ -6,7 +6,6 @@ export const cardPools = {
   // 测试限定卡池
   TestUR: {
     name: '测试限定卡池',
-    hasUR: true, // 是否包含UR
     // 基础概率
     rates: {
       [RARITY.UR]: 0.02,
@@ -35,7 +34,6 @@ export const cardPools = {
   TestSSR: {
     name: '测试常驻卡池',
     // 基础概率
-    hasUR: false, // 是否包含UR
     rates: {
       [RARITY.SSR]: 0.08,
       [RARITY.SR]: 0.2,

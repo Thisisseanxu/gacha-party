@@ -85,6 +85,7 @@ export function useGacha(poolId) {
   const boostAfter = ref(null)
   const boostValue = ref(null)
   const pityUP = ref(false)
+  const UpTrigger = ref(false) // 代表当前卡池是否有UP触发规则
   watchEffect(() => {
     // 当 currentPool.value 变化时，这个watchEffect会重新运行
     // 它会追踪 currentPool.value 及其内部属性的变化
@@ -109,6 +110,9 @@ export function useGacha(poolId) {
             boostRarity.value = rarity
             boostAfter.value = rule.boostAfter
             boostValue.value = rule.boost
+          }
+          if (rule.UpTrigger) {
+            UpTrigger.value = true // 如果有UP触发规则，则设置为true
           }
         }
       }
@@ -234,7 +238,8 @@ export function useGacha(poolId) {
 
     // 如果卡池当前稀有度有UP规则并没有抽到角色，下次变为保底，抽到则重置保底状态
     if (
-      currentPool.value.rules[selectedRarity]?.UpTrigger &&
+      UpTrigger.value &&
+      currentPool.value.rules[selectedRarity].UpTrigger &&
       !currentPool.value.rules[selectedRarity].UpCards.includes(pulledCard.id)
     ) {
       nextIsUP.value = true // 下次抽卡必定是UP角色
