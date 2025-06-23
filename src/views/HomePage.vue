@@ -2,14 +2,25 @@
   <div class="home-page">
     <h1>欢迎来到抽卡模拟器</h1>
     <p>选择一个卡池开始抽卡吧！</p>
-    <p>警告：这是一个非常早期的的版本，仅供测试卡池概率</p>
 
     <div class="card-pool-list">
-      <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
+      <router-link v-for="(pool, id) in limitedPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
         class="card-pool-item">
         <div class="card-pool-content">
           <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
           <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
+        </div>
+      </router-link>
+
+      <router-link class="card-pool-item" key="Normal" to="/gacha/Normal01">
+        <div class="card-pool-content">
+          <img src="/images/cardpools-icon/9.webp" alt="常驻卡池封面" class="pool-cover-image">
+        </div>
+      </router-link>
+
+      <router-link class="card-pool-item" key="AllUR" to="/gacha/AllUR">
+        <div class="card-pool-content">
+          <h2 class="pool-name-text">超爽UR卡池</h2>
         </div>
       </router-link>
     </div>
@@ -27,7 +38,14 @@
 </template>
 
 <script setup>
-import { cardPools } from '@/data/cardPools'; // 导入卡池数据
+import { computed } from 'vue'; // 1. 从 vue 导入 computed
+import { cardPools } from '@/data/cardPools';
+
+const limitedPools = computed(() => {
+  return Object.fromEntries(
+    Object.entries(cardPools).filter(([, pool]) => pool.type === '限定')
+  )
+});
 </script>
 
 <style scoped>
@@ -66,9 +84,7 @@ import { cardPools } from '@/data/cardPools'; // 导入卡池数据
 .card-pool-content {
   flex-grow: 1;
   width: 100%;
-  /* 确保内容区宽度一致 */
   overflow: hidden;
-  /* 隐藏溢出内容，特别是图片 */
 }
 
 .card-pool-item:hover {

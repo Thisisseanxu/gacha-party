@@ -16,7 +16,7 @@ export const allCards = [
   { id: 1102, name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },
   { id: 1105, name: '甜甜圈治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1105.webp' },
   { id: 1106, name: '甜甜圈双马尾', rarity: RARITY.SSR, imageUrl: '/images/cards/1106.webp' },
-  { id: 1108, name: '甜甜圈迫击炮', rarity: RARITY.SSR, imageUrl: '/images/cards/1108.webp' },
+  { id: 1108, name: '甜蜜迫击炮', rarity: RARITY.SSR, imageUrl: '/images/cards/1108.webp' },
   { id: 1109, name: '裱花千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1109.webp' },
   { id: 1201, name: '星星法师', rarity: RARITY.SSR, imageUrl: '/images/cards/1201.webp' },
   { id: 1203, name: '琉璃治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1203.webp' },

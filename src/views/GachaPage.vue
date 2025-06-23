@@ -12,6 +12,23 @@
       </div>
       <p v-else>卡池加载中或不存在...</p>
 
+      <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
+        <h3 @click="toggleUpGroupExpansion" class="collapsible-header">
+          <span>{{ isUpGroupExpanded ? '▼' : '▶' }}</span>
+          指定UP角色组:
+        </h3>
+        <transition name="collapse-transition">
+          <div v-if="isUpGroupExpanded" class="up-group-list">
+            <div v-for="group in selectableUpGroup" :key="group.id"
+              :class="['up-group-item', { 'selected': group.id === selectedUpGroup?.id }]"
+              @click="setSelectedUpGroup(group)">
+              <img v-if="group.image_url" :src="group.image_url" :alt="group.name + '组封面'" class="up-group-image">
+              <h4 v-else>{{ group.name }}</h4>
+            </div>
+          </div>
+        </transition>
+      </div>
+
       <div v-if="isSelectableUpPool" class="select-up-container">
         <h3 class="select-up-title">请选择UP角色：</h3>
         <div class="up-cards-selection">
@@ -36,7 +53,7 @@
         <h3>完整抽卡历史：</h3>
         <div class="gacha-history-list">
           <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
-            class="history-item">
+            :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">
             {{ card.name }} ({{ card.rarity === RARITY.UR ? '限定' : card.rarity }})
           </div>
           <p v-if="gachaHistory.length === 0">暂无抽卡历史。</p>
@@ -65,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
@@ -86,10 +103,20 @@ const {
   rarityCounts,
   performSinglePull,
   performTenPulls,
+  setSelectedUpGroup,
+  selectedUpGroup,
 } = useGacha(poolId.value, selectedUpCard); // 注意：这里必须传入 .value 属性
 
 const isSelectableUpPool = computed(() => {
-  return currentPool.value?.rules?.UR?.SelectUpCards === true;
+  return currentPool.value?.rules?.[RARITY.UR]?.SelectUpCards === true;
+});
+
+const isSelectableUpGroupPool = computed(() => {
+  return currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true;
+});
+
+const selectableUpGroup = computed(() => {
+  return currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || [];
 });
 
 // 获取可选UP角色列表
@@ -139,6 +166,12 @@ const paginatedGachaHistory = computed(() => {
   return reversedHistory.slice(start, end);
 });
 
+// 控制UP组的展开与收起
+const isUpGroupExpanded = ref(true);
+const toggleUpGroupExpansion = () => {
+  isUpGroupExpanded.value = !isUpGroupExpanded.value;
+};
+
 // 跳转到上一页
 const prevPage = () => {
   if (currentPage.value > 1) {
@@ -157,7 +190,6 @@ const nextPage = () => {
 // 比如，如果用户在第5页，然后历史记录减少了，总页数变成了3页，
 // 那么需要将 currentPage 重置为 3。
 // 我们可以通过 watch 监听 totalPages 或 gachaHistory.length
-import { watch } from 'vue';
 watch(totalPulls, () => {
   // 如果当前页码大于总页数，将其设置为总页数
   if (currentPage.value > totalPages.value && totalPages.value > 0) {
@@ -188,10 +220,10 @@ const confirmGachaResult = () => {
 
 <style scoped>
 .gacha-page {
-  padding: 20px;
-  text-align: center;
   max-width: 900px;
   margin: 0 auto;
+  padding: 20px;
+  text-align: center;
   position: relative;
   min-height: 100%;
   min-height: -webkit-fill-available;
@@ -200,27 +232,8 @@ const confirmGachaResult = () => {
 .header-container {
   display: flex;
   justify-content: space-between;
-  /* 将子元素分散到两端 */
   align-items: center;
-  /* 垂直居中对齐 */
   margin-bottom: 20px;
-  /* 保持原有的下边距，或者根据需要调整 */
-}
-
-.back-home-button {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-.back-home-button:hover {
-  background-color: #0056b3;
 }
 
 h1 {
@@ -228,27 +241,26 @@ h1 {
   font-size: 1.5em;
 }
 
-/* 现有 UI 元素，在叠加层显示时不展示 */
-.back-link,
-h2,
-.gacha-controls,
-.gacha-stats {
-  transition: opacity 0.3s ease;
-}
-
+/* 按钮样式 */
 .gacha-controls {
   margin-bottom: 40px;
+}
+
+.gacha-button,
+.back-home-button,
+.pagination-controls button,
+.confirm-button {
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
 }
 
 .gacha-button {
   padding: 12px 25px;
   margin: 0 10px;
   font-size: 1.1em;
-  font-weight: bold;
-  cursor: pointer;
   border: none;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
   color: white;
 }
 
@@ -268,85 +280,163 @@ h2,
   background-color: rgb(200, 170, 0);
 }
 
-/* 抽卡结果叠加层样式 */
-.gacha-result-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/images/gacha-bg.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: rgb(162, 37, 225);
+.back-home-button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border: none;
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.back-home-button:hover {
+  background-color: #0056b3;
+}
+
+/* 选择UP（组）组件样式 */
+.select-up-container,
+.select-up-group-container {
+  margin: 25px 0;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+}
+
+.select-up-container {
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.select-up-title,
+.select-up-group-container h3 {
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.select-up-group-container h3 {
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.up-cards-selection,
+.up-group-list {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  color: white;
-  padding: 20px;
-  box-sizing: border-box;
+  gap: 20px;
 }
 
-.gacha-result-overlay h2 {
-  color: #fff;
-  margin: 1%;
-  font-size: 2em;
-}
-
-.pulled-cards-container {
-  display: flex;
+.up-group-list {
   flex-wrap: wrap;
-  justify-content: center;
-  min-width: 400px;
-  max-width: 85%;
-  max-height: 80%;
-  overflow-y: auto;
-  gap: 5vh 10vw;
 }
 
-.card-item {
-  background-color: #333;
-  border: 1px solid #555;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  width: 120px;
-  height: auto;
-  padding: 10px;
-}
-
-.card-image {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-}
-
-.card-name {
-  font-weight: bold;
-  margin: 5px;
-  color: #ffffff;
-}
-
-.confirm-button {
-  padding: 0px 50px;
-  font-size: 1.5em;
-  font-weight: bold;
-  position: relative;
-  background-color: rgb(255, 215, 0);
-  color: rgb(255, 255, 255);
-  border: 2px solid #000000;
-  border-radius: 1.25em;
+.up-card-option {
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 30px;
-  height: 2.5em;
+  padding: 4px;
+  border-radius: 8px;
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  transition: transform 0.2s ease, border-color 0.3s ease;
 }
 
-.confirm-button:hover {
-  background-color: rgb(240, 235, 143);
+.up-card-option:hover {
+  transform: scale(1.05);
 }
 
+.up-card-option.selected {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px gold;
+}
+
+.up-card-image {
+  width: 80px;
+  height: 80px;
+  display: block;
+  border-radius: 4px;
+}
+
+.up-group-item {
+  cursor: pointer;
+  width: 320px;
+  height: 140px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eee;
+}
+
+.up-group-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.up-group-item.selected {
+  border-color: #ff9100;
+  box-shadow: 0 0 20px rgba(255, 145, 0, 0.8);
+  transform: scale(1.02);
+}
+
+.up-group-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.up-group-item h4 {
+  color: #333;
+  font-size: 1.2em;
+  text-align: center;
+  padding: 10px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.select-up-group-container .collapsible-header {
+  color: #007bff;
+  margin-bottom: 20px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.select-up-group-container .collapsible-header:hover {
+  opacity: 0.8;
+}
+
+.collapsible-header span {
+  margin-right: 8px;
+  width: 1em;
+  display: inline-block;
+  text-align: center;
+}
+
+.collapse-transition-enter-active,
+.collapse-transition-leave-active {
+  transition: all 0.3s ease-in-out;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.collapse-transition-enter-from,
+.collapse-transition-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
+}
+
+/* 抽卡历史样式 */
 .gacha-stats {
   margin-top: 50px;
   border-top: 1px solid #eee;
@@ -369,6 +459,7 @@ h2,
 
 .gacha-history-list {
   max-height: 250px;
+  min-height: 230px;
   overflow-y: auto;
   border: 1px solid #eee;
   padding: 10px;
@@ -376,7 +467,6 @@ h2,
   background-color: #f9f9f9;
   border-radius: 5px;
   text-align: left;
-  min-height: 230px;
 }
 
 .history-item {
@@ -386,8 +476,27 @@ h2,
   color: #444;
 }
 
+
 .history-item:last-child {
   border-bottom: none;
+}
+
+.text-rarity-ur {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.text-rarity-ssr {
+  color: #ff9100;
+  font-weight: bold;
+}
+
+.text-rarity-sr {
+  color: #cc00ff;
+}
+
+.text-rarity-r {
+  color: #00ccff;
 }
 
 .pagination-controls {
@@ -400,11 +509,13 @@ h2,
 .pagination-controls button {
   padding: 8px 15px;
   border: 1px solid #007bff;
-  border-radius: 5px;
   background-color: #007bff;
   color: white;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: normal;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: #0056b3;
 }
 
 .pagination-controls button:disabled {
@@ -413,16 +524,83 @@ h2,
   cursor: not-allowed;
 }
 
-.pagination-controls button:not(:disabled):hover {
-  background-color: #0056b3;
-}
-
 .pagination-controls span {
   font-weight: bold;
   color: #333;
 }
 
+/* 抽卡结果叠加层样式 */
+.gacha-result-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('/images/gacha-bg.webp') center/cover no-repeat rgb(162, 37, 225);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.gacha-result-overlay h2 {
+  color: #fff;
+  margin: 1%;
+  font-size: 2em;
+}
+
+.pulled-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5vh 10vw;
+  min-width: 400px;
+  max-width: 85%;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+.card-item {
+  background-color: #333;
+  border: 1px solid #555;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 120px;
+  padding: 10px;
+}
+
+.card-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.card-name {
+  font-weight: bold;
+  margin: 5px;
+  color: #ffffff;
+}
+
+.confirm-button {
+  height: 2.5em;
+  padding: 0 50px;
+  margin-top: 30px;
+  font-size: 1.5em;
+  background-color: rgb(255, 215, 0);
+  border: 2px solid #000000;
+  border-radius: 1.25em;
+  color: white;
+}
+
+.confirm-button:hover {
+  background-color: rgb(240, 235, 143);
+}
+
 /* 稀有度颜色 */
+/* TODO: 将所有颜色放在一个文件里管理，后续增加深色功能 */
 .rarity-ur {
   background-color: #ff0000;
 }
@@ -439,55 +617,6 @@ h2,
   background-color: #00ccff;
 }
 
-.select-up-container {
-  margin: 25px 0;
-  padding: 15px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 10px;
-}
-
-.select-up-title {
-  margin: 0 0 15px 0;
-  color: #333;
-  font-weight: bold;
-}
-
-.up-cards-selection {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-}
-
-.up-card-option {
-  cursor: pointer;
-  padding: 4px;
-  /* 给边框留出空间 */
-  border-radius: 8px;
-  background-clip: padding-box;
-  /* 让背景不超出内边距 */
-  border: 4px solid transparent;
-  /* 默认透明边框 */
-  transition: transform 0.2s ease, border-color 0.3s ease;
-}
-
-.up-card-option:hover {
-  transform: scale(1.05);
-}
-
-.up-card-option.selected {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px gold;
-}
-
-.up-card-image {
-  width: 80px;
-  height: 80px;
-  display: block;
-  border-radius: 4px;
-}
-
-/* 动态稀有度边框 */
 .rarity-border-ur {
   border-color: #ff4d4d;
 }
@@ -504,7 +633,6 @@ h2,
   border-color: #00ccff;
 }
 
-/* 选中时，边框颜色更亮眼 */
 .rarity-border-ur.selected {
   border-color: #ff0000;
 }

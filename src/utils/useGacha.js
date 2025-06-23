@@ -31,6 +31,8 @@ function weightedRandom(weightedItems) {
  * @returns {import('vue').ComputedRef<Object>} rarityCounts - 各稀有度累计抽到的数量统计（响应式）。
  * @returns {Function} performSinglePull - 执行单抽操作的函数。
  * @returns {Function} performTenPulls - 执行十连操作的函数。
+ * @returns {Function} setSelectedUpGroup - 设置用户选择的UP组的函数
+ * @returns {import('vue').Ref<Object>} selectedUpGroup - 当前选择的UP组
  *
  * @example
  * const {
@@ -41,6 +43,8 @@ function weightedRandom(weightedItems) {
  *   totalRarity,
  *   performSinglePull,
  *   performTenPulls
+ *   setSelectedUpGroup,
+ *   selectedUpGroup,
  * } = useGacha('standard');
  */
 export function useGacha(poolId, selectedUpCard) {
@@ -87,6 +91,10 @@ export function useGacha(poolId, selectedUpCard) {
   const boostValue = ref(null)
   const pityUP = ref(false)
   const UpTrigger = ref(false) // 代表当前卡池是否有UP触发规则
+  const poolHasSelectUpCardsGroup = ref(false) // 标记卡池是否支持UP组选择
+  const selectableUpGroups = ref([]) // 存储可供选择的UP组的完整数据
+  const selectedUpGroup = ref(null) // 用户选择的UP组
+
   watchEffect(() => {
     // 当 currentPool.value 变化时，这个watchEffect会重新运行
     // 它会追踪 currentPool.value 及其内部属性的变化
@@ -98,6 +106,10 @@ export function useGacha(poolId, selectedUpCard) {
       boostRarity.value = null
       boostAfter.value = null
       boostValue.value = null
+
+      poolHasSelectUpCardsGroup.value = false
+      selectableUpGroups.value = []
+      selectedUpGroup.value = null
 
       // 遍历规则，查找哪个稀有度有pity规则
       for (const [rarity, rule] of Object.entries(currentPool.value.rules)) {
@@ -115,10 +127,35 @@ export function useGacha(poolId, selectedUpCard) {
           if (rule.UpTrigger) {
             UpTrigger.value = true // 如果有UP触发规则，则设置为true
           }
+          selectableUpGroups.value = rule.UpGroups || [] // 获取可选UP组数据
+
+          if (rule.SelectUpCardsGroup && rule.UpGroups) {
+            poolHasSelectUpCardsGroup.value = true
+            selectedUpGroup.value = rule.UpGroups[0] // 默认选择第一个UP组
+          }
         }
       }
     }
   })
+
+  /**
+   * 设置用户选择的UP组
+   * @param {string} group - 选择的UP组
+   */
+  const setSelectedUpGroup = (group) => {
+    if (!poolHasSelectUpCardsGroup.value) {
+      console.warn('当前卡池不支持UP组选择。')
+      return
+    }
+    // 检查选择的UP组是否在可选组列表中
+    if (!group || !selectableUpGroups.value.some((g) => g.id === group.id)) {
+      console.warn(`尝试选择无效的UP组: ${group.name} (${group.id})`)
+      return
+    }
+    // 如果选择的UP组在可选组列表中，则设置为当前选择
+    selectedUpGroup.value = group
+    console.log(`已选择UP组: ${group.name} (${group.id}， UP池变为：${group.cards})`)
+  }
 
   /**
    * 根据当前卡池的概率和累计抽卡次数，获取调整后的稀有度概率
@@ -205,12 +242,20 @@ export function useGacha(poolId, selectedUpCard) {
       : undefined
     let possibleCards = []
     // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
-    if (nextIsUP.value && rulesForRarity?.UpCards) {
+    if (nextIsUP.value && rulesForRarity?.UpTrigger) {
       let upCardPoolIds = []
       // 确定UP池中有哪些角色ID
       if (rulesForRarity.SelectUpCards && selectedUpCard?.value) {
-        // 如果是“自选UP”并且用户已选择，UP池就是这一个角色
+        // 如果是“自选UP”模式并且已选择UP角色，UP池就是用户选择的UP角色
         upCardPoolIds = [selectedUpCard.value]
+      } else if (
+        // 如果是“可选UP组”模式，并且用户已选择UP组，UP池就是用户选择的UP组中的角色
+        rulesForRarity.SelectUpCardsGroup &&
+        selectedUpGroup.value
+      ) {
+        // UP组的角色ID列表
+        console.log(`当前UP组：`, selectedUpGroup.value)
+        upCardPoolIds = selectedUpGroup.value.cards || []
       } else {
         // 否则，UP池是规则中定义的所有UP角色
         upCardPoolIds = rulesForRarity.UpCards || []
@@ -255,14 +300,14 @@ export function useGacha(poolId, selectedUpCard) {
 
     if (
       // 如果有UP机制且需要选择UP角色，且当前抽到的不是选中的角色，则下次必定是UP角色
-      (!nextIsUP.value &&
-        rulesForRarity?.UpTrigger &&
+      (rulesForRarity?.UpTrigger &&
         rulesForRarity.SelectUpCards &&
         pulledCard.id !== selectedUpCard?.value) ||
-      // 如果有UP机制但不需要选择UP角色，且当前抽到的不是UP角色（组），则下次必定是UP角色
-      (!rulesForRarity?.SelectUpCards &&
-        rulesForRarity?.UpTrigger &&
-        !rulesForRarity.UpCard.includes(pulledCard.id))
+      // 如果有UP机制且需要选择UP组，且当前抽到的不是选中的UP组中的角色，则下次必定是UP角色
+      (rulesForRarity?.UpTrigger &&
+        rulesForRarity.SelectUpCardsGroup &&
+        selectedUpGroup.value &&
+        !selectedUpGroup.value.cards.includes(pulledCard.id))
     ) {
       nextIsUP.value = true // 下次抽卡必定是UP角色
     }
@@ -304,5 +349,7 @@ export function useGacha(poolId, selectedUpCard) {
     rarityCounts,
     performSinglePull,
     performTenPulls,
+    setSelectedUpGroup,
+    selectedUpGroup,
   }
 }
