@@ -177,8 +177,10 @@ export function useGacha(poolId) {
       selectedRarity = pityRarity.value
       if (pityUP.value) {
         nextIsUP.value = true // 如果是UP保底，则下次必定是UP角色
-        console.log('触发UP保底：必定抽到UP的角色')
+        // DEBUG: 输出UP保底信息
+        console.log('触发UP保底：抽到UP(组)的角色')
       } else {
+        // DEBUG: 输出保底信息
         console.log(`触发保底：抽到 ${selectedRarity} 稀有度角色`)
       }
       pityCounters.value = 0 // 重置保底计数器
@@ -211,6 +213,8 @@ export function useGacha(poolId) {
           card.rarity === selectedRarity &&
           currentPool.value.rules[selectedRarity].UpCards.includes(card.id),
       )
+      // DEBUG: 输出UP角色信息
+      console.log(`触发UP机制，当前UP角色（组）：`, currentPool.value.rules[selectedRarity].UpCards)
     } else {
       possibleCards = currentPool.value.cards.filter((card) => card.rarity === selectedRarity)
     }
@@ -218,33 +222,38 @@ export function useGacha(poolId) {
     // 如果某种稀有度没有角色，返回错误角色
     if (possibleCards.length === 0) {
       console.warn(`出现卡池没有对应卡的情况，请检查卡池设置和保底规则。`)
-      return { id: 404, name: '卡池出现错误', rarity: '', imageUrl: '/images/cards/404.png ' }
+      return { id: 404, name: '卡池出现错误', rarity: '', imageUrl: '/images/cards/404.webp ' }
     }
 
+    let pulledCard = null
     // 在该稀有度的角色中随机选择一张 (平分概率)
     // 如果possible cards当前有doubleRateCards，则这张卡的概率会翻倍
-    if (currentPool.value.doubleRateCards && currentPool.value.doubleRateCards[selectedRarity]) {
-      const doubleRateCard = currentPool.value.doubleRateCards[selectedRarity]
-      possibleCards = possibleCards.map((card) => {
-        if (card.id === doubleRateCard) {
-          return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
-        }
-        return { value: card, weight: 1 } // 其他卡的权重为1
-      })
+    if (possibleCards.length === 1) {
+      pulledCard = possibleCards[0] // 如果只有一张卡，直接返回
     } else {
-      possibleCards = possibleCards.map((card) => ({ value: card, weight: 1 })) // 所有卡的权重为1
+      if (currentPool.value.rules && currentPool.value.rules[selectedRarity]?.doubleRateCards) {
+        const doubleRateCards = currentPool.value.rules[selectedRarity].doubleRateCards
+        possibleCards = possibleCards.map((card) => {
+          if (card.id in doubleRateCards) {
+            return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
+          }
+          return { value: card, weight: 1 } // 其他卡的权重为1
+        })
+        // DEBUG: 输出双倍卡信息
+        console.log(`触发双倍卡机制 ${doubleRateCards} 权重调整为2`)
+      } else {
+        possibleCards = possibleCards.map((card) => ({ value: card, weight: 1 })) // 所有卡的权重为1
+      }
+      pulledCard = weightedRandom(possibleCards)
     }
-    const pulledCard = weightedRandom(possibleCards)
 
     // 如果卡池当前稀有度有UP规则并没有抽到角色，下次变为保底，抽到则重置保底状态
-    if (
-      UpTrigger.value &&
-      currentPool.value.rules[selectedRarity].UpTrigger &&
-      !currentPool.value.rules[selectedRarity].UpCards.includes(pulledCard.id)
-    ) {
-      nextIsUP.value = true // 下次抽卡必定是UP角色
-    } else {
-      nextIsUP.value = false // 抽到UP角色后，重置UP状态
+    if (UpTrigger.value && currentPool.value.rules[selectedRarity]?.UpTrigger) {
+      if (currentPool.value.rules[selectedRarity].UpCards.includes(pulledCard.id)) {
+        nextIsUP.value = false
+      } else {
+        nextIsUP.value = true
+      }
     }
 
     return pulledCard

@@ -7,7 +7,10 @@
     <div class="card-pool-list">
       <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
         class="card-pool-item">
-        <h2>{{ pool.name }}</h2>
+        <div class="card-pool-content">
+          <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
+          <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
+        </div>
       </router-link>
     </div>
 
@@ -44,9 +47,11 @@ import { cardPools } from '@/data/cardPools'; // 导入卡池数据
 }
 
 .card-pool-item {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   /* 使得整个区域可点击 */
-  width: 280px;
+  width: 320px;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -56,6 +61,14 @@ import { cardPools } from '@/data/cardPools'; // 导入卡池数据
   color: #333;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-pool-content {
+  flex-grow: 1;
+  width: 100%;
+  /* 确保内容区宽度一致 */
+  overflow: hidden;
+  /* 隐藏溢出内容，特别是图片 */
 }
 
 .card-pool-item:hover {

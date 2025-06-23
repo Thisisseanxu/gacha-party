@@ -42,7 +42,7 @@
       <div class="pulled-cards-container">
         <div v-for="card in lastPulledCards" :key="card.id + Math.random()"
           :class="['card-item', `rarity-${card.rarity.toLowerCase()}`]">
-          <img :src="card.imageUrl || '/images/cards/1101.png'" :alt="`${card.name}的立绘图`" class="card-image">
+          <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image">
           <p class="card-name">{{ card.name }}</p>
         </div>
       </div>
@@ -215,7 +215,7 @@ h2,
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/images/gacha-bg.png');
+  background-image: url('/images/gacha-bg.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

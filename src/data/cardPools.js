@@ -3,12 +3,13 @@ import { allCards } from '@/data/cards.js'
 
 // 定义卡池配置
 export const cardPools = {
-  // 测试限定卡池
-  TestUR: {
-    name: '测试限定卡池',
+  // 网游卡池
+  108: {
+    name: '塔菲扭蛋',
+    imageUrl: '/images/cardpools-icon/108.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.02,
+      [RARITY.UR]: 0.015,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -30,9 +31,11 @@ export const cardPools = {
       [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
       [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
     },
-  }, // 测试常驻卡池
-  TestSSR: {
-    name: '测试常驻卡池',
+  },
+  // 电玩大战卡池
+  3: {
+    name: '常驻扭蛋-电玩大战',
+    imageUrl: '/images/cardpools-icon/3.webp',
     // 基础概率
     rates: {
       [RARITY.SSR]: 0.08,
@@ -45,13 +48,16 @@ export const cardPools = {
         pity: 60, // 60抽必出SSR
         pityUP: true, // 触发保底时必定抽到UP的SSR
         UpTrigger: true, // 该卡池有UP机制
-        UpCards: [1105], // UP角色列表（如果这次SSR不是UP角色，则下次必定是列表中的角色）
+        UpCards: [1301, 1302, 1305, 1310], // UP角色列表（如果这次SSR不是UP角色，则下次必定是列表中的角色）
       },
     },
     cardIds: {
-      [RARITY.SSR]: [1105, 1102],
-      [RARITY.SR]: [1103],
-      [RARITY.R]: [1101],
+      [RARITY.SSR]: [
+        1102, 1106, 1108, 1109, 1201, 1209, 1203, 1204999, 1301, 1302, 1305, 1310, 1401, 1402, 1403,
+        1701, 1703, 1704, 1708, 1601, 1602, 1603, 1608, 1801, 1806, 1803, 1504, 1804,
+      ],
+      [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
+      [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
     },
   },
   // 只出UR池
