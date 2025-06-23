@@ -9,7 +9,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/108.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.015,
+      [RARITY.UR]: 0.02,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -32,13 +32,76 @@ export const cardPools = {
       [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
     },
   },
+  // 车手盲盒机
+  29: {
+    name: '车手盲盒机',
+    imageUrl: '/images/cardpools-icon/29.webp',
+    // 基础概率
+    rates: {
+      [RARITY.UR]: 0.02,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2,
+      // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.UR]: {
+        pity: 60, // 60抽必出UR
+        boostAfter: 40, // 40抽后每抽提升UR概率
+        boost: 0.02, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        UpCards: [1110, 1111],
+      },
+      [RARITY.SSR]: {
+        doubleRateCards: [1105], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
+    },
+    cardIds: {
+      [RARITY.UR]: [1110, 1111],
+      [RARITY.SSR]: [1105, 1102, 1108, 1106, 1109],
+      [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
+      [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
+    },
+  },
+  // 入梦童话国
+  21: {
+    name: '入梦童话国',
+    imageUrl: '/images/cardpools-icon/21.webp',
+    // 基础概率
+    rates: {
+      [RARITY.UR]: 0.02,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2,
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.UR]: {
+        pity: 60, // 60抽必出UR
+        boostAfter: 40, // 40抽后每抽提升UR概率
+        boost: 0.02, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        UpCards: [1906, 1211],
+      },
+      [RARITY.SSR]: {
+        doubleRateCards: [1], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
+    },
+    cardIds: {
+      [RARITY.UR]: [1906, 1211],
+      [RARITY.SSR]: [1, 2, 3, 4, 5],
+      [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
+      [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
+    },
+  },
   // 电玩大战卡池
   3: {
     name: '常驻扭蛋-电玩大战',
     imageUrl: '/images/cardpools-icon/3.webp',
     // 基础概率
     rates: {
-      [RARITY.SSR]: 0.08,
+      [RARITY.SSR]: 0.0,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
     },

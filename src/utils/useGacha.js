@@ -23,6 +23,7 @@ function weightedRandom(weightedItems) {
  * 抽卡逻辑Hook，包括单抽、十连抽、抽卡历史记录等功能。
  *
  * @param {string} poolId - 当前抽卡池的唯一标识符，用于获取对应卡池数据。
+ * @param {import('vue').Ref<number>} selectedUpCard - 可选，用户选择的UP角色ID（如果有UP机制）。
  * @returns {import('vue').ComputedRef<Object>} currentPool - 当前卡池的详细数据（响应式）。
  * @returns {import('vue').Ref<Array>} gachaHistory - 抽卡历史记录（响应式）。
  * @returns {import('vue').Ref<Array>} lastPulledCards - 最近一次抽到的角色列表（响应式）。
@@ -42,7 +43,7 @@ function weightedRandom(weightedItems) {
  *   performTenPulls
  * } = useGacha('standard');
  */
-export function useGacha(poolId) {
+export function useGacha(poolId, selectedUpCard) {
   // 根据传入的 poolId 获取当前卡池的详细数据
   const currentPool = computed(() => getFullCardPoolData(poolId))
 
@@ -205,16 +206,25 @@ export function useGacha(poolId) {
       boostCounters.value = 0 // 重置boost计数器
     }
 
+    const rulesForRarity = currentPool.value.rules[selectedRarity]
     let possibleCards = []
     // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
-    if (nextIsUP.value && currentPool.value.rules[selectedRarity]?.UpCards) {
+    if (nextIsUP.value && rulesForRarity?.UpCards) {
+      let upCardPoolIds = []
+      // 确定UP池中有哪些角色ID
+      if (rulesForRarity.SelectUpCards && selectedUpCard?.value) {
+        // 如果是“自选UP”并且用户已选择，UP池就是这一个角色
+        upCardPoolIds = [selectedUpCard.value]
+      } else {
+        // 否则，UP池是规则中定义的所有UP角色
+        upCardPoolIds = rulesForRarity.UpCards || []
+      }
       possibleCards = currentPool.value.cards.filter(
-        (card) =>
-          card.rarity === selectedRarity &&
-          currentPool.value.rules[selectedRarity].UpCards.includes(card.id),
+        (card) => card.rarity === selectedRarity && upCardPoolIds.includes(card.id),
       )
+      nextIsUP.value = false // 重置UP状态
       // DEBUG: 输出UP角色信息
-      console.log(`触发UP机制，当前UP角色（组）：`, currentPool.value.rules[selectedRarity].UpCards)
+      console.log(`触发UP机制，当前UP角色（组）：`, upCardPoolIds)
     } else {
       possibleCards = currentPool.value.cards.filter((card) => card.rarity === selectedRarity)
     }
@@ -231,29 +241,35 @@ export function useGacha(poolId) {
     if (possibleCards.length === 1) {
       pulledCard = possibleCards[0] // 如果只有一张卡，直接返回
     } else {
-      if (currentPool.value.rules && currentPool.value.rules[selectedRarity]?.doubleRateCards) {
-        const doubleRateCards = currentPool.value.rules[selectedRarity].doubleRateCards
+      if (currentPool.value.rules && rulesForRarity?.doubleRateCards) {
+        const doubleRateCards = rulesForRarity.doubleRateCards
         possibleCards = possibleCards.map((card) => {
-          if (card.id in doubleRateCards) {
+          console.log(`角色：`, card)
+          if (doubleRateCards.includes(card.id)) {
             return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
           }
           return { value: card, weight: 1 } // 其他卡的权重为1
         })
         // DEBUG: 输出双倍卡信息
-        console.log(`触发双倍卡机制 ${doubleRateCards} 权重调整为2`)
+        console.log(`触发双倍卡机制`, possibleCards)
       } else {
         possibleCards = possibleCards.map((card) => ({ value: card, weight: 1 })) // 所有卡的权重为1
       }
       pulledCard = weightedRandom(possibleCards)
     }
 
-    // 如果卡池当前稀有度有UP规则并没有抽到角色，下次变为保底，抽到则重置保底状态
-    if (UpTrigger.value && currentPool.value.rules[selectedRarity]?.UpTrigger) {
-      if (currentPool.value.rules[selectedRarity].UpCards.includes(pulledCard.id)) {
-        nextIsUP.value = false
-      } else {
-        nextIsUP.value = true
-      }
+    if (
+      // 如果有UP机制且需要选择UP角色，且当前抽到的不是选中的角色，则下次必定是UP角色
+      (!nextIsUP.value &&
+        rulesForRarity?.UpTrigger &&
+        rulesForRarity.SelectUpCards &&
+        pulledCard.id !== selectedUpCard?.value) ||
+      // 如果有UP机制但不需要选择UP角色，且当前抽到的不是UP角色（组），则下次必定是UP角色
+      (!rulesForRarity?.SelectUpCards &&
+        rulesForRarity?.UpTrigger &&
+        !rulesForRarity.UpCard.includes(pulledCard.id))
+    ) {
+      nextIsUP.value = true // 下次抽卡必定是UP角色
     }
 
     return pulledCard

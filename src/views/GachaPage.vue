@@ -1,14 +1,27 @@
 <template>
   <div class="gacha-page">
     <template v-if="!showGachaResultOverlay">
-      <router-link to="/" class="back-link">返回主页</router-link>
-      <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
+      <div class="header-container">
+        <router-link to="/" class="back-home-button">返回主页</router-link>
+        <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
+      </div>
 
       <div v-if="currentPool" class="gacha-controls">
         <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
         <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
       </div>
       <p v-else>卡池加载中或不存在...</p>
+
+      <div v-if="isSelectableUpPool" class="select-up-container">
+        <h3 class="select-up-title">请选择UP角色：</h3>
+        <div class="up-cards-selection">
+          <div v-for="card in upCardDetails" :key="card.id"
+            :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
+            @click="selectUpCard(card.id)">
+            <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+          </div>
+        </div>
+      </div>
 
       <div class="gacha-stats">
         <h2>抽卡统计：</h2>
@@ -24,7 +37,7 @@
         <div class="gacha-history-list">
           <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
             class="history-item">
-            {{ card.name }} ({{ card.rarity }})
+            {{ card.name }} ({{ card.rarity === RARITY.UR ? '限定' : card.rarity }})
           </div>
           <p v-if="gachaHistory.length === 0">暂无抽卡历史。</p>
         </div>
@@ -56,9 +69,13 @@ import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
+import { cardMap } from '@/data/cards';
 
 const route = useRoute();
 const poolId = computed(() => route.params.poolId);
+
+
+const selectedUpCard = ref(null);
 
 // 使用抽卡函数，传入当前卡池ID
 const {
@@ -69,7 +86,35 @@ const {
   rarityCounts,
   performSinglePull,
   performTenPulls,
-} = useGacha(poolId.value); // 注意：这里必须传入 .value 属性
+} = useGacha(poolId.value, selectedUpCard); // 注意：这里必须传入 .value 属性
+
+const isSelectableUpPool = computed(() => {
+  return currentPool.value?.rules?.UR?.SelectUpCards === true;
+});
+
+// 获取可选UP角色列表
+const upCardDetails = computed(() => {
+  if (!isSelectableUpPool.value) {
+    return [];
+  }
+  const upCardIds = currentPool.value.rules.UR.UpCards || [];
+  return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
+});
+
+// 监听卡池数据，自动设置默认的UP角色
+watch(currentPool, (newPool) => {
+  if (newPool?.rules?.UR?.SelectUpCards && newPool.rules.UR.UpCards?.length > 0) {
+    // 默认选择第一个UP角色
+    selectedUpCard.value = newPool.rules.UR.UpCards[0];
+  } else {
+    selectedUpCard.value = null;
+  }
+}, { immediate: true }); // immediate确保组件加载时立即执行一次
+
+// 选择UP按钮的方法
+const selectUpCard = (cardId) => {
+  selectedUpCard.value = cardId;
+};
 
 // 历史记录分页逻辑
 const itemsPerPage = 7; // 每页显示7条记录
@@ -152,20 +197,35 @@ const confirmGachaResult = () => {
   min-height: -webkit-fill-available;
 }
 
-.back-link {
-  display: inline-block;
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  /* 将子元素分散到两端 */
+  align-items: center;
+  /* 垂直居中对齐 */
   margin-bottom: 20px;
-  color: #007bff;
-  text-decoration: none;
+  /* 保持原有的下边距，或者根据需要调整 */
 }
 
-.back-link:hover {
-  text-decoration: underline;
+.back-home-button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.back-home-button:hover {
+  background-color: #0056b3;
 }
 
 h1 {
-  margin-bottom: 30px;
   color: #333;
+  font-size: 1.5em;
 }
 
 /* 现有 UI 元素，在叠加层显示时不展示 */
@@ -377,5 +437,87 @@ h2,
 
 .rarity-r {
   background-color: #00ccff;
+}
+
+.select-up-container {
+  margin: 25px 0;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.select-up-title {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.up-cards-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.up-card-option {
+  cursor: pointer;
+  padding: 4px;
+  /* 给边框留出空间 */
+  border-radius: 8px;
+  background-clip: padding-box;
+  /* 让背景不超出内边距 */
+  border: 4px solid transparent;
+  /* 默认透明边框 */
+  transition: transform 0.2s ease, border-color 0.3s ease;
+}
+
+.up-card-option:hover {
+  transform: scale(1.05);
+}
+
+.up-card-option.selected {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px gold;
+}
+
+.up-card-image {
+  width: 80px;
+  height: 80px;
+  display: block;
+  border-radius: 4px;
+}
+
+/* 动态稀有度边框 */
+.rarity-border-ur {
+  border-color: #ff4d4d;
+}
+
+.rarity-border-ssr {
+  border-color: #ff9100;
+}
+
+.rarity-border-sr {
+  border-color: #cc00ff;
+}
+
+.rarity-border-r {
+  border-color: #00ccff;
+}
+
+/* 选中时，边框颜色更亮眼 */
+.rarity-border-ur.selected {
+  border-color: #ff0000;
+}
+
+.rarity-border-ssr.selected {
+  border-color: #ffd700;
+}
+
+.rarity-border-sr.selected {
+  border-color: #ff00ff;
+}
+
+.rarity-border-r.selected {
+  border-color: #00ffff;
 }
 </style>

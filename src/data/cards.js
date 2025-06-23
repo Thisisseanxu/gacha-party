@@ -8,8 +8,9 @@ export const allCards = [
   { id: 1111, name: '小熊工程队', rarity: RARITY.UR, imageUrl: '/images/cards/1111.webp' },
   { id: 1709, name: '雪人女王', rarity: RARITY.UR, imageUrl: '/images/cards/1709.webp' },
   { id: 11006, name: '王牌发明家', rarity: RARITY.UR, imageUrl: '/images/cards/11006.webp' },
-  { id: 1211, name: '阿芙洛', rarity: RARITY.UR, imageUrl: '/images/cards/1211.webp' },
+  { id: 1211, name: '粉白梦魇', rarity: RARITY.UR, imageUrl: '/images/cards/1211.webp' },
   { id: 1609, name: '菜狗狗', rarity: RARITY.UR, imageUrl: '/images/cards/1609.webp' },
+  { id: 1906, name: '彩虹射手', rarity: RARITY.UR, imageUrl: '/images/cards/1906.webp' },
 
   // SSR 角色
   { id: 1102, name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },
@@ -42,6 +43,11 @@ export const allCards = [
   { id: 1803, name: '水枪普拉斯', rarity: RARITY.SSR, imageUrl: '/images/cards/1803.webp' },
   { id: 1504, name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
   { id: 1804, name: '消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
+  { id: 1, name: 'UP SSR占位符', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  { id: 2, name: 'SSR占位符01', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  { id: 3, name: 'SSR占位符02', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  { id: 4, name: 'SSR占位符03', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  { id: 5, name: 'SSR占位符04', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
 
   // SR 角色
   { id: 1103, name: '珍珠射手', rarity: RARITY.SR, imageUrl: '/images/cards/1103.webp' },
