@@ -143,15 +143,9 @@ export function useGacha(poolId, selectedUpCard) {
       adjustedRates[boostRarity.value] = +(
         adjustedRates[boostRarity.value] + boostIncrement
       ).toFixed(4)
-      // 其他稀有度的概率调整
-      Object.keys(adjustedRates).forEach((rarity) => {
-        if (rarity !== boostRarity.value) {
-          adjustedRates[rarity] = +(
-            adjustedRates[rarity] *
-            (1 - adjustedRates[boostRarity.value])
-          ).toFixed(4)
-        }
-      })
+      // 多出来的概率从R中扣除
+      adjustedRates[RARITY.R] = +(adjustedRates[RARITY.R] - boostIncrement).toFixed(4)
+
       // DEBUG: 在触发boost机制时提示
       console.log('Boost触发：当前稀有度概率:', adjustedRates)
     }
@@ -206,7 +200,9 @@ export function useGacha(poolId, selectedUpCard) {
       boostCounters.value = 0 // 重置boost计数器
     }
 
-    const rulesForRarity = currentPool.value.rules[selectedRarity]
+    const rulesForRarity = currentPool.value.rules
+      ? currentPool.value.rules[selectedRarity]
+      : undefined
     let possibleCards = []
     // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
     if (nextIsUP.value && rulesForRarity?.UpCards) {
@@ -244,14 +240,13 @@ export function useGacha(poolId, selectedUpCard) {
       if (currentPool.value.rules && rulesForRarity?.doubleRateCards) {
         const doubleRateCards = rulesForRarity.doubleRateCards
         possibleCards = possibleCards.map((card) => {
-          console.log(`角色：`, card)
           if (doubleRateCards.includes(card.id)) {
+            // DEBUG: 输出双倍卡信息
+            console.log(`触发双倍卡机制，当前的卡为`, card)
             return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
           }
           return { value: card, weight: 1 } // 其他卡的权重为1
         })
-        // DEBUG: 输出双倍卡信息
-        console.log(`触发双倍卡机制`, possibleCards)
       } else {
         possibleCards = possibleCards.map((card) => ({ value: card, weight: 1 })) // 所有卡的权重为1
       }
