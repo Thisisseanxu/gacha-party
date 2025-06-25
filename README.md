@@ -34,7 +34,7 @@
 1. **克隆仓库:**
 
     ```bash
-    git clone [https://github.com/Thisiseanxu/gacha-party](https://github.com/Thisiseanxu/gacha-party)
+    git clone https://github.com/Thisiseanxu/gacha-party.git
     cd gacha-party
     ```
 
@@ -111,8 +111,8 @@
 1. **克隆你的 Fork:**
 
     ```bash
-    git clone [https://github.com/Thisiseanxu/gacha-party.git](https://github.com/Thisiseanxu/gacha-party.git)
-    cd 你的仓库名
+    git clone [你的fork地址]
+    cd gacha-party
     ```
 
 1. **创建新分支:**
@@ -128,7 +128,7 @@
 1. **提交你的修改:**
 
     ```bash
-    git commit -m "feat: Add new feature or fix bug"
+    git commit -m "feat: 添加一个新功能/修复一个bug"
     ```
 
     (请参考下面的提交信息规范)
