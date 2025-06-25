@@ -1,0 +1,74 @@
+name: 🐞 Bug 报告
+description: 创建一个详细的报告来帮助我们定位并修复问题。
+title: '[Bug]: [请在此处简要描述问题]'
+labels: ['bug']
+assignees:
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你花时间填写这份 Bug 报告！
+        在提交前，请先[搜索现有的 Issue](https://github.com/your-repo/your-project/issues)，确保没有重复的问题。
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug 描述
+      description: 请清晰、简洁地描述你遇到的 Bug。
+      placeholder: Bug 的详细描述...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 复现步骤
+      description: 请提供详细的、可复现的步骤。
+      placeholder: |
+        1. 前往 '...'
+        2. 点击 '....'
+        3. 滚动到 '....'
+        4. 出现错误
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 期望行为
+      description: 你期望应用的行为是什么？
+      placeholder: 例如：页面应该流畅地展示抽卡结果。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？（如果可以，请附上错误信息）
+      placeholder: 例如：在连续出十个限定后，历史记录无法滚动。
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 请提供你的运行环境信息。
+      value: |
+        - 操作系统: 
+        - 浏览器: 
+        - Node.js 版本: 
+        - npm/Yarn 版本:
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-info
+    attributes:
+      label: 🙋 其他信息 (可选)
+      description: |
+        任何其他对理解 Bug 有帮助的信息。
+        如果你能提供截图或视频，将非常有帮助。你可以直接将文件拖拽到这个文本框中进行上传。
+    validations:
+      required: false

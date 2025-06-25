@@ -1,0 +1,38 @@
+name: ✨ 功能请求
+description: 对项目提出一个新功能的建议。
+title: '[Feature]: [请在此处简要描述你想要的功能]'
+labels: ['功能']
+assignees:
+body:
+  - type: markdown
+    attributes:
+      value: |
+        非常感谢你对改进项目的建议！
+        在提交前，请先[搜索现有的 Issue](https://github.com/Thisiseanxu/gacha-party/issues)，看看是否有人提出过类似的功能。
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 功能需求描述
+      description: 你想要添加什么新功能？请描述一下你遇到的问题，以及这个功能为什么能解决它。
+      placeholder: 我希望添加...功能，因为...
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-solution
+    attributes:
+      label: 设想的解决方案 (可选)
+      description: 如果你对如何实现这个功能有任何具体的想法或建议，欢迎分享。
+    validations:
+      required: false
+
+  - type: textarea
+    id: other-info
+    attributes:
+      label: 🙋 其他信息 (可选)
+      description: |
+        任何相关的额外信息、链接或截图。
+        例如，可以展示其他应用中类似功能的截图。
+    validations:
+      required: false
