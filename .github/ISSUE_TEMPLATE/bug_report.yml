@@ -2,7 +2,6 @@ name: 🐞 Bug 报告
 description: 创建一个详细的报告来帮助我们定位并修复问题。
 title: '[Bug]: [请在此处简要描述问题]'
 labels: ['bug']
-assignees:
 body:
   - type: markdown
     attributes:

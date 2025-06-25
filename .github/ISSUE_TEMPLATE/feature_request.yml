@@ -2,7 +2,6 @@ name: ✨ 功能请求
 description: 对项目提出一个新功能的建议。
 title: '[Feature]: [请在此处简要描述你想要的功能]'
 labels: ['功能']
-assignees:
 body:
   - type: markdown
     attributes:
