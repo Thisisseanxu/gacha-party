@@ -21,6 +21,7 @@ export const allCards = [
   { id: 1201, name: '星星法师', rarity: RARITY.SSR, imageUrl: '/images/cards/1201.webp' },
   { id: 1203, name: '琉璃治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1203.webp' },
   { id: 1204999, name: '航天娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1204999.webp' },
+  { id: 1206, name: '嫦娥娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1206.webp' },
   { id: 1209, name: '梦境千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1209.webp' },
   { id: 1301, name: '充电千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1301.webp' },
   { id: 1302, name: '首席护盾', rarity: RARITY.SSR, imageUrl: '/images/cards/1302.webp' },

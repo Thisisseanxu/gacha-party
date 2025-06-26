@@ -26,12 +26,12 @@ export const cardPools = {
         UpCards: [1906, 1211],
       },
       [RARITY.SSR]: {
-        doubleRateCards: [1], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: [1206], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
       [RARITY.UR]: [1906, 1211],
-      [RARITY.SSR]: [1, 2, 3, 4, 5],
+      [RARITY.SSR]: [1201, 1203, 1204999, 1206, 1209],
       [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
       [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
     },
