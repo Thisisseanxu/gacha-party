@@ -7,8 +7,8 @@ export const cardPools = {
   // 入梦童话国
   UR03: {
     type: '限定',
-    name: '入梦童话国',
-    imageUrl: '/images/cardpools-icon/21.webp',
+    name: '童话国盲盒机',
+    imageUrl: '/images/cardpools-icon/10032.webp',
     // 基础概率
     rates: {
       [RARITY.UR]: 0.02,
@@ -67,7 +67,7 @@ export const cardPools = {
     },
   },
   // 车手盲盒机
-  UR999: {
+  UR01: {
     type: '限定',
     name: '车手盲盒机',
     imageUrl: '/images/cardpools-icon/29.webp',
