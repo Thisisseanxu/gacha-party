@@ -11,6 +11,8 @@ export const allCards = [
   { id: 1211, name: '粉白梦魇', rarity: RARITY.UR, imageUrl: '/images/cards/1211.webp' },
   { id: 1609, name: '菜狗狗', rarity: RARITY.UR, imageUrl: '/images/cards/1609.webp' },
   { id: 1906, name: '彩虹射手', rarity: RARITY.UR, imageUrl: '/images/cards/1906.webp' },
+  { id: 1311, name: '赛博忍者', rarity: RARITY.UR, imageUrl: '/images/cards/1311.webp' },
+  { id: 1312, name: '酷玩游戏机', rarity: RARITY.UR, imageUrl: '/images/cards/1312.webp' },
 
   // SSR 角色
   { id: 1102, name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },

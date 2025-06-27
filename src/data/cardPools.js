@@ -99,6 +99,39 @@ export const cardPools = {
       [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
     },
   },
+  // 地下车手预览
+  UR04_Preview: {
+    type: '限定',
+    name: '地下车手招募-预测卡池',
+    imageUrl: '/images/cardpools-icon/107.webp',
+    // 基础概率
+    rates: {
+      [RARITY.UR]: 0.02,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2,
+      // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.UR]: {
+        pity: 60, // 60抽必出UR
+        boostAfter: 40, // 40抽后每抽提升UR概率
+        boost: 0.02, // 每抽提升2%的UR概率（41抽UR变为 0.04，42抽0.06......）
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        UpCards: [1311, 1312],
+      },
+      [RARITY.SSR]: {
+        doubleRateCards: [1], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
+    },
+    cardIds: {
+      [RARITY.UR]: [1311, 1312],
+      [RARITY.SSR]: [1, 2, 3, 4, 5], // 占位符SSR角色ID
+      [RARITY.SR]: [1103, 1104, 1207, 1303, 1405, 1604, 1606, 1702, 1205, 1304, 1805, 1202],
+      [RARITY.R]: [1101, 1204, 1107, 1306, 1406, 1607],
+    },
+  },
   // 常驻扭蛋
   Normal01: {
     type: '常驻',
