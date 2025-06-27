@@ -15,7 +15,7 @@
       <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
         <h3 @click="toggleUpGroupExpansion" class="collapsible-header">
           <span>{{ isUpGroupExpanded ? '▼' : '▶' }}</span>
-          指定UP角色组:
+          指定UP角色组: {{ isUpGroupExpanded ? '' : selectedUpGroup?.name || '请选择' }}
         </h3>
         <transition name="collapse-transition">
           <div v-if="isUpGroupExpanded" class="up-group-list">
