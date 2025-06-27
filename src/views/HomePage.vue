@@ -4,24 +4,10 @@
     <p>选择一个卡池开始抽卡吧！</p>
 
     <div class="card-pool-list">
-      <router-link v-for="(pool, id) in limitedPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
+      <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
         class="card-pool-item">
-        <div class="card-pool-content">
-          <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
-          <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
-        </div>
-      </router-link>
-
-      <router-link class="card-pool-item" key="Normal" to="/gacha/Normal01">
-        <div class="card-pool-content">
-          <img src="/images/cardpools-icon/9.webp" alt="常驻卡池封面" class="pool-cover-image">
-        </div>
-      </router-link>
-
-      <router-link class="card-pool-item" key="AllUR" to="/gacha/AllUR">
-        <div class="card-pool-content">
-          <h2 class="pool-name-text">超爽UR卡池</h2>
-        </div>
+        <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
+        <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
       </router-link>
     </div>
 
@@ -38,14 +24,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'; // 1. 从 vue 导入 computed
 import { cardPools } from '@/data/cardPools';
-
-const limitedPools = computed(() => {
-  return Object.fromEntries(
-    Object.entries(cardPools).filter(([, pool]) => pool.type === '限定')
-  )
-});
 </script>
 
 <style scoped>
@@ -70,9 +49,7 @@ const limitedPools = computed(() => {
   align-items: center;
   /* 使得整个区域可点击 */
   width: 320px;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  height: 140px;
   text-align: center;
   text-decoration: none;
   /* 移除下划线 */
@@ -81,10 +58,26 @@ const limitedPools = computed(() => {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.card-pool-content {
-  flex-grow: 1;
+.pool-cover-image {
   width: 100%;
-  overflow: hidden;
+  height: 100%;
+  object-fit: fill;
+  border-radius: 8px;
+}
+
+.pool-name-text {
+  width: 100%;
+  height: 100%;
+  /* 调整字体大小 */
+  font-size: 1.8em;
+  color: #007bff;
+  display: flex;
+  /* 确保文字在内容区垂直居中 */
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border: #333 4px solid;
+  border-radius: 16px;
 }
 
 .card-pool-item:hover {
