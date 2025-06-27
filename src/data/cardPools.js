@@ -1,5 +1,6 @@
 import * as RARITY from '@/data/rarity.js'
 import { allCards } from '@/data/cards.js'
+import { logger } from '@/utils/logger.js'
 
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
@@ -230,11 +231,11 @@ function getCardsByIds(ids, rarity = -1) {
     .map((id) => {
       const card = allCards.find((c) => c.id === id)
       if (!card) {
-        console.warn(`找不到 ${id} 对应的角色数据。请检查角色ID是否正确。`)
+        logger.warn(`找不到 ${id} 对应的角色数据。请检查角色ID是否正确。`)
         return null
       }
       if (card.rarity !== -1 && card.rarity !== rarity) {
-        console.warn(
+        logger.warn(
           `ID为 ${id} 的角色的稀有度是 ${card.rarity} 与 ${rarity} 不匹配。请检查角色数据。`,
         )
       }

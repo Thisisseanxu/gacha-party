@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 // 路由组件
 import HomePage from './views/HomePage.vue' // 主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
+import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 
 // 2. 定义路由
 const routes = [
@@ -18,6 +19,11 @@ const routes = [
     name: 'Gacha',
     component: GachaPage,
     props: true, // 将路由参数作为props传递给组件
+  },
+  {
+    path: '/testgacha',
+    name: 'TestGacha',
+    component: TestGacha,
   },
   // TODO 404页面
   // { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }

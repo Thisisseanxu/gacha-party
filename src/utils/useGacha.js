@@ -1,6 +1,7 @@
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect, toValue } from 'vue'
 import { getFullCardPoolData } from '@/data/cardPools' // 从 cardPools.js 导入获取完整卡池数据的函数
 import * as RARITY from '@/data/rarity.js'
+import { logger } from '@/utils/logger.js'
 
 /**
  * 加权随机函数，根据权重随机选择一个数组项
@@ -19,6 +20,7 @@ function weightedRandom(weightedItems) {
   }
   return weightedItems[weightedItems.length - 1].value
 }
+
 /**
  * 抽卡逻辑Hook，包括单抽、十连抽、抽卡历史记录等功能。
  *
@@ -42,14 +44,15 @@ function weightedRandom(weightedItems) {
  *   totalPulls,
  *   totalRarity,
  *   performSinglePull,
- *   performTenPulls
+ *   performTenPulls,
  *   setSelectedUpGroup,
  *   selectedUpGroup,
+ *   performMultiPulls,
  * } = useGacha('standard');
  */
 export function useGacha(poolId, selectedUpCard) {
   // 根据传入的 poolId 获取当前卡池的详细数据
-  const currentPool = computed(() => getFullCardPoolData(poolId))
+  const currentPool = computed(() => getFullCardPoolData(toValue(poolId)))
 
   // 存储抽卡历史和当前抽到的角色
   const gachaHistory = ref([]) // 存储所有抽到的角色
@@ -144,17 +147,17 @@ export function useGacha(poolId, selectedUpCard) {
    */
   const setSelectedUpGroup = (group) => {
     if (!poolHasSelectUpCardsGroup.value) {
-      console.warn('当前卡池不支持UP组选择。')
+      logger.warn('当前卡池不支持UP组选择。')
       return
     }
     // 检查选择的UP组是否在可选组列表中
     if (!group || !selectableUpGroups.value.some((g) => g.id === group.id)) {
-      console.warn(`尝试选择无效的UP组: ${group.name} (${group.id})`)
+      logger.warn(`尝试选择无效的UP组: ${group.name} (${group.id})`)
       return
     }
     // 如果选择的UP组在可选组列表中，则设置为当前选择
     selectedUpGroup.value = group
-    console.log(`已选择UP组: ${group.name} (${group.id}， UP池变为：${group.cards})`)
+    logger.log(`已选择UP组: ${group.name} (${group.id}， UP池变为：${group.cards})`)
   }
 
   /**
@@ -184,7 +187,7 @@ export function useGacha(poolId, selectedUpCard) {
       adjustedRates[RARITY.R] = +(adjustedRates[RARITY.R] - boostIncrement).toFixed(4)
 
       // DEBUG: 在触发boost机制时提示
-      console.log('Boost触发：当前稀有度概率:', adjustedRates)
+      logger.log('Boost触发：当前稀有度概率:', adjustedRates)
     }
 
     return adjustedRates
@@ -196,7 +199,7 @@ export function useGacha(poolId, selectedUpCard) {
    */
   const pullOne = () => {
     if (!currentPool.value || !currentPool.value.cards) {
-      console.error('卡池数据未加载或无效。')
+      logger.error('卡池数据未加载或无效。')
       return null
     }
 
@@ -210,10 +213,10 @@ export function useGacha(poolId, selectedUpCard) {
       if (pityUP.value) {
         nextIsUP.value = true // 如果是UP保底，则下次必定是UP角色
         // DEBUG: 输出UP保底信息
-        console.log('触发UP保底：抽到UP(组)的角色')
+        logger.log('触发UP保底：抽到UP(组)的角色')
       } else {
         // DEBUG: 输出保底信息
-        console.log(`触发保底：抽到 ${selectedRarity} 稀有度角色`)
+        logger.log(`触发保底：抽到 ${selectedRarity} 稀有度角色`)
       }
       pityCounters.value = 0 // 重置保底计数器
     } else {
@@ -231,7 +234,7 @@ export function useGacha(poolId, selectedUpCard) {
         pityCounters.value = 0 // 重置保底计数器
       }
       // DEBUG: 输出当前抽到的稀有度和所有稀有度的概率
-      // console.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)
+      // logger.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)
     }
 
     // 如果当前稀有度有boost规则，且没有选中对应的稀有度，则增加boost计数器
@@ -256,7 +259,6 @@ export function useGacha(poolId, selectedUpCard) {
         selectedUpGroup.value
       ) {
         // UP组的角色ID列表
-        console.log(`当前UP组：`, selectedUpGroup.value)
         upCardPoolIds = selectedUpGroup.value.cards || []
       } else {
         // 否则，UP池是规则中定义的所有UP角色
@@ -267,14 +269,14 @@ export function useGacha(poolId, selectedUpCard) {
       )
       nextIsUP.value = false // 重置UP状态
       // DEBUG: 输出UP角色信息
-      console.log(`触发UP机制，当前UP角色（组）：`, upCardPoolIds)
+      logger.log(`触发UP机制，当前UP角色（组）：`, upCardPoolIds)
     } else {
       possibleCards = currentPool.value.cards.filter((card) => card.rarity === selectedRarity)
     }
 
     // 如果某种稀有度没有角色，返回错误角色
     if (possibleCards.length === 0) {
-      console.warn(`出现卡池没有对应卡的情况，请检查卡池设置和保底规则。`)
+      logger.warn(`出现卡池没有对应卡的情况，请检查卡池设置和保底规则。`)
       return { id: 404, name: '卡池出现错误', rarity: '', imageUrl: '/images/cards/404.webp ' }
     }
 
@@ -289,7 +291,7 @@ export function useGacha(poolId, selectedUpCard) {
         possibleCards = possibleCards.map((card) => {
           if (doubleRateCards.includes(card.id)) {
             // DEBUG: 输出双倍卡信息
-            console.log(`触发双倍卡机制，当前的卡为`, card)
+            logger.log(`触发双倍卡机制，当前的卡为`, card)
             return { value: card, weight: 2 } // 将双倍概率卡的权重设置为2
           }
           return { value: card, weight: 1 } // 其他卡的权重为1
@@ -343,6 +345,42 @@ export function useGacha(poolId, selectedUpCard) {
     lastPulledCards.value = pulledCards // 十连抽显示十张
   }
 
+  /**
+   * 测试用：执行指定次数的批量抽卡模拟。
+   * 它直接返回本次批量抽卡的结果统计。
+   * @param {number} pullCount - 要模拟的抽卡次数。
+   * @returns {Object} 本次抽卡各稀有度的数量统计，例如 { UR: 1, SSR: 10, ... }。
+   */
+  const performMultiPulls = (pullCount) => {
+    logger.log(`模拟抽卡,卡池：${currentPool.value?.id} 执行 ${pullCount} 次抽卡`)
+
+    if (!currentPool.value || pullCount <= 0) {
+      return null
+    }
+    // 使用单独计数器来统计各稀有度的数量
+    const localRarityCounts = {
+      [RARITY.UR]: 0,
+      [RARITY.SSR]: 0,
+      [RARITY.SR]: 0,
+      [RARITY.R]: 0,
+    }
+
+    for (let i = 0; i < pullCount; i++) {
+      // 循环执行单抽逻辑
+      const pulledCard = pullOne()
+
+      if (pulledCard) {
+        // 将抽到的角色添加到计数器
+        if (localRarityCounts[pulledCard.rarity] !== undefined) {
+          localRarityCounts[pulledCard.rarity]++
+        }
+      }
+    }
+
+    // 6. 返回本次模拟的统计结果
+    return localRarityCounts
+  }
+
   return {
     currentPool,
     gachaHistory,
@@ -351,6 +389,7 @@ export function useGacha(poolId, selectedUpCard) {
     rarityCounts,
     performSinglePull,
     performTenPulls,
+    performMultiPulls,
     setSelectedUpGroup,
     selectedUpGroup,
   }
