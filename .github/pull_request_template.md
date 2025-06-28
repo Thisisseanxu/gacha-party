@@ -30,11 +30,11 @@
 * [ ] 我的提交信息符合 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/) 规范。
 * [ ] 我已确认我的修改不会引入新的 Bug。
 
-## 📸 截图或视频 (可选)
+### 📸 截图或视频 (可选)
 
 如果你的修改涉及 UI 或新功能，请提供截图或简短的视频。
 
-## 📚 相关 Issue (可选)
+### 📚 相关 Issue (可选)
 
 请关联你本次 PR 解决或相关的 Issue。
 例如：`Closes #123` 或 `Related to #456`
