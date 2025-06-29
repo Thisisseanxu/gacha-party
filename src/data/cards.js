@@ -46,6 +46,7 @@ export const allCards = [
   { id: 1803, name: '水枪普拉斯', rarity: RARITY.SSR, imageUrl: '/images/cards/1803.webp' },
   { id: 1504, name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
   { id: 1804, name: '消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
+  { id: 1808, name: '指路奈奈', rarity: RARITY.SSR, imageUrl: '/images/cards/1307.webp' }, // 新版的指路奈奈，但是图片地址与旧版相同
   { id: 1, name: 'UP SSR占位符', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 2, name: 'SSR占位符01', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 3, name: 'SSR占位符02', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
