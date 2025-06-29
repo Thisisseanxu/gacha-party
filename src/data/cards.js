@@ -1,7 +1,7 @@
 import * as RARITY from '@/data/rarity.js'
 
 // 所有角色的详细数据
-// 航天娃娃的id为1204s，为了保持纯数字id，转换为1204999
+// 航天娃娃的id和官方图片地址不符，官方地址为1204_skin1，实际id为1210
 export const allCards = [
   // 限定角色
   { id: 1110, name: '贪吃天使', rarity: RARITY.UR, imageUrl: '/images/cards/1110.webp ' },
@@ -22,7 +22,7 @@ export const allCards = [
   { id: 1109, name: '裱花千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1109.webp' },
   { id: 1201, name: '星星法师', rarity: RARITY.SSR, imageUrl: '/images/cards/1201.webp' },
   { id: 1203, name: '琉璃治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1203.webp' },
-  { id: 1204999, name: '航天娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1204999.webp' },
+  { id: 1210, name: '航天娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1210.webp' },
   { id: 1206, name: '嫦娥娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1206.webp' },
   { id: 1209, name: '梦境千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1209.webp' },
   { id: 1301, name: '充电千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1301.webp' },
