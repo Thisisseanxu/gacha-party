@@ -6,24 +6,36 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 import HomePage from './views/HomePage.vue' // 主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
+import RecordPage from './views/RecordPage.vue' // 抽卡记录页面
 
 // 2. 定义路由
 const routes = [
+  // TODO: 为抽卡和抽卡分析添加新的主页
   {
     path: '/',
     name: 'Home',
     component: HomePage,
   },
   {
-    path: '/gacha/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
-    name: 'Gacha',
+    path: '/chouka', // 抽卡页面的路由
+    name: '抽卡主页',
+    component: HomePage,
+  },
+  {
+    path: '/chouka/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
+    name: '抽卡页面',
     component: GachaPage,
     props: true, // 将路由参数作为props传递给组件
   },
   {
-    path: '/testgacha',
-    name: 'TestGacha',
+    path: '/test-gacha',
+    name: '测试抽卡',
     component: TestGacha,
+  },
+  {
+    path: '/fenxi',
+    name: '抽卡记录分析',
+    component: RecordPage,
   },
   // TODO 404页面
   // { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }

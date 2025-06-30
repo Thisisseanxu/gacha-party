@@ -4,7 +4,7 @@
     <p>选择一个卡池开始抽卡吧！</p>
 
     <div class="card-pool-list">
-      <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: 'Gacha', params: { poolId: id } }"
+      <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: '抽卡页面', params: { poolId: id } }"
         class="card-pool-item">
         <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
         <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
