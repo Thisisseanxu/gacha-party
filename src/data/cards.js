@@ -46,6 +46,7 @@ export const allCards = [
   { id: 1803, name: '水枪普拉斯', rarity: RARITY.SSR, imageUrl: '/images/cards/1803.webp' },
   { id: 1504, name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
   { id: 1804, name: '消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
+  { id: 1808, name: '指路奈奈', rarity: RARITY.SSR, imageUrl: '/images/cards/1307.webp' }, // 新版的指路奈奈，但是图片地址与旧版相同
   { id: 1, name: 'UP SSR占位符', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 2, name: 'SSR占位符01', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 3, name: 'SSR占位符02', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
@@ -65,6 +66,7 @@ export const allCards = [
   { id: 1304, name: '拳头礼盒', rarity: RARITY.SR, imageUrl: '/images/cards/1304.webp' },
   { id: 1805, name: '消防栓红', rarity: RARITY.SR, imageUrl: '/images/cards/1805.webp' },
   { id: 1202, name: '浅睡千竹', rarity: RARITY.SR, imageUrl: '/images/cards/1202.webp' },
+  { id: 1404, name: '贝斯战士', rarity: RARITY.SR, imageUrl: '/images/cards/1404.webp' },
 
   // R 角色
   { id: 1101, name: '纸杯千竹', rarity: RARITY.R, imageUrl: '/images/cards/1101.webp' },
