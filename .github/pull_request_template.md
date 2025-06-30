@@ -27,8 +27,11 @@
 * [ ] 我的代码遵循了项目的代码风格指南。
 * [ ] 我已对我的代码进行了充分测试。
 * [ ] 我已更新了必要的文档 (例如 `README.md` 中的功能说明或配置)。
-* [ ] 我的提交信息符合 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/) 规范。
 * [ ] 我已确认我的修改不会引入新的 Bug。
+
+你可以通过完成以下事项让你的代码更容易被并入：
+
+* [ ] 提交信息符合 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/) 规范。
 
 ### 📸 截图或视频 (可选)
 

@@ -1,0 +1,735 @@
+<template>
+  <div class="background">
+    <div class="gacha-analysis-container">
+      <div v-if="viewState === 'input'" class="input-section">
+        <h2 class="input-title">抽卡记录分析</h2>
+        <p>此页面可以分析使用盲盒派对抽卡记录导出工具导出的抽卡数据</p>
+        <p class="input-description">请在下方文本框粘贴您的抽卡记录 JSON 数据，或上传导出的文件。</p>
+
+        <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
+          placeholder='请在此处粘贴 JSON 数据... 例如：[{"id": 2542276, "item_id": "151402", ...}]'></textarea>
+
+        <div class="button-group">
+          <button @click="handleJsonAnalysis" class="action-button">开始分析</button>
+          <label class="file-upload-button action-button">
+            上传文件
+            <input type="file" @change="handleFileUpload" accept=".json,application/json" style="display: none;" />
+          </label>
+        </div>
+
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      </div>
+
+      <div v-else-if="viewState === 'analysis'" class="gacha-analysis-page">
+        <button @click="resetView" class="reset-button">← 分析新文件</button>
+        <div v-if="analysis">
+          <div class="header">
+            <div class="title-bar">
+              <span>限定卡池</span>
+            </div>
+            <div class="total-pulls">{{ analysis.totalPulls }} <span class="pulls-text">抽</span></div>
+            <div class="pity-counters">
+              <div class="pity-item">
+                <span>距上个限定</span>
+                <span class="pity-count UR">{{ analysis.UR }}</span>
+              </div>
+              <div class="pity-item">
+                <span>距上个SSR</span>
+                <span class="pity-count SSR">{{ analysis.SSR }}</span>
+              </div>
+            </div>
+            <div class="date-range">{{ analysis.dateRange }}</div>
+          </div>
+
+          <div class="stats-overview">
+            <div class="stat-box">
+              <div>限定平均抽数</div>
+              <div v-if="analysis.avgPullsForUR > 0" class="stat-value">{{ analysis.avgPullsForUR.toFixed(2) }} 抽</div>
+              <div v-else class="stat-value">暂无数据</div>
+            </div>
+            <div class="stat-box">
+              <div>SSR平均抽数</div>
+              <div v-if="analysis.avgPullsForSSR > 0" class="stat-value">{{ analysis.avgPullsForSSR.toFixed(2) }} 抽
+              </div>
+              <div v-else class="stat-value">暂无数据</div>
+            </div>
+            <div class="stat-box">
+              <div>最非限定</div>
+              <div v-if="analysis.maxUR > 0" class="stat-value">{{ analysis.maxUR }} 抽</div>
+              <div v-else class="stat-value">暂无数据</div>
+            </div>
+            <div class="stat-box">
+              <div>最欧限定</div>
+              <div v-if="analysis.minUR > 0" class="stat-value">{{ analysis.minUR }} 抽</div>
+              <div v-else class="stat-value">暂无数据</div>
+            </div>
+          </div>
+
+          <div class="history-list" ref="historyListRef">
+            <div v-for="(item, index) in analysis.URHistory" :key="index" class="history-item"
+              :style="getHistoryItemStyle(item)">
+              <div class="char-info">
+                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
+                <span class="char-name">{{ item.name }}</span>
+              </div>
+              <div class="pull-info">
+                <span class="pull-count">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="full-history-section">
+            <h3 class="section-title">完整抽卡历史</h3>
+            <div class="full-history-list">
+              <div v-for="item in paginatedHistory" :key="item.raw.id" :class="['full-history-item', item.rarity]">
+                <div class="char-info">
+                  <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
+                  <span class="char-name">{{ item.name }}</span>
+                </div>
+                <span :class="['rarity-' + item.rarity]">{{ item.rarity === 'UR' ? '限定' : item.rarity }}</span>
+              </div>
+              <p v-if="fullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
+            </div>
+            <div v-if="totalPages > 1" class="pagination-controls">
+              <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
+              <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
+              <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+            </div>
+          </div>
+        </div>
+        <p v-else>欸？好像没有抽卡记录</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+// ... script部分保持不变 ...
+import { ref, computed } from 'vue';
+import { cardMap } from '@/data/cards.js';
+import * as RARITY from '@/data/rarity.js';
+import { colors } from '@/styles/colors.js';
+
+const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
+const jsonInput = ref(''); // 存储用户输入的 JSON 数据
+const gachaData = ref([]); // 存储解析后的有效抽卡记录
+const errorMessage = ref('');
+
+
+const getCardInfoAndRemovePrefix = (itemId) => {
+  // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
+  let cardId = itemId;
+  if (itemId.startsWith('15')) {
+    cardId = itemId.slice(2); // 去掉前缀 "15"
+  }
+  cardId = parseInt(cardId, 10); // 确保是数字类型
+  return cardMap.get(cardId) || null;
+};
+
+const handleJsonAnalysis = () => {
+  errorMessage.value = '';
+  if (!jsonInput.value.trim()) {
+    errorMessage.value = '输入不能为空，请输入或粘贴JSON数据。';
+    return;
+  }
+
+  let parsedData;
+  try {
+    parsedData = JSON.parse(jsonInput.value);
+  } catch (error) {
+    errorMessage.value = `JSON 格式错误，请检查。错误详情: ${error.message}`;
+    return;
+  }
+
+  if (!Array.isArray(parsedData)) {
+    errorMessage.value = '数据格式错误：JSON 的顶层结构必须是一个数组 ( [...] )。';
+    return;
+  }
+
+  if (parsedData.length > 0) {
+    for (const item of parsedData) {
+      if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
+        errorMessage.value = '数据格式错误：数组中的对象必须包含 "id" 和 "item_id" 字段。';
+        return;
+      }
+    }
+  }
+
+  // 数据解析成功，更新状态并切换视图
+  gachaData.value = parsedData;
+  viewState.value = 'analysis';
+};
+
+// 处理文件上传
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    jsonInput.value = e.target.result; // 这里为了方便处理，直接把文件内容放进文本框，这样不用做两个逻辑，我真是个天才
+    handleJsonAnalysis();
+  };
+  reader.onerror = () => {
+    errorMessage.value = '读取文件时发生错误。';
+  };
+  reader.readAsText(file);
+  // 清空事件
+  event.target.value = '';
+};
+
+// 重置网页获取其他输入
+const resetView = () => {
+  viewState.value = 'input';
+  jsonInput.value = '';
+  gachaData.value = [];
+  errorMessage.value = '';
+};
+
+// 分析抽卡数据的主要逻辑
+const analysis = computed(() => {
+  // 仅当有有效数据时才执行计算
+  if (gachaData.value.length === 0) return null;
+
+  // 将数据改成从最久远到最近排序，方便计算抽数
+  const records = [...gachaData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+
+  let URCounter = 0;
+  let SSRCounter = 0;
+  let lastURPullIndex = -1;
+
+  const URHistory = [];
+  const URPulls = [];
+  const SSRPulls = [];
+
+  records.forEach((record, index) => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    if (!cardInfo) {
+      console.warn(`未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      return;
+    }
+
+    URCounter++;
+    SSRCounter++;
+
+    if (cardInfo.rarity === RARITY.UR) {
+      URHistory.unshift({
+        ...cardInfo,
+        count: URCounter,
+      });
+
+      URPulls.push(URCounter)
+
+      URCounter = 0;
+      lastURPullIndex = index;
+    }
+
+    if (cardInfo.rarity === RARITY.SSR) {
+      SSRPulls.push(SSRCounter);
+      SSRCounter = 0;
+    }
+  });
+
+  const totalPulls = records.length;
+  const currentUR = lastURPullIndex === -1 ? totalPulls : totalPulls - 1 - lastURPullIndex;
+
+  const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp * 1000);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  };
+  const startDate = formatDate(records[0]?.created_at);
+  const endDate = formatDate(records[records.length - 1]?.created_at);
+
+  return {
+    totalPulls,
+    UR: currentUR,
+    SSR: SSRCounter,
+    dateRange: `${startDate} - ${endDate}`,
+    avgPullsForUR: calculateAverage(URPulls),
+    avgPullsForSSR: calculateAverage(SSRPulls),
+    maxUR: URPulls.length > 0 ? Math.max(...URPulls) : 0,
+    minUR: URPulls.length > 0 ? Math.min(...URPulls) : 0,
+    URHistory: URHistory
+  };
+});
+
+/**
+ * 根据抽数计算背景样式
+ * @param {object} item - 包含count属性的历史记录项
+ * @returns {object} - 一个包含背景样式的对象
+ */
+const getHistoryItemStyle = (item) => {
+  const maxCount = 60; // 我们将60抽作为100%
+  const count = item.count;
+  const percentage = (count / maxCount) * 100;
+
+  let progressBarColor;
+
+  if (count < 30) {
+    progressBarColor = colors.progressBar.low;
+  } else if (count < 41) {
+    progressBarColor = colors.progressBar.medium;
+  } else {
+    progressBarColor = colors.progressBar.high;
+  }
+
+  const backgroundColor = colors.progressBar.background;
+
+  // 使用线性渐变创建进度条效果
+  // `${progressBarColor} ${percentage}%` 表示进度条颜色覆盖到计算出的百分比位置
+  // `${backgroundColor} ${percentage}%` 表示从同一个百分比位置开始，使用原始背景色
+  // 两个颜色在同一个百分比位置，可以产生一条清晰的分界线
+  return {
+    background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${backgroundColor} ${percentage}%)`
+  };
+
+
+};
+
+// 抽卡记录分页逻辑
+const currentPage = ref(1);
+const itemsPerPage = ref(10); // 每页显示10条
+
+const fullHistory = computed(() => {
+  if (gachaData.value.length === 0) return [];
+  // 将抽卡记录按时间从近到远排列（以防用户不是使用本网站抽卡获取器获取的数据），并映射成包含卡片信息的对象
+  return [...gachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    // 添加原始数据中的id和created_at字段
+    const raw = { id: record.id };
+    // 如果找不到卡片信息，提供一个默认值
+    const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
+    return {
+      ...(cardInfo || defaultCard),
+      raw
+    };
+  });
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(fullHistory.value.length / itemsPerPage.value);
+});
+
+const paginatedHistory = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return fullHistory.value.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+// CSS颜色常量
+const colorBgPrimary = colors.background.primary;
+const colorBgContent = colors.background.content;
+const colorBgLight = colors.background.light;
+const colorBgLighter = colors.background.lighter;
+const colorBgHover = colors.background.hover;
+const colorBgAvatar = colors.background.avatar;
+
+const colorTextPrimary = colors.text.primary;
+const colorTextSecondary = colors.text.secondary;
+const colorTextTertiary = colors.text.tertiary;
+const colorTextDark = colors.text.dark;
+const colorTextDisabled = colors.text.disabled;
+const colorTextLight = colors.text.light;
+
+const colorBrandPrimary = colors.brand.primary;
+const colorBrandHover = colors.brand.hover;
+
+const colorRarityUr = colors.rarity.ur;
+const colorRaritySsr = colors.rarity.ssr;
+const colorRaritySr = colors.rarity.sr;
+const colorRarityR = colors.rarity.r;
+
+const colorStatusError = colors.status.error;
+const colorStatusErrorBg = colors.status.errorBg;
+
+const colorScrollbar = colors.scrollbar;
+const colorTextShadow = colors.textShadow;
+
+</script>
+
+<style scoped>
+.background {
+  padding: 1vh 1vw;
+  min-height: 100vh;
+  background-color: v-bind(colorBgPrimary);
+  color: v-bind(colorTextPrimary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.gacha-analysis-container {
+  background-color: v-bind(colorBgContent);
+  padding: 16px;
+  max-width: 450px;
+  margin: auto;
+  border-radius: 12px;
+}
+
+/* --- 上传记录区域 --- */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.input-title {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.input-description {
+  color: v-bind(colorTextSecondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.json-textarea {
+  min-height: 200px;
+  background-color: v-bind(colorBgLight);
+  border: 1px solid v-bind(colorBorderPrimary);
+  /* 假设定义了 colorBorderPrimary */
+  border-radius: 8px;
+  color: v-bind(colorTextPrimary);
+  padding: 12px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  width: auto;
+}
+
+.json-textarea:focus {
+  outline: none;
+  border-color: v-bind(colorBrandPrimary);
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+}
+
+.action-button {
+  flex-grow: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: v-bind(colorBrandPrimary);
+  color: v-bind(colorTextDark);
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-button:hover {
+  background-color: v-bind(colorBrandHover);
+}
+
+.file-upload-button {
+  text-align: center;
+}
+
+.error-message {
+  color: v-bind(colorStatusError);
+  background-color: v-bind(colorStatusErrorBg);
+  border: 1px solid v-bind(colorStatusError);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+/* --- 分析结果区域 --- */
+.reset-button {
+  background-color: v-bind(colorBgLighter);
+  color: v-bind(colorTextLight);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.reset-button:hover {
+  background-color: v-bind(colorBgHover);
+}
+
+.header {
+  padding: 10px;
+}
+
+.title-bar {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.total-pulls {
+  font-size: 3.5rem;
+  font-weight: bold;
+  letter-spacing: -2px;
+}
+
+.pulls-text {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.pity-counters {
+  display: flex;
+  gap: 20px;
+  margin-top: 5px;
+  background-color: v-bind(colorBgLight);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.pity-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: v-bind(colorTextSecondary);
+}
+
+.pity-count {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.pity-count.UR {
+  color: v-bind(colorRarityUr);
+}
+
+.pity-count.SSR {
+  color: v-bind(colorRaritySsr);
+}
+
+.date-range {
+  margin-top: 10px;
+  color: v-bind(colorTextTertiary);
+  font-size: 0.9rem;
+}
+
+/* 统计数据概览 */
+.stats-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-box {
+  background-color: v-bind(colorBgLight);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-box div:first-child {
+  color: v-bind(colorTextSecondary);
+  font-size: 0.9rem;
+}
+
+.stat-box .stat-value {
+  margin-top: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.history-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: v-bind(colorScrollbar) transparent;
+  transition: scrollbar-color 0.5s ease-out;
+}
+
+/* --- 适配 Webkit 内核浏览器 (Chrome, Edge, Safari) --- */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background-color: v-bind(colorScrollbar);
+  border-radius: 3px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.char-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.char-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: v-bind(colorBgAvatar);
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+}
+
+.char-name {
+  font-weight: bold;
+  text-shadow: 1px 1px 3px v-bind(colorTextShadow);
+}
+
+.pull-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.pull-count {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: v-bind(colorBrandPrimary);
+  min-width: 30px;
+  text-align: right;
+  text-shadow: 1px 1px 3px v-bind(colorTextShadow);
+}
+
+/* 完整抽卡历史 */
+.full-history-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid v-bind(colorBgLighter);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  color: v-bind(colorTextSecondary);
+  margin-bottom: 16px;
+}
+
+.full-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 631px;
+}
+
+.no-history-text {
+  color: v-bind(colorTextTertiary);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.full-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: v-bind(colorBgLight);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+/* 不同稀有度的左边框颜色 */
+.full-history-item.UR {
+  border-left-color: v-bind(colorRarityUr);
+}
+
+.full-history-item.SSR {
+  border-left-color: v-bind(colorRaritySsr);
+}
+
+.full-history-item.SR {
+  border-left-color: v-bind(colorRaritySr);
+}
+
+.full-history-item.R {
+  border-left-color: v-bind(colorRarityR);
+}
+
+/* 不同稀有度的文字颜色 */
+.rarity-UR {
+  color: v-bind(colorRarityUr);
+  font-weight: bold;
+}
+
+.rarity-SSR {
+  color: v-bind(colorRaritySsr);
+  font-weight: bold;
+}
+
+.rarity-SR {
+  color: v-bind(colorRaritySr);
+  font-weight: bold;
+}
+
+.rarity-R {
+  color: v-bind(colorRarityR);
+  font-weight: bold;
+}
+
+/* 分页控制 */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  color: v-bind(colorTextSecondary);
+  font-size: 0.9rem;
+}
+
+.pagination-controls button {
+  background-color: v-bind(colorBgLighter);
+  color: v-bind(colorTextLight);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: v-bind(colorBgHover);
+}
+
+.pagination-controls button:disabled {
+  background-color: v-bind(colorBgLight);
+  color: v-bind(colorTextDisabled);
+  cursor: not-allowed;
+}
+</style>
