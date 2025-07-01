@@ -7,7 +7,7 @@
         <p class="input-description">请在下方文本框粘贴您的抽卡记录 JSON 数据，或上传导出的文件。</p>
 
         <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
-          placeholder='请在此处粘贴 JSON 数据... 例如：[{"id": 2542276, "item_id": "151402", ...}]'></textarea>
+          placeholder='请在此处粘贴 JSON 数据... 例如：[9: {"id": 2542276, "item_id": "151402", ...}]'></textarea>
 
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button">开始分析</button>
@@ -21,7 +21,7 @@
       </div>
 
       <div v-else-if="viewState === 'analysis'" class="gacha-analysis-page">
-        <button @click="resetView" class="reset-button">← 分析新文件</button>
+        <button @click="resetView" class="button">← 分析新文件</button>
         <div v-if="analysis">
           <div class="header">
             <div class="title-bar">
@@ -98,6 +98,9 @@
           </div>
         </div>
         <p v-else>欸？好像没有抽卡记录</p>
+        <div v-if="analysis" style="text-align: center; padding: 20px 0;">
+          <button @click="exportData" class="button">导出记录</button>
+        </div>
       </div>
     </div>
   </div>
@@ -112,7 +115,8 @@ import { colors } from '@/styles/colors.js';
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
-const gachaData = ref([]); // 存储解析后的有效抽卡记录
+const LimitGachaData = ref([]); // 存储解析后的有效抽卡记录
+const NormalGachaData = ref([]);
 const errorMessage = ref('');
 
 
@@ -128,8 +132,9 @@ const getCardInfoAndRemovePrefix = (itemId) => {
 
 const handleJsonAnalysis = () => {
   errorMessage.value = '';
+
   if (!jsonInput.value.trim()) {
-    errorMessage.value = '输入不能为空，请输入或粘贴JSON数据。';
+    errorMessage.value = '请输入JSON数据！';
     return;
   }
 
@@ -137,26 +142,68 @@ const handleJsonAnalysis = () => {
   try {
     parsedData = JSON.parse(jsonInput.value);
   } catch (error) {
-    errorMessage.value = `JSON 格式错误，请检查。错误详情: ${error.message}`;
+    errorMessage.value = `JSON 格式无法解析，请检查。错误详情: ${error.message}`;
     return;
   }
 
-  if (!Array.isArray(parsedData)) {
-    errorMessage.value = '数据格式错误：JSON 的顶层结构必须是一个数组 ( [...] )。';
+  if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
+    errorMessage.value = '数据格式错误：顶层结构必须是一个对象 ( 形如 {"key": "value", ...} )。';
     return;
   }
 
-  if (parsedData.length > 0) {
-    for (const item of parsedData) {
-      if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
-        errorMessage.value = '数据格式错误：数组中的对象必须包含 "id" 和 "item_id" 字段。';
-        return;
-      }
+  if (typeof parsedData.version !== 'number' || parsedData.version < 2) {
+    errorMessage.value = '您的数据版本不正确。请确保使用最新版盲盒派对抽卡记录导出工具导出数据！';
+    return;
+  }
+
+  const playerId = Object.keys(parsedData).find(key => key !== 'version');
+  if (!playerId) {
+    errorMessage.value = '数据格式错误：找不到玩家ID！';
+    return;
+  }
+
+  const playerData = parsedData[playerId];
+  if (typeof playerData !== 'object' || playerData === null || Object.keys(playerData).length === 0) {
+    errorMessage.value = '数据格式错误：玩家ID下没有任何卡池对象！';
+    return;
+  }
+
+  // 检查是否有卡池数据（不验证卡池是否为空）
+  const gachaPools = Object.values(playerData);
+  if (!gachaPools.some(pool => Array.isArray(pool))) {
+    errorMessage.value = '数据格式错误：未找到有效的卡池数据！';
+    return;
+  }
+
+  // 将限定卡池的数据合并到一个数组中，常驻卡池单独处理
+  // ID为9的卡池是常驻卡池，其他卡池是限定
+  const LimitGachaRecords = [];
+  const NormalGachaRecords = [];
+  for (const [gachaId, records] of Object.entries(playerData)) {
+    if (gachaId === '9') {
+      NormalGachaRecords.push(...records);
+    } else {
+      LimitGachaRecords.push(...records);
     }
   }
 
-  // 数据解析成功，更新状态并切换视图
-  gachaData.value = parsedData;
+  for (const item of LimitGachaRecords) {
+    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
+      errorMessage.value = '数据格式错误：限定卡池抽卡记录缺少 "id" 或 "item_id" 字段';
+      return;
+    }
+  }
+
+  for (const item of NormalGachaRecords) {
+    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
+      errorMessage.value = '数据格式错误：常驻卡池抽卡记录缺少 "id" 或 "item_id" 字段';
+      return;
+    }
+  }
+
+  // 数据解析和验证成功，更新状态并切换视图
+  LimitGachaData.value = LimitGachaRecords;
+  NormalGachaData.value = NormalGachaRecords;
   viewState.value = 'analysis';
 };
 
@@ -182,17 +229,17 @@ const handleFileUpload = (event) => {
 const resetView = () => {
   viewState.value = 'input';
   jsonInput.value = '';
-  gachaData.value = [];
+  LimitGachaData.value = [];
   errorMessage.value = '';
 };
 
 // 分析抽卡数据的主要逻辑
 const analysis = computed(() => {
   // 仅当有有效数据时才执行计算
-  if (gachaData.value.length === 0) return null;
+  if (LimitGachaData.value.length === 0) return null;
 
   // 将数据改成从最久远到最近排序，方便计算抽数
-  const records = [...gachaData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  const records = [...LimitGachaData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
 
   let URCounter = 0;
   let SSRCounter = 0;
@@ -294,12 +341,12 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10); // 每页显示10条
 
 const fullHistory = computed(() => {
-  if (gachaData.value.length === 0) return [];
+  if (LimitGachaData.value.length === 0) return [];
   // 将抽卡记录按时间从近到远排列（以防用户不是使用本网站抽卡获取器获取的数据），并映射成包含卡片信息的对象
-  return [...gachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
+  return [...LimitGachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     // 添加原始数据中的id和created_at字段
-    const raw = { id: record.id };
+    const raw = { id: record.id, created_at: record.created_at };
     // 如果找不到卡片信息，提供一个默认值
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
     return {
@@ -329,6 +376,68 @@ const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
   }
+};
+
+// 导出记录为CSV文件的方法
+const exportData = () => {
+  if (fullHistory.value.length === 0) {
+    alert('没有数据可供导出。');
+    return;
+  }
+
+  // CSV文件头部
+  const headers = ['角色名称', '稀有度', '抽到时间 (UTC+8)'];
+
+  // 转换每行数据
+  const rows = fullHistory.value.map(item => {
+    const { name, rarity, raw } = item;
+
+    // 格式化时间戳 (秒 -> 毫秒 -> UTC+8 字符串)
+    const timestamp = raw.created_at;
+    let formattedDate = 'N/A';
+    if (timestamp) {
+      // JS Date需要毫秒，所以乘以1000
+      const date = new Date(timestamp * 1000);
+
+      // 创建一个新的UTC+8时区的Date对象
+      // getTime() 获取的是标准UTC时间的毫秒数，我们手动加上8小时的毫秒数
+      const date_utc8 = new Date(date.getTime() + (8 * 60 * 60 * 1000));
+
+      // 使用toISOString获取`YYYY-MM-DDTHH:mm:ss.sssZ`格式，然后进行切割和替换
+      // toISOString()始终返回UTC时间，因为我们已经手动调整了时间，所以可以直接用
+      formattedDate = date_utc8.toISOString().slice(0, 19).replace('T', ' ');
+    }
+
+    // 处理稀有度显示
+    const rarityText = rarity === 'UR' ? '限定' : rarity;
+
+    // 为防止名称中包含逗号导致CSV格式错乱，将名称用双引号包裹
+    const safeName = `"${name}"`;
+
+    return [safeName, rarityText, formattedDate];
+  });
+
+  // 组合成CSV字符串
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n');
+
+  // 创建并触发下载
+  // 添加BOM头，确保Excel能正确识别UTF-8编码，防止中文乱码
+  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', '盲盒派对抽卡记录.csv');
+  link.style.visibility = 'hidden';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 // CSS颜色常量
@@ -455,7 +564,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 /* --- 分析结果区域 --- */
-.reset-button {
+.button {
   background-color: v-bind(colorBgLighter);
   color: v-bind(colorTextLight);
   border: none;
@@ -466,7 +575,7 @@ const colorTextShadow = colors.textShadow;
   font-weight: bold;
 }
 
-.reset-button:hover {
+.button:hover {
   background-color: v-bind(colorBgHover);
 }
 
