@@ -12,7 +12,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/10032.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.02,
+      [RARITY.UR]: 0.014,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
     },
@@ -44,7 +44,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/108.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.02,
+      [RARITY.UR]: 0.014,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -74,7 +74,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/29.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.02,
+      [RARITY.UR]: 0.014,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -107,7 +107,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/107.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.02,
+      [RARITY.UR]: 0.014,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
