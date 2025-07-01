@@ -2,7 +2,7 @@
   <div class="gacha-page">
     <template v-if="!showGachaResultOverlay">
       <div class="header-container">
-        <router-link to="/" class="back-home-button">返回主页</router-link>
+        <router-link to="/chouka" class="back-home-button">返回主页</router-link>
         <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
       </div>
 
