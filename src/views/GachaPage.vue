@@ -2,13 +2,16 @@
   <div class="gacha-page">
     <template v-if="!showGachaResultOverlay">
       <div class="header-container">
-        <router-link to="/" class="back-home-button">返回主页</router-link>
+        <router-link to="/chouka" class="back-home-button">返回主页</router-link>
         <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
       </div>
 
-      <div v-if="currentPool" class="gacha-controls">
-        <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
-        <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+      <div v-if="currentPool">
+        <div class="gacha-controls">
+          <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
+          <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+        </div>
+        <SwitchComponent label="使用旧概率（2%）" v-model="useOldRate" />
       </div>
       <p v-else>卡池加载中或不存在...</p>
 
@@ -87,12 +90,14 @@ import { useRoute } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
+import SwitchComponent from '@/components/SwitchComponent.vue';
 
 const route = useRoute();
 const poolId = computed(() => route.params.poolId);
 
 
 const selectedUpCard = ref(null);
+const useOldRate = ref(false); // 是否使用旧的抽卡概率
 
 // 使用抽卡函数，传入当前卡池ID
 const {
@@ -105,7 +110,7 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(poolId.value, selectedUpCard); // 注意：这里必须传入 .value 属性
+} = useGacha(poolId.value, selectedUpCard, useOldRate); // 注意：这里必须传入 .value 属性
 
 const isSelectableUpPool = computed(() => {
   return currentPool.value?.rules?.[RARITY.UR]?.SelectUpCards === true;
@@ -243,7 +248,7 @@ h1 {
 
 /* 按钮样式 */
 .gacha-controls {
-  margin-bottom: 40px;
+  margin-bottom: 10px;
 }
 
 .gacha-button,

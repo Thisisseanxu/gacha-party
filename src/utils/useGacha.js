@@ -24,8 +24,9 @@ function weightedRandom(weightedItems) {
 /**
  * 抽卡逻辑Hook，包括单抽、十连抽、抽卡历史记录等功能。
  *
- * @param {string} poolId - 当前抽卡池的唯一标识符，用于获取对应卡池数据。
+ * @param {string} poolId - 必须，当前抽卡池的唯一标识符，用于获取对应卡池数据。
  * @param {import('vue').Ref<number>} selectedUpCard - 可选，用户选择的UP角色ID（如果有UP机制）。
+ * @param {import('vue').Ref<boolean>} useOldRate - 可选，是否使用旧的抽卡概率（默认为false）。
  * @returns {import('vue').ComputedRef<Object>} currentPool - 当前卡池的详细数据（响应式）。
  * @returns {import('vue').Ref<Array>} gachaHistory - 抽卡历史记录（响应式）。
  * @returns {import('vue').Ref<Array>} lastPulledCards - 最近一次抽到的角色列表（响应式）。
@@ -50,7 +51,7 @@ function weightedRandom(weightedItems) {
  *   performMultiPulls,
  * } = useGacha('standard');
  */
-export function useGacha(poolId, selectedUpCard) {
+export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(false)) {
   // 根据传入的 poolId 获取当前卡池的详细数据
   const currentPool = computed(() => getFullCardPoolData(toValue(poolId)))
 
@@ -176,6 +177,10 @@ export function useGacha(poolId, selectedUpCard) {
     baseRates[RARITY.R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
 
     let adjustedRates = { ...baseRates } // 存储调整后的概率
+    // 如果使用旧的抽卡概率，则将UR的概率设置为0.02
+    if (useOldRate.value) {
+      adjustedRates[RARITY.UR] = 0.02
+    }
     // 如果有boost规则，且当前抽卡次数大于boostAfter，则调整概率
     // 每抽额外提升boost值*（boostCounters-boostAfter）的概率
     if (boostRarity.value && boostCounters.value > boostAfter.value) {

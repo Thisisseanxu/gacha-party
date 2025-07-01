@@ -209,6 +209,7 @@ import { ref, computed } from 'vue';
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
+import { logger } from '@/utils/logger.js';
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
@@ -350,7 +351,7 @@ const analysis = computed(() => {
   records.forEach((record, index) => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     if (!cardInfo) {
-      console.warn(`未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      logger.warn(`未找到 item_id: ${record.item_id} 的信息，已跳过。`);
       return;
     }
 
@@ -410,7 +411,7 @@ const normalAnalysis = computed(() => {
   records.forEach((record) => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     if (!cardInfo) {
-      console.warn(`(常驻池)未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      logger.warn(`(常驻池)未找到 item_id: ${record.item_id} 的信息，已跳过。`);
       return;
     }
 
