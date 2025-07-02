@@ -3,7 +3,9 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router' // 导入路由相关功能
 
 // 路由组件
-import HomePage from './views/HomePage.vue' // 主页
+import NewHomePage from './views/NewHomePage.vue'// 主页
+                                                  // To do分析页面
+import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡记录页面
@@ -13,13 +15,18 @@ const routes = [
   // TODO: 为抽卡和抽卡分析添加新的主页
   {
     path: '/',
-    name: 'Home',
-    component: HomePage,
+    name: '主页',
+    component: HomePage,// 新主页
   },
+  //   {
+  //   path: '/analysis',
+  //   name: '抽卡数据分析',
+  //   component: RecordPage  // 分析页面
+  // },
   {
-    path: '/chouka', // 抽卡页面的路由
+    path: '/chouka',
     name: '抽卡主页',
-    component: HomePage,
+    component: GachaHomePage  // 原主页改为抽卡主页
   },
   {
     path: '/chouka/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
