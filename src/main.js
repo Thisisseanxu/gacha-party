@@ -3,7 +3,7 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router' // 导入路由相关功能
 
 // 路由组件
-import NewHomePage from './views/HomePage.vue'// 主页
+import HomePage from './views/HomePage.vue'// 主页
                                                   // To do分析页面
 import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
