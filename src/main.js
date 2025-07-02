@@ -18,11 +18,6 @@ const routes = [
     name: '主页',
     component: HomePage,// 新主页
   },
-  //   {
-  //   path: '/analysis',
-  //   name: '抽卡数据分析',
-  //   component: RecordPage  // 分析页面
-  // },
   {
     path: '/chouka',
     name: '抽卡主页',
