@@ -115,7 +115,6 @@ const colorScrollbar = colors.scrollbar;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px;
   border-radius: 6px;
   transition: background-color 0.2s;
 }

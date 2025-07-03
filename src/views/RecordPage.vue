@@ -30,12 +30,23 @@
 
         <div v-if="analysis && analysis.totalPulls > 0">
           <div class="header">
-            <div class="title-bar">
+            <!-- <div class="title-bar">
               <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}{{ CurrentSelectedPool !== 'Limited' ?
                 '(含垫抽)' :
                 ''
               }}</span>
-            </div>
+            </div> -->
+            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
+              option-value-key="id">
+              <template #trigger>
+                <div class="title-bar">
+                  <span>
+                    {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                    {{ CurrentSelectedPool !== 'Limited' ? '(含垫抽)' : '' }}
+                  </span>
+                </div>
+              </template>
+            </SelectorComponent>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
               urAnalysis.totalPulls }} <span class="
               pulls-text">抽</span></div>
@@ -71,14 +82,16 @@
             <div class="stat-box">
               <div>最非限定</div>
               <div v-if="urAnalysis.maxUR > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{ urAnalysis.maxUR }} 抽
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.maxUR }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
               <div>最欧限定</div>
               <div v-if="urAnalysis.minUR > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{ urAnalysis.minUR }} 抽
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.minUR }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
@@ -224,6 +237,7 @@ import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+import SelectorComponent from '@/components/SelectorComponent.vue';
 
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
@@ -242,7 +256,14 @@ const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const CurrentSelectedPool = ref("Limited"); // 控制限定卡池筛选指定卡池的抽卡记录
 const errorMessage = ref('');
 
-CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
+// CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
+
+const cardPoolOptions = ref([
+  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
+  { id: 29, name: CARDPOOLS_NAME_MAP['29'] },
+  { id: 40, name: CARDPOOLS_NAME_MAP['40'] },
+  { id: 41, name: CARDPOOLS_NAME_MAP['41'] },
+]);
 
 const getCardInfoAndRemovePrefix = (itemId) => {
   // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
@@ -804,6 +825,8 @@ const colorTextShadow = colors.textShadow;
 }
 
 .title-bar {
+  display: flex;
+  justify-content: flex-start;
   font-size: 1.2rem;
   font-weight: bold;
 }
