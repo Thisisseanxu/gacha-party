@@ -4,11 +4,17 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div v-if="viewState === 'input'" class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
-        <p>此页面可以分析使用盲盒派对抽卡记录导出工具导出的抽卡数据</p>
+        <p>此页面可分析使用小助手抽卡记录导出工具导出的抽卡数据<br />
+          出于安全原因，请加
+          <a class="highlight"
+            href="https://qun.qq.com/universal-share/share?ac=1&authKey=D40X5P2LzYCIKUrliVXruIkafBN4ErGY5haQT9clTUSIFMwA6LPVQUHu2eBDwTIV&busi_data=eyJncm91cENvZGUiOiIxMDQ5NTc2MTkyIiwidG9rZW4iOiJVWTk2dTNqc1JPMUpsY2pkVVE3anRFRTlCeFk5cG8xTHdwWmRqb01EWEsxM0pSL0I3RmYzLy9TMEM0emw2OEltIiwidWluIjoiMTA5NTU4MjgxNyJ9&data=JRZlWIaClGB-kc7399zrqfP5J6vC9tc7JYX8GSBZkRiSzDmSS4P56fGdDksXjMsRwTrTBTnGeMmQRA15YncuPQ&svctype=4&tempid=h5_group_info"
+            target="_blank">
+            Q群1049576192</a>获取记录
+        </p>
         <p class="input-description">请在下方文本框粘贴您的抽卡记录 JSON 数据，或上传导出的文件。</p>
 
         <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
-          placeholder='请在此处粘贴 JSON 数据... 例如：[9: {"id": 2542276, "item_id": "151402", ...}]'></textarea>
+          placeholder='请在此处粘贴 JSON 数据... 例如：{"version":2,"9999999":{"9":[{"id":7579416,"gacha_id":9,"item_id":"151406","created_at":1751324096},...]}}'></textarea>
 
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button">开始分析</button>
@@ -19,6 +25,8 @@
         </div>
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisiseanxu/gacha-party"
+            target="_blank">Github链接</a>提出意见/贡献代码。</p>
       </div>
     </div>
 
@@ -838,6 +846,10 @@ const colorTextShadow = colors.textShadow;
 }
 
 .highlight {
+  color: v-bind(colorTextHighlight);
+}
+
+.highlight:visited {
   color: v-bind(colorTextHighlight);
 }
 
