@@ -636,18 +636,10 @@ const exportToCsv = (filename, historyData) => {
 
   const headers = ['角色名称', '稀有度', '抽到时间'];
   const rows = historyData.map(item => {
-    const { name, rarity } = item;
-    const timestamp = item.created_at;
-    let formattedDate = 'N/A';
-    if (timestamp) {
-      const date = new Date(timestamp * 1000);
-      // 格式化日期为UTC+8 YYYY年MM月DD日 hh:mm:ss
-      const options = { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-      formattedDate = date.toLocaleString('zh-CN', options).replace(/\//g, '-');
-    }
+    const { name, rarity, date } = item;
     const rarityText = rarity === 'UR' ? '限定' : rarity;
     const safeName = `"${name}"`;
-    return [safeName, rarityText, formattedDate];
+    return [safeName, rarityText, date];
   });
 
   const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
