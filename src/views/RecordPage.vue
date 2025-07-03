@@ -636,8 +636,8 @@ const exportToCsv = (filename, historyData) => {
 
   const headers = ['角色名称', '稀有度', '抽到时间'];
   const rows = historyData.map(item => {
-    const { name, rarity, raw } = item;
-    const timestamp = raw.created_at;
+    const { name, rarity } = item;
+    const timestamp = item.created_at;
     let formattedDate = 'N/A';
     if (timestamp) {
       const date = new Date(timestamp * 1000);
