@@ -6,7 +6,7 @@
         <h2 class="input-title">抽卡记录分析</h2>
         <p>此页面可分析使用小助手抽卡记录导出工具导出的抽卡数据<br />
           出于安全原因，请加 <a class="highlight"
-            href="https://qun.qq.com/universal-share/share?ac=1&authKey=D40X5P2LzYCIKUrliVXruIkafBN4ErGY5haQT9clTUSIFMwA6LPVQUHu2eBDwTIV&busi_data=eyJncm91cENvZGUiOiIxMDQ5NTc2MTkyIiwidG9rZW4iOiJVWTk2dTNqc1JPMUpsY2pkVVE3anRFRTlCeFk5cG8xTHdwWmRqb01EWEsxM0pSL0I3RmYzLy9TMEM0emw2OEltIiwidWluIjoiMTA5NTU4MjgxNyJ9&data=JRZlWIaClGB-kc7399zrqfP5J6vC9tc7JYX8GSBZkRiSzDmSS4P56fGdDksXjMsRwTrTBTnGeMmQRA15YncuPQ&svctype=4&tempid=h5_group_info"
+            href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
             target="_blank">
             Q群1049576192</a> 获取记录
         </p>
