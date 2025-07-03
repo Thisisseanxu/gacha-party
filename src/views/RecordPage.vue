@@ -30,10 +30,26 @@
 
         <div v-if="analysis && analysis.totalPulls > 0">
           <div class="header">
-            <div class="title-bar">
-              <span>限定卡池</span>
-            </div>
-            <div class="total-pulls">{{ analysis.totalPulls }} <span class="pulls-text">抽</span></div>
+            <!-- <div class="title-bar">
+              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}{{ CurrentSelectedPool !== 'Limited' ?
+                '(含垫抽)' :
+                ''
+              }}</span>
+            </div> -->
+            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
+              option-value-key="id">
+              <template #trigger>
+                <div class="title-bar">
+                  <span>
+                    {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                    {{ CurrentSelectedPool !== 'Limited' ? '(含垫抽)' : '' }}
+                  </span>
+                </div>
+              </template>
+            </SelectorComponent>
+            <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+              urAnalysis.totalPulls }} <span class="
+              pulls-text">抽</span></div>
             <div class="pity-counters">
               <div class="pity-item">
                 <span>距上个限定</span>
@@ -50,29 +66,39 @@
           <div class="stats-overview">
             <div class="stat-box">
               <div>限定平均抽数</div>
-              <div v-if="analysis.avgPullsForUR > 0" class="stat-value">{{ analysis.avgPullsForUR.toFixed(2) }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>SSR平均抽数</div>
-              <div v-if="analysis.avgPullsForSSR > 0" class="stat-value">{{ analysis.avgPullsForSSR.toFixed(2) }} 抽
+              <div v-if="urAnalysis.avgPullsForUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.avgPullsForUR.toFixed(2) }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
+              <div>SSR平均抽数</div>
+              <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{ urAnalysis.avgPullsForSSR.toFixed(2) }} 抽
+              </div>
+              <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
+              <div v-else class="stat-value">暂无数据</div>
+            </div>
+            <div class="stat-box">
               <div>最非限定</div>
-              <div v-if="analysis.maxUR > 0" class="stat-value">{{ analysis.maxUR }} 抽</div>
+              <div v-if="urAnalysis.maxUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.maxUR }} 抽
+              </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
               <div>最欧限定</div>
-              <div v-if="analysis.minUR > 0" class="stat-value">{{ analysis.minUR }} 抽</div>
+              <div v-if="urAnalysis.minUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.minUR }} 抽
+              </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
           </div>
 
           <div class="history-list" ref="historyListRef">
-            <div v-for="(item, index) in analysis.URHistory" :key="index" class="history-item"
+            <div v-for="(item, index) in urAnalysis.URHistory" :key="index" class="history-item"
               :style="getHistoryItemStyle(item)">
               <div class="char-info">
                 <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
@@ -85,14 +111,15 @@
           </div>
 
           <div class="full-history-section">
-            <h3 class="section-title">限定卡池 - 完整抽卡历史</h3>
+            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }} - {{ CurrentSelectedPool ===
+              "Limit" ? '完整' : '卡池' }}抽卡历史</h3>
             <div class="full-history-list">
-              <div v-for="item in paginatedHistory" :key="item.raw.id" :class="['full-history-item', item.rarity]">
+              <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
                 <div class="char-info">
                   <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
                   <span class="char-name">{{ item.name }}</span>
                 </div>
-                <span :class="['rarity-' + item.rarity]">{{ item.rarity === 'UR' ? '限定' : item.rarity }}</span>
+                <span :class="['rarity-' + item.rarity]">{{ item.date }}</span>
               </div>
               <p v-if="fullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
             </div>
@@ -103,7 +130,7 @@
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportLimitData" class="button">导出限定卡池记录</button>
+            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}卡池记录</button>
           </div>
         </div>
 
@@ -123,7 +150,7 @@
         <div v-if="normalAnalysis && normalAnalysis.totalPulls > 0" class="permanent-pool-section">
           <div class="header">
             <div class="title-bar">
-              <span>常驻卡池</span>
+              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
             </div>
             <div class="total-pulls">{{ normalAnalysis.totalPulls }} <span class="pulls-text">抽</span></div>
             <div class="pity-counters">
@@ -172,15 +199,15 @@
           </div>
 
           <div class="full-history-section">
-            <h3 class="section-title">常驻卡池 - 完整抽卡历史</h3>
+            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP["Normal"] }} - 完整抽卡历史</h3>
             <div class="full-history-list">
-              <div v-for="item in normalPaginatedHistory" :key="item.raw.id"
+              <div v-for="item in normalPaginatedHistory" :key="item.gacha_id"
                 :class="['full-history-item', item.rarity]">
                 <div class="char-info">
                   <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
                   <span class="char-name">{{ item.name }}</span>
                 </div>
-                <span :class="['rarity-' + item.rarity]">{{ item.rarity }}</span>
+                <span :class="['rarity-' + item.rarity]">{{ item.date }}</span>
               </div>
               <p v-if="normalFullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
             </div>
@@ -191,7 +218,7 @@
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportNormalData" class="button">导出常驻卡池记录</button>
+            <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal'] }}卡池记录</button>
           </div>
         </div>
 
@@ -210,13 +237,33 @@ import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+import SelectorComponent from '@/components/SelectorComponent.vue';
+
+const CARDPOOLS_NAME_MAP = {
+  'Normal': '常驻扭蛋',
+  'Limited': '限定扭蛋',
+  '9': '常驻扭蛋',
+  '29': '车手盲盒机',
+  '40': '塔菲扭蛋',
+  '41': '童话国盲盒机',
+};
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
+const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
+const CurrentSelectedPool = ref("Limited"); // 控制限定卡池筛选指定卡池的抽卡记录
 const errorMessage = ref('');
 
+// CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
+
+const cardPoolOptions = ref([
+  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
+  { id: 29, name: CARDPOOLS_NAME_MAP['29'] },
+  { id: 40, name: CARDPOOLS_NAME_MAP['40'] },
+  { id: 41, name: CARDPOOLS_NAME_MAP['41'] },
+]);
 
 const getCardInfoAndRemovePrefix = (itemId) => {
   // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
@@ -254,13 +301,13 @@ const handleJsonAnalysis = () => {
     return;
   }
 
-  const playerId = Object.keys(parsedData).find(key => key !== 'version');
-  if (!playerId) {
+  playerId.value = Object.keys(parsedData).find(key => key !== 'version'); // 目前格式中key只有version和玩家ID，未来可能需要改成更好的判断方式
+  if (!playerId.value) {
     errorMessage.value = '数据格式错误：找不到玩家ID！';
     return;
   }
 
-  const playerData = parsedData[playerId];
+  const playerData = parsedData[playerId.value];
   if (typeof playerData !== 'object' || playerData === null || Object.keys(playerData).length === 0) {
     errorMessage.value = '数据格式错误：玩家ID下没有任何卡池对象！';
     return;
@@ -332,6 +379,9 @@ const resetView = () => {
   errorMessage.value = '';
 };
 
+// 计算列表平均值的通用函数
+const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+
 // 限定卡池分析逻辑
 const analysis = computed(() => {
   // 仅当有有效数据时才执行计算
@@ -342,13 +392,12 @@ const analysis = computed(() => {
 
   let URCounter = 0;
   let SSRCounter = 0;
-  let lastURPullIndex = -1;
 
   const URHistory = [];
-  const URPulls = [];
-  const SSRPulls = [];
+  const SSRHistory = [];
 
-  records.forEach((record, index) => {
+
+  records.forEach((record) => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     if (!cardInfo) {
       logger.warn(`未找到 item_id: ${record.item_id} 的信息，已跳过。`);
@@ -362,21 +411,18 @@ const analysis = computed(() => {
       URHistory.unshift({
         ...cardInfo,
         count: URCounter,
+        gacha_id: record.gacha_id,
       });
-      URPulls.push(URCounter);
       URCounter = 0;
-      lastURPullIndex = index;
     }
 
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRPulls.push(SSRCounter);
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
       SSRCounter = 0;
     }
   });
 
   const totalPulls = records.length;
-  const currentUR = lastURPullIndex === -1 ? totalPulls : totalPulls - 1 - lastURPullIndex;
-  const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp * 1000);
@@ -387,14 +433,48 @@ const analysis = computed(() => {
 
   return {
     totalPulls,
-    UR: currentUR,
+    UR: URCounter,
     SSR: SSRCounter,
     dateRange: `${startDate} - ${endDate}`,
-    avgPullsForUR: calculateAverage(URPulls),
-    avgPullsForSSR: calculateAverage(SSRPulls),
-    maxUR: URPulls.length > 0 ? Math.max(...URPulls) : 0,
-    minUR: URPulls.length > 0 ? Math.min(...URPulls) : 0,
+    avgPullsForUR: calculateAverage(URHistory.map(item => item.count)),
+    avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxUR: Math.max(...URHistory.map(item => item.count), 0),
+    minUR: Math.min(...URHistory.map(item => item.count), Infinity),
     URHistory: URHistory
+  };
+});
+
+// 限定卡池单卡池分析逻辑
+const urAnalysis = computed(() => {
+  if (!analysis.value) return null;
+  if (CurrentSelectedPool.value !== 'Limited') {
+    const filteredHistory = analysis.value.URHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
+    if (filteredHistory.length === 0) {
+      return {
+        totalPulls: 0,
+        avgPullsForUR: 0,
+        avgPullsForSSR: 0,
+        maxUR: 0,
+        minUR: 0,
+        URHistory: [],
+      };
+    }
+    return {
+      totalPulls: filteredHistory.reduce((sum, item) => sum + item.count, 0),
+      avgPullsForUR: calculateAverage(filteredHistory.map(item => item.count)),
+      avgPullsForSSR: 0,
+      maxUR: Math.max(...filteredHistory.map(item => item.count), 0),
+      minUR: Math.min(...filteredHistory.map(item => item.count), Infinity),
+      URHistory: filteredHistory
+    };
+  }
+  return { // 如果没有选择特定卡池，则返回全部限定卡池的分析数据
+    totalPulls: analysis.value.totalPulls,
+    avgPullsForUR: analysis.value.avgPullsForUR,
+    avgPullsForSSR: analysis.value.avgPullsForSSR,
+    maxUR: analysis.value.maxUR,
+    minUR: analysis.value.minUR,
+    URHistory: analysis.value.URHistory,
   };
 });
 
@@ -428,7 +508,6 @@ const normalAnalysis = computed(() => {
   });
 
   const totalPulls = records.length;
-  const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp * 1000);
@@ -483,11 +562,18 @@ const itemsPerPage = ref(10);
 
 const fullHistory = computed(() => {
   if (LimitGachaData.value.length === 0) return [];
-  return [...LimitGachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
+  // 如果当前选中单卡池记录，则筛选出对应卡池的记录
+  let filteredData = [...LimitGachaData.value]
+  if (CurrentSelectedPool.value !== 'Limited') {
+    filteredData = filteredData.filter(record => record.gacha_id === CurrentSelectedPool.value);
+  }
+  return filteredData.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
-    const raw = { id: record.id, created_at: record.created_at };
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
-    return { ...(cardInfo || defaultCard), raw };
+    // 将created_at转换为可读格式 yy/mm/dd hh:mm:ss
+    const createdAt = new Date(record.created_at * 1000);
+    const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
+    return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
   });
 });
 
@@ -513,9 +599,10 @@ const normalFullHistory = computed(() => {
   if (NormalGachaData.value.length === 0) return [];
   return [...NormalGachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
-    const raw = { id: record.id, created_at: record.created_at };
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
-    return { ...(cardInfo || defaultCard), raw };
+    const createdAt = new Date(record.created_at * 1000);
+    const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
+    return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
   });
 });
 
@@ -572,7 +659,7 @@ const exportToCsv = (filename, historyData) => {
 
 // 限定卡池导出
 const exportLimitData = () => {
-  exportToCsv('限定卡池抽卡记录.csv', fullHistory.value);
+  exportToCsv(CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.csv', fullHistory.value);
 };
 
 // 常驻卡池导出
@@ -595,6 +682,7 @@ const colorTextTertiary = colors.text.tertiary;
 const colorTextDark = colors.text.dark;
 const colorTextDisabled = colors.text.disabled;
 const colorTextLight = colors.text.light;
+const colorTextHighlight = colors.text.highlight;
 
 const colorBrandPrimary = colors.brand.primary;
 const colorBrandHover = colors.brand.hover;
@@ -737,6 +825,8 @@ const colorTextShadow = colors.textShadow;
 }
 
 .title-bar {
+  display: flex;
+  justify-content: flex-start;
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -745,6 +835,10 @@ const colorTextShadow = colors.textShadow;
   font-size: 3.5rem;
   font-weight: bold;
   letter-spacing: -2px;
+}
+
+.highlight {
+  color: v-bind(colorTextHighlight);
 }
 
 .pulls-text {
