@@ -31,10 +31,14 @@
         <div v-if="analysis && analysis.totalPulls > 0">
           <div class="header">
             <div class="title-bar">
-              <span>{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}{{ CurrentSelectedPool !== 'Limited' ? '(含垫抽)' : ''
+              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}{{ CurrentSelectedPool !== 'Limited' ?
+                '(含垫抽)' :
+                ''
               }}</span>
             </div>
-            <div class="total-pulls">{{ urAnalysis.totalPulls }} <span class="pulls-text">抽</span></div>
+            <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+              urAnalysis.totalPulls }} <span class="
+              pulls-text">抽</span></div>
             <div class="pity-counters">
               <div class="pity-item">
                 <span>距上个限定</span>
@@ -51,7 +55,9 @@
           <div class="stats-overview">
             <div class="stat-box">
               <div>限定平均抽数</div>
-              <div v-if="urAnalysis.avgPullsForUR > 0" class="stat-value">{{ urAnalysis.avgPullsForUR.toFixed(2) }} 抽
+              <div v-if="urAnalysis.avgPullsForUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                  urAnalysis.avgPullsForUR.toFixed(2) }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
@@ -59,16 +65,21 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{ urAnalysis.avgPullsForSSR.toFixed(2) }} 抽
               </div>
+              <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
               <div>最非限定</div>
-              <div v-if="urAnalysis.maxUR > 0" class="stat-value">{{ urAnalysis.maxUR }} 抽</div>
+              <div v-if="urAnalysis.maxUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{ urAnalysis.maxUR }} 抽
+              </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
               <div>最欧限定</div>
-              <div v-if="urAnalysis.minUR > 0" class="stat-value">{{ urAnalysis.minUR }} 抽</div>
+              <div v-if="urAnalysis.minUR > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{ urAnalysis.minUR }} 抽
+              </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
           </div>
@@ -106,7 +117,7 @@
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportLimitData" class="button">导出限定卡池记录</button>
+            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}卡池记录</button>
           </div>
         </div>
 
@@ -126,7 +137,7 @@
         <div v-if="normalAnalysis && normalAnalysis.totalPulls > 0" class="permanent-pool-section">
           <div class="header">
             <div class="title-bar">
-              <span>{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
+              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
             </div>
             <div class="total-pulls">{{ normalAnalysis.totalPulls }} <span class="pulls-text">抽</span></div>
             <div class="pity-counters">
@@ -175,7 +186,7 @@
           </div>
 
           <div class="full-history-section">
-            <h3 class="section-title">常驻卡池 - 完整抽卡历史</h3>
+            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP["Normal"] }} - 完整抽卡历史</h3>
             <div class="full-history-list">
               <div v-for="item in normalPaginatedHistory" :key="item.gacha_id"
                 :class="['full-history-item', item.rarity]">
@@ -194,7 +205,7 @@
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportNormalData" class="button">导出常驻卡池记录</button>
+            <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal'] }}卡池记录</button>
           </div>
         </div>
 
@@ -225,12 +236,13 @@ const CARDPOOLS_NAME_MAP = {
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
+const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const CurrentSelectedPool = ref("Limited"); // 控制限定卡池筛选指定卡池的抽卡记录
 const errorMessage = ref('');
 
-// CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
+CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
 
 const getCardInfoAndRemovePrefix = (itemId) => {
   // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
@@ -268,13 +280,13 @@ const handleJsonAnalysis = () => {
     return;
   }
 
-  const playerId = Object.keys(parsedData).find(key => key !== 'version');
-  if (!playerId) {
+  playerId.value = Object.keys(parsedData).find(key => key !== 'version'); // 目前格式中key只有version和玩家ID，未来可能需要改成更好的判断方式
+  if (!playerId.value) {
     errorMessage.value = '数据格式错误：找不到玩家ID！';
     return;
   }
 
-  const playerData = parsedData[playerId];
+  const playerData = parsedData[playerId.value];
   if (typeof playerData !== 'object' || playerData === null || Object.keys(playerData).length === 0) {
     errorMessage.value = '数据格式错误：玩家ID下没有任何卡池对象！';
     return;
@@ -530,7 +542,11 @@ const itemsPerPage = ref(10);
 const fullHistory = computed(() => {
   if (LimitGachaData.value.length === 0) return [];
   // 如果当前选中单卡池记录，则筛选出对应卡池的记录
-  return [...LimitGachaData.value].filter(item => item.gacha_id === CurrentSelectedPool.value).sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
+  let filteredData = [...LimitGachaData.value]
+  if (CurrentSelectedPool.value !== 'Limited') {
+    filteredData = filteredData.filter(record => record.gacha_id === CurrentSelectedPool.value);
+  }
+  return filteredData.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
     // 将created_at转换为可读格式 yy/mm/dd hh:mm:ss
@@ -622,7 +638,7 @@ const exportToCsv = (filename, historyData) => {
 
 // 限定卡池导出
 const exportLimitData = () => {
-  exportToCsv('限定卡池抽卡记录.csv', fullHistory.value);
+  exportToCsv(CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.csv', fullHistory.value);
 };
 
 // 常驻卡池导出
@@ -645,6 +661,7 @@ const colorTextTertiary = colors.text.tertiary;
 const colorTextDark = colors.text.dark;
 const colorTextDisabled = colors.text.disabled;
 const colorTextLight = colors.text.light;
+const colorTextHighlight = colors.text.highlight;
 
 const colorBrandPrimary = colors.brand.primary;
 const colorBrandHover = colors.brand.hover;
@@ -795,6 +812,10 @@ const colorTextShadow = colors.textShadow;
   font-size: 3.5rem;
   font-weight: bold;
   letter-spacing: -2px;
+}
+
+.highlight {
+  color: v-bind(colorTextHighlight);
 }
 
 .pulls-text {
