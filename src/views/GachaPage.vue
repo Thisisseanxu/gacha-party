@@ -141,6 +141,11 @@ watch(currentPool, (newPool) => {
   } else {
     selectedUpCard.value = null;
   }
+  if (newPool && newPool.name) {
+    document.title = `${newPool.name} - 盲盒派对小助手抽卡模拟器`;
+  } else {
+    document.title = '抽卡模拟器'; // 如果卡池不存在，显示默认标题
+  }
 }, { immediate: true }); // immediate确保组件加载时立即执行一次
 
 // 选择UP按钮的方法
