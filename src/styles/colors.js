@@ -22,6 +22,7 @@ export const colors = {
   }, // 高亮色
   brand: {
     primary: 'rgba(232, 169, 100, 1)', // 主要高亮/按钮颜色
+    primaryBackground: 'rgba(232, 169, 100, 0.15)', // 主要高亮背景
     hover: 'rgba(240, 195, 138, 1)', // 高亮色悬浮
   }, // 稀有度颜色
   rarity: {
