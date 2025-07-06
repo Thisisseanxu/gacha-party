@@ -2,6 +2,8 @@ import * as RARITY from '@/data/rarity.js'
 import { allCards } from '@/data/cards.js'
 import { logger } from '@/utils/logger.js'
 
+const UR_BASE_RATE = 0.0125 // UR 基础概率
+
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
@@ -12,7 +14,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/10032.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.014,
+      [RARITY.UR]: UR_BASE_RATE,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
     },
@@ -44,7 +46,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/108.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.014,
+      [RARITY.UR]: UR_BASE_RATE,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -74,7 +76,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/29.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.014,
+      [RARITY.UR]: UR_BASE_RATE,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
@@ -107,7 +109,7 @@ export const cardPools = {
     imageUrl: '/images/cardpools-icon/107.webp',
     // 基础概率
     rates: {
-      [RARITY.UR]: 0.014,
+      [RARITY.UR]: UR_BASE_RATE,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
       // 其他情况都是 R
