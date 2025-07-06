@@ -1,0 +1,7 @@
+{
+  "name": "page",
+  "compatibility_date": "2025-07-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
