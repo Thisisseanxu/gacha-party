@@ -3,7 +3,9 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router' // 导入路由相关功能
 
 // 路由组件
-import HomePage from './views/HomePage.vue' // 主页
+import HomePage from './views/HomePage.vue'// 主页
+                                                  // To do分析页面
+import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡记录页面
@@ -20,9 +22,9 @@ const routes = [
     },
   },
   {
-    path: '/chouka', // 抽卡页面的路由
+    path: '/chouka',
     name: '抽卡主页',
-    component: HomePage,
+    component: GachaHomePage  // 原主页改为抽卡主页
     meta: {
       title: '抽卡模拟器主页 - 盲盒派对小助手',
     },
