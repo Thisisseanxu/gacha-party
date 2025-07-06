@@ -250,6 +250,8 @@ const CARDPOOLS_NAME_MAP = {
   '41': '童话国盲盒机',
 };
 
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41']; // 限定卡池ID列表
+
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
@@ -353,7 +355,7 @@ const handleJsonAnalysis = () => {
   for (const [gachaId, records] of Object.entries(playerData)) {
     if (gachaId === '9') {
       NormalGachaRecords.push(...records);
-    } else {
+    } else if (LIMITED_CARD_POOLS_ID.includes(gachaId)) {
       LimitGachaRecords.push(...records);
     }
   }
