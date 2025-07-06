@@ -37,12 +37,6 @@
 
         <div v-if="analysis && analysis.totalPulls > 0">
           <div class="header">
-            <!-- <div class="title-bar">
-              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}{{ CurrentSelectedPool !== 'Limited' ?
-                '(含垫抽)' :
-                ''
-              }}</span>
-            </div> -->
             <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
               option-value-key="id">
               <template #trigger>
@@ -245,6 +239,7 @@ import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
 import SelectorComponent from '@/components/SelectorComponent.vue';
+import pako from 'pako';
 
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
@@ -290,45 +285,69 @@ const handleJsonAnalysis = () => {
     return;
   }
 
-  let parsedData;
+  let finalData;
   try {
-    parsedData = JSON.parse(jsonInput.value);
+    let parsedData = JSON.parse(jsonInput.value);
+
+    // 检查是否是压缩格式
+    if (parsedData && parsedData.compressed === true && typeof parsedData.data === 'string') {
+      try {
+        // Base64 解码
+        const binaryString = atob(parsedData.data);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Gzip 解压
+        const decompressedString = pako.inflate(bytes, { to: 'string' });
+        finalData = JSON.parse(decompressedString);
+
+      } catch (e) {
+        errorMessage.value = `解压或解析压缩数据时失败，请确认数据是否正确。错误: ${e.message}`;
+        return;
+      }
+    } else {
+      // 如果不是压缩格式，直接使用
+      finalData = parsedData;
+    }
+
   } catch (error) {
     errorMessage.value = `JSON 格式无法解析，请检查。错误详情: ${error.message}`;
     return;
   }
 
-  if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
+  // --- 后续逻辑使用 finalData ---
+
+  if (typeof finalData !== 'object' || finalData === null || Array.isArray(finalData)) {
     errorMessage.value = '数据格式错误：顶层结构必须是一个对象 ( 形如 {"key": "value", ...} )。';
     return;
   }
 
-  if (typeof parsedData.version !== 'number' || parsedData.version < 2) {
+  if (typeof finalData.version !== 'number' || finalData.version < 2) {
     errorMessage.value = '您的数据版本不正确。请确保使用最新版盲盒派对抽卡记录导出工具导出数据！';
     return;
   }
 
-  playerId.value = Object.keys(parsedData).find(key => key !== 'version'); // 目前格式中key只有version和玩家ID，未来可能需要改成更好的判断方式
+  playerId.value = Object.keys(finalData).find(key => key !== 'version');
   if (!playerId.value) {
     errorMessage.value = '数据格式错误：找不到玩家ID！';
     return;
   }
 
-  const playerData = parsedData[playerId.value];
+  const playerData = finalData[playerId.value];
   if (typeof playerData !== 'object' || playerData === null || Object.keys(playerData).length === 0) {
     errorMessage.value = '数据格式错误：玩家ID下没有任何卡池对象！';
     return;
   }
 
-  // 检查是否有卡池数据（不验证卡池是否为空）
   const gachaPools = Object.values(playerData);
   if (!gachaPools.some(pool => Array.isArray(pool))) {
     errorMessage.value = '数据格式错误：未找到有效的卡池数据！';
     return;
   }
 
-  // 将限定卡池的数据合并到一个数组中，常驻卡池单独处理
-  // ID为9的卡池是常驻卡池，其他卡池是限定
   const LimitGachaRecords = [];
   const NormalGachaRecords = [];
   for (const [gachaId, records] of Object.entries(playerData)) {
@@ -353,7 +372,6 @@ const handleJsonAnalysis = () => {
     }
   }
 
-  // 数据解析和验证成功，更新状态并切换视图
   LimitGachaData.value = LimitGachaRecords;
   NormalGachaData.value = NormalGachaRecords;
   viewState.value = 'analysis';
