@@ -24,7 +24,7 @@ export const allCards = [
   { id: 1203, name: '琉璃治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1203.webp' },
   { id: 1210, name: '航天娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1210.webp' },
   { id: 1206, name: '嫦娥娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1206.webp' },
-  { id: 1209, name: '梦境千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1209.webp' },
+  { id: 1202, name: '梦境千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1209.webp' }, // 浅睡和梦境的图片地址相反
   { id: 1301, name: '充电千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1301.webp' },
   { id: 1302, name: '首席护盾', rarity: RARITY.SSR, imageUrl: '/images/cards/1302.webp' },
   { id: 1305, name: '佩宝宝', rarity: RARITY.SSR, imageUrl: '/images/cards/1305.webp' },
@@ -45,13 +45,14 @@ export const allCards = [
   { id: 1806, name: '功夫沙袋', rarity: RARITY.SSR, imageUrl: '/images/cards/1806.webp' },
   { id: 1803, name: '水枪普拉斯', rarity: RARITY.SSR, imageUrl: '/images/cards/1803.webp' },
   { id: 1504, name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
-  { id: 1804, name: '消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
+  { id: 1804, name: '强力消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
   { id: 1808, name: '指路奈奈', rarity: RARITY.SSR, imageUrl: '/images/cards/1307.webp' }, // 新版的指路奈奈，但是图片地址与旧版相同
   { id: 1, name: 'UP SSR占位符', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 2, name: 'SSR占位符01', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 3, name: 'SSR占位符02', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 4, name: 'SSR占位符03', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
   { id: 5, name: 'SSR占位符04', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  { id: 1807, name: '强力消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' }, // 卡池里正确的强力消防栓
 
   // SR 角色
   { id: 1103, name: '珍珠射手', rarity: RARITY.SR, imageUrl: '/images/cards/1103.webp' },
@@ -65,7 +66,7 @@ export const allCards = [
   { id: 1205, name: '梦游月兔', rarity: RARITY.SR, imageUrl: '/images/cards/1205.webp' },
   { id: 1304, name: '拳头礼盒', rarity: RARITY.SR, imageUrl: '/images/cards/1304.webp' },
   { id: 1805, name: '消防栓红', rarity: RARITY.SR, imageUrl: '/images/cards/1805.webp' },
-  { id: 1202, name: '浅睡千竹', rarity: RARITY.SR, imageUrl: '/images/cards/1202.webp' },
+  { id: 1209, name: '浅睡千竹', rarity: RARITY.SR, imageUrl: '/images/cards/1202.webp' }, // 浅睡和梦境的图片地址相反
   { id: 1404, name: '贝斯战士', rarity: RARITY.SR, imageUrl: '/images/cards/1404.webp' },
 
   // R 角色
