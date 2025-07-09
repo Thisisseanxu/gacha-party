@@ -54,7 +54,7 @@
             <div class="pity-counters">
               <div class="pity-item">
                 <span>距上个限定</span>
-                <span class="pity-count UR">{{ analysis.UR }}</span>
+                <span class="pity-count SP">{{ analysis.SP }}</span>
               </div>
               <div class="pity-item">
                 <span>距上个SSR</span>
@@ -67,9 +67,9 @@
           <div class="stats-overview">
             <div class="stat-box">
               <div>限定平均抽数</div>
-              <div v-if="urAnalysis.avgPullsForUR > 0"
+              <div v-if="urAnalysis.avgPullsForSP > 0"
                 :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.avgPullsForUR.toFixed(2) }} 抽
+                  urAnalysis.avgPullsForSP.toFixed(2) }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
@@ -82,24 +82,24 @@
             </div>
             <div class="stat-box">
               <div>最非限定</div>
-              <div v-if="urAnalysis.maxUR > 0"
+              <div v-if="urAnalysis.maxSP > 0"
                 :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.maxUR }} 抽
+                  urAnalysis.maxSP }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
             <div class="stat-box">
               <div>最欧限定</div>
-              <div v-if="urAnalysis.minUR > 0"
+              <div v-if="urAnalysis.minSP > 0"
                 :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.minUR }} 抽
+                  urAnalysis.minSP }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
           </div>
 
           <div class="history-list" ref="historyListRef">
-            <div v-for="(item, index) in urAnalysis.URHistory" :key="index" class="history-item"
+            <div v-for="(item, index) in urAnalysis.SPHistory" :key="index" class="history-item"
               :style="getHistoryItemStyle(item)">
               <div class="char-info">
                 <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
@@ -417,10 +417,10 @@ const analysis = computed(() => {
   // 将数据改成从最久远到最近排序，方便计算抽数
   const records = [...LimitGachaData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
 
-  let URCounter = 0;
+  let SPCounter = 0;
   let SSRCounter = 0;
 
-  const URHistory = [];
+  const SPHistory = [];
   const SSRHistory = [];
 
 
@@ -431,16 +431,16 @@ const analysis = computed(() => {
       return;
     }
 
-    URCounter++;
+    SPCounter++;
     SSRCounter++;
 
-    if (cardInfo.rarity === RARITY.UR) {
-      URHistory.unshift({
+    if (cardInfo.rarity === RARITY.SP) {
+      SPHistory.unshift({
         ...cardInfo,
-        count: URCounter,
+        count: SPCounter,
         gacha_id: record.gacha_id,
       });
-      URCounter = 0;
+      SPCounter = 0;
     }
 
     if (cardInfo.rarity === RARITY.SSR) {
@@ -460,14 +460,14 @@ const analysis = computed(() => {
 
   return {
     totalPulls,
-    UR: URCounter,
+    SP: SPCounter,
     SSR: SSRCounter,
     dateRange: `${startDate} - ${endDate}`,
-    avgPullsForUR: calculateAverage(URHistory.map(item => item.count)),
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
     avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
-    maxUR: Math.max(...URHistory.map(item => item.count), 0),
-    minUR: Math.min(...URHistory.map(item => item.count), Infinity),
-    URHistory: URHistory
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0),
+    minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory: SPHistory
   };
 });
 
@@ -475,33 +475,33 @@ const analysis = computed(() => {
 const urAnalysis = computed(() => {
   if (!analysis.value) return null;
   if (CurrentSelectedPool.value !== 'Limited') {
-    const filteredHistory = analysis.value.URHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
+    const filteredHistory = analysis.value.SPHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
     if (filteredHistory.length === 0) {
       return {
         totalPulls: 0,
-        avgPullsForUR: 0,
+        avgPullsForSP: 0,
         avgPullsForSSR: 0,
-        maxUR: 0,
-        minUR: 0,
-        URHistory: [],
+        maxSP: 0,
+        minSP: 0,
+        SPHistory: [],
       };
     }
     return {
       totalPulls: filteredHistory.reduce((sum, item) => sum + item.count, 0),
-      avgPullsForUR: calculateAverage(filteredHistory.map(item => item.count)),
+      avgPullsForSP: calculateAverage(filteredHistory.map(item => item.count)),
       avgPullsForSSR: 0,
-      maxUR: Math.max(...filteredHistory.map(item => item.count), 0),
-      minUR: Math.min(...filteredHistory.map(item => item.count), Infinity),
-      URHistory: filteredHistory
+      maxSP: Math.max(...filteredHistory.map(item => item.count), 0),
+      minSP: Math.min(...filteredHistory.map(item => item.count), Infinity),
+      SPHistory: filteredHistory
     };
   }
   return { // 如果没有选择特定卡池，则返回全部限定卡池的分析数据
     totalPulls: analysis.value.totalPulls,
-    avgPullsForUR: analysis.value.avgPullsForUR,
+    avgPullsForSP: analysis.value.avgPullsForSP,
     avgPullsForSSR: analysis.value.avgPullsForSSR,
-    maxUR: analysis.value.maxUR,
-    minUR: analysis.value.minUR,
-    URHistory: analysis.value.URHistory,
+    maxSP: analysis.value.maxSP,
+    minSP: analysis.value.minSP,
+    SPHistory: analysis.value.SPHistory,
   };
 });
 
@@ -558,7 +558,7 @@ const normalAnalysis = computed(() => {
 /**
  * 根据抽数计算背景样式
  * @param {object} item - 包含count属性的历史记录项
- * @param {boolean} isNormal - 是否为常驻池SSR（常驻池没有UR，保底阈值不同）
+ * @param {boolean} isNormal - 是否为常驻池SSR（常驻池没有SP，保底阈值不同）
  * @returns {object} - 一个包含背景样式的对象
  */
 const getHistoryItemStyle = (item, isNormal = false) => {
@@ -657,7 +657,7 @@ const exportToCsv = (filename, historyData) => {
   const headers = ['角色名称', '稀有度', '抽到时间'];
   const rows = historyData.map(item => {
     const { name, rarity, date } = item;
-    const rarityText = rarity === 'UR' ? '限定' : rarity;
+    const rarityText = rarity === 'SP' ? '限定' : rarity;
     const safeName = `"${name}"`;
     return [safeName, rarityText, date];
   });
@@ -666,14 +666,14 @@ const exportToCsv = (filename, historyData) => {
   const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
   const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
+  const url = SPL.createObjectSPL(blob);
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  SPL.revokeObjectSPL(url);
 };
 
 // 限定卡池导出
@@ -891,7 +891,7 @@ const colorTextShadow = colors.textShadow;
   font-size: 1.2rem;
 }
 
-.pity-count.UR {
+.pity-count.SP {
   color: v-bind(colorRarityUr);
 }
 
@@ -1043,7 +1043,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 /* 不同稀有度的左边框颜色 */
-.full-history-item.UR {
+.full-history-item.SP {
   border-left-color: v-bind(colorRarityUr);
 }
 
@@ -1060,7 +1060,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 /* 不同稀有度的文字颜色 */
-.rarity-UR {
+.rarity-SP {
   color: v-bind(colorRarityUr);
   font-weight: bold;
 }

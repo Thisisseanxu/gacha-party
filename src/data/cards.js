@@ -4,15 +4,15 @@ import * as RARITY from '@/data/rarity.js'
 // 航天娃娃的id和官方图片地址不符，官方地址为1204_skin1，实际id为1210
 export const allCards = [
   // 限定角色
-  { id: 1110, name: '贪吃天使', rarity: RARITY.UR, imageUrl: '/images/cards/1110.webp ' },
-  { id: 1111, name: '小熊工程队', rarity: RARITY.UR, imageUrl: '/images/cards/1111.webp' },
-  { id: 1709, name: '雪人女王', rarity: RARITY.UR, imageUrl: '/images/cards/1709.webp' },
-  { id: 11006, name: '王牌发明家', rarity: RARITY.UR, imageUrl: '/images/cards/11006.webp' },
-  { id: 1211, name: '粉白梦魇', rarity: RARITY.UR, imageUrl: '/images/cards/1211.webp' },
-  { id: 1609, name: '菜狗狗', rarity: RARITY.UR, imageUrl: '/images/cards/1609.webp' },
-  { id: 1906, name: '彩虹射手', rarity: RARITY.UR, imageUrl: '/images/cards/1906.webp' },
-  { id: 1311, name: '赛博忍者', rarity: RARITY.UR, imageUrl: '/images/cards/1311.webp' },
-  { id: 1312, name: '酷玩游戏机', rarity: RARITY.UR, imageUrl: '/images/cards/1312.webp' },
+  { id: 1110, name: '贪吃天使', rarity: RARITY.SP, imageUrl: '/images/cards/1110.webp ' },
+  { id: 1111, name: '小熊工程队', rarity: RARITY.SP, imageUrl: '/images/cards/1111.webp' },
+  { id: 1709, name: '雪人女王', rarity: RARITY.SP, imageUrl: '/images/cards/1709.webp' },
+  { id: 11006, name: '王牌发明家', rarity: RARITY.SP, imageUrl: '/images/cards/11006.webp' },
+  { id: 1211, name: '粉白梦魇', rarity: RARITY.SP, imageUrl: '/images/cards/1211.webp' },
+  { id: 1609, name: '菜狗狗', rarity: RARITY.SP, imageUrl: '/images/cards/1609.webp' },
+  { id: 1906, name: '彩虹射手', rarity: RARITY.SP, imageUrl: '/images/cards/1906.webp' },
+  { id: 1311, name: '赛博忍者', rarity: RARITY.SP, imageUrl: '/images/cards/1311.webp' },
+  { id: 1312, name: '酷玩游戏机', rarity: RARITY.SP, imageUrl: '/images/cards/1312.webp' },
 
   // SSR 角色
   { id: 1102, name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },

@@ -39,7 +39,7 @@ export const colors = {
     low: 'rgba(40, 167, 69, 1)', // 绿色 (低抽数)
     medium: 'rgb(215, 173, 46)', // 黄色 (中等抽数)
     high: 'rgba(220, 53, 69, 1)', // 红色 (高抽数)
-    background: 'rgba(74, 61, 76, 1)', // 进度条的背景（UR历史项的原始背景）
+    background: 'rgba(74, 61, 76, 1)', // 进度条的背景（SP历史项的原始背景）
   }, // 其他
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色
   textShadow: 'rgba(0, 0, 0, 0.6)', // 文本阴影

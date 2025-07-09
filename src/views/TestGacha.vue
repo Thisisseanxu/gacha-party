@@ -318,7 +318,7 @@ const runSimulation = async () => {
 }
 
 /* 稀有度颜色 */
-.rarity-text-UR {
+.rarity-text-SP {
   color: #d66b00;
 }
 
@@ -334,7 +334,7 @@ const runSimulation = async () => {
   color: #0070dd;
 }
 
-.rarity-text-UR+.bar-container>.bar {
+.rarity-text-SP+.bar-container>.bar {
   background-color: #d66b00;
 }
 
