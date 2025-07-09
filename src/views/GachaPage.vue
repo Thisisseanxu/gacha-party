@@ -491,7 +491,7 @@ h1 {
   border-bottom: none;
 }
 
-.text-rarity-ur {
+.text-rarity-sp {
   color: #ff0000;
   font-weight: bold;
 }
@@ -611,7 +611,7 @@ h1 {
 
 /* 稀有度颜色 */
 /* TODO: 将所有颜色放在一个文件里管理，后续增加深色功能 */
-.rarity-ur {
+.rarity-sp {
   background-color: #ff0000;
 }
 
@@ -627,7 +627,7 @@ h1 {
   background-color: #00ccff;
 }
 
-.rarity-border-ur {
+.rarity-border-sp {
   border-color: #ff4d4d;
 }
 
@@ -643,7 +643,7 @@ h1 {
   border-color: #00ccff;
 }
 
-.rarity-border-ur.selected {
+.rarity-border-sp.selected {
   border-color: #ff0000;
 }
 

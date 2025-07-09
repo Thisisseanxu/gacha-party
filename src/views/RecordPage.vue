@@ -275,7 +275,6 @@ const getCardInfoAndRemovePrefix = (itemId) => {
   if (itemId.startsWith('15')) {
     cardId = itemId.slice(2); // 去掉前缀 "15"
   }
-  cardId = parseInt(cardId, 10); // 确保是数字类型
   return cardMap.get(cardId) || null;
 };
 
