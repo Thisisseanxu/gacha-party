@@ -47,7 +47,7 @@
         <h2>抽卡统计：</h2>
         <p>总抽卡次数: {{ totalPulls }}</p>
         <ul>
-          <li v-if="rarityCounts[RARITY.UR] > 0">限定: {{ rarityCounts[RARITY.UR] }} 次</li>
+          <li v-if="rarityCounts[RARITY.SP] > 0">限定: {{ rarityCounts[RARITY.SP] }} 次</li>
           <li v-if="rarityCounts[RARITY.SSR] > 0">SSR: {{ rarityCounts[RARITY.SSR] }} 次</li>
           <li v-if="rarityCounts[RARITY.SR] > 0">SR: {{ rarityCounts[RARITY.SR] }} 次</li>
           <li v-if="rarityCounts[RARITY.R] > 0">R: {{ rarityCounts[RARITY.R] }} 次</li>
@@ -57,7 +57,7 @@
         <div class="gacha-history-list">
           <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
             :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">
-            {{ card.name }} ({{ card.rarity === RARITY.UR ? '限定' : card.rarity }})
+            {{ card.name }} ({{ card.rarity === RARITY.SP ? '限定' : card.rarity }})
           </div>
           <p v-if="gachaHistory.length === 0">暂无抽卡历史。</p>
         </div>
@@ -113,7 +113,7 @@ const {
 } = useGacha(poolId.value, selectedUpCard, useOldRate); // 注意：这里必须传入 .value 属性
 
 const isSelectableUpPool = computed(() => {
-  return currentPool.value?.rules?.[RARITY.UR]?.SelectUpCards === true;
+  return currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true;
 });
 
 const isSelectableUpGroupPool = computed(() => {
@@ -129,15 +129,15 @@ const upCardDetails = computed(() => {
   if (!isSelectableUpPool.value) {
     return [];
   }
-  const upCardIds = currentPool.value.rules.UR.UpCards || [];
+  const upCardIds = currentPool.value.rules.SP.UpCards || [];
   return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
 });
 
 // 监听卡池数据，自动设置默认的UP角色
 watch(currentPool, (newPool) => {
-  if (newPool?.rules?.UR?.SelectUpCards && newPool.rules.UR.UpCards?.length > 0) {
+  if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
     // 默认选择第一个UP角色
-    selectedUpCard.value = newPool.rules.UR.UpCards[0];
+    selectedUpCard.value = newPool.rules.SP.UpCards[0];
   } else {
     selectedUpCard.value = null;
   }
@@ -491,7 +491,7 @@ h1 {
   border-bottom: none;
 }
 
-.text-rarity-ur {
+.text-rarity-sp {
   color: #ff0000;
   font-weight: bold;
 }
@@ -611,7 +611,7 @@ h1 {
 
 /* 稀有度颜色 */
 /* TODO: 将所有颜色放在一个文件里管理，后续增加深色功能 */
-.rarity-ur {
+.rarity-sp {
   background-color: #ff0000;
 }
 
@@ -627,7 +627,7 @@ h1 {
   background-color: #00ccff;
 }
 
-.rarity-border-ur {
+.rarity-border-sp {
   border-color: #ff4d4d;
 }
 
@@ -643,7 +643,7 @@ h1 {
   border-color: #00ccff;
 }
 
-.rarity-border-ur.selected {
+.rarity-border-sp.selected {
   border-color: #ff0000;
 }
 
