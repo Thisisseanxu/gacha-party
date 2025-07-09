@@ -1,6 +1,5 @@
 <template>
   <div class="background">
-    <!-- 记录上传窗口 -->
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div v-if="viewState === 'input'" class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
@@ -29,7 +28,6 @@
       </div>
     </div>
 
-    <!-- 限定卡池分析结果窗口 -->
     <div v-if="viewState === 'analysis'" class="gacha-analysis-container">
 
       <div v-if="viewState === 'analysis'" class="gacha-analysis-page">
@@ -75,7 +73,9 @@
             </div>
             <div class="stat-box">
               <div>SSR平均抽数</div>
-              <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{ urAnalysis.avgPullsForSSR.toFixed(2) }} 抽
+              <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
+                urAnalysis.avgPullsForSSR.toFixed(2)
+              }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -112,7 +112,8 @@
           </div>
 
           <div class="full-history-section">
-            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }} - {{ CurrentSelectedPool ===
+            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }} - {{ CurrentSelectedPool
+              ===
               "Limit" ? '完整' : '卡池' }}抽卡历史</h3>
             <div class="full-history-list">
               <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
@@ -126,12 +127,18 @@
             </div>
             <div v-if="totalPages > 1" class="pagination-controls">
               <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
-              <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
+              <span>
+                第
+                <input type="number" id="LimitPageInput" class="page-input" v-model="pageInput" @keyup.enter="goToPage"
+                  @blur="goToPage" min="1" :max="totalPages" />
+                页 / 共 {{ totalPages }} 页
+              </span>
               <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}卡池记录</button>
+            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -142,7 +149,6 @@
       </div>
     </div>
 
-    <!-- 常驻卡池分析结果窗口 -->
     <div v-if="viewState === 'analysis'" class="gacha-analysis-container">
 
       <div v-if="viewState === 'analysis'" class="gacha-analysis-page">
@@ -214,12 +220,18 @@
             </div>
             <div v-if="normalTotalPages > 1" class="pagination-controls">
               <button @click="prevNormalPage" :disabled="normalCurrentPage === 1">上一页</button>
-              <span>第 {{ normalCurrentPage }} 页 / 共 {{ normalTotalPages }} 页</span>
+              <span>
+                第
+                <input type="number" id="NormalPageInput" class="page-input" v-model="normalPageInput"
+                  @keyup.enter="goToNormalPage" @blur="goToNormalPage" min="1" :max="normalTotalPages" />
+                页 / 共 {{ normalTotalPages }} 页
+              </span>
               <button @click="nextNormalPage" :disabled="normalCurrentPage === normalTotalPages">下一页</button>
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal'] }}卡池记录</button>
+            <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -233,7 +245,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
@@ -585,10 +597,10 @@ const getHistoryItemStyle = (item, isNormal = false) => {
 // 限定卡池分页逻辑
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const pageInput = ref(1);
 
 const fullHistory = computed(() => {
   if (LimitGachaData.value.length === 0) return [];
-  // 如果当前选中单卡池记录，则筛选出对应卡池的记录
   let filteredData = [...LimitGachaData.value]
   if (CurrentSelectedPool.value !== 'Limited') {
     filteredData = filteredData.filter(record => record.gacha_id === CurrentSelectedPool.value);
@@ -596,7 +608,6 @@ const fullHistory = computed(() => {
   return filteredData.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
-    // 将created_at转换为可读格式 yy/mm/dd hh:mm:ss
     const createdAt = new Date(record.created_at * 1000);
     const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
     return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
@@ -617,9 +628,21 @@ const prevPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
 
+// 跳转到指定页面的函数（限定池）
+const goToPage = () => {
+  const page = Math.floor(Number(pageInput.value));
+  if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  } else {
+    // 如果输入无效，则将输入框的值重置为当前页码
+    pageInput.value = currentPage.value;
+  }
+};
+
 // 常驻卡池分页逻辑
 const normalCurrentPage = ref(1);
 // itemsPerPage 可以共用
+const normalPageInput = ref(1);
 
 const normalFullHistory = computed(() => {
   if (NormalGachaData.value.length === 0) return [];
@@ -646,6 +669,33 @@ const prevNormalPage = () => {
   if (normalCurrentPage.value > 1) normalCurrentPage.value--;
 };
 
+// 跳转到指定页面的函数（常驻池）
+const goToNormalPage = () => {
+  const page = Math.floor(Number(normalPageInput.value));
+  if (!isNaN(page) && page >= 1 && page <= normalTotalPages.value) {
+    normalCurrentPage.value = page;
+  } else {
+    // 如果输入无效，则将输入框的值重置为当前页码
+    normalPageInput.value = normalCurrentPage.value;
+  }
+};
+
+// 监听限定卡池选择变化，重置页码为1
+watch(CurrentSelectedPool, () => {
+  currentPage.value = 1;
+});
+
+// 监听 currentPage 的变化，同步更新输入框的值
+watch(currentPage, (newPage) => {
+  pageInput.value = newPage;
+});
+
+// 监听 normalCurrentPage 的变化，同步更新输入框的值
+watch(normalCurrentPage, (newPage) => {
+  normalPageInput.value = newPage;
+});
+
+
 // 通用的导出卡池数据函数
 const exportToCsv = (filename, historyData) => {
   if (historyData.length === 0) {
@@ -665,14 +715,14 @@ const exportToCsv = (filename, historyData) => {
   const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
   const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  const url = SPL.createObjectSPL(blob);
+  const url = URL.createObjectURL(blob);
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  SPL.revokeObjectSPL(url);
+  URL.revokeObjectURL(url);
 };
 
 // 限定卡池导出
@@ -1088,6 +1138,40 @@ const colorTextShadow = colors.textShadow;
   margin-top: 24px;
   color: v-bind(colorTextSecondary);
   font-size: 0.9rem;
+}
+
+/* [NEW] 新增分页输入框样式 */
+.pagination-controls span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-input {
+  width: 50px;
+  padding: 4px;
+  text-align: center;
+  background-color: v-bind(colorBgLight);
+  color: v-bind(colorTextPrimary);
+  border: 1px solid v-bind(colorBgLighter);
+  border-radius: 4px;
+  font-size: inherit;
+}
+
+.page-input:focus {
+  outline: none;
+  border-color: v-bind(colorBrandPrimary);
+}
+
+/* 隐藏数字输入框的上下箭头 */
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.page-input[type=number] {
+  -moz-appearance: textfield;
 }
 
 .pagination-controls button {
