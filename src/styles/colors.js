@@ -40,7 +40,22 @@ export const colors = {
     medium: 'rgb(215, 173, 46)', // 黄色 (中等抽数)
     high: 'rgba(220, 53, 69, 1)', // 红色 (高抽数)
     background: 'rgba(74, 61, 76, 1)', // 进度条的背景（SP历史项的原始背景）
-  }, // 其他
+  },
+  // 新增：抽卡相关颜色
+  gacha: {
+    singlePull: '#e110d0',
+    singlePullHover: '#b610c2',
+    tenPull: 'rgb(230, 195, 0)',
+    tenPullHover: 'rgb(200, 170, 0)',
+    confirm: 'rgb(255, 215, 0)',
+    confirmHover: 'rgb(240, 235, 143)',
+  },
+  // 新增：边框颜色
+  border: {
+    primary: 'rgba(58, 59, 64, 1)',
+    secondary: 'rgba(44, 45, 50, 1)',
+  },
+  // 其他
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色
   textShadow: 'rgba(0, 0, 0, 0.6)', // 文本阴影
 }

@@ -1,105 +1,203 @@
 <template>
-  <div class="gacha-page">
-    <template v-if="!showGachaResultOverlay">
-      <div class="header-container">
-        <router-link to="/chouka" class="back-home-button">返回主页</router-link>
-        <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
-      </div>
-
-      <div v-if="currentPool">
-        <div class="gacha-controls">
-          <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
-          <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+  <div class="gacha-page-background">
+    <div class="gacha-page">
+      <template v-if="!showGachaResultOverlay">
+        <div class="header-container">
+          <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
+          <router-link to="/chouka" class="back-home-button">返回主页</router-link>
         </div>
-        <SwitchComponent label="使用旧概率（2%）" v-model="useOldRate" />
-      </div>
-      <p v-else>卡池加载中或不存在...</p>
 
-      <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
-        <h3 @click="toggleUpGroupExpansion" class="collapsible-header">
-          <span>{{ isUpGroupExpanded ? '▼' : '▶' }}</span>
-          指定UP角色组: {{ isUpGroupExpanded ? '' : selectedUpGroup?.name || '请选择' }}
-        </h3>
-        <transition name="collapse-transition">
-          <div v-if="isUpGroupExpanded" class="up-group-list">
-            <div v-for="group in selectableUpGroup" :key="group.id"
-              :class="['up-group-item', { 'selected': group.id === selectedUpGroup?.id }]"
-              @click="setSelectedUpGroup(group)">
-              <img v-if="group.image_url" :src="group.image_url" :alt="group.name + '组封面'" class="up-group-image">
-              <h4 v-else>{{ group.name }}</h4>
+        <div v-if="currentPool" class="gacha-main-content card">
+          <div class="controls-and-switch">
+            <div class="gacha-controls">
+              <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
+              <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+            </div>
+            <SwitchComponent label="使用旧概率（2%）" v-model="useOldRate" />
+          </div>
+
+          <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
+            <h3 @click="toggleUpGroupExpansion" class="collapsible-header">
+              <span>{{ isUpGroupExpanded ? '▼' : '▶' }}</span>
+              指定UP角色组: {{ isUpGroupExpanded ? '' : selectedUpGroup?.name || '请选择' }}
+            </h3>
+            <transition name="collapse-transition">
+              <div v-if="isUpGroupExpanded" class="up-group-list">
+                <div v-for="group in selectableUpGroup" :key="group.id"
+                  :class="['up-group-item', { 'selected': group.id === selectedUpGroup?.id }]"
+                  @click="setSelectedUpGroup(group)">
+                  <img v-if="group.image_url" :src="group.image_url" :alt="group.name + '组封面'" class="up-group-image">
+                  <h4 v-else>{{ group.name }}</h4>
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <div v-if="isSelectableUpPool" class="select-up-container">
+            <h3 class="select-up-title">请选择UP角色：</h3>
+            <div class="up-cards-selection">
+              <div v-for="card in upCardDetails" :key="card.id"
+                :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
+                @click="selectUpCard(card.id)">
+                <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+              </div>
             </div>
           </div>
-        </transition>
-      </div>
+        </div>
 
-      <div v-if="isSelectableUpPool" class="select-up-container">
-        <h3 class="select-up-title">请选择UP角色：</h3>
-        <div class="up-cards-selection">
-          <div v-for="card in upCardDetails" :key="card.id"
-            :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
-            @click="selectUpCard(card.id)">
-            <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+        <div class="gacha-stats card">
+          <h2>抽卡统计</h2>
+          <p>总抽卡次数: {{ totalPulls }}</p>
+          <ul class="rarity-counts-list">
+            <li v-if="rarityCounts[RARITY.SP] > 0" class="text-rarity-sp">限定: {{ rarityCounts[RARITY.SP] }}</li>
+            <li v-if="rarityCounts[RARITY.SSR] > 0" class="text-rarity-ssr">SSR: {{ rarityCounts[RARITY.SSR] }}</li>
+            <li v-if="rarityCounts[RARITY.SR] > 0" class="text-rarity-sr">SR: {{ rarityCounts[RARITY.SR] }}</li>
+            <li v-if="rarityCounts[RARITY.R] > 0" class="text-rarity-r">R: {{ rarityCounts[RARITY.R] }}</li>
+          </ul>
+
+          <h3>完整抽卡历史</h3>
+          <div class="gacha-history-list">
+            <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
+              :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">
+              {{ card.name }} ({{ card.rarity === RARITY.SP ? '限定' : card.rarity }})
+            </div>
+            <p v-if="gachaHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
+          </div>
+
+          <div v-if="totalPages > 1" class="pagination-controls">
+            <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
+            <span>{{ currentPage }} / {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
           </div>
         </div>
-      </div>
+        <p v-if="!currentPool" class="loading-text">卡池加载中或不存在...</p>
+      </template>
 
-      <div class="gacha-stats">
-        <h2>抽卡统计：</h2>
-        <p>总抽卡次数: {{ totalPulls }}</p>
-        <ul>
-          <li v-if="rarityCounts[RARITY.SP] > 0">限定: {{ rarityCounts[RARITY.SP] }} 次</li>
-          <li v-if="rarityCounts[RARITY.SSR] > 0">SSR: {{ rarityCounts[RARITY.SSR] }} 次</li>
-          <li v-if="rarityCounts[RARITY.SR] > 0">SR: {{ rarityCounts[RARITY.SR] }} 次</li>
-          <li v-if="rarityCounts[RARITY.R] > 0">R: {{ rarityCounts[RARITY.R] }} 次</li>
-        </ul>
-
-        <h3>完整抽卡历史：</h3>
-        <div class="gacha-history-list">
-          <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
-            :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">
-            {{ card.name }} ({{ card.rarity === RARITY.SP ? '限定' : card.rarity }})
+      <div v-if="showGachaResultOverlay" class="gacha-result-overlay">
+        <div class="overlay-content">
+          <h2 class="overlay-title">恭喜获得</h2>
+          <div class="pulled-cards-container" ref="cardsContainerRef">
+            <transition-group name="card-reveal" tag="div" class="pulled-cards-grid">
+              <div v-for="(card, index) in displayedCards" :key="card.id + '_' + index"
+                :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]">
+                <div
+                  :class="['card-image-wrapper', `rarity-border-${card.rarity.toLowerCase()}`, { 'highlight-rarity': isHighlightRarity(card.rarity) }]">
+                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image">
+                </div>
+                <p class="card-name">{{ card.name }}</p>
+              </div>
+            </transition-group>
           </div>
-          <p v-if="gachaHistory.length === 0">暂无抽卡历史。</p>
-        </div>
-
-        <div v-if="totalPages > 1" class="pagination-controls">
-          <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
-          <span>{{ currentPage }} / {{ totalPages }}</span>
-          <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
+          <button @click="confirmGachaResult" class="confirm-button" :disabled="isAnimating">
+            {{ isAnimating ? '...' : '确定' }}
+          </button>
         </div>
       </div>
-    </template>
-
-    <div v-if="showGachaResultOverlay" class="gacha-result-overlay">
-      <h2>恭喜获得</h2>
-      <div class="pulled-cards-container">
-        <div v-for="card in lastPulledCards" :key="card.id + Math.random()"
-          :class="['card-item', `rarity-${card.rarity.toLowerCase()}`]">
-          <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image">
-          <p class="card-name">{{ card.name }}</p>
-        </div>
-      </div>
-      <button @click="confirmGachaResult" class="confirm-button">确定</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import SwitchComponent from '@/components/SwitchComponent.vue';
+import { colors } from '@/styles/colors.js';
 
+// --- 动画相关ref ---
+const showGachaResultOverlay = ref(false);
+const displayedCards = ref([]);
+const isAnimating = ref(false);
+let animationTimeout = null;
+const cardsContainerRef = ref(null); // 卡片容器引用
+
+const isHighlightRarity = (rarity) => {
+  return rarity === RARITY.SP || rarity === RARITY.SSR;
+};
+
+const startPullAnimation = () => {
+  displayedCards.value = [];
+  isAnimating.value = true;
+
+  const cardsToAnimate = lastPulledCards.value;
+  let index = 0;
+
+  // 逐个显示卡片的递归函数
+  function revealNextCard() {
+    if (index < cardsToAnimate.length) {
+      const card = cardsToAnimate[index];
+      const delay = isHighlightRarity(card.rarity) ? 300 : 100; // 抽到高稀有度时增加动画间隔时间
+
+      displayedCards.value.push(card);
+
+      // 当显示新卡片时，确保容器滚动到底部
+      nextTick(() => {
+        if (cardsContainerRef.value) {
+          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+        }
+      });
+
+      index++;
+      animationTimeout = setTimeout(revealNextCard, delay);
+    } else {
+      isAnimating.value = false;
+    }
+  }
+  revealNextCard();
+};
+
+const stopAnimation = () => {
+  if (animationTimeout) {
+    clearTimeout(animationTimeout);
+  }
+  isAnimating.value = false;
+  displayedCards.value = lastPulledCards.value;
+  nextTick(() => {
+    if (cardsContainerRef.value) {
+      cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+    }
+  });
+};
+
+
+// --- Style颜色绑定 ---
+const colorBgPrimary = colors.background.primary;
+const colorBgContent = colors.background.content;
+const colorBgLight = colors.background.light;
+const colorBgLighter = colors.background.lighter;
+const colorBgHover = colors.background.hover;
+
+const colorTextPrimary = colors.text.primary;
+const colorTextSecondary = colors.text.secondary;
+const colorTextTertiary = colors.text.tertiary;
+const colorTextDisabled = colors.text.disabled;
+const colorTextHighlight = colors.text.highlight;
+
+const colorBorder = colors.border.primary;
+
+const colorBtnSingle = colors.gacha.singlePull;
+const colorBtnSingleHover = colors.gacha.singlePullHover;
+const colorBtnTen = colors.gacha.tenPull;
+const colorBtnTenHover = colors.gacha.tenPullHover;
+const colorBtnConfirm = colors.gacha.confirm;
+const colorBtnConfirmHover = colors.gacha.confirmHover;
+const colorBtnBack = colors.brand.primary;
+const colorBtnBackHover = colors.brand.hover;
+
+const colorRaritySP = colors.rarity.ur;
+const colorRaritySSR = colors.rarity.ssr;
+const colorRaritySR = colors.rarity.sr;
+const colorRarityR = colors.rarity.r;
+
+// --- 组件逻辑 ---
 const route = useRoute();
 const poolId = computed(() => route.params.poolId);
 
-
 const selectedUpCard = ref(null);
-const useOldRate = ref(false); // 是否使用旧的抽卡概率
+const useOldRate = ref(false);
 
-// 使用抽卡函数，传入当前卡池ID
 const {
   currentPool,
   gachaHistory,
@@ -110,150 +208,139 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(poolId.value, selectedUpCard, useOldRate); // 注意：这里必须传入 .value 属性
+} = useGacha(poolId.value, selectedUpCard, useOldRate);
 
-const isSelectableUpPool = computed(() => {
-  return currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true;
-});
+const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
+const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
+const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || []);
 
-const isSelectableUpGroupPool = computed(() => {
-  return currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true;
-});
-
-const selectableUpGroup = computed(() => {
-  return currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || [];
-});
-
-// 获取可选UP角色列表
 const upCardDetails = computed(() => {
-  if (!isSelectableUpPool.value) {
-    return [];
-  }
+  if (!isSelectableUpPool.value) return [];
   const upCardIds = currentPool.value.rules.SP.UpCards || [];
   return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
 });
 
-// 监听卡池数据，自动设置默认的UP角色
 watch(currentPool, (newPool) => {
   if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
-    // 默认选择第一个UP角色
     selectedUpCard.value = newPool.rules.SP.UpCards[0];
   } else {
     selectedUpCard.value = null;
   }
-  if (newPool && newPool.name) {
-    document.title = `${newPool.name} - 织夜工具箱抽卡模拟器`;
-  } else {
-    document.title = '抽卡模拟器'; // 如果卡池不存在，显示默认标题
-  }
-}, { immediate: true }); // immediate确保组件加载时立即执行一次
+  document.title = newPool?.name ? `${newPool.name} - 织夜工具箱` : '抽卡模拟器';
+}, { immediate: true });
 
-// 选择UP按钮的方法
 const selectUpCard = (cardId) => {
   selectedUpCard.value = cardId;
 };
 
-// 历史记录分页逻辑
-const itemsPerPage = 7; // 每页显示7条记录
-const currentPage = ref(1);   // 当前页码，默认为第一页
+const itemsPerPage = 10;
+const currentPage = ref(1);
 
-// 计算总页数
 const totalPages = computed(() => {
-  // 确保 gachaHistory.value 是一个数组
-  if (!Array.isArray(gachaHistory.value)) {
-    return 0;
-  }
+  if (!Array.isArray(gachaHistory.value)) return 0;
   return Math.ceil(gachaHistory.value.length / itemsPerPage);
 });
 
-// 计算当前页需要展示的抽卡记录
 const paginatedGachaHistory = computed(() => {
-  // 为了让最新抽到的卡片显示在第一页（即列表顶部），我们先反转 gachaHistory
-  const reversedHistory = [...gachaHistory.value].reverse(); // 创建一个副本并反转
-
+  const reversedHistory = [...gachaHistory.value].reverse();
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   return reversedHistory.slice(start, end);
 });
 
-// 控制UP组的展开与收起
 const isUpGroupExpanded = ref(true);
 const toggleUpGroupExpansion = () => {
   isUpGroupExpanded.value = !isUpGroupExpanded.value;
 };
 
-// 跳转到上一页
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
+const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 
-// 跳转到下一页
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-// 当抽卡历史改变时，确保当前页码不会超出总页数
-// 比如，如果用户在第5页，然后历史记录减少了，总页数变成了3页，
-// 那么需要将 currentPage 重置为 3。
-// 我们可以通过 watch 监听 totalPages 或 gachaHistory.length
 watch(totalPulls, () => {
-  // 如果当前页码大于总页数，将其设置为总页数
   if (currentPage.value > totalPages.value && totalPages.value > 0) {
     currentPage.value = totalPages.value;
-  } else if (totalPages.value === 0) { // 如果没有记录了
+  } else if (totalPages.value === 0) {
     currentPage.value = 1;
   }
-}, { immediate: true }); // immediate: true 确保在组件挂载时也执行一次检查
+}, { immediate: true });
 
-const showGachaResultOverlay = ref(false); // 控制抽卡结果叠加层的显示与隐藏
-// 处理单抽点击事件
 const handleSinglePull = () => {
-  performSinglePull(); // 执行抽卡逻辑
-  showGachaResultOverlay.value = true; // 显示抽卡结果叠加层
+  performSinglePull();
+  showGachaResultOverlay.value = true;
+  nextTick(startPullAnimation);
 };
 
-// 处理十连抽点击事件
 const handleTenPulls = () => {
-  performTenPulls(); // 执行抽卡逻辑
-  showGachaResultOverlay.value = true; // 显示抽卡结果叠加层
+  performTenPulls();
+  showGachaResultOverlay.value = true;
+  nextTick(startPullAnimation);
 };
 
-// 确认抽卡结果，隐藏叠加层
 const confirmGachaResult = () => {
-  showGachaResultOverlay.value = false; // 隐藏抽卡结果叠加层
+  if (isAnimating.value) {
+    stopAnimation();
+  } else {
+    showGachaResultOverlay.value = false;
+  }
 };
 </script>
 
 <style scoped>
+.gacha-page-background {
+  background-color: v-bind(colorBgPrimary);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
 .gacha-page {
   max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  min-height: 100%;
-  min-height: -webkit-fill-available;
+  color: v-bind(colorTextPrimary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.card {
+  background-color: v-bind(colorBgContent);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  border: 1px solid v-bind(colorBorder);
 }
 
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: -1rem;
 }
 
 h1 {
-  color: #333;
-  font-size: 1.5em;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
-/* 按钮样式 */
+.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: v-bind(colorTextSecondary);
+  padding: 4rem 0;
+}
+
+/* --- 交互组件样式 --- */
+.controls-and-switch {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .gacha-controls {
-  margin-bottom: 10px;
+  display: flex;
+  gap: 1rem;
 }
 
 .gacha-button,
@@ -261,75 +348,73 @@ h1 {
 .pagination-controls button,
 .confirm-button {
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   font-weight: bold;
-}
-
-.gacha-button {
-  padding: 12px 25px;
-  margin: 0 10px;
-  font-size: 1.1em;
   border: none;
   color: white;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
 }
 
 .single-pull {
-  background-color: #e110d0;
+  background-color: v-bind(colorBtnSingle);
 }
 
 .single-pull:hover {
-  background-color: #b610c2;
+  background-color: v-bind(colorBtnSingleHover);
+  transform: translateY(-2px);
 }
 
 .ten-pull {
-  background-color: rgb(230, 195, 0);
+  background-color: v-bind(colorBtnTen);
 }
 
 .ten-pull:hover {
-  background-color: rgb(200, 170, 0);
+  background-color: v-bind(colorBtnTenHover);
+  transform: translateY(-2px);
 }
 
 .back-home-button {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
+  background-color: v-bind(colorBtnBack);
   text-decoration: none;
-  border: none;
-  font-size: 16px;
-  font-weight: normal;
 }
 
 .back-home-button:hover {
-  background-color: #0056b3;
+  background-color: v-bind(colorBtnBackHover);
 }
 
-/* 选择UP（组）组件样式 */
+/* --- UP选择相关样式 --- */
 .select-up-container,
 .select-up-group-container {
-  margin: 25px 0;
-  border-radius: 10px;
-  padding: 20px;
-  background-color: #f8f8f8;
-  border: 1px solid #ddd;
-}
-
-.select-up-container {
-  padding: 15px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border: none;
+  margin-top: 2rem;
+  border-top: 1px solid v-bind(colorBorder);
+  padding-top: 1.5rem;
 }
 
 .select-up-title,
-.select-up-group-container h3 {
+.collapsible-header {
   font-weight: bold;
-  margin: 0 0 15px 0;
-  color: #333;
+  margin: 0 0 1.5rem 0;
+  color: v-bind(colorTextPrimary);
 }
 
-.select-up-group-container h3 {
-  color: #007bff;
-  margin-bottom: 20px;
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.collapsible-header:hover {
+  opacity: 0.8;
+}
+
+.collapsible-header span {
+  margin-right: 8px;
+  width: 1em;
+  text-align: center;
 }
 
 .up-cards-selection,
@@ -337,20 +422,16 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-}
-
-.up-group-list {
   flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .up-card-option {
   cursor: pointer;
   padding: 4px;
-  border-radius: 8px;
-  background-clip: padding-box;
+  border-radius: 12px;
   border: 4px solid transparent;
-  transition: transform 0.2s ease, border-color 0.3s ease;
+  transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .up-card-option:hover {
@@ -359,77 +440,312 @@ h1 {
 
 .up-card-option.selected {
   transform: scale(1.1);
-  box-shadow: 0 0 15px gold;
 }
 
 .up-card-image {
   width: 80px;
   height: 80px;
   display: block;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .up-group-item {
   cursor: pointer;
-  width: 320px;
-  height: 140px;
-  border: 2px solid #ccc;
+  width: clamp(280px, 45%, 320px);
+  border: 2px solid v-bind(colorBorder);
   border-radius: 8px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #eee;
+  transition: all 0.2s ease;
+  background-color: v-bind(colorBgPrimary);
 }
 
 .up-group-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
 }
 
 .up-group-item.selected {
-  border-color: #ff9100;
-  box-shadow: 0 0 20px rgba(255, 145, 0, 0.8);
-  transform: scale(1.02);
+  border-color: v-bind(colorRaritySSR);
+  box-shadow: 0 0 20px -5px v-bind(colorRaritySSR);
 }
 
 .up-group-image {
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: 16/7;
   object-fit: cover;
 }
 
-.up-group-item h4 {
-  color: #333;
-  font-size: 1.2em;
-  text-align: center;
-  padding: 10px;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* --- 历史记录相关样式 --- */
+.gacha-stats h2,
+.gacha-stats h3 {
+  color: v-bind(colorTextPrimary);
+  border-bottom: 1px solid v-bind(colorBorder);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.select-up-group-container .collapsible-header {
-  color: #007bff;
-  margin-bottom: 20px;
-  cursor: pointer;
-  user-select: none;
+.gacha-stats>p {
+  color: v-bind(colorTextSecondary);
+  font-size: 1rem;
+}
+
+.rarity-counts-list {
+  list-style: none;
+  padding: 0;
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.rarity-counts-list li {
+  font-weight: bold;
+  background-color: v-bind(colorBgPrimary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.gacha-history-list {
+  background-color: v-bind(colorBgPrimary);
+  min-height: 300px;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  padding: 5px 0;
+}
+
+.no-history-text {
+  text-align: center;
+  color: v-bind(colorTextTertiary);
+  margin-top: 2rem;
+}
+
+.pagination-controls {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 1rem;
+}
+
+.pagination-controls button {
+  background-color: v-bind(colorBgLighter);
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: v-bind(colorBgHover);
+}
+
+.pagination-controls button:disabled {
+  background-color: v-bind(colorBgLight);
+  color: v-bind(colorTextDisabled);
+  cursor: not-allowed;
+}
+
+/* --- 结果叠加层样式 --- */
+.gacha-result-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  background-image: url('/images/gacha_bg.webp');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.gacha-result-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.overlay-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-title {
+  color: v-bind(colorTextHighlight);
+  font-size: 2.5em;
+  margin-bottom: 2rem;
+}
+
+.pulled-cards-container {
+  width: 100%;
+  max-width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.pulled-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+.card-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-image-wrapper {
+  width: 120px;
+  height: 120px;
+  padding: 5px;
+  border-radius: 12px;
+  border-width: 4px;
+  border-style: solid;
+  position: relative;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.card-name {
+  font-weight: bold;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.confirm-button {
+  padding: 1rem 4rem;
+  margin-top: auto;
+  font-size: 1.2em;
+  background-color: v-bind(colorBtnConfirm);
+  color: #1a1a1a;
+  border: none;
+  min-width: 120px;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background-color: v-bind(colorBtnConfirmHover);
+}
+
+.confirm-button:disabled {
+  cursor: wait;
+}
+
+
+/* --- 稀有度颜色 --- */
+.text-rarity-sp,
+.rarity-border-sp {
+  color: v-bind(colorRaritySP);
+  border-color: v-bind(colorRaritySP);
+}
+
+.text-rarity-ssr,
+.rarity-border-ssr {
+  color: v-bind(colorRaritySSR);
+  border-color: v-bind(colorRaritySSR);
+}
+
+.text-rarity-sr,
+.rarity-border-sr {
+  color: v-bind(colorRaritySR);
+  border-color: v-bind(colorRaritySR);
+}
+
+.text-rarity-r,
+.rarity-border-r {
+  color: v-bind(colorRarityR);
+  border-color: v-bind(colorRarityR);
+}
+
+.rarity-bg-sp {
+  background: radial-gradient(ellipse at center, rgba(222, 33, 30, 0.3) 0%, rgba(222, 33, 30, 0) 70%);
+}
+
+.rarity-bg-ssr {
+  background: radial-gradient(ellipse at center, rgba(232, 119, 33, 0.3) 0%, rgba(232, 119, 33, 0) 70%);
+}
+
+.rarity-bg-sr {
+  background: radial-gradient(ellipse at center, rgba(178, 30, 251, 0.25) 0%, rgba(178, 30, 251, 0) 70%);
+}
+
+.up-card-option.selected.rarity-border-sp {
+  box-shadow: 0 0 15px v-bind(colorRaritySP);
+}
+
+.up-card-option.selected.rarity-border-ssr {
+  box-shadow: 0 0 15px v-bind(colorRaritySSR);
+}
+
+/* --- 动画关键帧 & 过渡 --- */
+
+@keyframes highlight-flash {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px 2px v-bind(colorRaritySP);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px 10px v-bind(colorRaritySP);
+    transform: scale(1.1);
+  }
+}
+
+.highlight-rarity.rarity-border-sp,
+.highlight-rarity.rarity-border-ssr {
+  animation: highlight-flash 0.6s ease-in-out;
+}
+
+/* 角色弹出动画 */
+.card-reveal-enter-active {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-reveal-enter-from {
+  opacity: 0;
+  transform: scale(0.5) translateY(50px);
+}
+
+.card-reveal-leave-active {
   transition: opacity 0.2s ease;
 }
 
-.select-up-group-container .collapsible-header:hover {
-  opacity: 0.8;
-}
-
-.collapsible-header span {
-  margin-right: 8px;
-  width: 1em;
-  display: inline-block;
-  text-align: center;
+.card-reveal-leave-to {
+  opacity: 0;
 }
 
 .collapse-transition-enter-active,
@@ -446,216 +762,28 @@ h1 {
   max-height: 0;
 }
 
-/* 抽卡历史样式 */
-.gacha-stats {
-  margin-top: 50px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
+/* 移动端适配 */
+@media (max-width: 900px) {
+  .pulled-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 1.5rem;
+    /* Limit to max 5 per line */
+    max-width: calc(5 * 80px + 4 * 1rem);
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-.gacha-stats ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 15px;
-}
+  .card-image-wrapper {
+    width: 80px;
+    height: 80px;
+  }
 
-.gacha-stats li {
-  font-weight: bold;
-  color: #555;
-}
+  .card-name {
+    font-size: 1rem;
+  }
 
-.gacha-history-list {
-  max-height: 250px;
-  min-height: 230px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-  padding: 10px;
-  margin-top: 20px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  text-align: left;
-}
-
-.history-item {
-  padding: 5px 0;
-  border-bottom: 1px dashed #eee;
-  font-size: 0.9em;
-  color: #444;
-}
-
-
-.history-item:last-child {
-  border-bottom: none;
-}
-
-.text-rarity-sp {
-  color: #ff0000;
-  font-weight: bold;
-}
-
-.text-rarity-ssr {
-  color: #ff9100;
-  font-weight: bold;
-}
-
-.text-rarity-sr {
-  color: #cc00ff;
-}
-
-.text-rarity-r {
-  color: #00ccff;
-}
-
-.pagination-controls {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.pagination-controls button {
-  padding: 8px 15px;
-  border: 1px solid #007bff;
-  background-color: #007bff;
-  color: white;
-  font-weight: normal;
-}
-
-.pagination-controls button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.pagination-controls button:disabled {
-  background-color: #cccccc;
-  border-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.pagination-controls span {
-  font-weight: bold;
-  color: #333;
-}
-
-/* 抽卡结果叠加层样式 */
-.gacha-result-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('/images/gacha_bg.webp') center/cover no-repeat rgb(162, 37, 225);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  color: white;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.gacha-result-overlay h2 {
-  color: #fff;
-  margin: 1%;
-  font-size: 2em;
-}
-
-.pulled-cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 5vh 10vw;
-  min-width: 400px;
-  max-width: 85%;
-  max-height: 80%;
-  overflow-y: auto;
-}
-
-.card-item {
-  background-color: #333;
-  border: 1px solid #555;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  width: 120px;
-  padding: 10px;
-}
-
-.card-image {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-}
-
-.card-name {
-  font-weight: bold;
-  margin: 5px;
-  color: #ffffff;
-}
-
-.confirm-button {
-  height: 2.5em;
-  padding: 0 50px;
-  margin-top: 30px;
-  font-size: 1.5em;
-  background-color: rgb(255, 215, 0);
-  border: 2px solid #000000;
-  border-radius: 1.25em;
-  color: white;
-}
-
-.confirm-button:hover {
-  background-color: rgb(240, 235, 143);
-}
-
-/* 稀有度颜色 */
-/* TODO: 将所有颜色放在一个文件里管理，后续增加深色功能 */
-.rarity-sp {
-  background-color: #ff0000;
-}
-
-.rarity-ssr {
-  background-color: #ff9100;
-}
-
-.rarity-sr {
-  background-color: #cc00ff;
-}
-
-.rarity-r {
-  background-color: #00ccff;
-}
-
-.rarity-border-sp {
-  border-color: #ff4d4d;
-}
-
-.rarity-border-ssr {
-  border-color: #ff9100;
-}
-
-.rarity-border-sr {
-  border-color: #cc00ff;
-}
-
-.rarity-border-r {
-  border-color: #00ccff;
-}
-
-.rarity-border-sp.selected {
-  border-color: #ff0000;
-}
-
-.rarity-border-ssr.selected {
-  border-color: #ffd700;
-}
-
-.rarity-border-sr.selected {
-  border-color: #ff00ff;
-}
-
-.rarity-border-r.selected {
-  border-color: #00ffff;
+  .overlay-title {
+    font-size: 2.5em;
+  }
 }
 </style>

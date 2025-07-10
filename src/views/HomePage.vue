@@ -41,7 +41,7 @@ import { GithubOne, TencentQq } from '@icon-park/vue-next';
 const colorTextPrimary = colors.text.primary;
 const colorTextHighlight = colors.text.highlight;
 
-// --- 新增的逻辑 ---
+// --- 开发中按钮控制逻辑 ---
 const originalComingSoonText = '🛠️ 伤害计算器 (即将推出)';
 const comingSoonText = ref(originalComingSoonText);
 const isComingSoonClicked = ref(false);
@@ -58,7 +58,7 @@ const handleComingSoon = () => {
   setTimeout(() => {
     comingSoonText.value = originalComingSoonText;
     isComingSoonClicked.value = false;
-  }, 3000); // 3000毫秒 = 3秒
+  }, 3000);
 };
 // --- 逻辑结束 ---
 </script>
@@ -66,7 +66,6 @@ const handleComingSoon = () => {
 <style scoped>
 .background {
   position: relative;
-  padding: 1vh 1vw;
   min-height: 100vh;
   background-color: #000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -148,7 +147,7 @@ const handleComingSoon = () => {
   background: linear-gradient(145deg, #F9A8D4, #EC4899);
 }
 
-/* --- 新增的按钮样式 --- */
+/* --- 开发中功能的按钮 --- */
 .coming-soon-btn {
   background: linear-gradient(145deg, #6B7280, #4B5563);
   color: #D1D5DB;
@@ -164,8 +163,6 @@ const handleComingSoon = () => {
   /* 禁用时移除悬浮效果 */
   filter: none;
 }
-
-/* --- 样式结束 --- */
 
 .info-footer {
   display: flex;
