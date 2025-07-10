@@ -58,7 +58,7 @@ const handleComingSoon = () => {
   setTimeout(() => {
     comingSoonText.value = originalComingSoonText;
     isComingSoonClicked.value = false;
-  }, 3000);
+  }, 1000);
 };
 // --- 逻辑结束 ---
 </script>

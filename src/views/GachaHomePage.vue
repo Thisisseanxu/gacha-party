@@ -1,4 +1,5 @@
 <template>
+  <FloatingHomeButton />
   <div class="home-page-background">
     <div class="home-page">
       <div class="header-section">
@@ -33,6 +34,7 @@
 <script setup>
 import { cardPools } from '@/data/cardPools';
 import { colors } from '@/styles/colors.js';
+import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 
 // 将颜色值绑定到CSS变量，以便在 <style> 中使用
 const colorBgPrimary = colors.background.primary;
