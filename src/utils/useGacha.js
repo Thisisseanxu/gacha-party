@@ -65,7 +65,7 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
   // 稀有度计数器
   const rarityCounts = computed(() => {
     const counts = {
-      [RARITY.UR]: 0,
+      [RARITY.SP]: 0,
       [RARITY.SSR]: 0,
       [RARITY.SR]: 0,
       [RARITY.R]: 0,
@@ -177,9 +177,9 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
     baseRates[RARITY.R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
 
     let adjustedRates = { ...baseRates } // 存储调整后的概率
-    // 如果使用旧的抽卡概率，则将UR的概率设置为0.02
+    // 如果使用旧的抽卡概率，则将SP的概率设置为0.02
     if (useOldRate.value) {
-      adjustedRates[RARITY.UR] = 0.02
+      adjustedRates[RARITY.SP] = 0.02
     }
     // 如果有boost规则，且当前抽卡次数大于boostAfter，则调整概率
     // 每抽额外提升boost值*（boostCounters-boostAfter）的概率
@@ -354,7 +354,7 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
    * 测试用：执行指定次数的批量抽卡模拟。
    * 它直接返回本次批量抽卡的结果统计。
    * @param {number} pullCount - 要模拟的抽卡次数。
-   * @returns {Object} 本次抽卡各稀有度的数量统计，例如 { UR: 1, SSR: 10, ... }。
+   * @returns {Object} 本次抽卡各稀有度的数量统计，例如 { SP: 1, SSR: 10, ... }。
    */
   const performMultiPulls = (pullCount) => {
     logger.log(`模拟抽卡,卡池：${currentPool.value?.id} 执行 ${pullCount} 次抽卡`)
@@ -364,7 +364,7 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
     }
     // 使用单独计数器来统计各稀有度的数量
     const localRarityCounts = {
-      [RARITY.UR]: 0,
+      [RARITY.SP]: 0,
       [RARITY.SSR]: 0,
       [RARITY.SR]: 0,
       [RARITY.R]: 0,
