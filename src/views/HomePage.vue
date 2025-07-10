@@ -1,27 +1,26 @@
 <template>
   <div class="home-container">
-    <h1 class="title">🎮 盲盒派对小助手 🎀</h1>
+    <h1 class="title">织夜工具箱</h1>
 
     <div class="button-group">
-      <router-link to="/chouka" class="btn chouka-btn">
+      <router-link to="chouka" class="btn chouka-btn">
         <span>✨ 抽卡模拟器 ✨</span>
-        <span class="icon">🎴</span>
       </router-link>
 
-      <router-link to="/analysis" class="btn analysis-btn">
-        <span>📊 数据分析 📈</span>
-        <span class="icon">📥</span>
+      <router-link to="fenxi " class="btn analysis-btn">
+        <span>📊 抽卡数据分析 📈</span>
       </router-link>
     </div>
 
     <div class="info-footer">
-      <a href="https://github.com/your-repo" target="_blank" class="footer-link">
+      <a href="https://github.com/Thisiseanxu/gacha-party" target="_blank" class="footer-link">
         <span>🌌 开源地址</span>
         <span class="icon">🔗</span>
       </a>
 
-      <a href="https://qm.qq.com/group/your-group" target="_blank" class="footer-link">
-        <span>💬 交流群组</span>
+      <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
+        target="_blank" class="footer-link">
+        <span>💬 加入Q群</span>
         <span class="icon">👥</span>
       </a>
     </div>
@@ -33,13 +32,9 @@
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
 .home-container {
   padding: 4rem 2rem;
   background: linear-gradient(135deg, #6a4ba8 0%, #8e5bef 100%);
-  border-radius: 20px;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -109,12 +104,10 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(120deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   transition: 0.5s;
 }
 
@@ -135,12 +128,15 @@
 
 .info-footer {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
   gap: 2rem;
-  padding: 2rem;
+  margin: 2rem 0;
+  padding: 1rem;
   background: rgba(106, 75, 168, 0.1);
   backdrop-filter: blur(12px);
   border-radius: 15px;
-  margin-top: auto;
   width: 100%;
   max-width: 600px;
 }
