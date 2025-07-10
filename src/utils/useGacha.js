@@ -249,6 +249,8 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
           tenPullNoSRCount.value = 0 // 重置计数器
           logger.log('连续十次抽中R，强制抽出一张SR角色')
         }
+      } else {
+        tenPullNoSRCount.value = 0 // 如果抽到非R角色，则重置计数器
       }
       // DEBUG: 输出当前抽到的稀有度和所有稀有度的概率
       // logger.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)
