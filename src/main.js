@@ -17,7 +17,7 @@ const routes = [
     name: 'Home',
     component: HomePage,
     meta: {
-      title: '盲盒派对小助手',
+      title: '织夜工具箱',
     },
   },
   {
@@ -25,7 +25,7 @@ const routes = [
     name: '抽卡主页',
     component: GachaHomePage, // 原主页改为抽卡主页
     meta: {
-      title: '抽卡模拟器主页 - 盲盒派对小助手',
+      title: '抽卡模拟器主页 - 织夜工具箱',
     },
   },
   {
@@ -34,7 +34,7 @@ const routes = [
     component: GachaPage,
     props: true, // 将路由参数作为props传递给组件
     meta: {
-      title: '抽卡模拟器 - 盲盒派对小助手',
+      title: '抽卡模拟器 - 织夜工具箱',
     },
   },
   {
@@ -50,7 +50,7 @@ const routes = [
     name: '抽卡记录分析',
     component: RecordPage,
     meta: {
-      title: '抽卡记录分析 - 盲盒派对小助手',
+      title: '抽卡记录分析 - 织夜工具箱',
     },
   },
   // TODO 404页面
@@ -63,7 +63,7 @@ const router = createRouter({
   routes,
 })
 
-const defaultTitle = '盲盒派对小助手'
+const defaultTitle = '织夜工具箱'
 router.afterEach((to) => {
   // 如果路由有 meta.title，则使用它，否则使用默认标题
   document.title = to.meta.title || defaultTitle

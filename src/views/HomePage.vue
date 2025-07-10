@@ -1,61 +1,115 @@
 <template>
-  <div class="home-container">
-    <h1 class="title">织夜工具箱</h1>
+  <div class="background">
+    <div class="home-container">
+      <h1 class="title">织夜工具箱</h1>
 
-    <div class="button-group">
-      <router-link to="chouka" class="btn chouka-btn">
-        <span>✨ 抽卡模拟器 ✨</span>
-      </router-link>
+      <div class="button-group">
+        <router-link to="chouka" class="btn chouka-btn">
+          <span>✨ 抽卡模拟器 ✨</span>
+        </router-link>
 
-      <router-link to="fenxi " class="btn analysis-btn">
-        <span>📊 抽卡数据分析 📈</span>
-      </router-link>
-    </div>
+        <router-link to="fenxi" class="btn analysis-btn">
+          <span>📊 抽卡数据分析 📈</span>
+        </router-link>
 
-    <div class="info-footer">
-      <a href="https://github.com/Thisiseanxu/gacha-party" target="_blank" class="footer-link">
-        <span>🌌 开源地址</span>
-        <span class="icon">🔗</span>
-      </a>
+        <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon-btn">
+          <span>{{ comingSoonText }}</span>
+        </button>
+      </div>
 
-      <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
-        target="_blank" class="footer-link">
-        <span>💬 加入Q群</span>
-        <span class="icon">👥</span>
-      </a>
+      <div class="info-footer">
+        <a href="https://github.com/Thisiseanxu/gacha-party" target="_blank" class="footer-link">
+          <github-one theme="outline" size="20" />
+          <span>开源地址</span>
+        </a>
+
+        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
+          target="_blank" class="footer-link">
+          <tencent-qq theme="outline" size="20" />
+          <span>加入Q群</span>
+        </a>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// 可添加动画逻辑
+import { ref } from 'vue';
+import { colors } from '@/styles/colors.js';
+import { GithubOne, TencentQq } from '@icon-park/vue-next';
+
+const colorTextPrimary = colors.text.primary;
+const colorTextHighlight = colors.text.highlight;
+
+// --- 新增的逻辑 ---
+const originalComingSoonText = '🛠️ 伤害计算器 (即将推出)';
+const comingSoonText = ref(originalComingSoonText);
+const isComingSoonClicked = ref(false);
+
+const handleComingSoon = () => {
+  // 如果按钮已经被点击，则不执行任何操作
+  if (isComingSoonClicked.value) return;
+
+  // 更新文本并禁用按钮
+  comingSoonText.value = '正在努力更新，不要戳我了！';
+  isComingSoonClicked.value = true;
+
+  // 3秒后恢复按钮
+  setTimeout(() => {
+    comingSoonText.value = originalComingSoonText;
+    isComingSoonClicked.value = false;
+  }, 3000); // 3000毫秒 = 3秒
+};
+// --- 逻辑结束 ---
 </script>
 
 <style scoped>
+.background {
+  position: relative;
+  padding: 1vh 1vw;
+  min-height: 100vh;
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/homepage_bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.2;
+  z-index: 1;
+}
+
 .home-container {
-  padding: 4rem 2rem;
-  background: linear-gradient(135deg, #6a4ba8 0%, #8e5bef 100%);
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  width: 100%;
+  padding: 2rem;
+  background-color: rgba(26, 27, 32, 0.8);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(106, 75, 168, 0.15);
-  font-family: 'Poppins', sans-serif;
-  color: #e0d4ff;
+  text-align: center;
 }
 
 .title {
   font-size: 3rem;
-  background: linear-gradient(45deg, #4c3b71, #5d3aa4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 2px 2px 4px rgba(106, 75, 168, 0.2);
+  font-weight: bold;
+  color: v-bind(colorTextPrimary);
   margin-bottom: 2rem;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0 1rem;
 }
 
 .button-group {
@@ -63,96 +117,77 @@
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
-  max-width: 600px;
-  padding: 0 2rem;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.2rem 2.5rem;
-  border-radius: 25px;
+  padding: 1.2rem;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  border: 2px solid transparent;
-  background: linear-gradient(145deg, #9f7aea, #7d56d9);
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
-}
-
-.chouka-btn:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(159, 122, 234, 0.25);
-}
-
-.analysis-btn {
-  box-shadow: 0 4px 15px rgba(125, 86, 217, 0.3);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  /* 为所有按钮添加指针手势 */
 }
 
 .btn:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent);
-  transition: 0.5s;
+.chouka-btn {
+  background: linear-gradient(145deg, #8B5CF6, #6D28D9);
 }
 
-.btn:hover::before {
-  left: 100%;
+.analysis-btn {
+  background: linear-gradient(145deg, #F9A8D4, #EC4899);
 }
 
-.icon {
-  margin-left: 1rem;
-  font-size: 1.5rem;
-  transition: transform 0.3s ease;
-  color: #ffd600;
+/* --- 新增的按钮样式 --- */
+.coming-soon-btn {
+  background: linear-gradient(145deg, #6B7280, #4B5563);
+  color: #D1D5DB;
 }
 
-.btn:hover .icon {
-  transform: translateX(5px);
+/* 按钮被禁用时的样式 */
+.coming-soon-btn:disabled {
+  background: linear-gradient(145deg, #4B5563, #374151);
+  color: #9CA3AF;
+  cursor: not-allowed;
+  /* 禁用时显示“不可用”光标 */
+  transform: none;
+  /* 禁用时移除悬浮效果 */
+  filter: none;
 }
+
+/* --- 样式结束 --- */
 
 .info-footer {
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-direction: row;
   gap: 2rem;
-  margin: 2rem 0;
-  padding: 1rem;
-  background: rgba(106, 75, 168, 0.1);
-  backdrop-filter: blur(12px);
-  border-radius: 15px;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(58, 59, 64, 0.5);
   width: 100%;
-  max-width: 600px;
 }
 
 .footer-link {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  color: #e0d4ff;
+  gap: 0.8rem;
+  color: v-bind(colorTextHighlight);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-  color: #ffd600;
-  transform: translateY(-3px);
+  filter: brightness(1.2);
 }
 </style>
