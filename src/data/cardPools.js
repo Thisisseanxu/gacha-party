@@ -141,7 +141,7 @@ export const cardPools = {
   SP04_Preview: {
     type: '限定',
     name: '浴缸大作战-预测卡池',
-    imageUrl: '/images/cardpools-icon/34.webp',
+    imageUrl: '/images/cardpools-icon/sp04.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
