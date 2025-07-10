@@ -1,104 +1,193 @@
 <template>
-  <div class="home-page">
-    <h1>欢迎来到抽卡模拟器</h1>
-    <p>选择一个卡池开始抽卡吧！</p>
+  <div class="background">
+    <div class="home-container">
+      <h1 class="title">织夜工具箱</h1>
 
-    <div class="card-pool-list">
-      <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: '抽卡页面', params: { poolId: id } }"
-        class="card-pool-item">
-        <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
-        <h2 v-else class="pool-name-text">{{ pool.name }}</h2>
-      </router-link>
-    </div>
+      <div class="button-group">
+        <router-link to="chouka" class="btn chouka-btn">
+          <span>✨ 抽卡模拟器 ✨</span>
+        </router-link>
 
-    <div class="text-left">
-      <p>本项目完全开源，如果你也是开发者，欢迎加Q群1049576192一起完善项目，敬请查看<a href="https://github.com/Thisiseanxu/gacha-party">Github开源页面</a>
-      </p>
-      <p>概率公示：本模拟器默认使用1.4的基础概率来拟合2%的综合概率，可切换为2%基础概率</p>
-      <p>所有常驻卡池：SSR的概率每抽都为8%，如果连续59次抽卡没有获取UP组中的SSR角色，则第60抽必定获取<br />
-        获取SR角色的概率为每抽20%，获取R角色的概率为每抽72%<br />
-        在获取SSR角色时有50%的概率为UP角色，如本次没有获取，则下次获取SSR角色时必为UP角色之一</p>
-      <p>所有限定卡池：限定角色的综合概率为每抽2%，如果连续40次没有获取限定角色，则下一抽的概率变为4%（以此类推，6%，8%...）<br />
-        第60抽必定获取限定角色，卡池有选择限定规则时，若本次获取的限定角色不为选择的，则下次获取时必定为选择的限定角色<br />
-        获取SSR角色的概率为每抽6%，获取SR角色的概率为每抽20%，获取R角色的概率为每抽72%。</p>
+        <router-link to="fenxi" class="btn analysis-btn">
+          <span>📊 抽卡数据分析 📈</span>
+        </router-link>
+
+        <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon-btn">
+          <span>{{ comingSoonText }}</span>
+        </button>
+      </div>
+
+      <div class="info-footer">
+        <a href="https://github.com/Thisiseanxu/gacha-party" target="_blank" class="footer-link">
+          <github-one theme="outline" size="20" />
+          <span>开源地址</span>
+        </a>
+
+        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
+          target="_blank" class="footer-link">
+          <tencent-qq theme="outline" size="20" />
+          <span>加入Q群</span>
+        </a>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { cardPools } from '@/data/cardPools';
+import { ref } from 'vue';
+import { colors } from '@/styles/colors.js';
+import { GithubOne, TencentQq } from '@icon-park/vue-next';
+
+const colorTextPrimary = colors.text.primary;
+const colorTextHighlight = colors.text.highlight;
+
+// --- 新增的逻辑 ---
+const originalComingSoonText = '🛠️ 伤害计算器 (即将推出)';
+const comingSoonText = ref(originalComingSoonText);
+const isComingSoonClicked = ref(false);
+
+const handleComingSoon = () => {
+  // 如果按钮已经被点击，则不执行任何操作
+  if (isComingSoonClicked.value) return;
+
+  // 更新文本并禁用按钮
+  comingSoonText.value = '正在努力更新，不要戳我了！';
+  isComingSoonClicked.value = true;
+
+  // 3秒后恢复按钮
+  setTimeout(() => {
+    comingSoonText.value = originalComingSoonText;
+    isComingSoonClicked.value = false;
+  }, 3000); // 3000毫秒 = 3秒
+};
+// --- 逻辑结束 ---
 </script>
 
 <style scoped>
-.home-page {
+.background {
+  position: relative;
+  padding: 1vh 1vw;
+  min-height: 100vh;
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/homepage_bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.2;
+  z-index: 1;
+}
+
+.home-container {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  width: 100%;
+  padding: 2rem;
+  background-color: rgba(26, 27, 32, 0.8);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-}
-
-.card-pool-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 30px;
-  justify-content: center;
-}
-
-.card-pool-item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* 使得整个区域可点击 */
-  width: 320px;
-  height: 140px;
   text-align: center;
-  text-decoration: none;
-  /* 移除下划线 */
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.pool-cover-image {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  border-radius: 8px;
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: v-bind(colorTextPrimary);
+  margin-bottom: 2rem;
 }
 
-.pool-name-text {
-  width: 100%;
-  height: 100%;
-  /* 调整字体大小 */
-  font-size: 1.8em;
-  color: #007bff;
+.button-group {
   display: flex;
-  /* 确保文字在内容区垂直居中 */
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.btn {
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  border: #333 4px solid;
-  border-radius: 16px;
+  padding: 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  /* 为所有按钮添加指针手势 */
 }
 
-.card-pool-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
-.card-pool-item h2 {
-  margin: 0;
-  color: #007bff;
+.chouka-btn {
+  background: linear-gradient(145deg, #8B5CF6, #6D28D9);
 }
 
-.card-pool-item p {
-  margin-bottom: 5px;
-  font-size: 0.9em;
-  color: #666;
+.analysis-btn {
+  background: linear-gradient(145deg, #F9A8D4, #EC4899);
 }
 
-.text-left {
-  text-align: left;
+/* --- 新增的按钮样式 --- */
+.coming-soon-btn {
+  background: linear-gradient(145deg, #6B7280, #4B5563);
+  color: #D1D5DB;
+}
+
+/* 按钮被禁用时的样式 */
+.coming-soon-btn:disabled {
+  background: linear-gradient(145deg, #4B5563, #374151);
+  color: #9CA3AF;
+  cursor: not-allowed;
+  /* 禁用时显示“不可用”光标 */
+  transform: none;
+  /* 禁用时移除悬浮效果 */
+  filter: none;
+}
+
+/* --- 样式结束 --- */
+
+.info-footer {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(58, 59, 64, 0.5);
+  width: 100%;
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: v-bind(colorTextHighlight);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+  filter: brightness(1.2);
 }
 </style>

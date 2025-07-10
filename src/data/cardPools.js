@@ -141,7 +141,7 @@ export const cardPools = {
   SP04_Preview: {
     type: '限定',
     name: '浴缸大作战-预测卡池',
-    imageUrl: '/images/cardpools-icon/34.webp',
+    imageUrl: '/images/cardpools-icon/sp04.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -155,14 +155,14 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1809', 'SP01'], // 'SP01' 是占位符，实际使用时替换为真实角色ID
+        UpCards: ['1809', 'newSP01'], // 'SP01' 是占位符，实际使用时替换为真实角色ID
       },
       [RARITY.SSR]: {
         doubleRateCards: ['1'], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1809', 'SP01'],
+      [RARITY.SP]: ['1809', 'newSP01'],
       [RARITY.SSR]: ['UPSSR', '1801', '1806', '1803', '1807'], // 占位符SSR角色ID
       [RARITY.SR]: [
         '1103',

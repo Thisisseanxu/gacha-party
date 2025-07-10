@@ -142,7 +142,7 @@ watch(currentPool, (newPool) => {
     selectedUpCard.value = null;
   }
   if (newPool && newPool.name) {
-    document.title = `${newPool.name} - 盲盒派对小助手抽卡模拟器`;
+    document.title = `${newPool.name} - 织夜工具箱抽卡模拟器`;
   } else {
     document.title = '抽卡模拟器'; // 如果卡池不存在，显示默认标题
   }
@@ -546,7 +546,7 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('/images/gacha-bg.webp') center/cover no-repeat rgb(162, 37, 225);
+  background: url('/images/gacha_bg.webp') center/cover no-repeat rgb(162, 37, 225);
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -4,9 +4,10 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 
 // 路由组件
 import HomePage from './views/HomePage.vue' // 主页
+import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
-import RecordPage from './views/RecordPage.vue' // 抽卡记录页面
+import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
 
 // 2. 定义路由
 const routes = [
@@ -16,15 +17,15 @@ const routes = [
     name: 'Home',
     component: HomePage,
     meta: {
-      title: '盲盒派对小助手',
+      title: '织夜工具箱',
     },
   },
   {
-    path: '/chouka', // 抽卡页面的路由
+    path: '/chouka',
     name: '抽卡主页',
-    component: HomePage,
+    component: GachaHomePage, // 原主页改为抽卡主页
     meta: {
-      title: '抽卡模拟器主页 - 盲盒派对小助手',
+      title: '抽卡模拟器主页 - 织夜工具箱',
     },
   },
   {
@@ -33,7 +34,7 @@ const routes = [
     component: GachaPage,
     props: true, // 将路由参数作为props传递给组件
     meta: {
-      title: '抽卡模拟器 - 盲盒派对小助手',
+      title: '抽卡模拟器 - 织夜工具箱',
     },
   },
   {
@@ -49,7 +50,7 @@ const routes = [
     name: '抽卡记录分析',
     component: RecordPage,
     meta: {
-      title: '抽卡记录分析 - 盲盒派对小助手',
+      title: '抽卡记录分析 - 织夜工具箱',
     },
   },
   // TODO 404页面
@@ -62,7 +63,7 @@ const router = createRouter({
   routes,
 })
 
-const defaultTitle = '盲盒派对小助手'
+const defaultTitle = '织夜工具箱'
 router.afterEach((to) => {
   // 如果路由有 meta.title，则使用它，否则使用默认标题
   document.title = to.meta.title || defaultTitle

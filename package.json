@@ -11,6 +11,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@icon-park/vue-next": "^1.4.2",
     "hono": "^4.8.4",
     "pako": "^2.1.0",
     "vue": "^3.5.13",

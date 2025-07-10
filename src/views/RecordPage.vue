@@ -3,7 +3,7 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div v-if="viewState === 'input'" class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
-        <p>此页面可分析使用小助手抽卡记录导出工具导出的抽卡数据<br />
+        <p>此页面可分析使用抽卡记录导出工具导出的抽卡数据<br />
           出于安全原因，请加 <a class="highlight"
             href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
             target="_blank">
@@ -75,7 +75,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-              }} 抽
+                }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -138,7 +138,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -231,7 +231,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
