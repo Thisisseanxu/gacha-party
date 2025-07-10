@@ -1,4 +1,5 @@
 <template>
+  <FloatingHomeButton />
   <div class="background">
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div v-if="viewState === 'input'" class="input-section">
@@ -252,6 +253,7 @@ import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import pako from 'pako';
+import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',

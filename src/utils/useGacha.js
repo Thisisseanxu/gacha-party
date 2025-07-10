@@ -85,6 +85,9 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
   // 递增概率规则的抽数计数器
   const boostCounters = ref(0)
 
+  // 十次没出SR的抽数计数器
+  const tenPullNoSRCount = ref(0)
+
   // UP保底状态：true表示下一次是UP，false表示正常判断
   const nextIsUP = ref(false)
 
@@ -237,6 +240,17 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
       // 如果选中的稀有度是保底稀有度，则重置保底计数器
       if (selectedRarity === pityRarity.value) {
         pityCounters.value = 0 // 重置保底计数器
+      }
+      // 如果当前稀有度是R，则增加没出SR计数器，如果连续十次出R，则这次的改为抽出SR
+      if (selectedRarity === RARITY.R) {
+        tenPullNoSRCount.value++
+        if (tenPullNoSRCount.value >= 10) {
+          selectedRarity = RARITY.SR // 十次没出SR则这次必定出SR
+          tenPullNoSRCount.value = 0 // 重置计数器
+          logger.log('连续十次抽中R，强制抽出一张SR角色')
+        }
+      } else {
+        tenPullNoSRCount.value = 0 // 如果抽到非R角色，则重置计数器
       }
       // DEBUG: 输出当前抽到的稀有度和所有稀有度的概率
       // logger.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)

@@ -9,6 +9,8 @@
 </template>
 
 <script setup>
+import { colors } from '@/styles/colors.js';
+
 const props = defineProps({
   // modelValue 是 v-model 的标准 prop 名称
   // 它接收一个布尔值来控制开关状态
@@ -32,6 +34,8 @@ function toggle() {
   emit('update:modelValue', !props.modelValue);
 }
 
+const colorTextSecondary = colors.text.secondary;
+
 </script>
 
 <style scoped>
@@ -49,7 +53,7 @@ function toggle() {
 
 .switch-label {
   font-size: 14px;
-  color: #333;
+  color: v-bind(colorTextSecondary);
 }
 
 .switch-container {
