@@ -158,12 +158,12 @@ export const cardPools = {
         UpCards: ['1809', 'newSP01'], // 'SP01' 是占位符，实际使用时替换为真实角色ID
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['1'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['1803'], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
       [RARITY.SP]: ['1809', 'newSP01'],
-      [RARITY.SSR]: ['UPSSR', '1801', '1806', '1803', '1807'], // 占位符SSR角色ID
+      [RARITY.SSR]: ['1803', '1801', '1806', '1803', '1807'], // 占位符SSR角色ID
       [RARITY.SR]: [
         '1103',
         '1104',
