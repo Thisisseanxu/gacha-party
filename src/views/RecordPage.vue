@@ -279,9 +279,7 @@ const errorMessage = ref('');
 
 const cardPoolOptions = ref([
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
-  { id: 29, name: CARDPOOLS_NAME_MAP['29'] },
-  { id: 40, name: CARDPOOLS_NAME_MAP['40'] },
-  { id: 41, name: CARDPOOLS_NAME_MAP['41'] },
+  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] }))
 ]);
 
 const getCardInfoAndRemovePrefix = (itemId) => {
@@ -489,7 +487,8 @@ const analysis = computed(() => {
 const urAnalysis = computed(() => {
   if (!analysis.value) return null;
   if (CurrentSelectedPool.value !== 'Limited') {
-    const filteredHistory = analysis.value.SPHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
+    // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
+    const filteredHistory = analysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
     if (filteredHistory.length === 0) {
       return {
         totalPulls: 0,
