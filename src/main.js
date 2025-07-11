@@ -8,8 +8,9 @@ import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
+import GiftValueCalculator from './views/GiftValueCalculator.vue' // 礼包价值计算器页面
 
-// 2. 定义路由
+// 定义路由
 const routes = [
   // TODO: 为抽卡和抽卡分析添加新的主页
   {
@@ -51,6 +52,14 @@ const routes = [
     component: RecordPage,
     meta: {
       title: '抽卡记录分析 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/kejin',
+    name: '礼包价值计算器',
+    component: GiftValueCalculator,
+    meta: {
+      title: '我该不该氪？ - 织夜工具箱',
     },
   },
   // TODO 404页面
