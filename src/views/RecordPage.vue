@@ -76,7 +76,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-                }} 抽
+              }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -139,7 +139,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -232,7 +232,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -262,9 +262,10 @@ const CARDPOOLS_NAME_MAP = {
   '29': '车手盲盒机',
   '40': '塔菲扭蛋',
   '41': '童话国盲盒机',
+  '42': '扭蛋大作战',
 };
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41']; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42']; // 限定卡池ID列表
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据

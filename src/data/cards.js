@@ -14,7 +14,7 @@ export const allCards = [
   { id: '1311', name: '赛博忍者', rarity: RARITY.SP, imageUrl: '/images/cards/1311.webp' },
   { id: '1312', name: '酷玩游戏机', rarity: RARITY.SP, imageUrl: '/images/cards/1312.webp' },
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
-  { id: 'newSP01', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/newSP01.webp' },
+  { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
 
   // SSR 角色
   { id: '1102', name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },
