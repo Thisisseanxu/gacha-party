@@ -8,8 +8,12 @@
           <span>✨ 抽卡模拟器 ✨</span>
         </router-link>
 
-        <router-link to="fenxi" class="btn analysis-btn">
+        <router-link to="fenxi" class="btn fenxi-btn">
           <span>📊 抽卡数据分析 📈</span>
+        </router-link>
+
+        <router-link to="kejin" class="btn kejin-btn">
+          <span>🎁 我该不该氪？ 💰</span>
         </router-link>
 
         <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon-btn">
@@ -143,8 +147,12 @@ const handleComingSoon = () => {
   background: linear-gradient(145deg, #8B5CF6, #6D28D9);
 }
 
-.analysis-btn {
+.fenxi-btn {
   background: linear-gradient(145deg, #F9A8D4, #EC4899);
+}
+
+.kejin-btn {
+  background: linear-gradient(145deg, #10B981, #059669);
 }
 
 /* --- 开发中功能的按钮 --- */
