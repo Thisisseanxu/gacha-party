@@ -1,4 +1,4 @@
-# Logs
+# 日志文件
 logs
 *.log
 npm-debug.log*
@@ -13,11 +13,12 @@ dist
 dist-ssr
 coverage
 *.local
+dev-dist
 
 /cypress/videos/
 /cypress/screenshots/
 
-# Editor directories and files
+# 编辑器配置文件
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -27,5 +28,6 @@ coverage
 *.sln
 *.sw?
 
+# 其他文件
 *.tsbuildinfo
-压缩webp图片命令.txt
+/*.txt
