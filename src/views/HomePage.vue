@@ -32,18 +32,55 @@
           <tencent-qq theme="outline" size="20" />
           <span>加入Q群</span>
         </a>
+
+        <a v-if="deferredPrompt" @click="handleInstallClick" class="footer-link">
+          <install theme="outline" size="20" />
+          <span>安装应用</span>
+        </a>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { colors } from '@/styles/colors.js';
-import { GithubOne, TencentQq } from '@icon-park/vue-next';
+import { GithubOne, TencentQq, Install } from '@icon-park/vue-next';
 
-const colorTextPrimary = colors.text.primary;
-const colorTextHighlight = colors.text.highlight;
+
+// 创建一个 ref 保存 'beforeinstallprompt' 事件
+const deferredPrompt = ref(null);
+const captureInstallPrompt = (e) => {
+  // 阻止浏览器默认的、自动弹出的安装提示
+  e.preventDefault();
+  // 保存事件对象，以便后续手动触发
+  deferredPrompt.value = e;
+  console.log('PWA 安装提示已被捕获，等待用户手动触发。');
+};
+
+// 设置一个监听器来捕获 'beforeinstallprompt' 事件
+onMounted(() => {
+  window.addEventListener('beforeinstallprompt', captureInstallPrompt);
+});
+onUnmounted(() => {
+  window.removeEventListener('beforeinstallprompt', captureInstallPrompt);
+});
+
+const handleInstallClick = async () => {
+  if (!deferredPrompt.value) {
+    return;
+  }
+  // 调用保存的事件对象的 prompt() 方法，会弹出浏览器标准的安装窗口
+  deferredPrompt.value.prompt();
+
+  // 等待用户做出选择 (接受或拒绝)
+  const { outcome } = await deferredPrompt.value.userChoice;
+  console.log(`PWA 安装提示的用户选择: ${outcome}`);
+
+  // 无论用户选择什么，这个事件都已经用过，无法再次使用。
+  // 清空 ref，我们的安装按钮也会因此被 v-if 隐藏。
+  deferredPrompt.value = null;
+};
 
 // --- 开发中按钮控制逻辑 ---
 const originalComingSoonText = '🛠️ 伤害计算器 (即将推出)';
@@ -64,7 +101,9 @@ const handleComingSoon = () => {
     isComingSoonClicked.value = false;
   }, 1000);
 };
-// --- 逻辑结束 ---
+
+const colorTextPrimary = colors.text.primary;
+const colorTextHighlight = colors.text.highlight;
 </script>
 
 <style scoped>

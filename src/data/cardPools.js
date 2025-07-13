@@ -10,7 +10,7 @@ export const cardPools = {
   // 浴缸大作战预览
   SP04: {
     type: '限定',
-    name: '浴缸大作战-预测卡池',
+    name: '浴缸大作战',
     imageUrl: '/images/cardpools-icon/10042.webp',
     // 基础概率
     rates: {
