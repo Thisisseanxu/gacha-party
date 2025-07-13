@@ -76,7 +76,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-              }} 抽
+                }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -139,7 +139,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -232,7 +232,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -605,7 +605,7 @@ const fullHistory = computed(() => {
   if (LimitGachaData.value.length === 0) return [];
   let filteredData = [...LimitGachaData.value]
   if (CurrentSelectedPool.value !== 'Limited') {
-    filteredData = filteredData.filter(record => record.gacha_id === CurrentSelectedPool.value);
+    filteredData = filteredData.filter(record => record.gacha_id === Number(CurrentSelectedPool.value));
   }
   return filteredData.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
