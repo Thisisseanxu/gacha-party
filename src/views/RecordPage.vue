@@ -48,11 +48,15 @@
               </template>
             </SelectorComponent>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-              urAnalysis.totalPulls }} <span class="
-              pulls-text">抽</span></div>
+              urAnalysis.totalPulls
+              }} <span class="pulls-text">抽</span>
+            </div>
+
+            <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽' }}
+            </span>
             <div class="pity-counters">
               <div class="pity-item">
-                <span>距上个限定</span>
+                <span>距上个限定 </span>
                 <span class="pity-count SP">{{ analysis.SP }}</span>
               </div>
               <div class="pity-item">
@@ -76,7 +80,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-                }} 抽
+              }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -139,7 +143,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -232,7 +236,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -472,6 +476,7 @@ const analysis = computed(() => {
 
   return {
     totalPulls,
+    SinglePulls: 0,
     SP: SPCounter,
     SSR: SSRCounter,
     dateRange: `${startDate} - ${endDate}`,
@@ -492,6 +497,7 @@ const urAnalysis = computed(() => {
     if (filteredHistory.length === 0) {
       return {
         totalPulls: 0,
+        SinglePulls: 0,
         avgPullsForSP: 0,
         avgPullsForSSR: 0,
         maxSP: 0,
@@ -501,6 +507,7 @@ const urAnalysis = computed(() => {
     }
     return {
       totalPulls: filteredHistory.reduce((sum, item) => sum + item.count, 0),
+      SinglePulls: fullHistory.value.length,
       avgPullsForSP: calculateAverage(filteredHistory.map(item => item.count)),
       avgPullsForSSR: 0,
       maxSP: Math.max(...filteredHistory.map(item => item.count), 0),
@@ -510,6 +517,7 @@ const urAnalysis = computed(() => {
   }
   return { // 如果没有选择特定卡池，则返回全部限定卡池的分析数据
     totalPulls: analysis.value.totalPulls,
+    SinglePulls: analysis.value.SinglePulls,
     avgPullsForSP: analysis.value.avgPullsForSP,
     avgPullsForSSR: analysis.value.avgPullsForSSR,
     maxSP: analysis.value.maxSP,
