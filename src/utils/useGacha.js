@@ -345,6 +345,9 @@ export function useGacha(poolSource, selectedUpCard = ref(null), useOldRate = re
       nextIsUP.value = true // 下次抽卡必定是UP角色
     }
 
+    // DEBUG: 输出抽到的角色信息
+    // logger.log(`抽到角色：${pulledCard.name} (${pulledCard.rarity})`)
+
     return pulledCard
   }
 
