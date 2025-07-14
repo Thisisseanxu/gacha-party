@@ -161,6 +161,17 @@ const navigateToGachaPage = () => {
       doubleRateCards: [...doubleRateSSRIds.value],
     };
   }
+  // 如果对应稀有度没有卡牌被选中，则自动设置概率为0
+  if (selectedCardIds.value.SP.length === 0) customPool.value.rates.SP = 0;
+  if (selectedCardIds.value.SSR.length === 0) customPool.value.rates.SSR = 0;
+  if (selectedCardIds.value.SR.length === 0) customPool.value.rates.SR = 0;
+  // 如果没有设置R卡池，则自动设置其他稀有度的总概率为100%（按原比例换算）
+  if (selectedCardIds.value.R.length === 0) {
+    const totalRate = customPool.value.rates.SP + customPool.value.rates.SSR + customPool.value.rates.SR;
+    customPool.value.rates.SP = (customPool.value.rates.SP / totalRate) * 100;
+    customPool.value.rates.SSR = (customPool.value.rates.SSR / totalRate) * 100;
+    customPool.value.rates.SR = (customPool.value.rates.SR / totalRate) * 100;
+  }
 
   const finalPoolConfig = {
     id: 'custom',
