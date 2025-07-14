@@ -24,7 +24,7 @@ function weightedRandom(weightedItems) {
 /**
  * 抽卡逻辑Hook，包括单抽、十连抽、抽卡历史记录等功能。
  *
- * @param {string} poolId - 必须，当前抽卡池的唯一标识符，用于获取对应卡池数据。
+ * @param {string} poolSource - 必须，传入当前抽卡卡池的ID，或者是一个自定义卡池对象。
  * @param {import('vue').Ref<number>} selectedUpCard - 可选，用户选择的UP角色ID（如果有UP机制）。
  * @param {import('vue').Ref<boolean>} useOldRate - 可选，是否使用旧的抽卡概率（默认为false）。
  * @returns {import('vue').ComputedRef<Object>} currentPool - 当前卡池的详细数据（响应式）。
@@ -51,9 +51,19 @@ function weightedRandom(weightedItems) {
  *   performMultiPulls,
  * } = useGacha('standard');
  */
-export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(false)) {
-  // 根据传入的 poolId 获取当前卡池的详细数据
-  const currentPool = computed(() => getFullCardPoolData(toValue(poolId)))
+export function useGacha(poolSource, selectedUpCard = ref(null), useOldRate = ref(false)) {
+  // currentPool现在可以根据poolSource的类型来决定数据来源
+  // 如果poolSource是字符串 (poolId)，则从 cardPools.js 获取数据
+  // 如果poolSource是对象 (自定义卡池)，则直接使用该对象
+  const currentPool = computed(() => {
+    const source = toValue(poolSource)
+    if (typeof source === 'string') {
+      return getFullCardPoolData(source)
+    } else if (typeof source === 'object' && source !== null) {
+      return source //直接使用传入的自定义卡池对象
+    }
+    return null // 如果源无效，返回null
+  })
 
   // 存储抽卡历史和当前抽到的角色
   const gachaHistory = ref([]) // 存储所有抽到的角色
@@ -334,6 +344,9 @@ export function useGacha(poolId, selectedUpCard = ref(null), useOldRate = ref(fa
     ) {
       nextIsUP.value = true // 下次抽卡必定是UP角色
     }
+
+    // DEBUG: 输出抽到的角色信息
+    // logger.log(`抽到角色：${pulledCard.name} (${pulledCard.rarity})`)
 
     return pulledCard
   }

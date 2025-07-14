@@ -9,10 +9,10 @@ import GachaPage from './views/GachaPage.vue' // 抽卡页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
 import GiftValueCalculator from './views/GiftValueCalculator.vue' // 礼包价值计算器页面
+import CustomGachaPage from './views/CustomGachaPage.vue' // 自定义卡池页面
 
 // 定义路由
 const routes = [
-  // TODO: 为抽卡和抽卡分析添加新的主页
   {
     path: '/',
     name: 'Home',
@@ -36,6 +36,14 @@ const routes = [
     props: true, // 将路由参数作为props传递给组件
     meta: {
       title: '抽卡模拟器 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/zidingyichouka',
+    name: '自定义卡池',
+    component: CustomGachaPage,
+    meta: {
+      title: '自定义卡池 - 织夜工具箱',
     },
   },
   {
