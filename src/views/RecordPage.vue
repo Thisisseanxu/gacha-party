@@ -42,17 +42,18 @@
                 <div class="title-bar">
                   <span>
                     {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
-                    {{ CurrentSelectedPool !== 'Limited' ? '(含垫抽)' : '' }}
+                    {{ CurrentSelectedPool !== 'Limited' ? '(计算垫抽)' : '' }}
                   </span>
                 </div>
               </template>
             </SelectorComponent>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
               urAnalysis.totalPulls
-              }} <span class="pulls-text">抽</span>
+            }} <span class="pulls-text">抽</span>
             </div>
 
-            <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽' }}
+            <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽'
+              }}
             </span>
             <div class="pity-counters">
               <div class="pity-item">
@@ -80,7 +81,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-              }} 抽
+                }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -143,7 +144,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -236,7 +237,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -1181,6 +1182,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .page-input[type=number] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
