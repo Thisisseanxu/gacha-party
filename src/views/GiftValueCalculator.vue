@@ -27,7 +27,7 @@
           <input id="token-value" type="number" v-model.number="tokenValue" />
         </div>
         <div class="input-group">
-          <label for="premium-rate">炫彩水晶兑换比例</label>
+          <label for="premium-rate">炫彩水晶价值多少个水晶</label>
           <input id="premium-rate" type="number" v-model.number="premiumToStandardRate" />
         </div>
       </div>
