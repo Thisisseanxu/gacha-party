@@ -13,7 +13,7 @@
               <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
               <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
             </div>
-            <SwitchComponent label="使用旧概率（2%）" v-model="useOldRate" />
+            <SwitchComponent v-if="currentPool.type === '限定'" label="使用旧概率（2%）" v-model="useOldRate" />
           </div>
 
           <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
@@ -105,6 +105,7 @@ import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import SwitchComponent from '@/components/SwitchComponent.vue';
 import { colors } from '@/styles/colors.js';
+import pako from 'pako'; // 引入 pako
 
 // --- 动画相关ref ---
 const showGachaResultOverlay = ref(false);
@@ -193,10 +194,32 @@ const colorRarityR = colors.rarity.r;
 
 // --- 组件逻辑 ---
 const route = useRoute();
-const poolId = computed(() => route.params.poolId);
-
 const selectedUpCard = ref(null);
 const useOldRate = ref(false);
+
+// 动态获取卡池源
+const gachaSource = computed(() => {
+  // 检查是否是自定义卡池并带有数据
+  if (route.params.poolId === 'custom' && route.query.data) {
+    try {
+      // Base64 解码 -> pako 解压缩 -> JSON 解析
+      const binaryString = atob(route.query.data);
+      const compressed = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        compressed[i] = binaryString.charCodeAt(i);
+      }
+      const jsonString = pako.inflate(compressed, { to: 'string' });
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('解析自定义卡池数据失败:', error);
+      // 如果解析失败，可以返回一个默认卡池ID或进行错误处理
+      return 'Normal01';
+    }
+  }
+  // 否则，使用路由参数中的 poolId
+  return route.params.poolId;
+});
+
 
 const {
   currentPool,
@@ -208,7 +231,7 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(poolId.value, selectedUpCard, useOldRate);
+} = useGacha(gachaSource, selectedUpCard, useOldRate);
 
 const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
 const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
@@ -227,7 +250,7 @@ watch(currentPool, (newPool) => {
     selectedUpCard.value = null;
   }
   document.title = newPool?.name ? `${newPool.name} - 织夜工具箱` : '抽卡模拟器';
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 const selectUpCard = (cardId) => {
   selectedUpCard.value = cardId;
@@ -767,7 +790,7 @@ h1 {
   .pulled-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 1.5rem;
-    /* Limit to max 5 per line */
+    /* 一行最多5个角色 */
     max-width: calc(5 * 80px + 4 * 1rem);
     margin-left: auto;
     margin-right: auto;
