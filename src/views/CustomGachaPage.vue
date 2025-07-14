@@ -1,7 +1,7 @@
 <template>
   <div class="custom-gacha-page-background">
     <div class="config-container card">
-      <router-link to="/" class="back-home-button-config">返回主页</router-link>
+      <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
       <h1 class="config-title">自定义卡池构建器</h1>
       <p class="config-description">在这里创建你独一无二的梦想卡池！</p>
 
@@ -72,7 +72,7 @@
       </div>
 
       <button @click="navigateToGachaPage" class="finalize-button">创建卡池并开始抽卡</button>
-      <router-link to="/" class="back-home-button-config">返回主页</router-link>
+      <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
     </div>
   </div>
 </template>

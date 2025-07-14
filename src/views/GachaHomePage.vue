@@ -15,6 +15,11 @@
             <h2 class="pool-name-text">{{ pool.name }}</h2>
           </div>
         </router-link>
+        <router-link key="custom" :to="{ name: '自定义卡池' }" class="card-pool-item">
+          <div class="pool-name-text-wrapper">
+            <h2 class="pool-name-text">自定义卡池</h2>
+          </div>
+        </router-link>
       </div>
 
       <div class="info-section card">

@@ -292,16 +292,6 @@ export const cardPools = {
       ],
       [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
     },
-  }, // 所有SP角色卡池
-  AllSP: {
-    type: '特殊',
-    name: '超爽SP卡池',
-    rates: {
-      [RARITY.SP]: 1.0,
-    },
-    cardIds: {
-      [RARITY.SP]: allCards.filter((card) => card.rarity === RARITY.SP).map((card) => card.id),
-    },
   },
 }
 
