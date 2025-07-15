@@ -3,8 +3,12 @@
     <div class="gacha-page">
       <template v-if="!showGachaResultOverlay">
         <div class="header-container">
-          <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
-          <router-link to="/chouka" class="back-home-button">返回主页</router-link>
+          <div class="title-with-share">
+            <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
+            <button v-if="isCustomPool" @click="shareCustomPool" class="share-button">分享卡池</button>
+          </div>
+          <router-link v-if="!isCustomPool" to="/chouka" class="back-home-button">返回主页</router-link>
+          <button v-else @click="goBackToEdit" class="back-home-button">重新编辑</button>
         </div>
 
         <div v-if="currentPool" class="gacha-main-content card">
@@ -99,13 +103,13 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import SwitchComponent from '@/components/SwitchComponent.vue';
 import { colors } from '@/styles/colors.js';
-import pako from 'pako'; // 引入 pako
+import pako from 'pako'; // 引入pako库解压缩json数据
 
 // --- 动画相关ref ---
 const showGachaResultOverlay = ref(false);
@@ -130,9 +134,7 @@ const startPullAnimation = () => {
     if (index < cardsToAnimate.length) {
       const card = cardsToAnimate[index];
       const delay = isHighlightRarity(card.rarity) ? 300 : 100; // 抽到高稀有度时增加动画间隔时间
-
       displayedCards.value.push(card);
-
       // 当显示新卡片时，确保容器滚动到底部
       nextTick(() => {
         if (cardsContainerRef.value) {
@@ -194,13 +196,15 @@ const colorRarityR = colors.rarity.r;
 
 // --- 组件逻辑 ---
 const route = useRoute();
+const router = useRouter(); // 获取路由实例
 const selectedUpCard = ref(null);
 const useOldRate = ref(false);
 
-// 动态获取卡池源
+// 动态获取卡池数据
+const isCustomPool = computed(() => route.params.poolId === 'custom');
 const gachaSource = computed(() => {
   // 检查是否是自定义卡池并带有数据
-  if (route.params.poolId === 'custom' && route.query.data) {
+  if (isCustomPool.value && route.query.data) {
     try {
       // Base64 解码 -> pako 解压缩 -> JSON 解析
       const binaryString = atob(route.query.data);
@@ -212,11 +216,11 @@ const gachaSource = computed(() => {
       return JSON.parse(jsonString);
     } catch (error) {
       console.error('解析自定义卡池数据失败:', error);
-      // 如果解析失败，可以返回一个默认卡池ID或进行错误处理
+      // 如果解析失败，返回一个默认卡池ID
       return 'Normal01';
     }
   }
-  // 否则，使用路由参数中的 poolId
+  // 如果不是自定义卡池模式则使用路由参数中的 poolId
   return route.params.poolId;
 });
 
@@ -306,9 +310,54 @@ const confirmGachaResult = () => {
     showGachaResultOverlay.value = false;
   }
 };
+
+const goBackToEdit = () => {
+  router.back();
+};
+
+const shareCustomPool = () => {
+  if (!isCustomPool.value || !currentPool.value) return;
+
+  const poolName = currentPool.value.name;
+  const data = route.query.data;
+  // 使用 encodeURIComponent 防止编码问题
+  const encodedData = encodeURIComponent(data);
+  const shareText = `这是我在织夜工具箱创建的 ${poolName} 卡池，快来试试吧\nhttps://gacha-party.fans/chouka/custom?data=${encodedData}`;
+
+  navigator.clipboard.writeText(shareText).then(() => {
+    alert('分享链接已复制到剪贴板！');
+  }).catch(err => {
+    console.error('复制失败: ', err);
+    alert('复制失败，请手动复制分享内容。');
+  });
+};
+
 </script>
 
 <style scoped>
+/* 分享按钮样式 */
+.title-with-share {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.share-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.share-button:hover {
+  background-color: #45a049;
+}
+
+
 .gacha-page-background {
   background-color: v-bind(colorBgPrimary);
   min-height: 100vh;
@@ -790,7 +839,7 @@ h1 {
   .pulled-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 1.5rem;
-    /* 一行最多5个角色 */
+    /* 一行最多五个角色 */
     max-width: calc(5 * 80px + 4 * 1rem);
     margin-left: auto;
     margin-right: auto;

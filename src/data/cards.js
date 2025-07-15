@@ -15,6 +15,12 @@ export const allCards = [
   { id: '1312', name: '酷玩游戏机', rarity: RARITY.SP, imageUrl: '/images/cards/1312.webp' },
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
   { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
+  {
+    id: 'CustomSPishuan',
+    name: '超·强力消防栓',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1804.webp',
+  },
 
   // SSR 角色
   { id: '1102', name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },
@@ -47,7 +53,6 @@ export const allCards = [
   { id: '1806', name: '功夫沙袋', rarity: RARITY.SSR, imageUrl: '/images/cards/1806.webp' },
   { id: '1803', name: '水枪普拉斯', rarity: RARITY.SSR, imageUrl: '/images/cards/1803.webp' },
   { id: '1504', name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
-  { id: '1804', name: '消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' },
   { id: '1807', name: '强力消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' }, // 新版的强力消防栓，图片地址为1804
   { id: '1808', name: '指路奈奈', rarity: RARITY.SSR, imageUrl: '/images/cards/1307.webp' }, // 新版的指路奈奈，但是图片地址与旧版相同
   {
@@ -80,6 +85,12 @@ export const allCards = [
   { id: '1306', name: '迷你风扇', rarity: RARITY.R, imageUrl: '/images/cards/1306.webp' },
   { id: '1406', name: '闪耀灯球', rarity: RARITY.R, imageUrl: '/images/cards/1406.webp' },
   { id: '1607', name: '火柴女孩', rarity: RARITY.R, imageUrl: '/images/cards/1607.webp' },
+  {
+    id: 'CustomRishuan',
+    name: '弱力消防栓',
+    rarity: RARITY.R,
+    imageUrl: '/images/cards/1805.webp',
+  },
 ]
 
 // 将角色ID和角色对象映射到一个Map中，方便通过ID快速查找角色
