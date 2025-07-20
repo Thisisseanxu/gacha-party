@@ -49,16 +49,16 @@
                 </template>
               </SelectorComponent>
 
-              <CustomPlayerTitle v-if="urAnalysis && urAnalysis.avgPullsForSP > 0" :titleMap="PLAYER_TITLE_MAP"
+              <CustomPlayerTitle v-if="urAnalysis && urAnalysis.avgPullsForSP > 0" :titleMap="LIMITPOOL_TITLE_MAP"
                 :value="urAnalysis.avgPullsForSP" />
             </div>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
               urAnalysis.totalPulls
-              }} <span class="pulls-text">抽</span>
+            }} <span class="pulls-text">抽</span>
             </div>
 
             <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽'
-            }}
+              }}
             </span>
             <div class="pity-counters">
               <div class="pity-item">
@@ -86,7 +86,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-              }} 抽
+                }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -149,7 +149,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -167,8 +167,13 @@
 
         <div v-if="normalAnalysis && normalAnalysis.totalPulls > 0" class="permanent-pool-section">
           <div class="header">
-            <div class="title-bar">
-              <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
+            <div class="header-top-row">
+              <div class="title-bar">
+                <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
+              </div>
+
+              <CustomPlayerTitle v-if="normalAnalysis && normalAnalysis.avgPullsForSSR > 0"
+                :titleMap="NORMALPOOL_TITLE_MAP" :value="normalAnalysis.avgPullsForSSR" />
             </div>
             <div class="total-pulls">{{ normalAnalysis.totalPulls }} <span class="pulls-text">抽</span></div>
             <div class="pity-counters">
@@ -242,7 +247,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -276,13 +281,23 @@ const CARDPOOLS_NAME_MAP = {
   '42': '扭蛋大作战',
 };
 
-const PLAYER_TITLE_MAP = {
+const LIMITPOOL_TITLE_MAP = {
   32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
   34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
   35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
   37.5: { title: '欧非守恒', background: colors.colorOfLuck.medium },
   39: { title: '小非酋', background: colors.colorOfLuck.high },
   41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
+  120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
+};
+
+const NORMALPOOL_TITLE_MAP = {
+  10.25: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
+  11.25: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
+  12: { title: '小欧皇', background: colors.colorOfLuck.low },
+  13: { title: '欧非守恒', background: colors.colorOfLuck.medium },
+  13.75: { title: '小非酋', background: colors.colorOfLuck.high },
+  14.75: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
 

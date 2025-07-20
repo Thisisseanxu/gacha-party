@@ -62,7 +62,7 @@ const titleStyle = computed(() => {
 .player-title {
   padding: 8px 8px;
   /* 圆角矩形 */
-  border-radius: 20px;
+  border-radius: 9px;
   font-weight: bold;
   font-size: 0.9rem;
   min-width: 6em;
