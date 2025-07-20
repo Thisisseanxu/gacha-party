@@ -36,24 +36,29 @@
 
         <div v-if="analysis && analysis.totalPulls > 0">
           <div class="header">
-            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
-              option-value-key="id">
-              <template #trigger>
-                <div class="title-bar">
-                  <span>
-                    {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
-                    {{ CurrentSelectedPool !== 'Limited' ? '(计算垫抽)' : '' }}
-                  </span>
-                </div>
-              </template>
-            </SelectorComponent>
+            <div class="header-top-row">
+              <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
+                option-value-key="id">
+                <template #trigger>
+                  <div class="title-bar">
+                    <span>
+                      {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                      {{ CurrentSelectedPool !== 'Limited' ? '(计算垫抽)' : '' }}
+                    </span>
+                  </div>
+                </template>
+              </SelectorComponent>
+
+              <CustomPlayerTitle v-if="urAnalysis && urAnalysis.avgPullsForSP > 0" :titleMap="PLAYER_TITLE_MAP"
+                :value="urAnalysis.avgPullsForSP" />
+            </div>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
               urAnalysis.totalPulls
-            }} <span class="pulls-text">抽</span>
+              }} <span class="pulls-text">抽</span>
             </div>
 
             <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽'
-              }}
+            }}
             </span>
             <div class="pity-counters">
               <div class="pity-item">
@@ -81,7 +86,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-                }} 抽
+              }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -144,7 +149,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -237,7 +242,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -259,6 +264,7 @@ import { logger } from '@/utils/logger.js';
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import pako from 'pako';
 import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
+import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
 
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
@@ -268,6 +274,16 @@ const CARDPOOLS_NAME_MAP = {
   '40': '塔菲扭蛋',
   '41': '童话国盲盒机',
   '42': '扭蛋大作战',
+};
+
+const PLAYER_TITLE_MAP = {
+  32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
+  34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
+  35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
+  37.5: { title: '欧非守恒', background: colors.colorOfLuck.medium },
+  39: { title: '小非酋', background: colors.colorOfLuck.high },
+  41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
+  120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
 
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42']; // 限定卡池ID列表
@@ -592,14 +608,14 @@ const getHistoryItemStyle = (item, isNormal = false) => {
 
   // 根据不同卡池和抽数应用不同颜色
   if ((isNormal && count < 9) || (!isNormal && count < 30)) {
-    progressBarColor = colors.progressBar.low;
+    progressBarColor = colors.colorOfLuck.veryLow;
   } else if ((isNormal && count < 19) || (!isNormal && count < 41)) {
-    progressBarColor = colors.progressBar.medium;
+    progressBarColor = colors.colorOfLuck.medium;
   } else {
-    progressBarColor = colors.progressBar.high;
+    progressBarColor = colors.colorOfLuck.veryHigh;
   }
 
-  const backgroundColor = colors.progressBar.background;
+  const backgroundColor = colors.colorOfLuck.background;
   return {
     background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${backgroundColor} ${percentage}%)`
   };
@@ -901,6 +917,17 @@ const colorTextShadow = colors.textShadow;
 
 .header {
   padding: 10px;
+}
+
+.header-top-row {
+  display: flex;
+  /* 两端对齐，左边靠左，右边靠右 */
+  justify-content: space-between;
+  /* 垂直居中对齐 */
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .title-bar {

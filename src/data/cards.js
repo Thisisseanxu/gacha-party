@@ -55,6 +55,8 @@ export const allCards = [
   { id: '1504', name: '重金属吉他', rarity: RARITY.SSR, imageUrl: '/images/cards/1504.webp' },
   { id: '1807', name: '强力消防栓', rarity: RARITY.SSR, imageUrl: '/images/cards/1804.webp' }, // 新版的强力消防栓，图片地址为1804
   { id: '1808', name: '指路奈奈', rarity: RARITY.SSR, imageUrl: '/images/cards/1307.webp' }, // 新版的指路奈奈，但是图片地址与旧版相同
+  { id: '1407', name: '特别医护', rarity: RARITY.SSR, imageUrl: '/images/cards/1407.webp' },
+  { id: '1706', name: '冰池娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1706.webp' },
   {
     id: 'UPSSR',
     name: '概率提升SSR',

@@ -263,7 +263,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), useOldRate = re
         tenPullNoSRCount.value = 0 // 如果抽到非R角色，则重置计数器
       }
       // DEBUG: 输出当前抽到的稀有度和所有稀有度的概率
-      // logger.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)
+      logger.log(`抽到的稀有度：${selectedRarity}，当前概率：`, adjustedRates)
     }
 
     // 如果当前稀有度有boost规则，且没有选中对应的稀有度，则增加boost计数器
