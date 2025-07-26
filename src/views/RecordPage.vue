@@ -839,7 +839,7 @@ const getExcelColor = (rgbaColor) => {
     // a的值是0-1的小数，需要转换为0-255的整数
     const a = toHex(Math.round(parseFloat(match[4]) * 255));
     // 拼接成 'AARRGGBB' 格式并转为大写
-    return `${a}${r}${g}${b} `.toUpperCase();
+    return `${a}${r}${g}${b}`.toUpperCase();
   }
   // 如果格式不匹配，打印警告并返回一个默认颜色（黑色）
   console.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
@@ -883,16 +883,13 @@ const exportToExcel = async (filename, historyData) => {
     // 根据稀有度选择样式
     const baseStyle = rarityStyles[rarity] || defaultStyle
     const style = { ...baseStyle, font: { ...baseStyle.font, name: '黑体', family: 4, size: 14 } }; // 首选无衬线字体
-
     // 添加一行数据
     const row = worksheet.addRow({ id: index--, name, rarity, date });
-
     // 为该行的每个单元格应用样式
     row.eachCell({ includeEmpty: true }, (cell) => {
       cell.style = style;
     });
   });
-
   // 设置冻结窗格和自动筛选
   // 冻结首行
   worksheet.views = [
@@ -903,7 +900,6 @@ const exportToExcel = async (filename, historyData) => {
     from: 'A1',
     to: { row: 1, column: worksheet.columns.length }
   };
-
   // 生成文件并使用 FileSaver.js 来保存文件
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
