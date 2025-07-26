@@ -26,7 +26,7 @@ export const colors = {
     hover: 'rgba(240, 195, 138, 1)', // 高亮色悬浮
   }, // 稀有度颜色
   rarity: {
-    ur: 'rgba(222, 33, 30, 1)',
+    sp: 'rgba(222, 33, 30, 1)',
     ssr: 'rgba(232, 119, 33, 1)',
     sr: 'rgba(178, 30, 251, 1)',
     r: 'rgba(24, 138, 250, 1)',
