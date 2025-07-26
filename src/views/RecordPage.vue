@@ -61,7 +61,7 @@
 
           <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -75,7 +75,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                 limitAnalysis.SSR
-                }}</span>
+              }}</span>
             </div>
           </div>
           <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -230,7 +230,7 @@
         </div>
         <div style="text-align: center; padding: 20px 0;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+          }}卡池记录</button>
         </div>
       </div>
 
@@ -1217,8 +1217,6 @@ const colorTextShadow = colors.textShadow;
   flex-direction: column;
   gap: 8px;
   max-height: 600px;
-  min-height: 300px;
-  /* 设置最小高度防止切换时页面跳动 */
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: v-bind(colorScrollbar) transparent;
