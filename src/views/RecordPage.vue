@@ -156,7 +156,8 @@
                   <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
                   <span class="char-name">{{ item.name }}</span>
                 </div>
-                <span :class="['rarity-' + item.rarity]">{{ item.date }}</span>
+                <span :class="['rarity-' + item.rarity]">{{ item.date.slice(2) }}</span>
+                <!-- 为了保证手机端能在一行内显示，将年份缩短为两位数 -->
               </div>
               <p v-if="fullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
             </div>
@@ -172,7 +173,7 @@
             </div>
           </div>
           <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
+            <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
             }}卡池记录</button>
           </div>
         </div>
@@ -188,12 +189,16 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import pako from 'pako';
+import ExcelJS from 'exceljs';
+import FileSaver from 'file-saver';
+
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+
 import SelectorComponent from '@/components/SelectorComponent.vue';
-import pako from 'pako';
 import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
 
@@ -565,7 +570,7 @@ const getHistoryItemStyle = (item, isNormal = false) => {
   };
 };
 
-// 限定卡池分页逻辑
+// 历史记录分页逻辑
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const pageInput = ref(1);
@@ -585,7 +590,7 @@ const fullHistory = computed(() => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
     const createdAt = new Date(record.created_at * 1000);
-    const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
+    const formattedDate = `${createdAt.getFullYear().toString()}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
     return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
   });
 });
@@ -604,7 +609,7 @@ const prevPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
 
-// 跳转到指定页面的函数（限定池）
+// 跳转到指定页面的函数
 const goToPage = () => {
   const page = Math.floor(Number(pageInput.value));
   if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
@@ -625,39 +630,95 @@ watch(currentPage, (newPage) => {
   pageInput.value = newPage;
 });
 
+// 将 'rgba(r, g, b, a)' 格式的颜色字符串转换为 'AARRGGBB'
+const getExcelColor = (rgbaColor) => {
+  // 使用正则表达式从 'rgba(r, g, b, a)' 中提取出 r, g, b, a 的值
+  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/);
+  if (match) {
+    // 将数字转换为十六进制
+    const toHex = (c) => {
+      const hex = Number(c).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+    const r = toHex(match[1]);
+    const g = toHex(match[2]);
+    const b = toHex(match[3]);
+    const a = toHex(match[4]);
+    // 拼接成 'AARRGGBB' 格式并转为大写
+    return `${a}${r}${g}${b}`.toUpperCase();
+  }
+  // 如果格式不匹配，打印警告并返回一个默认颜色（黑色）
+  console.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
+  return 'FF000000';
+};
 
-// 导出卡池数据的函数
-const exportToCsv = (filename, historyData) => {
+// 将抽卡记录导出为 Excel 文件
+const exportToExcel = async (filename, historyData) => {
   if (historyData.length === 0) {
     alert('没有数据可供导出。');
     return;
   }
-
-  const headers = ['角色名称', '稀有度', '抽到时间'];
-  const rows = historyData.map(item => {
+  // 创建工作簿和工作表
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('抽卡记录');
+  // 设置表头和列宽
+  worksheet.columns = [
+    { header: '序号', key: 'id', width: 10 },
+    { header: '角色名称', key: 'name', width: 25 },
+    { header: '稀有度', key: 'rarity', width: 10 },
+    { header: '抽到时间', key: 'date', width: 35 }
+  ];
+  // 设置表头样式
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true, name: '黑体', family: 4, size: 14 }; // 首选无衬线字体
+  // 定义不同稀有度的样式
+  const rarityStyles = {
+    SP: {
+      font: { color: { argb: getExcelColor(colorRaritySP) }, bold: true },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: getExcelColor(colorBrandHover) } }
+    },
+    SSR: { font: { color: { argb: getExcelColor(colorRaritySSR) }, bold: true } },
+    SR: { font: { color: { argb: getExcelColor(colorRaritySR) } } },
+    R: { font: { color: { argb: getExcelColor(colorRarityR) } } },
+  };
+  const defaultStyle = { font: { color: { argb: getExcelColor(colorTextPrimary) } } };
+  // 遍历数据并添加行，同时应用样式，同时加上序号，最旧的数据为1，最新的数据为最大值
+  let index = historyData.length
+  historyData.forEach(item => {
     const { name, rarity, date } = item;
-    const rarityText = rarity === 'SP' ? '限定' : rarity;
-    const safeName = `"${name}"`;
-    return [safeName, rarityText, date];
+    // 根据稀有度选择样式
+    const baseStyle = rarityStyles[rarity] || defaultStyle
+    const style = { ...baseStyle, font: { ...baseStyle.font, name: '黑体', family: 4, size: 14 } }; // 首选无衬线字体
+
+    // 添加一行数据
+    const row = worksheet.addRow({ id: index--, name, rarity, date });
+
+    // 为该行的每个单元格应用样式
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cell.style = style;
+    });
   });
 
-  const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-  const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  // 设置冻结窗格和自动筛选
+  // 冻结首行
+  worksheet.views = [
+    { state: 'frozen', ySplit: 1 }
+  ];
+  // 在第一行开启自动筛选
+  worksheet.autoFilter = {
+    from: 'A1',
+    to: { row: 1, column: worksheet.columns.length }
+  };
+
+  // 生成文件并使用 FileSaver.js 来保存文件
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  FileSaver.saveAs(blob, filename);
 };
 
-// 限定卡池导出
-const exportLimitData = () => {
-  exportToCsv('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.csv', fullHistory.value);
+// 导出抽卡记录的函数
+const exportPoolData = () => {
+  exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
 
 
@@ -672,7 +733,7 @@ const colorBgAvatar = colors.background.avatar;
 const colorTextPrimary = colors.text.primary;
 const colorTextSecondary = colors.text.secondary;
 const colorTextTertiary = colors.text.tertiary;
-const colorTextDark = colors.text.dark;
+const colorTextBlack = colors.text.black;
 const colorTextDisabled = colors.text.disabled;
 const colorTextLight = colors.text.light;
 const colorTextHighlight = colors.text.highlight;
@@ -680,9 +741,9 @@ const colorTextHighlight = colors.text.highlight;
 const colorBrandPrimary = colors.brand.primary;
 const colorBrandHover = colors.brand.hover;
 
-const colorRarityUr = colors.rarity.ur;
-const colorRaritySsr = colors.rarity.ssr;
-const colorRaritySr = colors.rarity.sr;
+const colorRaritySP = colors.rarity.sp;
+const colorRaritySSR = colors.rarity.ssr;
+const colorRaritySR = colors.rarity.sr;
 const colorRarityR = colors.rarity.r;
 
 const colorStatusError = colors.status.error;
@@ -765,7 +826,7 @@ const colorTextShadow = colors.textShadow;
   border: none;
   border-radius: 8px;
   background-color: v-bind(colorBrandPrimary);
-  color: v-bind(colorTextDark);
+  color: v-bind(colorTextBlack);
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -877,11 +938,11 @@ const colorTextShadow = colors.textShadow;
 }
 
 .pity-count.SP {
-  color: v-bind(colorRarityUr);
+  color: v-bind(colorRaritySP);
 }
 
 .pity-count.SSR {
-  color: v-bind(colorRaritySsr);
+  color: v-bind(colorRaritySSR);
 }
 
 .tertiary-text {
@@ -1029,15 +1090,15 @@ const colorTextShadow = colors.textShadow;
 
 /* 不同稀有度的左边框颜色 */
 .full-history-item.SP {
-  border-left-color: v-bind(colorRarityUr);
+  border-left-color: v-bind(colorRaritySP);
 }
 
 .full-history-item.SSR {
-  border-left-color: v-bind(colorRaritySsr);
+  border-left-color: v-bind(colorRaritySSR);
 }
 
 .full-history-item.SR {
-  border-left-color: v-bind(colorRaritySr);
+  border-left-color: v-bind(colorRaritySR);
 }
 
 .full-history-item.R {
@@ -1046,17 +1107,17 @@ const colorTextShadow = colors.textShadow;
 
 /* 不同稀有度的文字颜色 */
 .rarity-SP {
-  color: v-bind(colorRarityUr);
+  color: v-bind(colorRaritySP);
   font-weight: bold;
 }
 
 .rarity-SSR {
-  color: v-bind(colorRaritySsr);
+  color: v-bind(colorRaritySSR);
   font-weight: bold;
 }
 
 .rarity-SR {
-  color: v-bind(colorRaritySr);
+  color: v-bind(colorRaritySR);
   font-weight: bold;
 }
 
