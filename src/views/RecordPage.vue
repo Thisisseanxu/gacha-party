@@ -63,7 +63,7 @@
 
             <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
               singleAnalysis.SinglePulls + '次'
-            }}<br />
+              }}<br />
               抽数会计算到最终抽出限定的卡池中
             </div>
             <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -77,7 +77,7 @@
                 <span>距上个SSR</span>
                 <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                   limitAnalysis.SSR
-                  }}</span>
+                }}</span>
               </div>
             </div>
             <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -117,12 +117,10 @@
             </div>
             <div class="stat-box">
               <div class="stat-title">SSR平均</div>
-              <div v-if="CurrentSelectedPool === 'Limited'" class="stat-value">{{ limitAnalysis.avgPullsForSSR > 0 ?
-                limitAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
-              <div v-else-if="CurrentSelectedPool === 'Normal'" class="stat-value">
+              <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
                 {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
-              <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
-              <div v-else class="stat-value">暂无数据</div>
+              <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{ limitAnalysis.avgPullsForSSR > 0 ?
+                singleAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
             </div>
             <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
               <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
@@ -136,6 +134,7 @@
             </div>
           </div>
 
+          <!-- 出货进度条区域 -->
           <div class="history-list" ref="historyListRef">
             <div
               v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
@@ -177,7 +176,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+              }}卡池记录</button>
           </div>
         </div>
 
@@ -303,8 +302,6 @@ const handleJsonAnalysis = () => {
     errorMessage.value = `JSON 格式无法解析，请检查。错误详情: ${error.message}`;
     return;
   }
-
-  // --- 后续逻辑使用 finalData ---
 
   if (typeof finalData !== 'object' || finalData === null || Array.isArray(finalData)) {
     errorMessage.value = '数据格式错误：顶层结构必须是一个对象 ( 形如 {"key": "value", ...} )。';
@@ -453,7 +450,8 @@ const limitAnalysis = computed(() => {
     avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
     maxSP: Math.max(...SPHistory.map(item => item.count), 0),
     minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
-    SPHistory: SPHistory
+    SPHistory: SPHistory,
+    SSRHistory: SSRHistory,
   };
 });
 
@@ -462,8 +460,9 @@ const singleAnalysis = computed(() => {
   if (!limitAnalysis.value) return null;
   if (CurrentSelectedPool.value !== 'Limited' && CurrentSelectedPool.value !== 'Normal') {
     // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
-    const filteredHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
-    if (filteredHistory.length === 0) {
+    const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    if (filteredSPHistory.length === 0) {
       return {
         totalPulls: 0,
         SinglePulls: 0,
@@ -475,13 +474,13 @@ const singleAnalysis = computed(() => {
       };
     }
     return {
-      totalPulls: filteredHistory.reduce((sum, item) => sum + item.count, 0),
+      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
       SinglePulls: fullHistory.value.length,
-      avgPullsForSP: calculateAverage(filteredHistory.map(item => item.count)),
-      avgPullsForSSR: 0,
-      maxSP: Math.max(...filteredHistory.map(item => item.count), 0),
-      minSP: Math.min(...filteredHistory.map(item => item.count), Infinity),
-      SPHistory: filteredHistory
+      avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
+      avgPullsForSSR: calculateAverage(filteredSSRHistory.map(item => item.count)),
+      maxSP: Math.max(...filteredSPHistory.map(item => item.count), 0),
+      minSP: Math.min(...filteredSPHistory.map(item => item.count), Infinity),
+      SPHistory: filteredSPHistory
     };
   }
   return { // 如果选中的卡池不存在，则返回全部限定卡池的分析数据
@@ -495,6 +494,8 @@ const singleAnalysis = computed(() => {
     SPHistory: limitAnalysis.value.SPHistory,
   };
 });
+
+console.log(singleAnalysis.value);
 
 // 常驻卡池分析逻辑
 const normalAnalysis = computed(() => {
@@ -547,9 +548,9 @@ const normalAnalysis = computed(() => {
 });
 
 /**
- * 根据抽数计算背景样式
- * @param {object} count - 进度条数量
- * @param {boolean} isNormal - 是否为常驻池SSR（常驻池没有SP，保底阈值不同）
+ * 根据抽数计算出金进度条背景样式
+ * @param {object} count - 当前抽数
+ * @param {boolean} isNormal - 是否为常驻池模式（常驻池出货概率阈值不同）
  * @returns {object} - 一个包含背景样式的对象
  */
 const getHistoryItemStyle = (count, isNormal = false) => {
