@@ -42,7 +42,7 @@ export const allCards = [
   { id: '1403', name: '歌姬小喵', rarity: RARITY.SSR, imageUrl: '/images/cards/1403.webp' },
   { id: '1701', name: '制冰机', rarity: RARITY.SSR, imageUrl: '/images/cards/1701.webp' },
   { id: '1703', name: '寒冰战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1703.webp' },
-  { id: '1704', name: '织夜酱好可爱！', rarity: RARITY.SSR, imageUrl: '/images/cards/1704.webp' },
+  { id: '1704', name: '超可爱的织夜', rarity: RARITY.SSR, imageUrl: '/images/cards/1704.webp' },
   { id: '1708', name: '球球射手', rarity: RARITY.SSR, imageUrl: '/images/cards/1708.webp' },
   { id: '1601', name: '火焰魔女', rarity: RARITY.SSR, imageUrl: '/images/cards/1601.webp' },
   { id: '1602', name: '油瓶射手', rarity: RARITY.SSR, imageUrl: '/images/cards/1602.webp' },
