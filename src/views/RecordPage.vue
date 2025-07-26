@@ -54,11 +54,11 @@
             </div>
             <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
               urAnalysis.totalPulls
-            }} <span class="pulls-text">抽</span>
+              }} <span class="pulls-text">抽</span>
             </div>
 
             <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽'
-              }}
+            }}
             </span>
             <div class="pity-counters">
               <div class="pity-item">
@@ -86,7 +86,7 @@
               <div>SSR平均抽数</div>
               <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
                 urAnalysis.avgPullsForSSR.toFixed(2)
-                }} 抽
+              }} 抽
               </div>
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
@@ -149,7 +149,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -247,7 +247,7 @@
           </div>
           <div style="text-align: center; padding: 20px 0;">
             <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-              }}卡池记录</button>
+            }}卡池记录</button>
           </div>
         </div>
 
@@ -282,20 +282,21 @@ const CARDPOOLS_NAME_MAP = {
 };
 
 const LIMITPOOL_TITLE_MAP = {
+  // 抽数<字典键值时显示对应称号
   32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
   34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
   35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
-  37.5: { title: '欧非守恒', background: colors.colorOfLuck.medium },
+  37.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
   39: { title: '小非酋', background: colors.colorOfLuck.high },
   41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
 
 const NORMALPOOL_TITLE_MAP = {
-  10.25: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
-  11.25: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  12: { title: '小欧皇', background: colors.colorOfLuck.low },
-  13: { title: '欧非守恒', background: colors.colorOfLuck.medium },
+  10: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
+  11: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
+  11.75: { title: '小欧皇', background: colors.colorOfLuck.low },
+  13: { title: '平平无奇', background: colors.colorOfLuck.medium },
   13.75: { title: '小非酋', background: colors.colorOfLuck.high },
   14.75: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况

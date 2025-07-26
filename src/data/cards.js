@@ -1,7 +1,6 @@
 import * as RARITY from '@/data/rarity.js'
 
 // 所有角色的详细数据
-// 航天娃娃的id和官方图片地址不符，官方地址为1204_skin1，实际id为1210
 export const allCards = [
   // 限定角色
   { id: '1110', name: '贪吃天使', rarity: RARITY.SP, imageUrl: '/images/cards/1110.webp ' },
