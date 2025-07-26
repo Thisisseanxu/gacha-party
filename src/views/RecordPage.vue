@@ -67,13 +67,15 @@
               抽数会计算到最终抽出限定的卡池中
             </div>
             <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
-              <div class="pity-item" v-if="CurrentSelectedPool !== 'Normal'">
+              <div class="history-item" :style="{ ...getHistoryItemStyle(limitAnalysis.SP), flex: '1' }"
+                v-if="CurrentSelectedPool !== 'Normal'">
                 <span>距上个限定 </span>
-                <span class="pity-count SP">{{ limitAnalysis.SP }}</span>
+                <span class="pity-count">{{ limitAnalysis.SP }}</span>
               </div>
-              <div class="pity-item">
+              <div class="history-item"
+                :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR : 0, isNormal = true), flex: '1' }">
                 <span>距上个SSR</span>
-                <span class="pity-count SSR">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
+                <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                   limitAnalysis.SSR
                   }}</span>
               </div>
@@ -85,19 +87,36 @@
 
           <div class="stats-overview">
             <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div>已获取SSR数量</div>
+              <div class="stat-title">SSR数量</div>
               <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
             </div>
             <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div>限定平均抽数</div>
+              <div class="stat-title">限定平均</div>
               <div v-if="singleAnalysis.avgPullsForSP > 0"
                 :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
                   singleAnalysis.avgPullsForSP.toFixed(2) }} 抽
               </div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
+
+            <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
+              <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+                <div v-if="singleAnalysis.maxSP > 0"
+                  :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最非 {{
+                    singleAnalysis.maxSP }} 抽
+                </div>
+                <div v-else class="stat-value">未抽到</div>
+              </div>
+              <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+                <div v-if="singleAnalysis.minSP > 0"
+                  :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最欧 {{
+                    singleAnalysis.minSP }} 抽
+                </div>
+                <div v-else class="stat-value">限定</div>
+              </div>
+            </div>
             <div class="stat-box">
-              <div>SSR平均抽数</div>
+              <div class="stat-title">SSR平均</div>
               <div v-if="CurrentSelectedPool === 'Limited'" class="stat-value">{{ limitAnalysis.avgPullsForSSR > 0 ?
                 limitAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
               <div v-else-if="CurrentSelectedPool === 'Normal'" class="stat-value">
@@ -105,39 +124,23 @@
               <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
               <div v-else class="stat-value">暂无数据</div>
             </div>
-            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div>最非限定</div>
-              <div v-if="singleAnalysis.maxSP > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  singleAnalysis.maxSP }} 抽
+            <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
+              <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+                <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
+                <div v-else class="stat-value">未抽到</div>
               </div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div>最欧限定</div>
-              <div v-if="singleAnalysis.minSP > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  singleAnalysis.minSP }} 抽
+              <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+                <div v-if="normalAnalysis.minSSR > 0" class="stat-value">最欧 {{ normalAnalysis.minSSR }} 抽</div>
+                <div v-else class="stat-value">SSR</div>
               </div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-
-            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div>最非SSR</div>
-              <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">{{ normalAnalysis.maxSSR }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div>最欧SSR</div>
-              <div v-if="normalAnalysis.minSSR > 0" class="stat-value">{{ normalAnalysis.minSSR }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
             </div>
           </div>
 
           <div class="history-list" ref="historyListRef">
             <div
               v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
-              :key="index" class="history-item" :style="getHistoryItemStyle(item, CurrentSelectedPool === 'Normal')">
+              :key="index" class="history-item"
+              :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
               <div class="char-info">
                 <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
                 <span class="char-name">{{ item.name }}</span>
@@ -385,6 +388,7 @@ const resetView = () => {
   LimitGachaData.value = [];
   NormalGachaData.value = [];
   errorMessage.value = '';
+  CurrentSelectedPool.value = 'Limited';
 };
 
 // 计算列表平均值的通用函数
@@ -544,21 +548,20 @@ const normalAnalysis = computed(() => {
 
 /**
  * 根据抽数计算背景样式
- * @param {object} item - 包含count属性的历史记录项
+ * @param {object} count - 进度条数量
  * @param {boolean} isNormal - 是否为常驻池SSR（常驻池没有SP，保底阈值不同）
  * @returns {object} - 一个包含背景样式的对象
  */
-const getHistoryItemStyle = (item, isNormal = false) => {
+const getHistoryItemStyle = (count, isNormal = false) => {
   const maxCount = 60;
-  const count = item.count;
   const percentage = (count / maxCount) * 100;
 
   let progressBarColor;
 
   // 根据不同卡池和抽数应用不同颜色
-  if ((isNormal && count < 9) || (!isNormal && count < 30)) {
+  if ((isNormal && count < 10) || (!isNormal && count < 31)) {
     progressBarColor = colors.colorOfLuck.veryLow;
-  } else if ((isNormal && count < 19) || (!isNormal && count < 41)) {
+  } else if ((isNormal && count < 15) || (!isNormal && count < 41)) {
     progressBarColor = colors.colorOfLuck.medium;
   } else {
     progressBarColor = colors.colorOfLuck.veryHigh;
@@ -935,14 +938,8 @@ const colorTextShadow = colors.textShadow;
 .pity-count {
   font-weight: bold;
   font-size: 1.2rem;
-}
-
-.pity-count.SP {
-  color: v-bind(colorRaritySP);
-}
-
-.pity-count.SSR {
-  color: v-bind(colorRaritySSR);
+  color: v-bind(colorTextHighlight);
+  /* 为防止和背景颜色相近，暂时使用金色 */
 }
 
 .tertiary-text {
@@ -953,27 +950,40 @@ const colorTextShadow = colors.textShadow;
 
 /* 统计数据概览 */
 .stats-overview {
-  display: grid;
+  display: flex;
+  flex-direction: row;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 5px;
+}
+
+.stat-vertical-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 5px;
 }
 
 .stat-box {
   background-color: v-bind(colorBgLight);
-  padding: 15px;
   border-radius: 8px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 5px 0px;
 }
 
-.stat-box div:first-child {
+.stat-box .stat-title {
   color: v-bind(colorTextSecondary);
   font-size: 0.9rem;
 }
 
 .stat-box .stat-value {
-  margin-top: 8px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
+
 }
 
 .history-list {
