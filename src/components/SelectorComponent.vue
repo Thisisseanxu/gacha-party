@@ -166,7 +166,7 @@ const colorScrollbar = colors.scrollbar;
 
 /* 单个选项 */
 .options-dropdown li {
-  padding: 10px 12px;
+  padding: 10px 0px;
   transition: background-color 0.2s;
   border-radius: 4px;
   white-space: nowrap;

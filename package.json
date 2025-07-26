@@ -1,6 +1,6 @@
 {
   "name": "gacha-party",
-  "version": "0.0.0",
+  "version": "2.3.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,10 +8,15 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "patch": "npm version patch -m \"docs: 更新补丁版本号v%s\"",
+    "minor": "npm version minor -m \"docs: 更新次要版本号v%s\"",
+    "major": "npm version major -m \"docs: 更新主要版本号v%s\""
   },
   "dependencies": {
     "@icon-park/vue-next": "^1.4.2",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "hono": "^4.8.4",
     "pako": "^2.1.0",
     "vue": "^3.5.13",

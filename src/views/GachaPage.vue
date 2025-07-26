@@ -189,7 +189,7 @@ const colorBtnConfirmHover = colors.gacha.confirmHover;
 const colorBtnBack = colors.brand.primary;
 const colorBtnBackHover = colors.brand.hover;
 
-const colorRaritySP = colors.rarity.ur;
+const colorRaritySP = colors.rarity.sp;
 const colorRaritySSR = colors.rarity.ssr;
 const colorRaritySR = colors.rarity.sr;
 const colorRarityR = colors.rarity.r;

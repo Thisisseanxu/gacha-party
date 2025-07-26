@@ -25,7 +25,7 @@
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisiseanxu/gacha-party"
-            target="_blank">Github链接</a>提出意见/贡献代码。</p>
+            target="_blank">Github链接</a>提出意见/提交代码。</p>
       </div>
     </div>
 
@@ -34,240 +34,226 @@
       <div v-if="viewState === 'analysis'" class="gacha-analysis-page">
         <button @click="resetView" class="button">← 分析新文件</button>
 
-        <div v-if="analysis && analysis.totalPulls > 0">
-          <div class="header">
-            <div class="header-top-row">
-              <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
-                option-value-key="id">
-                <template #trigger>
-                  <div class="title-bar">
-                    <span>
-                      {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
-                      {{ CurrentSelectedPool !== 'Limited' ? '(计算垫抽)' : '' }}
-                    </span>
-                  </div>
-                </template>
-              </SelectorComponent>
+        <div>
+          <div class="header-top-row">
+            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
+              option-value-key="id">
+              <template #trigger>
+                <div class="title-bar">
+                  <span>
+                    {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                  </span>
+                </div>
+              </template>
+            </SelectorComponent>
 
-              <CustomPlayerTitle v-if="urAnalysis && urAnalysis.avgPullsForSP > 0" :titleMap="LIMITPOOL_TITLE_MAP"
-                :value="urAnalysis.avgPullsForSP" />
-            </div>
-            <div :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-              urAnalysis.totalPulls
-              }} <span class="pulls-text">抽</span>
-            </div>
+            <CustomPlayerTitle
+              v-if="(CurrentSelectedPool !== 'Normal' && singleAnalysis && singleAnalysis.avgPullsForSP > 0) || (CurrentSelectedPool === 'Normal' && normalAnalysis && normalAnalysis.avgPullsForSSR > 0)"
+              :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP"
+              :value="CurrentSelectedPool === 'Normal' ? normalAnalysis.avgPullsForSSR : singleAnalysis.avgPullsForSP" />
+          </div>
+          <div
+            :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' && CurrentSelectedPool !== 'Normal' }">
+            {{
+              CurrentSelectedPool === 'Normal' ? normalAnalysis.totalPulls : singleAnalysis.totalPulls
+            }} <span class="pulls-text">抽</span>
+          </div>
 
-            <span v-if="urAnalysis.SinglePulls > 0" class="single-pulls-text">{{ '此卡池共计' + urAnalysis.SinglePulls + '抽'
-            }}
+          <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
+            singleAnalysis.SinglePulls + '次'
+          }}<br />
+            抽数会计算到最终抽出限定的卡池中
+          </div>
+          <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
+            <div class="history-item" :style="{ ...getHistoryItemStyle(limitAnalysis.SP), flex: '1' }"
+              v-if="CurrentSelectedPool !== 'Normal'">
+              <span>距上个限定 </span>
+              <span class="pity-count">{{ limitAnalysis.SP }}</span>
+            </div>
+            <div class="history-item"
+              :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR : 0, isNormal = true), flex: '1' }">
+              <span>距上个SSR</span>
+              <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
+                limitAnalysis.SSR
+              }}</span>
+            </div>
+          </div>
+          <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
+            singleAnalysis.dateRange }}
+          </div>
+        </div>
+
+        <div class="stats-overview">
+          <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+            <div class="stat-title">SSR数量</div>
+            <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
+          </div>
+          <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+            <div class="stat-title">限定平均</div>
+            <div v-if="singleAnalysis.avgPullsForSP > 0"
+              :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
+                singleAnalysis.avgPullsForSP.toFixed(2) }} 抽
+            </div>
+            <div v-else class="stat-value">暂无数据</div>
+          </div>
+
+          <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
+            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+              <div v-if="singleAnalysis.maxSP > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最非 {{
+                  singleAnalysis.maxSP }} 抽
+              </div>
+              <div v-else class="stat-value">未抽到</div>
+            </div>
+            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+              <div v-if="singleAnalysis.minSP > 0"
+                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最欧 {{
+                  singleAnalysis.minSP }} 抽
+              </div>
+              <div v-else class="stat-value">限定</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-title">SSR平均</div>
+            <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
+              {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
+            <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{ limitAnalysis.avgPullsForSSR > 0 ?
+              singleAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
+          </div>
+          <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
+            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+              <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
+              <div v-else class="stat-value">未抽到</div>
+            </div>
+            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+              <div v-if="normalAnalysis.minSSR > 0" class="stat-value">最欧 {{ normalAnalysis.minSSR }} 抽</div>
+              <div v-else class="stat-value">SSR</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="history-nav">
+            <button ref="progressBarButton" class="nav-button" :class="{ active: activeTab === 'progressBar' }"
+              @click="activeTab = 'progressBar'">
+              进度条
+            </button>
+            <button ref="characterOverviewButton" class="nav-button"
+              :class="{ active: activeTab === 'characterOverview' }" @click="activeTab = 'characterOverview'">
+              角色一览
+            </button>
+            <button ref="quantityStatisticsButton" class="nav-button"
+              :class="{ active: activeTab === 'quantityStatistics' }" @click="activeTab = 'quantityStatistics'">
+              数量统计
+            </button>
+            <div class="nav-underline" :style="underlineStyle"></div>
+          </div>
+
+          <!-- 进度条区域 -->
+          <div v-if="activeTab === 'progressBar'" class="history-list" ref="historyListRef">
+            <div
+              v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
+              :key="index" class="history-item"
+              :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
+              <div class="char-info">
+                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
+                <span class="char-name">{{ item.name }}</span>
+              </div>
+              <div class="pull-info">
+                <span class="pull-count">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 角色一览区域 -->
+          <div v-if="activeTab === 'characterOverview'" class="character-overview-list">
+            <div
+              v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
+              :key="index" class="overview-item"
+              :style="{ backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal') }">
+              <img :src="item.imageUrl" :alt="item.name" class="overview-avatar">
+              <span class="overview-name">{{ item.name }}</span>
+              <span class="overview-pull-count">{{ item.count }}</span>
+            </div>
+          </div>
+
+          <!-- 数量统计区域 -->
+          <div v-if="activeTab === 'quantityStatistics'" class="quantity-statistics-list">
+            <div v-for="item in quantityStatistics" :key="item.id" class="quantity-item"
+              :style="{ backgroundColor: getAlphaBgWith(item.rarity) }">
+              <img :src="item.imageUrl" :alt="item.name" class="quantity-avatar">
+              <span class="quantity-name">{{ item.name }}</span>
+              <span class="quantity-pull-count">x {{ item.count }}</span>
+            </div>
+            <p v-if="quantityStatistics.length === 0" class="no-history-text full-width">暂无记录</p>
+          </div>
+        </div>
+
+        <div class="full-history-section">
+          <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
+          <div class="full-history-list">
+            <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
+              <div class="char-info">
+                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
+                <span class="char-name">{{ item.name }}</span>
+              </div>
+              <span :class="['rarity-' + item.rarity]">{{ item.date.slice(2) }}</span>
+              <!-- 为了保证手机端能在一行内显示，将年份缩短为两位数 -->
+            </div>
+            <p v-if="fullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
+          </div>
+          <div class="pagination-controls">
+            <span class="items-per-page-label">每页显示</span>
+            <SelectorComponent v-model="itemsPerPage" :options="[
+              { number: 7, text: '7' },
+              { number: 10, text: '10' },
+              { number: 20, text: '20' },
+            ]" option-text-key="number" option-value-key="number" style="min-width: 30px;">
+              <template #trigger>
+                <div class="selector-trigger">
+                  {{ itemsPerPage }}
+                </div>
+              </template>
+            </SelectorComponent>
+            <span class="items-per-page-label">条记录</span>
+          </div>
+          <div v-if="totalPages > 1" class="pagination-controls">
+            <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
+            <span>
+              第
+              <input type="number" id="LimitPageInput" class="page-input" v-model="pageInput" @keyup.enter="goToPage"
+                @blur="goToPage" min="1" :max="totalPages" />
+              页 / 共 {{ totalPages }} 页
             </span>
-            <div class="pity-counters">
-              <div class="pity-item">
-                <span>距上个限定 </span>
-                <span class="pity-count SP">{{ analysis.SP }}</span>
-              </div>
-              <div class="pity-item">
-                <span>距上个SSR</span>
-                <span class="pity-count SSR">{{ analysis.SSR }}</span>
-              </div>
-            </div>
-            <div class="date-range">{{ analysis.dateRange }}</div>
-          </div>
-
-          <div class="stats-overview">
-            <div class="stat-box">
-              <div>限定平均抽数</div>
-              <div v-if="urAnalysis.avgPullsForSP > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.avgPullsForSP.toFixed(2) }} 抽
-              </div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>SSR平均抽数</div>
-              <div v-if="urAnalysis.avgPullsForSSR > 0" class="stat-value">{{
-                urAnalysis.avgPullsForSSR.toFixed(2)
-              }} 抽
-              </div>
-              <div v-else-if="CurrentSelectedPool !== 'Limit'" class="stat-value">单池无法统计</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>最非限定</div>
-              <div v-if="urAnalysis.maxSP > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.maxSP }} 抽
-              </div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>最欧限定</div>
-              <div v-if="urAnalysis.minSP > 0"
-                :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-                  urAnalysis.minSP }} 抽
-              </div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-          </div>
-
-          <div class="history-list" ref="historyListRef">
-            <div v-for="(item, index) in urAnalysis.SPHistory" :key="index" class="history-item"
-              :style="getHistoryItemStyle(item)">
-              <div class="char-info">
-                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
-                <span class="char-name">{{ item.name }}</span>
-              </div>
-              <div class="pull-info">
-                <span class="pull-count">{{ item.count }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="full-history-section">
-            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }} - {{ CurrentSelectedPool
-              ===
-              "Limit" ? '完整' : '卡池' }}抽卡历史</h3>
-            <div class="full-history-list">
-              <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
-                <div class="char-info">
-                  <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
-                  <span class="char-name">{{ item.name }}</span>
-                </div>
-                <span :class="['rarity-' + item.rarity]">{{ item.date }}</span>
-              </div>
-              <p v-if="fullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
-            </div>
-            <div v-if="totalPages > 1" class="pagination-controls">
-              <button @click="prevPage" :disabled="currentPage === 1">上一页</button>
-              <span>
-                第
-                <input type="number" id="LimitPageInput" class="page-input" v-model="pageInput" @keyup.enter="goToPage"
-                  @blur="goToPage" min="1" :max="totalPages" />
-                页 / 共 {{ totalPages }} 页
-              </span>
-              <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
-            </div>
-          </div>
-          <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportLimitData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录</button>
+            <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
           </div>
         </div>
-
-        <p v-if="(!analysis || analysis.totalPulls === 0)">
-          欸？好像没有抽卡记录
-        </p>
-
-      </div>
-    </div>
-
-    <div v-if="viewState === 'analysis'" class="gacha-analysis-container">
-
-      <div v-if="viewState === 'analysis'" class="gacha-analysis-page">
-        <button @click="resetView" class="button">← 分析新文件</button>
-
-        <div v-if="normalAnalysis && normalAnalysis.totalPulls > 0" class="permanent-pool-section">
-          <div class="header">
-            <div class="header-top-row">
-              <div class="title-bar">
-                <span>{{ playerId }}-{{ CARDPOOLS_NAME_MAP["Normal"] }}</span>
-              </div>
-
-              <CustomPlayerTitle v-if="normalAnalysis && normalAnalysis.avgPullsForSSR > 0"
-                :titleMap="NORMALPOOL_TITLE_MAP" :value="normalAnalysis.avgPullsForSSR" />
-            </div>
-            <div class="total-pulls">{{ normalAnalysis.totalPulls }} <span class="pulls-text">抽</span></div>
-            <div class="pity-counters">
-              <div class="pity-item">
-                <span>距上个SSR</span>
-                <span class="pity-count SSR">{{ normalAnalysis.SSR }}</span>
-              </div>
-            </div>
-            <div class="date-range">{{ normalAnalysis.dateRange }}</div>
-          </div>
-
-          <div class="stats-overview">
-            <div class="stat-box">
-              <div>已获取SSR数量</div>
-              <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
-            </div>
-            <div class="stat-box">
-              <div>SSR平均抽数</div>
-              <div v-if="normalAnalysis.avgPullsForSSR > 0" class="stat-value">{{
-                normalAnalysis.avgPullsForSSR.toFixed(2) }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>最非SSR</div>
-              <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">{{ normalAnalysis.maxSSR }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-            <div class="stat-box">
-              <div>最欧SSR</div>
-              <div v-if="normalAnalysis.minSSR > 0" class="stat-value">{{ normalAnalysis.minSSR }} 抽</div>
-              <div v-else class="stat-value">暂无数据</div>
-            </div>
-          </div>
-
-          <div class="history-list" ref="normalHistoryListRef">
-            <div v-for="(item, index) in normalAnalysis.SSRHistory" :key="index" class="history-item"
-              :style="getHistoryItemStyle(item, true)">
-              <div class="char-info">
-                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
-                <span class="char-name">{{ item.name }}</span>
-              </div>
-              <div class="pull-info">
-                <span class="pull-count">{{ item.count }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="full-history-section">
-            <h3 class="section-title">{{ CARDPOOLS_NAME_MAP["Normal"] }} - 完整抽卡历史</h3>
-            <div class="full-history-list">
-              <div v-for="item in normalPaginatedHistory" :key="item.gacha_id"
-                :class="['full-history-item', item.rarity]">
-                <div class="char-info">
-                  <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
-                  <span class="char-name">{{ item.name }}</span>
-                </div>
-                <span :class="['rarity-' + item.rarity]">{{ item.date }}</span>
-              </div>
-              <p v-if="normalFullHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
-            </div>
-            <div v-if="normalTotalPages > 1" class="pagination-controls">
-              <button @click="prevNormalPage" :disabled="normalCurrentPage === 1">上一页</button>
-              <span>
-                第
-                <input type="number" id="NormalPageInput" class="page-input" v-model="normalPageInput"
-                  @keyup.enter="goToNormalPage" @blur="goToNormalPage" min="1" :max="normalTotalPages" />
-                页 / 共 {{ normalTotalPages }} 页
-              </span>
-              <button @click="nextNormalPage" :disabled="normalCurrentPage === normalTotalPages">下一页</button>
-            </div>
-          </div>
-          <div style="text-align: center; padding: 20px 0;">
-            <button @click="exportNormalData" class="button">导出{{ CARDPOOLS_NAME_MAP['Normal']
-            }}卡池记录</button>
-          </div>
+        <div style="text-align: center; padding: 20px 0;">
+          <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
+          }}卡池记录</button>
         </div>
-
-        <p v-if="(!analysis || analysis.totalPulls === 0) && (!normalAnalysis || normalAnalysis.totalPulls === 0)">
-          欸？好像没有抽卡记录
-        </p>
-
       </div>
+
+      <p v-if="(!limitAnalysis || limitAnalysis.totalPulls === 0)">
+        欸？好像没有抽卡记录
+      </p>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import pako from 'pako';
+import ExcelJS from 'exceljs';
+import FileSaver from 'file-saver';
+
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+
 import SelectorComponent from '@/components/SelectorComponent.vue';
-import pako from 'pako';
 import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
 
@@ -311,13 +297,18 @@ const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const CurrentSelectedPool = ref("Limited"); // 控制限定卡池筛选指定卡池的抽卡记录
 const errorMessage = ref('');
-
-// CurrentSelectedPool.value = 29; // DEBUG：模拟用户选择了某个卡池
-
+// 卡池选择下拉框选项
 const cardPoolOptions = ref([
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
-  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] }))
+  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] },
+  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(),
 ]);
+// 导航栏相关的响应式变量
+const activeTab = ref('progressBar');
+const progressBarButton = ref(null);
+const quantityStatisticsButton = ref(null);
+const characterOverviewButton = ref(null);
+const underlineStyle = ref({});
 
 const getCardInfoAndRemovePrefix = (itemId) => {
   // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
@@ -368,8 +359,6 @@ const handleJsonAnalysis = () => {
     errorMessage.value = `JSON 格式无法解析，请检查。错误详情: ${error.message}`;
     return;
   }
-
-  // --- 后续逻辑使用 finalData ---
 
   if (typeof finalData !== 'object' || finalData === null || Array.isArray(finalData)) {
     errorMessage.value = '数据格式错误：顶层结构必须是一个对象 ( 形如 {"key": "value", ...} )。';
@@ -453,13 +442,14 @@ const resetView = () => {
   LimitGachaData.value = [];
   NormalGachaData.value = [];
   errorMessage.value = '';
+  CurrentSelectedPool.value = 'Limited';
 };
 
 // 计算列表平均值的通用函数
 const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
 
 // 限定卡池分析逻辑
-const analysis = computed(() => {
+const limitAnalysis = computed(() => {
   // 仅当有有效数据时才执行计算
   if (LimitGachaData.value.length === 0) return null;
 
@@ -517,17 +507,19 @@ const analysis = computed(() => {
     avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
     maxSP: Math.max(...SPHistory.map(item => item.count), 0),
     minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
-    SPHistory: SPHistory
+    SPHistory: SPHistory,
+    SSRHistory: SSRHistory,
   };
 });
 
 // 限定卡池单卡池分析逻辑
-const urAnalysis = computed(() => {
-  if (!analysis.value) return null;
-  if (CurrentSelectedPool.value !== 'Limited') {
+const singleAnalysis = computed(() => {
+  if (!limitAnalysis.value) return null;
+  if (CurrentSelectedPool.value !== 'Limited' && CurrentSelectedPool.value !== 'Normal') {
     // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
-    const filteredHistory = analysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
-    if (filteredHistory.length === 0) {
+    const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    if (filteredSPHistory.length === 0) {
       return {
         totalPulls: 0,
         SinglePulls: 0,
@@ -536,26 +528,30 @@ const urAnalysis = computed(() => {
         maxSP: 0,
         minSP: 0,
         SPHistory: [],
+        SSRHistory: [],
       };
     }
     return {
-      totalPulls: filteredHistory.reduce((sum, item) => sum + item.count, 0),
+      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
       SinglePulls: fullHistory.value.length,
-      avgPullsForSP: calculateAverage(filteredHistory.map(item => item.count)),
-      avgPullsForSSR: 0,
-      maxSP: Math.max(...filteredHistory.map(item => item.count), 0),
-      minSP: Math.min(...filteredHistory.map(item => item.count), Infinity),
-      SPHistory: filteredHistory
+      avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
+      avgPullsForSSR: calculateAverage(filteredSSRHistory.map(item => item.count)),
+      maxSP: Math.max(...filteredSPHistory.map(item => item.count), 0),
+      minSP: Math.min(...filteredSPHistory.map(item => item.count), Infinity),
+      SPHistory: filteredSPHistory,
+      SSRHistory: filteredSSRHistory
     };
   }
-  return { // 如果没有选择特定卡池，则返回全部限定卡池的分析数据
-    totalPulls: analysis.value.totalPulls,
-    SinglePulls: analysis.value.SinglePulls,
-    avgPullsForSP: analysis.value.avgPullsForSP,
-    avgPullsForSSR: analysis.value.avgPullsForSSR,
-    maxSP: analysis.value.maxSP,
-    minSP: analysis.value.minSP,
-    SPHistory: analysis.value.SPHistory,
+  return { // 如果选中的卡池不存在，则返回全部限定卡池的分析数据
+    dateRange: limitAnalysis.value.dateRange,
+    totalPulls: limitAnalysis.value.totalPulls,
+    SinglePulls: limitAnalysis.value.SinglePulls,
+    avgPullsForSP: limitAnalysis.value.avgPullsForSP,
+    avgPullsForSSR: limitAnalysis.value.avgPullsForSSR,
+    maxSP: limitAnalysis.value.maxSP,
+    minSP: limitAnalysis.value.minSP,
+    SPHistory: limitAnalysis.value.SPHistory,
+    SSRHistory: limitAnalysis.value.SSRHistory,
   };
 });
 
@@ -610,22 +606,21 @@ const normalAnalysis = computed(() => {
 });
 
 /**
- * 根据抽数计算背景样式
- * @param {object} item - 包含count属性的历史记录项
- * @param {boolean} isNormal - 是否为常驻池SSR（常驻池没有SP，保底阈值不同）
+ * 根据抽数计算出金进度条背景样式
+ * @param {object} count - 当前抽数
+ * @param {boolean} isNormal - 是否为常驻池模式（常驻池出货概率阈值不同）
  * @returns {object} - 一个包含背景样式的对象
  */
-const getHistoryItemStyle = (item, isNormal = false) => {
+const getHistoryItemStyle = (count, isNormal = false) => {
   const maxCount = 60;
-  const count = item.count;
   const percentage = (count / maxCount) * 100;
 
   let progressBarColor;
 
   // 根据不同卡池和抽数应用不同颜色
-  if ((isNormal && count < 9) || (!isNormal && count < 30)) {
+  if ((isNormal && count < 10) || (!isNormal && count < 31)) {
     progressBarColor = colors.colorOfLuck.veryLow;
-  } else if ((isNormal && count < 19) || (!isNormal && count < 41)) {
+  } else if ((isNormal && count < 15) || (!isNormal && count < 41)) {
     progressBarColor = colors.colorOfLuck.medium;
   } else {
     progressBarColor = colors.colorOfLuck.veryHigh;
@@ -637,22 +632,147 @@ const getHistoryItemStyle = (item, isNormal = false) => {
   };
 };
 
-// 限定卡池分页逻辑
+// 数量统计计算逻辑
+const quantityStatistics = computed(() => {
+  if (!limitAnalysis.value && !normalAnalysis.value) return [];
+
+  // 辅助函数：用于从历史记录中生成统计数据
+  const generateStats = (history, rarity) => {
+    if (!history || history.length === 0) return [];
+    const stats = new Map();
+    history.forEach(item => {
+      if (stats.has(item.id)) {
+        stats.get(item.id).count++;
+      } else {
+        stats.set(item.id, {
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl,
+          rarity: rarity, // 明确角色的稀有度
+          count: 1,
+        });
+      }
+    });
+    // 将 Map 转换为数组并按角色id排序
+    return Array.from(stats.values()).sort((a, b) => a.id - b.id);
+  };
+
+  // 如果是常驻池则直接返回SSR统计
+  if (CurrentSelectedPool.value === 'Normal') {
+    return generateStats(normalAnalysis.value?.SSRHistory, RARITY.SSR);
+  }
+
+  // 获取 SP 统计
+  const spStats = generateStats(singleAnalysis.value?.SPHistory, RARITY.SP);
+  // 获取 SSR 统计
+  const ssrStats = generateStats(singleAnalysis.value?.SSRHistory, RARITY.SSR);
+
+  // 合并列表，SP在前，SSR在后
+  return [...spStats, ...ssrStats];
+});
+
+// 动态下划线核心逻辑
+const updateUnderline = () => {
+  let activeButton;
+  switch (activeTab.value) {
+    case 'characterOverview':
+      activeButton = characterOverviewButton.value;
+      break;
+    case 'quantityStatistics':
+      activeButton = quantityStatisticsButton.value;
+      break;
+    case 'progressBar':
+    default:
+      activeButton = progressBarButton.value;
+      break;
+  }
+
+  if (activeButton) {
+    underlineStyle.value = {
+      left: `${activeButton.offsetLeft}px`,
+      width: `${activeButton.offsetWidth}px`,
+    };
+  }
+};
+
+watch(activeTab, async () => {
+  // 等待DOM更新完成再计算位置
+  await nextTick();
+  updateUnderline();
+});
+
+watch(viewState, async (newState) => {
+  if (newState === 'analysis') {
+    // 确保DOM已经更新，导航栏已渲染
+    await nextTick();
+    updateUnderline();
+  }
+});
+
+onMounted(() => {
+  window.addEventListener('resize', updateUnderline);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateUnderline);
+});
+
+// 根据传入的参数获取对应的修改过透明度的背景颜色
+const getAlphaBgWith = (type) => {
+  switch (type) {
+    case RARITY.SP:
+      return colors.rarity.sp.replace(/[\d.]+\)$/g, `${0.3})`);
+    case RARITY.SSR:
+      return colors.rarity.ssr.replace(/[\d.]+\)$/g, `${0.3})`);
+    case RARITY.SR:
+      return colors.rarity.sr.replace(/[\d.]+\)$/g, `${0.3})`);
+    case RARITY.R:
+      return colors.rarity.r.replace(/[\d.]+\)$/g, `${0.3})`);
+    case "veryHigh":
+      return colors.colorOfLuck.veryHigh.replace(/[\d.]+\)$/g, `${0.3})`);
+    case "medium":
+      return colors.colorOfLuck.medium.replace(/[\d.]+\)$/g, `${0.3})`);
+    case "veryLow":
+      return colors.colorOfLuck.veryLow.replace(/[\d.]+\)$/g, `${0.3})`);
+    default:
+      return 'transparent'; // 默认返回透明色
+  }
+};
+
+const getAlphaBgWithCount = (count, isNormal = false) => {
+  // 根据抽数和卡池类型返回不同的背景颜色
+  if (isNormal) {
+    if (count < 10) return getAlphaBgWith("veryLow");
+    else if (count < 15) return getAlphaBgWith("medium");
+    else return getAlphaBgWith("veryHigh");
+  } else {
+    if (count < 31) return getAlphaBgWith("veryLow");
+    else if (count < 41) return getAlphaBgWith("medium");
+    else return getAlphaBgWith("veryHigh");
+  }
+};
+
+// 历史记录分页逻辑
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const pageInput = ref(1);
 
 const fullHistory = computed(() => {
-  if (LimitGachaData.value.length === 0) return [];
-  let filteredData = [...LimitGachaData.value]
-  if (CurrentSelectedPool.value !== 'Limited') {
-    filteredData = filteredData.filter(record => record.gacha_id === Number(CurrentSelectedPool.value));
+  let filteredData = [];
+  if (CurrentSelectedPool.value === 'Normal') {
+    filteredData = [...NormalGachaData.value];
+  } else {
+    if (LimitGachaData.value.length === 0) return [];
+    filteredData = [...LimitGachaData.value]
+    if (CurrentSelectedPool.value !== 'Limited') {
+      filteredData = filteredData.filter(record => record.gacha_id === Number(CurrentSelectedPool.value));
+    }
   }
   return filteredData.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
     const createdAt = new Date(record.created_at * 1000);
-    const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
+    const formattedDate = `${createdAt.getFullYear().toString()}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
     return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
   });
 });
@@ -663,7 +783,6 @@ const paginatedHistory = computed(() => {
   const end = start + itemsPerPage.value;
   return fullHistory.value.slice(start, end);
 });
-
 const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
@@ -671,7 +790,7 @@ const prevPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
 
-// 跳转到指定页面的函数（限定池）
+// 跳转到指定页面的函数
 const goToPage = () => {
   const page = Math.floor(Number(pageInput.value));
   if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
@@ -679,47 +798,6 @@ const goToPage = () => {
   } else {
     // 如果输入无效，则将输入框的值重置为当前页码
     pageInput.value = currentPage.value;
-  }
-};
-
-// 常驻卡池分页逻辑
-const normalCurrentPage = ref(1);
-// itemsPerPage 可以共用
-const normalPageInput = ref(1);
-
-const normalFullHistory = computed(() => {
-  if (NormalGachaData.value.length === 0) return [];
-  return [...NormalGachaData.value].sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
-    const defaultCard = { name: `未知角色 (${record.item_id})`, rarity: RARITY.R, imageUrl: '/images/cards/placeholder.webp' };
-    const createdAt = new Date(record.created_at * 1000);
-    const formattedDate = `${createdAt.getFullYear().toString().slice(-2)}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`;
-    return { ...(cardInfo || defaultCard), gacha_id: record.id, date: formattedDate };
-  });
-});
-
-const normalTotalPages = computed(() => Math.ceil(normalFullHistory.value.length / itemsPerPage.value));
-const normalPaginatedHistory = computed(() => {
-  const start = (normalCurrentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return normalFullHistory.value.slice(start, end);
-});
-
-const nextNormalPage = () => {
-  if (normalCurrentPage.value < normalTotalPages.value) normalCurrentPage.value++;
-};
-const prevNormalPage = () => {
-  if (normalCurrentPage.value > 1) normalCurrentPage.value--;
-};
-
-// 跳转到指定页面的函数（常驻池）
-const goToNormalPage = () => {
-  const page = Math.floor(Number(normalPageInput.value));
-  if (!isNaN(page) && page >= 1 && page <= normalTotalPages.value) {
-    normalCurrentPage.value = page;
-  } else {
-    // 如果输入无效，则将输入框的值重置为当前页码
-    normalPageInput.value = normalCurrentPage.value;
   }
 };
 
@@ -733,49 +811,108 @@ watch(currentPage, (newPage) => {
   pageInput.value = newPage;
 });
 
-// 监听 normalCurrentPage 的变化，同步更新输入框的值
-watch(normalCurrentPage, (newPage) => {
-  normalPageInput.value = newPage;
+// 监听 itemsPerPage 的变化，重置页码为1
+watch(itemsPerPage, () => {
+  currentPage.value = 1;
+  // 更新最小高度以适应新的每页条数
+  nextTick(() => {
+    const fullHistoryList = document.querySelector('.full-history-list');
+    if (fullHistoryList) {
+      fullHistoryList.style.minHeight = `${itemsPerPage.value * 64}px`;
+    }
+  });
 });
 
+// 将 'rgba(r, g, b, a)' 格式的颜色字符串转换为 'AARRGGBB'
+const getExcelColor = (rgbaColor) => {
+  // 使用正则表达式从 'rgba(r, g, b, a)' 中提取出 r, g, b, a 的值
+  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),\s*(\d+(\.\d+)?)\)/);
+  if (match) {
+    // 将数字转换为十六进制
+    const toHex = (c) => {
+      const hex = Number(c).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+    const r = toHex(match[1]);
+    const g = toHex(match[2]);
+    const b = toHex(match[3]);
+    // a的值是0-1的小数，需要转换为0-255的整数
+    const a = toHex(Math.round(parseFloat(match[4]) * 255));
+    // 拼接成 'AARRGGBB' 格式并转为大写
+    return `${a}${r}${g}${b} `.toUpperCase();
+  }
+  // 如果格式不匹配，打印警告并返回一个默认颜色（黑色）
+  console.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
+  return 'FF000000';
+};
 
-// 通用的导出卡池数据函数
-const exportToCsv = (filename, historyData) => {
+// 将抽卡记录导出为 Excel 文件
+const exportToExcel = async (filename, historyData) => {
   if (historyData.length === 0) {
     alert('没有数据可供导出。');
     return;
   }
-
-  const headers = ['角色名称', '稀有度', '抽到时间'];
-  const rows = historyData.map(item => {
+  // 创建工作簿和工作表
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('抽卡记录');
+  // 设置表头和列宽
+  worksheet.columns = [
+    { header: '序号', key: 'id', width: 10 },
+    { header: '角色名称', key: 'name', width: 25 },
+    { header: '稀有度', key: 'rarity', width: 10 },
+    { header: '抽到时间', key: 'date', width: 35 }
+  ];
+  // 设置表头样式
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true, name: '黑体', family: 4, size: 14 }; // 首选无衬线字体
+  // 定义不同稀有度的样式
+  const rarityStyles = {
+    SP: {
+      font: { color: { argb: getExcelColor(colorRaritySP) }, bold: true },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: getExcelColor(colorBrandHover) } }
+    },
+    SSR: { font: { color: { argb: getExcelColor(colorRaritySSR) }, bold: true } },
+    SR: { font: { color: { argb: getExcelColor(colorRaritySR) } } },
+    R: { font: { color: { argb: getExcelColor(colorRarityR) } } },
+  };
+  const defaultStyle = { font: { color: { argb: getExcelColor(colorTextPrimary) } } };
+  // 遍历数据并添加行，同时应用样式，同时加上序号，最旧的数据为1，最新的数据为最大值
+  let index = historyData.length
+  historyData.forEach(item => {
     const { name, rarity, date } = item;
-    const rarityText = rarity === 'SP' ? '限定' : rarity;
-    const safeName = `"${name}"`;
-    return [safeName, rarityText, date];
+    // 根据稀有度选择样式
+    const baseStyle = rarityStyles[rarity] || defaultStyle
+    const style = { ...baseStyle, font: { ...baseStyle.font, name: '黑体', family: 4, size: 14 } }; // 首选无衬线字体
+
+    // 添加一行数据
+    const row = worksheet.addRow({ id: index--, name, rarity, date });
+
+    // 为该行的每个单元格应用样式
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cell.style = style;
+    });
   });
 
-  const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-  const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  // 设置冻结窗格和自动筛选
+  // 冻结首行
+  worksheet.views = [
+    { state: 'frozen', ySplit: 1 }
+  ];
+  // 在第一行开启自动筛选
+  worksheet.autoFilter = {
+    from: 'A1',
+    to: { row: 1, column: worksheet.columns.length }
+  };
+
+  // 生成文件并使用 FileSaver.js 来保存文件
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  FileSaver.saveAs(blob, filename);
 };
 
-// 限定卡池导出
-const exportLimitData = () => {
-  exportToCsv(CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.csv', fullHistory.value);
-};
-
-// 常驻卡池导出
-const exportNormalData = () => {
-  exportToCsv('常驻卡池抽卡记录.csv', normalFullHistory.value);
+// 导出抽卡记录的函数
+const exportPoolData = () => {
+  exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
 
 
@@ -790,7 +927,7 @@ const colorBgAvatar = colors.background.avatar;
 const colorTextPrimary = colors.text.primary;
 const colorTextSecondary = colors.text.secondary;
 const colorTextTertiary = colors.text.tertiary;
-const colorTextDark = colors.text.dark;
+const colorTextBlack = colors.text.black;
 const colorTextDisabled = colors.text.disabled;
 const colorTextLight = colors.text.light;
 const colorTextHighlight = colors.text.highlight;
@@ -798,9 +935,9 @@ const colorTextHighlight = colors.text.highlight;
 const colorBrandPrimary = colors.brand.primary;
 const colorBrandHover = colors.brand.hover;
 
-const colorRarityUr = colors.rarity.ur;
-const colorRaritySsr = colors.rarity.ssr;
-const colorRaritySr = colors.rarity.sr;
+const colorRaritySP = colors.rarity.sp;
+const colorRaritySSR = colors.rarity.ssr;
+const colorRaritySR = colors.rarity.sr;
 const colorRarityR = colors.rarity.r;
 
 const colorStatusError = colors.status.error;
@@ -812,7 +949,6 @@ const colorTextShadow = colors.textShadow;
 
 <style scoped>
 .background {
-  padding: 1vh 1vw;
   min-height: 100vh;
   background-color: v-bind(colorBgPrimary);
   color: v-bind(colorTextPrimary);
@@ -827,10 +963,10 @@ const colorTextShadow = colors.textShadow;
 
 .gacha-analysis-container {
   background-color: v-bind(colorBgContent);
-  padding: 16px;
-  margin: 8px;
+  padding: 15px;
+  margin: 10px;
   min-width: 300px;
-  width: 450px;
+  width: 500px;
   border-radius: 12px;
 }
 
@@ -883,7 +1019,7 @@ const colorTextShadow = colors.textShadow;
   border: none;
   border-radius: 8px;
   background-color: v-bind(colorBrandPrimary);
-  color: v-bind(colorTextDark);
+  color: v-bind(colorTextBlack);
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -911,8 +1047,8 @@ const colorTextShadow = colors.textShadow;
 
 /* --- 分析结果区域 --- */
 .gacha-analysis-page>div:not(:first-child) {
-  padding-top: 24px;
-  margin-top: 24px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 2px solid v-bind(colorBgLight);
 }
 
@@ -923,7 +1059,6 @@ const colorTextShadow = colors.textShadow;
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  margin-bottom: 8px;
   font-weight: bold;
 }
 
@@ -931,9 +1066,6 @@ const colorTextShadow = colors.textShadow;
   background-color: v-bind(colorBgHover);
 }
 
-.header {
-  padding: 10px;
-}
 
 .header-top-row {
   display: flex;
@@ -943,13 +1075,12 @@ const colorTextShadow = colors.textShadow;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 12px;
 }
 
 .title-bar {
   display: flex;
   justify-content: flex-start;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
 }
 
@@ -976,9 +1107,6 @@ const colorTextShadow = colors.textShadow;
 .pity-counters {
   display: flex;
   gap: 20px;
-  margin-top: 5px;
-  background-color: v-bind(colorBgLight);
-  padding: 10px;
   border-radius: 8px;
 }
 
@@ -992,17 +1120,11 @@ const colorTextShadow = colors.textShadow;
 .pity-count {
   font-weight: bold;
   font-size: 1.2rem;
+  color: v-bind(colorTextHighlight);
+  /* 为防止和背景颜色相近，暂时使用金色 */
 }
 
-.pity-count.SP {
-  color: v-bind(colorRarityUr);
-}
-
-.pity-count.SSR {
-  color: v-bind(colorRaritySsr);
-}
-
-.date-range {
+.tertiary-text {
   margin-top: 10px;
   color: v-bind(colorTextTertiary);
   font-size: 0.9rem;
@@ -1010,31 +1132,87 @@ const colorTextShadow = colors.textShadow;
 
 /* 统计数据概览 */
 .stats-overview {
-  display: grid;
+  display: flex;
+  flex-direction: row;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 5px;
+}
+
+.stat-vertical-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 5px;
 }
 
 .stat-box {
   background-color: v-bind(colorBgLight);
-  padding: 15px;
   border-radius: 8px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 5px 0px;
 }
 
-.stat-box div:first-child {
+.stat-box .stat-title {
   color: v-bind(colorTextSecondary);
   font-size: 0.9rem;
 }
 
 .stat-box .stat-value {
-  margin-top: 8px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
+
 }
 
-.history-list {
-  margin-top: 20px;
+/* 导航栏样式 */
+.history-nav {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid v-bind(colorBgLighter);
+  margin-bottom: 6px;
+}
+
+.nav-button {
+  background-color: transparent;
+  border: none;
+  padding: 4px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: v-bind(colorTextSecondary);
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  border-radius: 8px 8px 0 0;
+}
+
+.nav-button:hover {
+  color: v-bind(colorTextPrimary);
+  background-color: v-bind(colorBgHover);
+}
+
+.nav-button.active {
+  color: v-bind(colorBrandPrimary);
+  background-color: transparent;
+}
+
+.nav-underline {
+  position: absolute;
+  bottom: -2px;
+  /* 贴在边框上 */
+  height: 3px;
+  background-color: v-bind(colorBrandPrimary);
+  border-radius: 1.5px;
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+
+.history-list,
+.quantity-statistics-list,
+.character-overview-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1045,16 +1223,28 @@ const colorTextShadow = colors.textShadow;
   transition: scrollbar-color 0.5s ease-out;
 }
 
+/* 数量统计网格布局 */
+.quantity-statistics-list,
+.character-overview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 72px);
+  gap: 6px;
+  justify-content: center;
+}
+
 /* --- 适配 Webkit 内核浏览器 (Chrome, Edge, Safari) --- */
-.history-list::-webkit-scrollbar {
+.history-list::-webkit-scrollbar,
+.quantity-statistics-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.history-list::-webkit-scrollbar-track {
+.history-list::-webkit-scrollbar-track,
+.quantity-statistics-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.history-list::-webkit-scrollbar-thumb {
+.history-list::-webkit-scrollbar-thumb,
+.quantity-statistics-list::-webkit-scrollbar-thumb {
   background-color: v-bind(colorScrollbar);
   border-radius: 3px;
 }
@@ -1067,6 +1257,63 @@ const colorTextShadow = colors.textShadow;
   border-radius: 8px;
   position: relative;
   z-index: 1;
+}
+
+/* 卡片样式 */
+.quantity-item,
+.overview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 0px 0px 0px;
+  border-radius: 6px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  width: 72px;
+}
+
+.quantity-item:hover,
+.overview-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 卡片内头像样式 */
+.quantity-avatar,
+.overview-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  /* 方形圆角 */
+  object-fit: cover;
+  margin-bottom: 4px;
+  background-color: v-bind(colorBgAvatar);
+}
+
+/* 卡片内名称样式 */
+.quantity-name,
+.overview-name {
+  font-weight: bold;
+  font-size: 0.7rem;
+  color: v-bind(colorTextPrimary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 名称过长时显示省略号 */
+}
+
+.quantity-pull-count,
+.overview-pull-count {
+  font-size: 1rem;
+  font-weight: bold;
+  color: v-bind(colorTextHighlight);
+}
+
+/* 确保 “无记录” 提示能横跨整个网格 */
+.no-history-text.full-width {
+  grid-column: 1 / -1;
+  /* 横跨所有列 */
 }
 
 .char-info {
@@ -1104,7 +1351,6 @@ const colorTextShadow = colors.textShadow;
   font-size: 1.2rem;
   font-weight: bold;
   color: v-bind(colorBrandPrimary);
-  min-width: 30px;
   text-align: right;
   text-shadow: 1px 1px 3px v-bind(colorTextShadow);
 }
@@ -1126,7 +1372,8 @@ const colorTextShadow = colors.textShadow;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 631px;
+  /* 设置最小宽度防止记录不够时页面跳动 */
+  min-height: 640px;
 }
 
 .no-history-text {
@@ -1147,15 +1394,15 @@ const colorTextShadow = colors.textShadow;
 
 /* 不同稀有度的左边框颜色 */
 .full-history-item.SP {
-  border-left-color: v-bind(colorRarityUr);
+  border-left-color: v-bind(colorRaritySP);
 }
 
 .full-history-item.SSR {
-  border-left-color: v-bind(colorRaritySsr);
+  border-left-color: v-bind(colorRaritySSR);
 }
 
 .full-history-item.SR {
-  border-left-color: v-bind(colorRaritySr);
+  border-left-color: v-bind(colorRaritySR);
 }
 
 .full-history-item.R {
@@ -1164,17 +1411,17 @@ const colorTextShadow = colors.textShadow;
 
 /* 不同稀有度的文字颜色 */
 .rarity-SP {
-  color: v-bind(colorRarityUr);
+  color: v-bind(colorRaritySP);
   font-weight: bold;
 }
 
 .rarity-SSR {
-  color: v-bind(colorRaritySsr);
+  color: v-bind(colorRaritySSR);
   font-weight: bold;
 }
 
 .rarity-SR {
-  color: v-bind(colorRaritySr);
+  color: v-bind(colorRaritySR);
   font-weight: bold;
 }
 
@@ -1189,12 +1436,12 @@ const colorTextShadow = colors.textShadow;
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 24px;
   color: v-bind(colorTextSecondary);
   font-size: 0.9rem;
+  margin-top: 8px;
 }
 
-/* [NEW] 新增分页输入框样式 */
+/* 分页输入框样式 */
 .pagination-controls span {
   display: inline-flex;
   align-items: center;

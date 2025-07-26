@@ -286,8 +286,8 @@ const navigateToGachaPage = () => {
 }
 
 .text-rarity-sp {
-  border-color: v-bind('colors.rarity.ur');
-  color: v-bind('colors.rarity.ur');
+  border-color: v-bind('colors.rarity.sp');
+  color: v-bind('colors.rarity.sp');
 }
 
 .text-rarity-ssr {
