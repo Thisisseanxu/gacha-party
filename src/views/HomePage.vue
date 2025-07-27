@@ -38,6 +38,8 @@
           <span>安装应用</span>
         </a>
       </div>
+
+      <span class="version">当前版本：v{{ appVersion }}</span>
     </div>
   </div>
 </template>
@@ -47,6 +49,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { colors } from '@/styles/colors.js';
 import { GithubOne, TencentQq, Install } from '@icon-park/vue-next';
 
+const appVersion = __VERSION__;
 
 // 创建一个 ref 保存 'beforeinstallprompt' 事件
 const deferredPrompt = ref(null);
@@ -103,6 +106,7 @@ const handleComingSoon = () => {
 };
 
 const colorTextPrimary = colors.text.primary;
+const colorTextTertiary = colors.text.tertiary;
 const colorTextHighlight = colors.text.highlight;
 </script>
 
@@ -151,7 +155,13 @@ const colorTextHighlight = colors.text.highlight;
   font-size: 3rem;
   font-weight: bold;
   color: v-bind(colorTextPrimary);
+  margin-top: 1rem;
   margin-bottom: 2rem;
+}
+
+.version {
+  font-size: 1rem;
+  color: v-bind(colorTextTertiary);
 }
 
 .button-group {
@@ -215,7 +225,8 @@ const colorTextHighlight = colors.text.highlight;
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.1rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(58, 59, 64, 0.5);
   width: 100%;

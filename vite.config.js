@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import pkg from './package.json'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -55,6 +56,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  define: {
+    __VERSION__: JSON.stringify(pkg.version),
   },
 
   css: {
