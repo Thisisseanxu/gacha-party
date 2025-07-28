@@ -29,7 +29,7 @@
         </p>
         <p><strong>限定卡池：</strong>限定角色综合概率为2%，40抽后概率提升，60抽必出。SSR概率为6%，SR为20%，R为72%。UP机制与常驻池类似。</p>
         <p class="footer-link">本项目完全开源，欢迎前往 <a href="https://github.com/Thisiseanxu/gacha-party"
-            target="_blank">Github</a> 贡献代码，或加入Q群 1049576192 交流。
+            target="_blank">Github</a> 参与开发，或加入Q群 1049576192 交流。
         </p>
       </div>
     </div>
