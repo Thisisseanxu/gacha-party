@@ -679,6 +679,8 @@ h1 {
   max-height: 70vh;
   overflow-y: auto;
   padding: 1rem;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .pulled-cards-grid {
