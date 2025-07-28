@@ -38,7 +38,7 @@
           </div>
 
           <div v-if="isSelectableUpPool" class="select-up-container">
-            <h3 class="select-up-title">请选择UP角色：</h3>
+            <h3 class="select-up-title">{{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}</h3>
             <div class="up-cards-selection">
               <div v-for="card in upCardDetails" :key="card.id"
                 :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
