@@ -7,6 +7,49 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
+  // 早稻叽-预览卡池
+  ZAODAOJI: {
+    type: '限定',
+    name: '早稻叽-预览卡池',
+    imageUrl: '/images/cardpools-icon/zaodaojibg.webp',
+    // 基础概率
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2, // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.SP]: {
+        pity: 60, // 60抽必出SP
+        boostAfter: 40, // 40抽后每抽提升SP概率
+        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
+      },
+      [RARITY.SSR]: {
+        doubleRateCards: ['UPSSR'], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
+    },
+    cardIds: {
+      [RARITY.SP]: ['zaodaoji'],
+      [RARITY.SSR]: ['UPSSR', 'SSR01', 'SSR01', 'SSR01', 'SSR01'],
+      [RARITY.SR]: [
+        '1103',
+        '1104',
+        '1207',
+        '1303',
+        '1405',
+        '1604',
+        '1606',
+        '1702',
+        '1205',
+        '1304',
+        '1805',
+        '1209',
+        '1404',
+      ],
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
+    },
+  },
   // 浴缸大作战预览
   SP04: {
     type: '限定',
@@ -47,6 +90,7 @@ export const cardPools = {
         '1304',
         '1805',
         '1209',
+        '1404',
       ],
       [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
     },

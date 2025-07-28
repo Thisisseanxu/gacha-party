@@ -14,6 +14,7 @@ export const allCards = [
   { id: '1312', name: '酷玩游戏机', rarity: RARITY.SP, imageUrl: '/images/cards/1312.webp' },
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
   { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
+  { id: 'zaodaoji', name: '光之恶魔', rarity: RARITY.SP, imageUrl: '/images/cards/zaodaoji.webp' },
   {
     id: 'CustomSPishuan',
     name: '超·强力消防栓',
@@ -58,11 +59,16 @@ export const allCards = [
   { id: '1706', name: '冰池娃娃', rarity: RARITY.SSR, imageUrl: '/images/cards/1706.webp' },
   {
     id: 'UPSSR',
-    name: '概率提升SSR',
+    name: '概率提升的SSR',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/placeholder.webp',
   },
-  { id: 'SSR01', name: '未知SSR', rarity: RARITY.SSR, imageUrl: '/images/cards/placeholder.webp' },
+  {
+    id: 'SSR01',
+    name: '未知的SSR',
+    rarity: RARITY.SSR,
+    imageUrl: '/images/cards/placeholder.webp',
+  },
 
   // SR 角色
   { id: '1103', name: '珍珠射手', rarity: RARITY.SR, imageUrl: '/images/cards/1103.webp' },
