@@ -28,12 +28,12 @@ export const cardPools = {
         UpCards: ['zaodaoji'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['UPSSR'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['1403'], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
       [RARITY.SP]: ['zaodaoji'],
-      [RARITY.SSR]: ['UPSSR', 'SSR01', 'SSR01', 'SSR01', 'SSR01'],
+      [RARITY.SSR]: ['1403', '1504', '1402', '1401'],
       [RARITY.SR]: [
         '1103',
         '1104',

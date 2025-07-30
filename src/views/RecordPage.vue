@@ -228,9 +228,12 @@
             <button @click="nextPage" :disabled="currentPage === totalPages">下一页</button>
           </div>
         </div>
-        <div style="text-align: center; padding: 20px 0;">
+        <div
+          style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录</button>
+          }}卡池记录 (Excel)</button>
+          <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
+          <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
         </div>
       </div>
 
@@ -309,6 +312,9 @@ const progressBarButton = ref(null);
 const quantityStatisticsButton = ref(null);
 const characterOverviewButton = ref(null);
 const underlineStyle = ref({});
+
+// 检查是否为开发环境
+const isDev = import.meta.env.DEV;
 
 const getCardInfoAndRemovePrefix = (itemId) => {
   // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
@@ -845,6 +851,79 @@ const getExcelColor = (rgbaColor) => {
   console.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
   return 'FF000000';
 };
+
+// 下载压缩后的JSON源数据
+const downloadCompressedData = () => {
+  if (!jsonInput.value.trim()) {
+    alert('没有可供下载的数据。');
+    return;
+  }
+  try {
+    let parsedData = JSON.parse(jsonInput.value);
+
+    // 如果数据已经是压缩格式，直接下载
+    if (parsedData && parsedData.compressed === true) {
+      const blob = new Blob([jsonInput.value], { type: 'application/json;charset=utf-8' });
+      FileSaver.saveAs(blob, `gacha-records-${playerId.value || 'data'}-compressed.json`);
+      return;
+    }
+
+    // 如果不是，则进行压缩
+    const uint8Array = pako.gzip(JSON.stringify(parsedData));
+    let binaryString = '';
+    // 将 Uint8Array 转换为二进制字符串
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i]);
+    }
+    // Base64 编码
+    const base64Data = btoa(binaryString);
+
+    const outputObject = {
+      compressed: true,
+      data: base64Data,
+    };
+
+    const blob = new Blob([JSON.stringify(outputObject, null, 2)], { type: 'application/json;charset=utf-8' });
+    FileSaver.saveAs(blob, `gacha-records-${playerId.value || 'data'}-compressed.json`);
+  } catch (e) {
+    alert(`处理数据时出错，请检查JSON格式是否正确: ${e.message}`);
+  }
+};
+
+// (仅开发环境) 下载解压后的JSON源数据
+const downloadDecompressedData = () => {
+  if (!jsonInput.value.trim()) {
+    alert('没有可供下载的数据。');
+    return;
+  }
+  let finalData;
+  try {
+    let parsedData = JSON.parse(jsonInput.value);
+
+    // 如果是压缩格式，则解压
+    if (parsedData && parsedData.compressed === true && typeof parsedData.data === 'string') {
+      const binaryString = atob(parsedData.data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const decompressedString = pako.inflate(bytes, { to: 'string' });
+      finalData = JSON.parse(decompressedString);
+    } else {
+      // 如果不是，则直接使用
+      finalData = parsedData;
+    }
+
+    // 格式化JSON并创建下载链接
+    const prettyJson = JSON.stringify(finalData, null, 2);
+    const blob = new Blob([prettyJson], { type: 'application/json;charset=utf-8' });
+    FileSaver.saveAs(blob, `gacha-records-${playerId.value || 'data'}-decompressed.json`);
+  } catch (e) {
+    alert(`处理或解析数据时出错: ${e.message}`);
+  }
+};
+
 
 // 将抽卡记录导出为 Excel 文件
 const exportToExcel = async (filename, historyData) => {
