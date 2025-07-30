@@ -405,15 +405,15 @@ const handleJsonAnalysis = () => {
   }
 
   for (const item of LimitGachaRecords) {
-    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
-      errorMessage.value = '数据格式错误：限定卡池抽卡记录缺少 "id" 或 "item_id" 字段';
+    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item) || !('created_at' in item)) {
+      errorMessage.value = '数据格式错误：限定卡池抽卡记录缺少 "id" 或 "item_id" 或 "created_at" 字段';
       return;
     }
   }
 
   for (const item of NormalGachaRecords) {
-    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item)) {
-      errorMessage.value = '数据格式错误：常驻卡池抽卡记录缺少 "id" 或 "item_id" 字段';
+    if (typeof item !== 'object' || item === null || !('id' in item) || !('item_id' in item) || !('created_at' in item)) {
+      errorMessage.value = '数据格式错误：常驻卡池抽卡记录缺少 "id" 或 "item_id" 或 "created_at" 字段';
       return;
     }
   }

@@ -6,6 +6,7 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 import HomePage from './views/HomePage.vue' // 主页
 import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
 import GachaPage from './views/GachaPage.vue' // 抽卡页面
+import GachaChallangePage from './views/GachaChallangePage.vue' // 抽卡挑战赛页面
 import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
 import GiftValueCalculator from './views/GiftValueCalculator.vue' // 礼包价值计算器页面
@@ -36,6 +37,15 @@ const routes = [
     props: true, // 将路由参数作为props传递给组件
     meta: {
       title: '抽卡模拟器 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/choukatiaozhansai/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
+    name: '抽卡挑战赛',
+    component: GachaChallangePage,
+    props: true, // 将路由参数作为props传递给组件
+    meta: {
+      title: '抽卡挑战赛 - 熊月定制版',
     },
   },
   {
