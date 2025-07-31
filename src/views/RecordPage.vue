@@ -61,7 +61,7 @@
 
           <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleAnalysis.SinglePulls + '次'
-          }}<br />
+            }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -75,7 +75,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                 limitAnalysis.SSR
-              }}</span>
+                }}</span>
             </div>
           </div>
           <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -231,7 +231,7 @@
         <div
           style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+            }}卡池记录 (Excel)</button>
           <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
           <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
         </div>
@@ -268,6 +268,7 @@ const CARDPOOLS_NAME_MAP = {
   '40': '塔菲扭蛋',
   '41': '童话国盲盒机',
   '42': '扭蛋大作战',
+  '43': '早稻叽',
 };
 
 const LIMITPOOL_TITLE_MAP = {
@@ -291,7 +292,7 @@ const NORMALPOOL_TITLE_MAP = {
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42']; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
