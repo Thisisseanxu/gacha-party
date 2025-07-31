@@ -97,7 +97,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';

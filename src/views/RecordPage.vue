@@ -5,10 +5,10 @@
       <div v-if="viewState === 'input'" class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
         <p>此页面可分析使用抽卡记录导出工具导出的抽卡数据<br />
-          出于安全原因，请加 <a class="highlight"
+          工具和激活码请加 <a class="highlight"
             href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
             target="_blank">
-            Q群1049576192</a> 获取记录
+            Q群1049576192</a> 获取
         </p>
         <p class="input-description">请在下方文本框粘贴您的抽卡记录 JSON 数据，或上传导出的文件。</p>
 
@@ -24,6 +24,15 @@
         </div>
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+        <div class="cloud-section">
+          <p class="input-title">织夜云服务</p>
+          <p class="input-description">如果您有织夜云服务的时长，可使用云服务查询您的抽卡记录。</p>
+          <input type="text" v-model="licenseInput" class="cloud-input" placeholder="在此处输入您的激活码" />
+          <button @click="handleGetRecord" class="action-button">获取云端抽卡记录</button>
+        </div>
+
+        <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
         <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisiseanxu/gacha-party"
             target="_blank">Github链接</a>提出意见/提交代码。</p>
       </div>
@@ -255,11 +264,13 @@ import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+import { verifyLicense } from '@/utils/licenseManager.js';
 
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
 
+// 卡池id和名称的映射
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
   'Limited': '限定扭蛋',
@@ -271,8 +282,8 @@ const CARDPOOLS_NAME_MAP = {
   '43': '早稻叽',
 };
 
+// 抽数<字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
-  // 抽数<字典键值时显示对应称号
   32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
   34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
   35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
@@ -281,7 +292,6 @@ const LIMITPOOL_TITLE_MAP = {
   41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
-
 const NORMALPOOL_TITLE_MAP = {
   10: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
   11: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
@@ -297,16 +307,19 @@ const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID�
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
+const licenseInput = ref(''); // 绑定的许可证输入框
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const CurrentSelectedPool = ref("Limited"); // 控制限定卡池筛选指定卡池的抽卡记录
 const errorMessage = ref('');
-// 卡池选择下拉框选项
+const cloudErrorMessage = ref(''); // 织夜云的错误信息
+// 合成卡池选择下拉框选项
 const cardPoolOptions = ref([
-  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
-  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] },
-  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(),
+  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
+  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
+  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
 ]);
+
 // 导航栏相关的响应式变量
 const activeTab = ref('progressBar');
 const progressBarButton = ref(null);
@@ -317,13 +330,48 @@ const underlineStyle = ref({});
 // 检查是否为开发环境
 const isDev = import.meta.env.DEV;
 
-const getCardInfoAndRemovePrefix = (itemId) => {
-  // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
-  let cardId = itemId;
-  if (itemId.startsWith('15')) {
-    cardId = itemId.slice(2); // 去掉前缀 "15"
+const handleGetRecord = async () => {
+  if (!licenseInput.value.trim()) {
+    errorMessage.value = '请输入激活码！';
+    return;
   }
-  return cardMap.get(cardId) || null;
+
+  const licenseKey = licenseInput.value.trim();
+  errorMessage.value = '';
+
+  try {
+    // 在客户端先进行一次验证
+    logger.log("正在客户端验证激活码...");
+    const result = verifyLicense(licenseKey);
+    if (result.success !== true) {
+      throw new Error(result.message || '激活码验证失败，请检查激活码是否正确。');
+    }
+    logger.log(`客户端验证成功, User ID: ${result.userId}`);
+
+    const currentUrl = isDev ? 'http://localhost:8787' : window.location.origin;
+
+    // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
+    const response = await fetch(`${currentUrl}/get-record`, {
+      method: 'GET',
+      headers: {
+        'X-License-Key': licenseKey
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `服务器错误: ${response.status}`);
+    }
+
+    const compressedString = await response.text();
+    const wrappedJson = { compressed: true, data: compressedString };
+    jsonInput.value = JSON.stringify(wrappedJson);
+    handleJsonAnalysis(); // 调用已有的分析逻辑
+
+  } catch (error) {
+    logger.error("激活码处理错误:", error);
+    errorMessage.value = error.message;
+  }
 };
 
 const handleJsonAnalysis = () => {
@@ -454,6 +502,16 @@ const resetView = () => {
 
 // 计算列表平均值的通用函数
 const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+
+const getCardInfoAndRemovePrefix = (itemId) => {
+  // id格式为15xxxx，而cardMap中没有15前缀，直接是xxxx，因此需要转换
+  let cardId = itemId;
+  if (itemId.startsWith('15')) {
+    cardId = itemId.slice(2); // 去掉前缀 "15"
+  }
+  return cardMap.get(cardId) || null;
+};
+
 
 // 限定卡池分析逻辑
 const limitAnalysis = computed(() => {
@@ -1087,6 +1145,29 @@ const colorTextShadow = colors.textShadow;
 .button-group {
   display: flex;
   gap: 12px;
+}
+
+.cloud-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid v-bind(colorBgLight);
+}
+
+.cloud-input {
+  padding: 12px;
+  background-color: v-bind(colorBgLight);
+  border: 1px solid v-bind(colorBorderPrimary);
+  border-radius: 8px;
+  color: v-bind(colorTextPrimary);
+  font-size: 1rem;
+}
+
+.cloud-input:focus {
+  outline: none;
+  border-color: v-bind(colorBrandPrimary);
 }
 
 .action-button {

@@ -31,3 +31,6 @@ dev-dist
 # 其他文件
 *.tsbuildinfo
 /*.txt
+
+# 不上传本地wrangler运行时生成的文件
+.wrangler

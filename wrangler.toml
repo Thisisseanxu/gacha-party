@@ -1,7 +1,12 @@
 name = "gacha-party"
 main = "_worker.js"
-compatibility_date = "2025-07-05"
+compatibility_date = "2025-07-29"
 
 [assets]
 directory = "./dist"
 not_found_handling = "single-page-application"
+
+# 定义KV命名空间绑定
+[[kv_namespaces]]
+binding = "GACHA_PARTY_RECORDS" # KV 数据库的命名空间
+id = "91be14f46c174618af8980503577680e" # KV数据库的ID

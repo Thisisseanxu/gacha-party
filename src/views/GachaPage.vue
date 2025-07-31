@@ -322,7 +322,8 @@ const shareCustomPool = () => {
   const data = route.query.data;
   // 使用 encodeURIComponent 防止编码问题
   const encodedData = encodeURIComponent(data);
-  const shareText = `这是我在织夜工具箱创建的 ${poolName} 卡池，快来试试吧\nhttps://gacha-party.fans/chouka/custom?data=${encodedData}`;
+  const currentUrl = window.location.origin;
+  const shareText = `这是我在织夜工具箱创建的 ${poolName} 卡池，快来试试吧\n${currentUrl}/chouka/custom?data=${encodedData}`;
 
   navigator.clipboard.writeText(shareText).then(() => {
     alert('分享链接已复制到剪贴板！');
