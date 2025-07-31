@@ -14,7 +14,7 @@ export const allCards = [
   { id: '1312', name: '酷玩游戏机', rarity: RARITY.SP, imageUrl: '/images/cards/1312.webp' },
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
   { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
-  { id: 'zaodaoji', name: '光之恶魔', rarity: RARITY.SP, imageUrl: '/images/cards/zaodaoji.webp' },
+  { id: '11007', name: '光之恶魔', rarity: RARITY.SP, imageUrl: '/images/cards/zaodaoji.webp' },
   {
     id: 'CustomSPishuan',
     name: '超·强力消防栓',
