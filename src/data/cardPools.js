@@ -25,14 +25,14 @@ export const cardPools = {
         boostAfter: 40, // 40抽后每抽提升SP概率
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
-        UpCards: ['zaodaoji'],
+        UpCards: ['11007'],
       },
       [RARITY.SSR]: {
         doubleRateCards: ['1403'], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
-      [RARITY.SP]: ['zaodaoji'],
+      [RARITY.SP]: ['11007'],
       [RARITY.SSR]: ['1403', '1504', '1402', '1401'],
       [RARITY.SR]: [
         '1103',
