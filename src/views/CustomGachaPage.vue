@@ -1,8 +1,8 @@
 <template>
   <div class="custom-gacha-page-background">
-    <div class="config-container card">
+    <div class="config-container">
       <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
-      <h1 class="config-title">自定义卡池构建器</h1>
+      <h1 class="config-title">创建自定义卡池</h1>
       <p class="config-description">在这里创建你独一无二的梦想卡池！</p>
 
       <div class="config-section">
@@ -211,18 +211,15 @@ const navigateToGachaPage = () => {
   color: v-bind('colors.text.primary');
 }
 
-.card {
-  background-color: v-bind('colors.background.content');
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid v-bind('colors.border.primary');
-}
-
 .config-container {
   max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  background-color: v-bind('colors.background.content');
+  padding: 1.5rem min(4vw, 2rem);
+  border-radius: 12px;
+  border: 1px solid v-bind('colors.border.primary');
 }
 
 .config-title {
@@ -305,8 +302,9 @@ const navigateToGachaPage = () => {
 
 .card-selector-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, 86px);
   gap: 1rem;
+  justify-content: center;
 }
 
 .card-option {
@@ -326,7 +324,7 @@ const navigateToGachaPage = () => {
 .card-option .card-name {
   font-size: 0.8rem;
   text-align: center;
-  padding: 4px;
+  padding: 4px 0px;
   background: rgba(0, 0, 0, 0.6);
   position: absolute;
   bottom: 0;

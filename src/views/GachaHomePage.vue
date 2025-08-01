@@ -137,7 +137,7 @@ const challengeMode = ref(false);
   text-align: left;
   color: v-bind('colors.text.secondary');
   line-height: 1.8;
-  width: 100%;
+  max-width: min(100%, 100dvw - 40px);
   border: 1px solid v-bind('colors.border.primary');
 }
 
