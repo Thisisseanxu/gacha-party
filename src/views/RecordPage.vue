@@ -5,7 +5,7 @@
         <h2 class="input-title">抽卡记录分析</h2>
         <p>此页面可分析使用抽卡记录导出工具导出的抽卡数据<br />
           工具和激活码请加 <a class="highlight"
-            href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
+            href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
             target="_blank">
             Q群1049576192</a> 获取
         </p>
@@ -69,7 +69,7 @@
 
           <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleAnalysis.SinglePulls + '次'
-          }}<br />
+            }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -83,7 +83,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                 limitAnalysis.SSR
-              }}</span>
+                }}</span>
             </div>
           </div>
           <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -240,7 +240,7 @@
         <div
           style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+            }}卡池记录 (Excel)</button>
           <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
           <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
         </div>
