@@ -52,7 +52,7 @@
         <h2>联系我们与反馈</h2>
         <p>我们非常期待听到你的声音！<br />如果有任何建议、想法，或者在使用过程中遇到了问题，欢迎通过以下方式联系我们：</p>
         <ul class="contact-list">
-          <li><strong>问题反馈与建议: </strong><a href="https://github.com/your-repo/issues" target="_blank"
+          <li><strong>问题反馈与建议: </strong><a href="https://github.com/Thisiseanxu/gacha-party/issues" target="_blank"
               rel="noopener noreferrer">创建Github Issue</a></li>
           <li><strong>交流 QQ 群: </strong><a
               href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
