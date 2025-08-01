@@ -194,7 +194,7 @@ const navigateToGachaPage = () => {
   const encodedData = btoa(binaryString);
 
   router.push({
-    name: '抽卡页面',
+    name: '抽卡模拟器',
     params: { poolId: 'custom' }, // 使用一个固定的param来标识这是自定义卡池
     query: { data: encodedData },
   });
