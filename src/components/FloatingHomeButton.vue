@@ -12,7 +12,6 @@
 </template>
 
 <script setup>
-// 导入 ref 和 onMounted
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -88,14 +87,12 @@ const goToHome = () => {
   }
 }
 
-/* -- Transition 动画 -- */
-/* 定义名为 "fade" 的 transition 的进入和离开过程 */
+/* 气泡动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
 }
 
-/* 进入的开始状态和离开的结束状态 */
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

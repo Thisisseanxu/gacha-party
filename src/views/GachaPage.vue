@@ -7,7 +7,7 @@
             <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
             <button v-if="isCustomPool" @click="shareCustomPool" class="share-button">分享卡池</button>
           </div>
-          <router-link v-if="!isCustomPool" to="/chouka" class="back-home-button">返回主页</router-link>
+          <router-link v-if="!isCustomPool" to="/chouka" class="back-home-button">返回</router-link>
           <button v-else @click="goBackToEdit" class="back-home-button">重新编辑</button>
         </div>
 

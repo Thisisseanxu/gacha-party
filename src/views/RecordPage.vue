@@ -1,5 +1,4 @@
 <template>
-  <FloatingHomeButton />
   <div class="background">
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div v-if="viewState === 'input'" class="input-section">
@@ -70,7 +69,7 @@
 
           <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -84,7 +83,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                 limitAnalysis.SSR
-                }}</span>
+              }}</span>
             </div>
           </div>
           <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -241,7 +240,7 @@
         <div
           style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
           <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
           <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
         </div>
@@ -268,7 +267,6 @@ import { logger } from '@/utils/logger.js';
 import { verifyLicense } from '@/utils/licenseManager.js';
 
 import SelectorComponent from '@/components/SelectorComponent.vue';
-import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
 
 // 卡池id和名称的映射

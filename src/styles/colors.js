@@ -57,6 +57,10 @@ export const colors = {
     primary: 'rgba(58, 59, 64, 1)',
     secondary: 'rgba(44, 45, 50, 1)',
   },
+  shadow: {
+    card: 'rgba(0, 0, 0, 0.3)', // 用于卡片、列表项的常规阴影
+    cardHover: 'rgba(0, 0, 0, 0.5)', // 用于悬浮时更明显的阴影
+  },
   // 其他
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色
   textShadow: 'rgba(0, 0, 0, 0.6)', // 文本阴影

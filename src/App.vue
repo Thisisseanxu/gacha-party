@@ -2,6 +2,7 @@
   <div id="app">
     <router-view>
     </router-view>
+    <FloatingHomeButton v-if="$route.path !== '/'" />
   </div>
 </template>
 
@@ -9,6 +10,10 @@
 export default {
   name: 'App',
 }
+</script>
+
+<script setup>
+import FloatingHomeButton from './components/FloatingHomeButton.vue';
 </script>
 
 <style>

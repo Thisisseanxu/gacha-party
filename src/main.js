@@ -11,6 +11,7 @@ import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
 import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
 import GiftValueCalculator from './views/GiftValueCalculator.vue' // 礼包价值计算器页面
 import CustomGachaPage from './views/CustomGachaPage.vue' // 自定义卡池页面
+import AboutPage from './views/AboutPage.vue' // 关于页面
 
 // 定义路由
 const routes = [
@@ -20,6 +21,14 @@ const routes = [
     component: HomePage,
     meta: {
       title: '织夜工具箱',
+    },
+  },
+  {
+    path: '/about',
+    name: '关于',
+    component: AboutPage,
+    meta: {
+      title: '关于 - 织夜工具箱',
     },
   },
   {

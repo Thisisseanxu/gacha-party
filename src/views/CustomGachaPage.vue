@@ -223,7 +223,6 @@ const navigateToGachaPage = () => {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .config-title {
@@ -240,7 +239,6 @@ const navigateToGachaPage = () => {
 
 .config-section {
   border-top: 1px solid v-bind('colors.border.secondary');
-  padding-top: 1.5rem;
 }
 
 .section-title {
@@ -363,7 +361,6 @@ const navigateToGachaPage = () => {
 }
 
 .advanced-rules {
-  margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid v-bind('colors.border.secondary');
 }
@@ -421,6 +418,7 @@ const navigateToGachaPage = () => {
 
 .finalize-button,
 .back-home-button-config {
+  margin-top: 1rem;
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;

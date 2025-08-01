@@ -15,6 +15,7 @@ export const allCards = [
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
   { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
   { id: '11007', name: '光之恶魔', rarity: RARITY.SP, imageUrl: '/images/cards/zaodaoji.webp' },
+  //
   {
     id: 'CustomSPishuan',
     name: '超·强力消防栓',
@@ -24,7 +25,7 @@ export const allCards = [
 
   // SSR 角色
   { id: '1102', name: '卷卷战士', rarity: RARITY.SSR, imageUrl: '/images/cards/1102.webp' },
-  { id: '1105', name: '甜甜圈治疗师', rarity: RARITY.SSR, imageUrl: '/images/cards/1105.webp' },
+  { id: '1105', name: '甜甜圈医师', rarity: RARITY.SSR, imageUrl: '/images/cards/1105.webp' },
   { id: '1106', name: '甜甜圈推车', rarity: RARITY.SSR, imageUrl: '/images/cards/1106.webp' },
   { id: '1108', name: '甜蜜迫击炮', rarity: RARITY.SSR, imageUrl: '/images/cards/1108.webp' },
   { id: '1109', name: '裱花千竹', rarity: RARITY.SSR, imageUrl: '/images/cards/1109.webp' },
