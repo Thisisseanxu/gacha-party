@@ -38,7 +38,7 @@ const goToHome = () => {
   z-index: 9999;
   /* 手机端的默认样式：距离角落较近 */
   top: 5px;
-  left: 5px;
+  right: 5px;
   /* 让内部元素可以相对于它定位 */
   display: flex;
   flex-direction: column;
@@ -67,9 +67,9 @@ const goToHome = () => {
 .hint-bubble {
   /* 绝对定位，相对于 .floating-wrapper */
   position: absolute;
-  /* 放在悬浮球右侧，留出一点空隙 */
-  left: 100%;
-  margin-left: 10px;
+  /* 放在悬浮球左侧，留出一点空隙 */
+  right: 100%;
+  margin-right: 10px;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 6px 12px;
@@ -83,7 +83,7 @@ const goToHome = () => {
   .floating-wrapper {
     /* 应用大屏幕的样式：距离角落更远 */
     top: 4vh;
-    left: 4vw;
+    right: 4vw;
   }
 }
 

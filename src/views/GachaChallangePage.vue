@@ -3,7 +3,10 @@
     <div class="gacha-page">
       <template v-if="!showGachaResultOverlay">
         <div class="header-container">
-          <h1>抽卡挑战赛（熊月规则v2）</h1>
+          <div class="header-title">
+            <h1>抽卡挑战赛</h1>
+            <h2>（熊月规则v2）</h2>
+          </div>
         </div>
 
         <div class="challenge-stats-overview card">
@@ -300,9 +303,17 @@ const selectUpCard = (cardId) => {
   margin-bottom: -1rem;
 }
 
-h1 {
-  font-size: 2rem;
-  font-weight: bold;
+.header-title {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: v-bind('colors.text.primary');
 }
 
 .loading-text,
