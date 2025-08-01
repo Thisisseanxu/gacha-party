@@ -25,9 +25,9 @@
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
         <div class="cloud-section">
-          <p class="input-title">织夜云服务</p>
-          <p class="input-description">如果您有织夜云服务的时长，可使用云服务查询您的抽卡记录。</p>
-          <input type="text" v-model="licenseInput" class="cloud-input" placeholder="在此处输入您的激活码" />
+          <p class="input-title">织夜云服务 BETA</p>
+          <p class="input-description">【限时免费】使用激活码查询您的抽卡记录。</p>
+          <input type="text" v-model="licenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
           <button @click="handleGetRecord" class="action-button">获取云端抽卡记录</button>
         </div>
 
@@ -69,7 +69,7 @@
 
           <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
@@ -83,7 +83,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
                 limitAnalysis.SSR
-                }}</span>
+              }}</span>
             </div>
           </div>
           <div class="tertiary-text">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.dateRange :
@@ -240,7 +240,7 @@
         <div
           style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-            }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
           <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
           <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
         </div>
