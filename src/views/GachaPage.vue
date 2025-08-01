@@ -17,7 +17,6 @@
               <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
               <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
             </div>
-            <SwitchComponent v-if="currentPool.type === '限定'" label="使用旧概率（2%）" v-model="useOldRate" />
           </div>
 
           <div v-if="isSelectableUpGroupPool" class="select-up-group-container">
@@ -107,11 +106,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
-import SwitchComponent from '@/components/SwitchComponent.vue';
 import { colors } from '@/styles/colors.js';
 import pako from 'pako'; // 引入pako库解压缩json数据
 
-// --- 动画相关ref ---
+// 动画相关的ref
 const showGachaResultOverlay = ref(false);
 const displayedCards = ref([]);
 const isAnimating = ref(false);
@@ -164,41 +162,10 @@ const stopAnimation = () => {
   });
 };
 
-
-// --- Style颜色绑定 ---
-const colorBgPrimary = colors.background.primary;
-const colorBgContent = colors.background.content;
-const colorBgLight = colors.background.light;
-const colorBgLighter = colors.background.lighter;
-const colorBgHover = colors.background.hover;
-
-const colorTextPrimary = colors.text.primary;
-const colorTextSecondary = colors.text.secondary;
-const colorTextTertiary = colors.text.tertiary;
-const colorTextDisabled = colors.text.disabled;
-const colorTextHighlight = colors.text.highlight;
-
-const colorBorder = colors.border.primary;
-
-const colorBtnSingle = colors.gacha.singlePull;
-const colorBtnSingleHover = colors.gacha.singlePullHover;
-const colorBtnTen = colors.gacha.tenPull;
-const colorBtnTenHover = colors.gacha.tenPullHover;
-const colorBtnConfirm = colors.gacha.confirm;
-const colorBtnConfirmHover = colors.gacha.confirmHover;
-const colorBtnBack = colors.brand.primary;
-const colorBtnBackHover = colors.brand.hover;
-
-const colorRaritySP = colors.rarity.sp;
-const colorRaritySSR = colors.rarity.ssr;
-const colorRaritySR = colors.rarity.sr;
-const colorRarityR = colors.rarity.r;
-
-// --- 组件逻辑 ---
+// 组件逻辑
 const route = useRoute();
 const router = useRouter(); // 获取路由实例
 const selectedUpCard = ref(null);
-const useOldRate = ref(false);
 
 // 动态获取卡池数据
 const isCustomPool = computed(() => route.params.poolId === 'custom');
@@ -235,7 +202,7 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(gachaSource, selectedUpCard, useOldRate);
+} = useGacha(gachaSource, selectedUpCard);
 
 const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
 const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
@@ -360,7 +327,7 @@ const shareCustomPool = () => {
 
 
 .gacha-page-background {
-  background-color: v-bind(colorBgPrimary);
+  background-color: v-bind('colors.background.primary');
   min-height: 100vh;
   padding: 2rem 1rem;
 }
@@ -376,10 +343,10 @@ const shareCustomPool = () => {
 }
 
 .card {
-  background-color: v-bind(colorBgContent);
+  background-color: v-bind('colors.background.content');
   padding: 1.5rem 2rem;
   border-radius: 12px;
-  border: 1px solid v-bind(colorBorder);
+  border: 1px solid v-bind('colors.border.primary');
 }
 
 .header-container {
@@ -392,12 +359,13 @@ const shareCustomPool = () => {
 h1 {
   font-size: 2rem;
   font-weight: bold;
+  color: v-bind('colors.text.primary');
 }
 
 .loading-text {
   text-align: center;
   font-size: 1.2rem;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   padding: 4rem 0;
 }
 
@@ -431,37 +399,37 @@ h1 {
 }
 
 .single-pull {
-  background-color: v-bind(colorBtnSingle);
+  background-color: v-bind('colors.gacha.singlePull');
 }
 
 .single-pull:hover {
-  background-color: v-bind(colorBtnSingleHover);
+  background-color: v-bind('colors.gacha.singlePullHover');
   transform: translateY(-2px);
 }
 
 .ten-pull {
-  background-color: v-bind(colorBtnTen);
+  background-color: v-bind('colors.gacha.tenPull');
 }
 
 .ten-pull:hover {
-  background-color: v-bind(colorBtnTenHover);
+  background-color: v-bind('colors.gacha.tenPullHover');
   transform: translateY(-2px);
 }
 
 .back-home-button {
-  background-color: v-bind(colorBtnBack);
+  background-color: v-bind('colors.brand.primary');
   text-decoration: none;
 }
 
 .back-home-button:hover {
-  background-color: v-bind(colorBtnBackHover);
+  background-color: v-bind('colors.brand.hover');
 }
 
 /* --- UP选择相关样式 --- */
 .select-up-container,
 .select-up-group-container {
   margin-top: 2rem;
-  border-top: 1px solid v-bind(colorBorder);
+  border-top: 1px solid v-bind('colors.border.primary');
   padding-top: 1.5rem;
 }
 
@@ -469,7 +437,7 @@ h1 {
 .collapsible-header {
   font-weight: bold;
   margin: 0 0 1.5rem 0;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
 }
 
 .collapsible-header {
@@ -525,11 +493,11 @@ h1 {
 .up-group-item {
   cursor: pointer;
   width: clamp(280px, 45%, 320px);
-  border: 2px solid v-bind(colorBorder);
+  border: 2px solid v-bind('colors.border.primary');
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s ease;
-  background-color: v-bind(colorBgPrimary);
+  background-color: v-bind('colors.background.primary');
 }
 
 .up-group-item:hover {
@@ -538,8 +506,8 @@ h1 {
 }
 
 .up-group-item.selected {
-  border-color: v-bind(colorRaritySSR);
-  box-shadow: 0 0 20px -5px v-bind(colorRaritySSR);
+  border-color: v-bind('colors.rarity.ssr');
+  box-shadow: 0 0 20px -5px v-bind('colors.rarity.ssr');
 }
 
 .up-group-image {
@@ -552,14 +520,14 @@ h1 {
 /* --- 历史记录相关样式 --- */
 .gacha-stats h2,
 .gacha-stats h3 {
-  color: v-bind(colorTextPrimary);
-  border-bottom: 1px solid v-bind(colorBorder);
+  color: v-bind('colors.text.primary');
+  border-bottom: 1px solid v-bind('colors.border.primary');
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .gacha-stats>p {
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   font-size: 1rem;
 }
 
@@ -575,13 +543,13 @@ h1 {
 
 .rarity-counts-list li {
   font-weight: bold;
-  background-color: v-bind(colorBgPrimary);
+  background-color: v-bind('colors.background.primary');
   padding: 0.5rem 1rem;
   border-radius: 6px;
 }
 
 .gacha-history-list {
-  background-color: v-bind(colorBgPrimary);
+  background-color: v-bind('colors.background.primary');
   min-height: 300px;
   border-radius: 8px;
   padding: 1rem;
@@ -597,7 +565,7 @@ h1 {
 
 .no-history-text {
   text-align: center;
-  color: v-bind(colorTextTertiary);
+  color: v-bind('colors.text.tertiary');
   margin-top: 2rem;
 }
 
@@ -610,16 +578,16 @@ h1 {
 }
 
 .pagination-controls button {
-  background-color: v-bind(colorBgLighter);
+  background-color: v-bind('colors.background.lighter');
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: v-bind(colorBgHover);
+  background-color: v-bind('colors.background.hover');
 }
 
 .pagination-controls button:disabled {
-  background-color: v-bind(colorBgLight);
-  color: v-bind(colorTextDisabled);
+  background-color: v-bind('colors.background.light');
+  color: v-bind('colors.text.disabled');
   cursor: not-allowed;
 }
 
@@ -669,7 +637,7 @@ h1 {
 }
 
 .overlay-title {
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
   font-size: 2.5em;
   margin-bottom: 2rem;
 }
@@ -724,14 +692,14 @@ h1 {
   padding: 1rem 4rem;
   margin-top: auto;
   font-size: 1.2em;
-  background-color: v-bind(colorBtnConfirm);
+  background-color: v-bind('colors.gacha.confirm');
   color: #1a1a1a;
   border: none;
   min-width: 120px;
 }
 
 .confirm-button:hover:not(:disabled) {
-  background-color: v-bind(colorBtnConfirmHover);
+  background-color: v-bind('colors.gacha.confirmHover');
 }
 
 .confirm-button:disabled {
@@ -742,26 +710,26 @@ h1 {
 /* --- 稀有度颜色 --- */
 .text-rarity-sp,
 .rarity-border-sp {
-  color: v-bind(colorRaritySP);
-  border-color: v-bind(colorRaritySP);
+  color: v-bind('colors.rarity.sp');
+  border-color: v-bind('colors.rarity.sp');
 }
 
 .text-rarity-ssr,
 .rarity-border-ssr {
-  color: v-bind(colorRaritySSR);
-  border-color: v-bind(colorRaritySSR);
+  color: v-bind('colors.rarity.ssr');
+  border-color: v-bind('colors.rarity.ssr');
 }
 
 .text-rarity-sr,
 .rarity-border-sr {
-  color: v-bind(colorRaritySR);
-  border-color: v-bind(colorRaritySR);
+  color: v-bind('colors.rarity.sr');
+  border-color: v-bind('colors.rarity.sr');
 }
 
 .text-rarity-r,
 .rarity-border-r {
-  color: v-bind(colorRarityR);
-  border-color: v-bind(colorRarityR);
+  color: v-bind('colors.rarity.r');
+  border-color: v-bind('colors.rarity.r');
 }
 
 .rarity-bg-sp {
@@ -777,11 +745,11 @@ h1 {
 }
 
 .up-card-option.selected.rarity-border-sp {
-  box-shadow: 0 0 15px v-bind(colorRaritySP);
+  box-shadow: 0 0 15px v-bind('colors.rarity.sp');
 }
 
 .up-card-option.selected.rarity-border-ssr {
-  box-shadow: 0 0 15px v-bind(colorRaritySSR);
+  box-shadow: 0 0 15px v-bind('colors.rarity.ssr');
 }
 
 /* --- 动画关键帧 & 过渡 --- */
@@ -790,12 +758,12 @@ h1 {
 
   0%,
   100% {
-    box-shadow: 0 0 10px 2px v-bind(colorRaritySP);
+    box-shadow: 0 0 10px 2px v-bind('colors.rarity.sp');
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 30px 10px v-bind(colorRaritySP);
+    box-shadow: 0 0 30px 10px v-bind('colors.rarity.sp');
     transform: scale(1.1);
   }
 }

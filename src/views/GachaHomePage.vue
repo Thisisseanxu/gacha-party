@@ -1,13 +1,15 @@
 <template>
-  <div class="home-page-background">
+  <div class="background">
     <div class="home-page">
       <div class="header-section">
         <h1>抽卡模拟器</h1>
         <p>选择一个卡池，开始你的欧皇之旅吧！</p>
+        <SwitchComponent v-model="challengeMode" label="熊月的200抽挑战赛模式" />
       </div>
 
       <div class="card-pool-list">
-        <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: '抽卡模拟器', params: { poolId: id } }"
+        <router-link v-for="(pool, id) in cardPools" :key="id"
+          :to="challengeMode ? { name: '抽卡挑战赛', params: { poolId: id } } : { name: '抽卡模拟器', params: { poolId: id } }"
           class="card-pool-item">
           <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
           <div v-else class="pool-name-text-wrapper">
@@ -36,25 +38,23 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { cardPools } from '@/data/cardPools';
 import { colors } from '@/styles/colors.js';
+import SwitchComponent from '@/components/SwitchComponent.vue';
 
-// 将颜色值绑定到CSS变量，以便在 <style> 中使用
-const colorBgPrimary = colors.background.primary;
-const colorBgContent = colors.background.content;
-const colorTextPrimary = colors.text.primary;
-const colorTextSecondary = colors.text.secondary;
-const colorTextHighlight = colors.text.highlight;
-const colorBorder = colors.border.primary;
-
+const challengeMode = ref(false);
 </script>
 
 <style scoped>
-.home-page-background {
-  background-color: v-bind(colorBgPrimary);
+.background {
+  position: relative;
   min-height: 100vh;
-  padding: 2rem 1rem;
+  background-color: v-bind('colors.background.primary');
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  overflow: hidden;
+  justify-items: center;
 }
 
 .home-page {
@@ -72,13 +72,13 @@ const colorBorder = colors.border.primary;
 
 .header-section h1 {
   font-size: 2.5rem;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   font-weight: bold;
 }
 
 .header-section p {
   font-size: 1.1rem;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
 }
 
 .card-pool-list {
@@ -95,8 +95,8 @@ const colorBorder = colors.border.primary;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background-color: v-bind(colorBgContent);
-  border: 1px solid v-bind(colorBorder);
+  background-color: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
   display: flex;
   justify-content: center;
   align-items: center;
@@ -125,28 +125,28 @@ const colorBorder = colors.border.primary;
 
 .pool-name-text {
   font-size: 1.8em;
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
   font-weight: bold;
   margin: 0;
 }
 
 .info-section.card {
-  background-color: v-bind(colorBgContent);
+  background-color: v-bind('colors.background.content');
   border-radius: 12px;
   padding: 2rem;
   text-align: left;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   line-height: 1.8;
   width: 100%;
-  border: 1px solid v-bind(colorBorder);
+  border: 1px solid v-bind('colors.border.primary');
 }
 
 .info-section h3 {
   font-size: 1.5rem;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   margin-top: 0;
   margin-bottom: 1rem;
-  border-bottom: 2px solid v-bind(colorBorder);
+  border-bottom: 2px solid v-bind('colors.border.primary');
   padding-bottom: 0.5rem;
 }
 
@@ -157,11 +157,11 @@ const colorBorder = colors.border.primary;
 .footer-link {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid v-bind(colorBorder);
+  border-top: 1px solid v-bind('colors.border.primary');
 }
 
 .footer-link a {
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
   text-decoration: none;
   font-weight: bold;
 }
