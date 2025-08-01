@@ -51,7 +51,6 @@ const challengeMode = ref(false);
   position: relative;
   min-height: 100vh;
   background-color: v-bind('colors.background.primary');
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   overflow: hidden;
   justify-items: center;

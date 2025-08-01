@@ -121,7 +121,6 @@ const colorTextHighlight = colors.text.highlight;
   position: relative;
   min-height: 100dvh;
   background-color: #000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -255,7 +254,7 @@ const colorTextHighlight = colors.text.highlight;
 }
 
 /* 确保icon-park的图标垂直居中 */
-.footer-link .i-icon {
+.footer-link :deep(.i-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

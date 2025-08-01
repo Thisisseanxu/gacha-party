@@ -160,7 +160,6 @@ const runSimulation = async () => {
   padding: 2rem;
   min-height: 80vh;
   background-color: #f0f2f5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .card {
@@ -313,7 +312,6 @@ const runSimulation = async () => {
 
 .rarity-count {
   text-align: right;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
   color: #555;
 }
 

@@ -14,13 +14,11 @@ export default {
 
 <script setup>
 import FloatingHomeButton from './components/FloatingHomeButton.vue';
+import './styles/global.css';
 </script>
 
 <style scoped>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   min-height: 100dvh;

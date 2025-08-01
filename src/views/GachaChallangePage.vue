@@ -283,7 +283,6 @@ const selectUpCard = (cardId) => {
   max-width: 900px;
   margin: 0 auto;
   color: v-bind('colors.text.primary');
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;

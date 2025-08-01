@@ -25,7 +25,6 @@ import { colors } from '../styles/colors.js';
   width: 100%;
   background-color: v-bind('colors.background.primary');
   color: v-bind('colors.text.primary');
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   text-align: center;
 }
 

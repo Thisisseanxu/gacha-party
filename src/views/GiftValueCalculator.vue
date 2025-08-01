@@ -99,7 +99,6 @@ const colorBorderPrimary = colors.border.primary;
   min-height: 100vh;
   background-color: v-bind(colorBgPrimary);
   color: v-bind(colorTextPrimary);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   justify-content: center;
   align-items: flex-start;

@@ -117,14 +117,12 @@ const specialThanks = ref([
   position: relative;
   min-height: 100vh;
   background-color: #000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   overflow: hidden;
   justify-items: center;
 }
 
 .info-page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: v-bind('colors.background.primary');
   color: v-bind('colors.text.primary');
   max-width: 800px;

@@ -336,7 +336,6 @@ const shareCustomPool = () => {
   max-width: 900px;
   margin: 0 auto;
   color: v-bind(colorTextPrimary);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
