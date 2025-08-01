@@ -42,7 +42,7 @@
           <li v-for="(item, index) in specialThanks" :key="index">
             感谢
             <a :href="item.link" target="_blank" rel="noopener noreferrer" v-if="item.link"><strong>{{ item.supporter
-                }}</strong></a>
+            }}</strong></a>
             <strong v-else>{{ item.supporter }}</strong> {{ item.contribution }}
           </li>
         </ul>
@@ -269,7 +269,7 @@ a:hover {
 .thanks-list li:hover,
 .contact-list li:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px v-bind('colors.shadow.cardHover');
+  box-shadow: 0 6px 15px v-bind('colors.shadow.primaryHover');
   border-color: v-bind('colors.background.lighter');
 }
 

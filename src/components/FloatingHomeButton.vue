@@ -14,6 +14,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { colors } from '@/styles/colors.js';
 
 const router = useRouter();
 
@@ -53,14 +54,14 @@ const goToHome = () => {
   background-size: cover;
   background-position: center;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 2px solid v-bind('colors.shadow.lightHover');
+  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .floating-home-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px v-bind('colors.shadow.primaryHover');
 }
 
 /* 提示气泡样式 */
@@ -70,8 +71,8 @@ const goToHome = () => {
   /* 放在悬浮球左侧，留出一点空隙 */
   right: 100%;
   margin-right: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
+  background-color: v-bind('colors.shadow.primaryHover');
+  color: v-bind('colors.text.primary');
   padding: 6px 12px;
   border-radius: 15px;
   font-size: 14px;
