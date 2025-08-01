@@ -115,7 +115,7 @@
               <div v-else class="stat-value">未抽到</div>
             </div>
             <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div v-if="singleAnalysis.minSP > 0"
+              <div v-if="singleAnalysis.minSP > 0 && singleAnalysis.minSP !== Infinity"
                 :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最欧 {{
                   singleAnalysis.minSP }} 抽
               </div>
@@ -135,7 +135,8 @@
               <div v-else class="stat-value">未抽到</div>
             </div>
             <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div v-if="normalAnalysis.minSSR > 0" class="stat-value">最欧 {{ normalAnalysis.minSSR }} 抽</div>
+              <div v-if="normalAnalysis.minSSR > 0 && normalAnalysis.minSSR !== Infinity" class="stat-value">最欧 {{
+                normalAnalysis.minSSR }} 抽</div>
               <div v-else class="stat-value">SSR</div>
             </div>
           </div>
@@ -281,6 +282,7 @@ const CARDPOOLS_NAME_MAP = {
   '42': '扭蛋大作战',
   '43': '早稻叽',
 };
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
 
 // 抽数<字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
@@ -302,7 +304,6 @@ const NORMALPOOL_TITLE_MAP = {
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh }, // 设置为120以防偶尔出现的>60抽的情况
 };
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
 
 const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
@@ -523,10 +524,8 @@ const limitAnalysis = computed(() => {
 
   let SPCounter = 0;
   let SSRCounter = 0;
-
   const SPHistory = [];
   const SSRHistory = [];
-
 
   records.forEach((record) => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
@@ -574,33 +573,23 @@ const limitAnalysis = computed(() => {
     minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
     SPHistory: SPHistory,
     SSRHistory: SSRHistory,
+    records: records,
   };
 });
 
 // 限定卡池单卡池分析逻辑
 const singleAnalysis = computed(() => {
   if (!limitAnalysis.value) return null;
-  if (CurrentSelectedPool.value !== 'Limited' && CurrentSelectedPool.value !== 'Normal') {
+  if (LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
     // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
     const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
     const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
-    if (filteredSPHistory.length === 0) {
-      return {
-        totalPulls: 0,
-        SinglePulls: 0,
-        avgPullsForSP: 0,
-        avgPullsForSSR: 0,
-        maxSP: 0,
-        minSP: 0,
-        SPHistory: [],
-        SSRHistory: [],
-      };
-    }
+    const totalPulls = filteredSPHistory.reduce((sum, item) => sum + item.count, 0);
     return {
-      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
+      totalPulls: totalPulls,
       SinglePulls: fullHistory.value.length,
       avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
-      avgPullsForSSR: calculateAverage(filteredSSRHistory.map(item => item.count)),
+      avgPullsForSSR: filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
       maxSP: Math.max(...filteredSPHistory.map(item => item.count), 0),
       minSP: Math.min(...filteredSPHistory.map(item => item.count), Infinity),
       SPHistory: filteredSPHistory,
@@ -907,7 +896,7 @@ const getExcelColor = (rgbaColor) => {
     return `${a}${r}${g}${b}`.toUpperCase();
   }
   // 如果格式不匹配，打印警告并返回一个默认颜色（黑色）
-  console.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
+  logger.warn(`颜色格式非RGBA或无法解析: ${rgbaColor}, 已默认使用纯黑色。`);
   return 'FF000000';
 };
 
