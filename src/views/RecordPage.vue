@@ -329,50 +329,6 @@ const underlineStyle = ref({});
 // 检查是否为开发环境
 const isDev = import.meta.env.DEV;
 
-const handleGetRecord = async () => {
-  if (!licenseInput.value.trim()) {
-    errorMessage.value = '请输入激活码！';
-    return;
-  }
-
-  const licenseKey = licenseInput.value.trim();
-  errorMessage.value = '';
-
-  try {
-    // 在客户端先进行一次验证
-    logger.log("正在客户端验证激活码...");
-    const result = verifyLicense(licenseKey);
-    if (result.success !== true) {
-      throw new Error(result.message || '激活码验证失败，请检查激活码是否正确。');
-    }
-    logger.log(`客户端验证成功, User ID: ${result.userId}`);
-
-    const currentUrl = isDev ? 'http://localhost:8787' : window.location.origin;
-
-    // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
-    const response = await fetch(`${currentUrl}/get-record`, {
-      method: 'GET',
-      headers: {
-        'X-License-Key': licenseKey
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `服务器错误: ${response.status}`);
-    }
-
-    const compressedString = await response.text();
-    const wrappedJson = { compressed: true, data: compressedString };
-    jsonInput.value = JSON.stringify(wrappedJson);
-    handleJsonAnalysis(); // 调用已有的分析逻辑
-
-  } catch (error) {
-    logger.error("激活码处理错误:", error);
-    errorMessage.value = error.message;
-  }
-};
-
 const handleJsonAnalysis = () => {
   errorMessage.value = '';
 
@@ -399,6 +355,7 @@ const handleJsonAnalysis = () => {
         // Gzip 解压
         const decompressedString = pako.inflate(bytes, { to: 'string' });
         finalData = JSON.parse(decompressedString);
+        finalData.cloud = parsedData.cloud || false; // 保留云端标记
 
       } catch (e) {
         errorMessage.value = `解压或解析压缩数据时失败，请确认数据是否正确。错误: ${e.message}`;
@@ -440,6 +397,19 @@ const handleJsonAnalysis = () => {
   if (!gachaPools.some(pool => Array.isArray(pool))) {
     errorMessage.value = '数据格式错误：未找到有效的卡池数据！';
     return;
+  }
+
+  if (finalData.cloud) {
+    // 处理云端数据时要手动加上gacha_id
+    for (const [gachaId, records] of Object.entries(playerData)) {
+      if (Array.isArray(records)) {
+        records.forEach(record => {
+          if (typeof record === 'object' && record !== null) {
+            record.gacha_id = gachaId; // 添加 gacha_id 字段
+          }
+        });
+      }
+    }
   }
 
   const LimitGachaRecords = [];
@@ -489,6 +459,50 @@ const handleFileUpload = (event) => {
   event.target.value = '';
 };
 
+// 处理获取云端记录
+const handleGetRecord = async () => {
+  if (!licenseInput.value.trim()) {
+    cloudErrorMessage.value = '请输入激活码！';
+    return;
+  }
+
+  const licenseKey = licenseInput.value.trim();
+
+  try {
+    // 在客户端先进行一次验证
+    logger.log("正在客户端验证激活码...");
+    const result = verifyLicense(licenseKey);
+    if (result.success !== true) {
+      throw new Error(result.message || '激活码验证失败，请检查激活码是否正确。');
+    }
+    logger.log(`客户端验证成功, User ID: ${result.userId}`);
+
+    const currentUrl = isDev ? 'http://localhost:8787' : window.location.origin;
+
+    // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
+    const response = await fetch(`${currentUrl}/get-record`, {
+      method: 'GET',
+      headers: {
+        'X-License-Key': licenseKey
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `服务器错误: ${response.status}`);
+    }
+
+    const compressedString = await response.text();
+    const wrappedJson = { cloud: true, compressed: true, data: compressedString };
+    jsonInput.value = JSON.stringify(wrappedJson);
+    handleJsonAnalysis(); // 调用已有的分析逻辑
+
+  } catch (error) {
+    logger.error("激活码处理错误:", error);
+    cloudErrorMessage.value = error.message;
+  }
+};
+
 // 重置网页获取其他输入
 const resetView = () => {
   viewState.value = 'input';
@@ -496,6 +510,8 @@ const resetView = () => {
   LimitGachaData.value = [];
   NormalGachaData.value = [];
   errorMessage.value = '';
+  playerId.value = '';
+  cloudErrorMessage.value = '';
   CurrentSelectedPool.value = 'Limited';
 };
 
@@ -580,11 +596,10 @@ const singleAnalysis = computed(() => {
   if (!limitAnalysis.value) return null;
   if (LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
     // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
-    const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
-    const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
-    const totalPulls = filteredSPHistory.reduce((sum, item) => sum + item.count, 0);
+    const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
+    const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === CurrentSelectedPool.value);
     return {
-      totalPulls: totalPulls,
+      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
       SinglePulls: fullHistory.value.length,
       avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
       avgPullsForSSR: filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
@@ -962,7 +977,7 @@ const downloadDecompressedData = () => {
     }
 
     // 格式化JSON并创建下载链接
-    const prettyJson = JSON.stringify(finalData, null, 2);
+    const prettyJson = JSON.stringify(finalData, null, 3);
     const blob = new Blob([prettyJson], { type: 'application/json;charset=utf-8' });
     FileSaver.saveAs(blob, `gacha-records-${playerId.value || 'data'}-decompressed.json`);
   } catch (e) {
@@ -993,14 +1008,14 @@ const exportToExcel = async (filename, historyData) => {
   // 定义不同稀有度的样式
   const rarityStyles = {
     SP: {
-      font: { color: { argb: getExcelColor(colorRaritySP) }, bold: true },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: getExcelColor(colorBrandHover) } }
+      font: { color: { argb: getExcelColor('colors.rarity.sp') }, bold: true },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: getExcelColor('colors.brand.hover') } }
     },
-    SSR: { font: { color: { argb: getExcelColor(colorRaritySSR) }, bold: true } },
-    SR: { font: { color: { argb: getExcelColor(colorRaritySR) } } },
-    R: { font: { color: { argb: getExcelColor(colorRarityR) } } },
+    SSR: { font: { color: { argb: getExcelColor('colors.rarity.ssr') }, bold: true } },
+    SR: { font: { color: { argb: getExcelColor('colors.rarity.sr') } } },
+    R: { font: { color: { argb: getExcelColor('colors.rarity.r') } } },
   };
-  const defaultStyle = { font: { color: { argb: getExcelColor(colorTextPrimary) } } };
+  const defaultStyle = { font: { color: { argb: getExcelColor('colors.text.primary') } } };
   // 遍历数据并添加行，同时应用样式，同时加上序号，最旧的数据为1，最新的数据为最大值
   let index = historyData.length
   historyData.forEach(item => {
@@ -1035,44 +1050,13 @@ const exportToExcel = async (filename, historyData) => {
 const exportPoolData = () => {
   exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
-
-
-// CSS颜色常量
-const colorBgPrimary = colors.background.primary;
-const colorBgContent = colors.background.content;
-const colorBgLight = colors.background.light;
-const colorBgLighter = colors.background.lighter;
-const colorBgHover = colors.background.hover;
-const colorBgAvatar = colors.background.avatar;
-
-const colorTextPrimary = colors.text.primary;
-const colorTextSecondary = colors.text.secondary;
-const colorTextTertiary = colors.text.tertiary;
-const colorTextBlack = colors.text.black;
-const colorTextDisabled = colors.text.disabled;
-const colorTextLight = colors.text.light;
-const colorTextHighlight = colors.text.highlight;
-
-const colorBrandPrimary = colors.brand.primary;
-const colorBrandHover = colors.brand.hover;
-
-const colorRaritySP = colors.rarity.sp;
-const colorRaritySSR = colors.rarity.ssr;
-const colorRaritySR = colors.rarity.sr;
-const colorRarityR = colors.rarity.r;
-
-const colorStatusError = colors.status.error;
-const colorStatusErrorBg = colors.status.errorBg;
-
-const colorScrollbar = colors.scrollbar;
-const colorTextShadow = colors.textShadow;
 </script>
 
 <style scoped>
 .background {
   min-height: 100vh;
-  background-color: v-bind(colorBgPrimary);
-  color: v-bind(colorTextPrimary);
+  background-color: v-bind('colors.background.primary');
+  color: v-bind('colors.text.primary');
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: row;
@@ -1083,7 +1067,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .gacha-analysis-container {
-  background-color: v-bind(colorBgContent);
+  background-color: v-bind('colors.background.content');
   padding: 15px;
   margin: 10px;
   min-width: 300px;
@@ -1105,18 +1089,18 @@ const colorTextShadow = colors.textShadow;
 }
 
 .input-description {
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   font-size: 0.9rem;
   margin: 0;
 }
 
 .json-textarea {
   min-height: 200px;
-  background-color: v-bind(colorBgLight);
+  background-color: v-bind('colors.background.light');
   border: 1px solid v-bind(colorBorderPrimary);
   /* 假设定义了 colorBorderPrimary */
   border-radius: 8px;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   padding: 12px;
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.85rem;
@@ -1126,7 +1110,7 @@ const colorTextShadow = colors.textShadow;
 
 .json-textarea:focus {
   outline: none;
-  border-color: v-bind(colorBrandPrimary);
+  border-color: v-bind('colors.brand.primary');
 }
 
 .button-group {
@@ -1140,21 +1124,21 @@ const colorTextShadow = colors.textShadow;
   gap: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid v-bind(colorBgLight);
+  border-top: 1px solid v-bind('colors.background.light');
 }
 
 .cloud-input {
   padding: 12px;
-  background-color: v-bind(colorBgLight);
+  background-color: v-bind('colors.background.light');
   border: 1px solid v-bind(colorBorderPrimary);
   border-radius: 8px;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   font-size: 1rem;
 }
 
 .cloud-input:focus {
   outline: none;
-  border-color: v-bind(colorBrandPrimary);
+  border-color: v-bind('colors.brand.primary');
 }
 
 .action-button {
@@ -1162,8 +1146,8 @@ const colorTextShadow = colors.textShadow;
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
-  background-color: v-bind(colorBrandPrimary);
-  color: v-bind(colorTextBlack);
+  background-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -1171,7 +1155,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .action-button:hover {
-  background-color: v-bind(colorBrandHover);
+  background-color: v-bind('colors.brand.hover');
 }
 
 .file-upload-button {
@@ -1179,9 +1163,9 @@ const colorTextShadow = colors.textShadow;
 }
 
 .error-message {
-  color: v-bind(colorStatusError);
-  background-color: v-bind(colorStatusErrorBg);
-  border: 1px solid v-bind(colorStatusError);
+  color: v-bind('colors.status.error');
+  background-color: v-bind('colors.status.errorBg');
+  border: 1px solid v-bind('colors.status.error');
   padding: 10px;
   border-radius: 8px;
   margin: 0;
@@ -1193,12 +1177,12 @@ const colorTextShadow = colors.textShadow;
 .gacha-analysis-page>div:not(:first-child) {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 2px solid v-bind(colorBgLight);
+  border-top: 2px solid v-bind('colors.background.light');
 }
 
 .button {
-  background-color: v-bind(colorBgLighter);
-  color: v-bind(colorTextLight);
+  background-color: v-bind('colors.background.lighter');
+  color: v-bind('colors.text.light');
   border: none;
   padding: 8px 12px;
   border-radius: 6px;
@@ -1207,7 +1191,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .button:hover {
-  background-color: v-bind(colorBgHover);
+  background-color: v-bind('colors.background.hover');
 }
 
 
@@ -1235,11 +1219,11 @@ const colorTextShadow = colors.textShadow;
 }
 
 .highlight {
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
 }
 
 .highlight:visited {
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
 }
 
 .pulls-text {
@@ -1258,19 +1242,19 @@ const colorTextShadow = colors.textShadow;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
 }
 
 .pity-count {
   font-weight: bold;
   font-size: 1.2rem;
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
   /* 为防止和背景颜色相近，暂时使用金色 */
 }
 
 .tertiary-text {
   margin-top: 10px;
-  color: v-bind(colorTextTertiary);
+  color: v-bind('colors.text.tertiary');
   font-size: 0.9rem;
 }
 
@@ -1290,7 +1274,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .stat-box {
-  background-color: v-bind(colorBgLight);
+  background-color: v-bind('colors.background.light');
   border-radius: 8px;
   text-align: center;
   display: flex;
@@ -1302,7 +1286,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .stat-box .stat-title {
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   font-size: 0.9rem;
 }
 
@@ -1317,7 +1301,7 @@ const colorTextShadow = colors.textShadow;
   position: relative;
   display: flex;
   justify-content: center;
-  border-bottom: 2px solid v-bind(colorBgLighter);
+  border-bottom: 2px solid v-bind('colors.background.lighter');
   margin-bottom: 6px;
 }
 
@@ -1328,18 +1312,18 @@ const colorTextShadow = colors.textShadow;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
   border-radius: 8px 8px 0 0;
 }
 
 .nav-button:hover {
-  color: v-bind(colorTextPrimary);
-  background-color: v-bind(colorBgHover);
+  color: v-bind('colors.text.primary');
+  background-color: v-bind('colors.background.hover');
 }
 
 .nav-button.active {
-  color: v-bind(colorBrandPrimary);
+  color: v-bind('colors.brand.primary');
   background-color: transparent;
 }
 
@@ -1348,7 +1332,7 @@ const colorTextShadow = colors.textShadow;
   bottom: -2px;
   /* 贴在边框上 */
   height: 3px;
-  background-color: v-bind(colorBrandPrimary);
+  background-color: v-bind('colors.brand.primary');
   border-radius: 1.5px;
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
@@ -1363,7 +1347,7 @@ const colorTextShadow = colors.textShadow;
   max-height: 600px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: v-bind(colorScrollbar) transparent;
+  scrollbar-color: v-bind('colors.scrollbar') transparent;
   transition: scrollbar-color 0.5s ease-out;
 }
 
@@ -1389,7 +1373,7 @@ const colorTextShadow = colors.textShadow;
 
 .history-list::-webkit-scrollbar-thumb,
 .quantity-statistics-list::-webkit-scrollbar-thumb {
-  background-color: v-bind(colorScrollbar);
+  background-color: v-bind('colors.scrollbar');
   border-radius: 3px;
 }
 
@@ -1432,7 +1416,7 @@ const colorTextShadow = colors.textShadow;
   /* 方形圆角 */
   object-fit: cover;
   margin-bottom: 4px;
-  background-color: v-bind(colorBgAvatar);
+  background-color: v-bind('colors.background.avatar');
 }
 
 /* 卡片内名称样式 */
@@ -1440,7 +1424,7 @@ const colorTextShadow = colors.textShadow;
 .overview-name {
   font-weight: bold;
   font-size: 0.7rem;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1451,7 +1435,7 @@ const colorTextShadow = colors.textShadow;
 .overview-pull-count {
   font-size: 1rem;
   font-weight: bold;
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
 }
 
 /* 确保 “无记录” 提示能横跨整个网格 */
@@ -1472,7 +1456,7 @@ const colorTextShadow = colors.textShadow;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: v-bind(colorBgAvatar);
+  background-color: v-bind('colors.background.avatar');
   object-fit: cover;
   position: relative;
   z-index: 2;
@@ -1480,7 +1464,7 @@ const colorTextShadow = colors.textShadow;
 
 .char-name {
   font-weight: bold;
-  text-shadow: 1px 1px 3px v-bind(colorTextShadow);
+  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
 }
 
 .pull-info {
@@ -1494,21 +1478,21 @@ const colorTextShadow = colors.textShadow;
 .pull-count {
   font-size: 1.2rem;
   font-weight: bold;
-  color: v-bind(colorBrandPrimary);
+  color: v-bind('colors.brand.primary');
   text-align: right;
-  text-shadow: 1px 1px 3px v-bind(colorTextShadow);
+  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
 }
 
 /* 完整抽卡历史 */
 .full-history-section {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid v-bind(colorBgLighter);
+  border-top: 1px solid v-bind('colors.background.lighter');
 }
 
 .section-title {
   font-size: 1.1rem;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   margin-bottom: 16px;
 }
 
@@ -1521,7 +1505,7 @@ const colorTextShadow = colors.textShadow;
 }
 
 .no-history-text {
-  color: v-bind(colorTextTertiary);
+  color: v-bind('colors.text.tertiary');
   text-align: center;
   padding: 20px 0;
 }
@@ -1530,7 +1514,7 @@ const colorTextShadow = colors.textShadow;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: v-bind(colorBgLight);
+  background-color: v-bind('colors.background.light');
   padding: 8px 12px;
   border-radius: 8px;
   border-left: 4px solid transparent;
@@ -1538,39 +1522,39 @@ const colorTextShadow = colors.textShadow;
 
 /* 不同稀有度的左边框颜色 */
 .full-history-item.SP {
-  border-left-color: v-bind(colorRaritySP);
+  border-left-color: v-bind('colors.rarity.sp');
 }
 
 .full-history-item.SSR {
-  border-left-color: v-bind(colorRaritySSR);
+  border-left-color: v-bind('colors.rarity.ssr');
 }
 
 .full-history-item.SR {
-  border-left-color: v-bind(colorRaritySR);
+  border-left-color: v-bind('colors.rarity.sr');
 }
 
 .full-history-item.R {
-  border-left-color: v-bind(colorRarityR);
+  border-left-color: v-bind('colors.rarity.r');
 }
 
 /* 不同稀有度的文字颜色 */
 .rarity-SP {
-  color: v-bind(colorRaritySP);
+  color: v-bind('colors.rarity.sp');
   font-weight: bold;
 }
 
 .rarity-SSR {
-  color: v-bind(colorRaritySSR);
+  color: v-bind('colors.rarity.ssr');
   font-weight: bold;
 }
 
 .rarity-SR {
-  color: v-bind(colorRaritySR);
+  color: v-bind('colors.rarity.sr');
   font-weight: bold;
 }
 
 .rarity-R {
-  color: v-bind(colorRarityR);
+  color: v-bind('colors.rarity.r');
   font-weight: bold;
 }
 
@@ -1580,7 +1564,7 @@ const colorTextShadow = colors.textShadow;
   justify-content: center;
   align-items: center;
   gap: 16px;
-  color: v-bind(colorTextSecondary);
+  color: v-bind('colors.text.secondary');
   font-size: 0.9rem;
   margin-top: 8px;
 }
@@ -1596,16 +1580,16 @@ const colorTextShadow = colors.textShadow;
   width: 50px;
   padding: 4px;
   text-align: center;
-  background-color: v-bind(colorBgLight);
-  color: v-bind(colorTextPrimary);
-  border: 1px solid v-bind(colorBgLighter);
+  background-color: v-bind('colors.background.light');
+  color: v-bind('colors.text.primary');
+  border: 1px solid v-bind('colors.background.lighter');
   border-radius: 4px;
   font-size: inherit;
 }
 
 .page-input:focus {
   outline: none;
-  border-color: v-bind(colorBrandPrimary);
+  border-color: v-bind('colors.brand.primary');
 }
 
 /* 隐藏数字输入框的上下箭头 */
@@ -1621,8 +1605,8 @@ const colorTextShadow = colors.textShadow;
 }
 
 .pagination-controls button {
-  background-color: v-bind(colorBgLighter);
-  color: v-bind(colorTextLight);
+  background-color: v-bind('colors.background.lighter');
+  color: v-bind('colors.text.light');
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -1632,12 +1616,12 @@ const colorTextShadow = colors.textShadow;
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: v-bind(colorBgHover);
+  background-color: v-bind('colors.background.hover');
 }
 
 .pagination-controls button:disabled {
-  background-color: v-bind(colorBgLight);
-  color: v-bind(colorTextDisabled);
+  background-color: v-bind('colors.background.light');
+  color: v-bind('colors.text.disabled');
   cursor: not-allowed;
 }
 </style>
