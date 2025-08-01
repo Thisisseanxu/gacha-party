@@ -3,21 +3,13 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router' // 导入路由相关功能
 
 // 路由组件
-import HomePage from './views/HomePage.vue' // 主页
-import GachaHomePage from './views/GachaHomePage.vue' // 抽卡主页
-import GachaPage from './views/GachaPage.vue' // 抽卡页面
-import GachaChallangePage from './views/GachaChallangePage.vue' // 抽卡挑战赛页面
-import TestGacha from './views/TestGacha.vue' // 测试抽卡页面
-import RecordPage from './views/RecordPage.vue' // 抽卡分析页面
-import GiftValueCalculator from './views/GiftValueCalculator.vue' // 礼包价值计算器页面
-import CustomGachaPage from './views/CustomGachaPage.vue' // 自定义卡池页面
-import AboutPage from './views/AboutPage.vue' // 关于页面
+import HomePage from './views/HomePage.vue'
 
 // 定义路由
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: '主页',
     component: HomePage,
     meta: {
       title: '织夜工具箱',
@@ -26,23 +18,23 @@ const routes = [
   {
     path: '/about',
     name: '关于',
-    component: AboutPage,
+    component: () => import('./views/AboutPage.vue'), // 关于页面组件
     meta: {
       title: '关于 - 织夜工具箱',
     },
   },
   {
     path: '/chouka',
-    name: '抽卡主页',
-    component: GachaHomePage, // 原主页改为抽卡主页
+    name: '抽卡模拟器主页',
+    component: () => import('./views/GachaHomePage.vue'), // 抽卡模拟器主页组件
     meta: {
       title: '抽卡模拟器主页 - 织夜工具箱',
     },
   },
   {
     path: '/chouka/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
-    name: '抽卡页面',
-    component: GachaPage,
+    name: '抽卡模拟器',
+    component: () => import('./views/GachaPage.vue'), // 抽卡页面组件
     props: true, // 将路由参数作为props传递给组件
     meta: {
       title: '抽卡模拟器 - 织夜工具箱',
@@ -51,7 +43,7 @@ const routes = [
   {
     path: '/choukatiaozhansai/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
     name: '抽卡挑战赛',
-    component: GachaChallangePage,
+    component: () => import('./views/GachaChallangePage.vue'), // 抽卡挑战赛页面组件
     props: true, // 将路由参数作为props传递给组件
     meta: {
       title: '抽卡挑战赛 - 熊月定制版',
@@ -60,7 +52,7 @@ const routes = [
   {
     path: '/zidingyichouka',
     name: '自定义卡池',
-    component: CustomGachaPage,
+    component: () => import('./views/CustomGachaPage.vue'), // 自定义卡池页面组件
     meta: {
       title: '自定义卡池 - 织夜工具箱',
     },
@@ -68,7 +60,7 @@ const routes = [
   {
     path: '/test-gacha',
     name: '测试抽卡',
-    component: TestGacha,
+    component: () => import('./views/TestGacha.vue'), // 测试抽卡页面组件
     meta: {
       title: '测试抽卡页面',
     },
@@ -76,7 +68,7 @@ const routes = [
   {
     path: '/fenxi',
     name: '抽卡记录分析',
-    component: RecordPage,
+    component: () => import('./views/RecordPage.vue'), // 抽卡记录分析页面组件
     meta: {
       title: '抽卡记录分析 - 织夜工具箱',
     },
@@ -84,13 +76,12 @@ const routes = [
   {
     path: '/kejin',
     name: '礼包价值计算器',
-    component: GiftValueCalculator,
+    component: () => import('./views/GiftValueCalculator.vue'), // 礼包价值计算器页面组件
     meta: {
-      title: '我该不该氪？ - 织夜工具箱',
+      title: '礼包价值计算器 - 织夜工具箱',
     },
   },
-  // TODO 404页面
-  // { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }
+  { path: '/:pathMatch(.*)*', name: '404', component: () => import('./views/NotFound.vue') }, // 404 页面处理
 ]
 
 // 创建路由实例
