@@ -12,7 +12,7 @@ export const colors = {
     avatar: 'rgba(51, 51, 51, 1)', // 头像占位背景
   }, // 文本颜色
   text: {
-    primary: 'rgba(255, 255, 255, 1)', // 主要文字 (白色)
+    primary: 'rgba(247, 244, 239, 1)', // 主要文字 (白色)
     secondary: 'rgba(204, 204, 204, 1)', // 次要文字 (灰色)
     tertiary: 'rgba(136, 136, 136, 1)', // 最次要的文字 (更深的灰色)
     black: 'rgba(26, 27, 32, 1)', // 用于亮色背景上的深色文字
@@ -56,6 +56,12 @@ export const colors = {
   border: {
     primary: 'rgba(58, 59, 64, 1)',
     secondary: 'rgba(44, 45, 50, 1)',
+  },
+  shadow: {
+    primary: 'rgba(0, 0, 0, 0.3)', // 用于卡片、列表项的常规阴影
+    primaryHover: 'rgba(0, 0, 0, 0.5)', // 用于悬浮时更明显的阴影
+    light: 'rgba(255, 255, 255, 0.3)', // 用于深色背景上的阴影
+    lightHover: 'rgba(255, 255, 255, 0.5)', // 用于深色背景上的悬浮阴影
   },
   // 其他
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色

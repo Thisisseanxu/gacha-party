@@ -1,5 +1,5 @@
 import * as RARITY from '@/data/rarity.js'
-import { allCards } from '@/data/cards.js'
+import { cardMap } from '@/data/cards.js'
 import { logger } from '@/utils/logger.js'
 
 const SP_BASE_RATE = 0.0125 // SP 基础概率
@@ -10,8 +10,8 @@ export const cardPools = {
   // 早稻叽-预览卡池
   ZAODAOJI: {
     type: '限定',
-    name: '早稻叽-预览卡池',
-    imageUrl: '/images/cardpools-icon/zaodaojibg.webp',
+    name: '早稻叽',
+    imageUrl: '/images/cardpools-icon/10051.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -353,7 +353,7 @@ export const cardPools = {
 function getCardsByIds(ids, rarity = -1) {
   return ids
     .map((id) => {
-      const card = allCards.find((c) => c.id === id)
+      const card = cardMap.get(id) // 使用 cardMap 来获取角色数据
       if (!card) {
         logger.warn(`找不到 ${id} 对应的角色数据。请检查角色ID是否正确。`)
         return null

@@ -1,8 +1,8 @@
 <template>
   <div class="custom-gacha-page-background">
-    <div class="config-container card">
+    <div class="config-container">
       <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
-      <h1 class="config-title">自定义卡池构建器</h1>
+      <h1 class="config-title">创建自定义卡池</h1>
       <p class="config-description">在这里创建你独一无二的梦想卡池！</p>
 
       <div class="config-section">
@@ -194,7 +194,7 @@ const navigateToGachaPage = () => {
   const encodedData = btoa(binaryString);
 
   router.push({
-    name: '抽卡页面',
+    name: '抽卡模拟器',
     params: { poolId: 'custom' }, // 使用一个固定的param来标识这是自定义卡池
     query: { data: encodedData },
   });
@@ -211,19 +211,15 @@ const navigateToGachaPage = () => {
   color: v-bind('colors.text.primary');
 }
 
-.card {
-  background-color: v-bind('colors.background.content');
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid v-bind('colors.border.primary');
-}
-
 .config-container {
   max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  background-color: v-bind('colors.background.content');
+  padding: 1.5rem min(4vw, 2rem);
+  border-radius: 12px;
+  border: 1px solid v-bind('colors.border.primary');
 }
 
 .config-title {
@@ -240,7 +236,6 @@ const navigateToGachaPage = () => {
 
 .config-section {
   border-top: 1px solid v-bind('colors.border.secondary');
-  padding-top: 1.5rem;
 }
 
 .section-title {
@@ -307,8 +302,9 @@ const navigateToGachaPage = () => {
 
 .card-selector-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, 86px);
   gap: 1rem;
+  justify-content: center;
 }
 
 .card-option {
@@ -328,7 +324,7 @@ const navigateToGachaPage = () => {
 .card-option .card-name {
   font-size: 0.8rem;
   text-align: center;
-  padding: 4px;
+  padding: 4px 0px;
   background: rgba(0, 0, 0, 0.6);
   position: absolute;
   bottom: 0;
@@ -363,7 +359,6 @@ const navigateToGachaPage = () => {
 }
 
 .advanced-rules {
-  margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid v-bind('colors.border.secondary');
 }
@@ -421,6 +416,7 @@ const navigateToGachaPage = () => {
 
 .finalize-button,
 .back-home-button-config {
+  margin-top: 1rem;
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;

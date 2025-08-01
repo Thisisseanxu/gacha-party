@@ -13,7 +13,7 @@
         </router-link>
 
         <router-link to="kejin" class="btn kejin-btn">
-          <span>🎁 我该不该氪？ 💰</span>
+          <span>🎁 礼包价值计算 💰</span>
         </router-link>
 
         <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon-btn">
@@ -22,16 +22,22 @@
       </div>
 
       <div class="info-footer">
-        <a href="https://github.com/Thisiseanxu/gacha-party" target="_blank" class="footer-link">
+        <a href="https://github.com/Thisiseanxu/gacha-party" rel="noopener noreferrer" target="_blank"
+          class="footer-link">
           <github-one theme="outline" size="20" />
           <span>开源地址</span>
         </a>
 
         <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
-          target="_blank" class="footer-link">
+          target="_blank" rel="noopener noreferrer" class="footer-link">
           <tencent-qq theme="outline" size="20" />
           <span>加入Q群</span>
         </a>
+
+        <router-link to="about" class="footer-link">
+          <info theme="outline" size="20" />
+          <span>关于</span>
+        </router-link>
 
         <a v-if="deferredPrompt" @click="handleInstallClick" class="footer-link">
           <install theme="outline" size="20" />
@@ -47,7 +53,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { colors } from '@/styles/colors.js';
-import { GithubOne, TencentQq, Install } from '@icon-park/vue-next';
+import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next';
 
 const appVersion = __VERSION__;
 
@@ -76,17 +82,17 @@ const handleInstallClick = async () => {
   // 调用保存的事件对象的 prompt() 方法，会弹出浏览器标准的安装窗口
   deferredPrompt.value.prompt();
 
-  // 等待用户做出选择 (接受或拒绝)
+  // 等待用户做出选择
   const { outcome } = await deferredPrompt.value.userChoice;
   console.log(`PWA 安装提示的用户选择: ${outcome}`);
 
   // 无论用户选择什么，这个事件都已经用过，无法再次使用。
-  // 清空 ref，我们的安装按钮也会因此被 v-if 隐藏。
+  // 清空 ref，安装按钮也会因此被 v-if 隐藏。
   deferredPrompt.value = null;
 };
 
 // --- 开发中按钮控制逻辑 ---
-const originalComingSoonText = '🛠️ 伤害计算器 (即将推出)';
+const originalComingSoonText = '🛠️ 更多功能即将上线';
 const comingSoonText = ref(originalComingSoonText);
 const isComingSoonClicked = ref(false);
 
@@ -113,7 +119,7 @@ const colorTextHighlight = colors.text.highlight;
 <style scoped>
 .background {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: #000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
@@ -140,7 +146,6 @@ const colorTextHighlight = colors.text.highlight;
 .home-container {
   position: relative;
   z-index: 2;
-  max-width: 600px;
   width: 100%;
   padding: 2rem;
   background-color: rgba(26, 27, 32, 0.8);
@@ -149,6 +154,9 @@ const colorTextHighlight = colors.text.highlight;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-sizing: border-box;
+  max-width: min(100vw, 800px);
+  min-width: 0;
 }
 
 .title {
@@ -169,6 +177,7 @@ const colorTextHighlight = colors.text.highlight;
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
+  max-width: 100vw;
 }
 
 .btn {
@@ -223,10 +232,12 @@ const colorTextHighlight = colors.text.highlight;
 
 .info-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 2rem;
+  row-gap: 0.8rem;
   margin-top: 2rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.8rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(58, 59, 64, 0.5);
   width: 100%;
@@ -234,12 +245,20 @@ const colorTextHighlight = colors.text.highlight;
 
 .footer-link {
   display: flex;
+  text-wrap: nowrap;
   align-items: center;
   gap: 0.8rem;
   color: v-bind(colorTextHighlight);
   text-decoration: none;
   font-size: 1rem;
   transition: all 0.3s ease;
+}
+
+/* 确保icon-park的图标垂直居中 */
+.footer-link .i-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer-link:hover {

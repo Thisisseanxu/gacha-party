@@ -1,5 +1,4 @@
 <template>
-  <FloatingHomeButton />
   <div class="background">
     <div class="calculator-container">
       <h2 class="title">我该不该氪？</h2>
@@ -47,7 +46,6 @@
 <script setup>
 import { ref } from 'vue';
 import { colors } from '@/styles/colors.js';
-import FloatingHomeButton from '@/components/FloatingHomeButton.vue';
 
 // --- 输入绑定 ---
 const price = ref(null);

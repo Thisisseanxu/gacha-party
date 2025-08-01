@@ -1,6 +1,6 @@
 {
   "name": "gacha-party",
-  "version": "2.3.7",
+  "version": "2.4.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,10 +15,12 @@
   },
   "dependencies": {
     "@icon-park/vue-next": "^1.4.2",
+    "buffer": "^6.0.3",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "hono": "^4.8.4",
     "pako": "^2.1.0",
+    "tweetnacl": "^1.0.3",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -28,6 +30,7 @@
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.22.0",
     "eslint-plugin-vue": "~10.0.0",
+    "eslint-plugin-vue-scoped-css": "^2.11.0",
     "globals": "^16.0.0",
     "prettier": "3.5.3",
     "vite": "^6.2.4",

@@ -51,7 +51,7 @@ function weightedRandom(weightedItems) {
  *   performMultiPulls,
  * } = useGacha('standard');
  */
-export function useGacha(poolSource, selectedUpCard = ref(null), useOldRate = ref(false)) {
+export function useGacha(poolSource, selectedUpCard = ref(null)) {
   // currentPool现在可以根据poolSource的类型来决定数据来源
   // 如果poolSource是字符串 (poolId)，则从 cardPools.js 获取数据
   // 如果poolSource是对象 (自定义卡池)，则直接使用该对象
@@ -190,10 +190,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), useOldRate = re
     baseRates[RARITY.R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
 
     let adjustedRates = { ...baseRates } // 存储调整后的概率
-    // 如果使用旧的抽卡概率，则将SP的概率设置为0.02
-    if (useOldRate.value) {
-      adjustedRates[RARITY.SP] = 0.02
-    }
+
     // 如果有boost规则，且当前抽卡次数大于boostAfter，则调整概率
     // 每抽额外提升boost值*（boostCounters-boostAfter）的概率
     if (boostRarity.value && boostCounters.value > boostAfter.value) {

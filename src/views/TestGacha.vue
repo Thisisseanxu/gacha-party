@@ -333,20 +333,4 @@ const runSimulation = async () => {
 .rarity-text-R {
   color: #0070dd;
 }
-
-.rarity-text-SP+.bar-container>.bar {
-  background-color: #d66b00;
-}
-
-.rarity-text-SSR+.bar-container>.bar {
-  background-color: #d42c2a;
-}
-
-.rarity-text-SR+.bar-container>.bar {
-  background-color: #a335ee;
-}
-
-.rarity-text-R+.bar-container>.bar {
-  background-color: #0070dd;
-}
 </style>
