@@ -16,7 +16,7 @@ export default {
 import FloatingHomeButton from './components/FloatingHomeButton.vue';
 </script>
 
-<style>
+<style scoped>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -24,10 +24,5 @@ import FloatingHomeButton from './components/FloatingHomeButton.vue';
   text-align: center;
   color: #2c3e50;
   min-height: 100dvh;
-}
-
-body {
-  margin: 0;
-  padding: 0;
 }
 </style>

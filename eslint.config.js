@@ -3,6 +3,7 @@ import globals from 'globals'
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import pluginVueScopedCss from 'eslint-plugin-vue-scoped-css'
 
 export default defineConfig([
   {
@@ -24,5 +25,6 @@ export default defineConfig([
 
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
+  ...pluginVueScopedCss.configs['flat/all'],
   skipFormatting,
 ])

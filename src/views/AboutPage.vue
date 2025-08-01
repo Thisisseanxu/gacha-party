@@ -20,29 +20,7 @@
         </p>
       </section>
 
-      <!-- <section class="content-section">
-        <h2>核心功能一览</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>[功能一名称，如：通知一键发布]</h3>
-            <p>[对功能一的简短描述，如：支持多平台一键同步发送班级通知，省去重复操作的烦恼。]</p>
-          </div>
-          <div class="feature-card">
-            <h3>[功能二名称，如：活动报名统计]</h3>
-            <p>[对功能二的简短描述，如：快速创建活动报名链接，实时查看报名情况，并支持数据导出。]</p>
-          </div>
-          <div class="feature-card">
-            <h3>[功能三名称，如：班费透明管理]</h3>
-            <p>[对功能三的简短描述，如：提供清晰的收支记录功能，账目公开透明，增强班级凝聚力。]</p>
-          </div>
-          <div class="feature-card">
-            <h3>[更多功能...]</h3>
-            <p>[请继续添加你的核心功能介绍，或描述：更多实用功能正在持续开发中，敬请期待！]</p>
-          </div>
-        </div>
-      </section> -->
-
-      <!-- <section class="content-section">
+      <section class="content-section" v-if="false"> <!-- 暂时没有内容所以禁用渲染 -->
         <h2>核心贡献者</h2>
         <p>本项目的成长离不开每一位贡献者的努力。以下是部分核心贡献者（排名不分先后）：</p>
         <div class="contributors-list">
@@ -55,7 +33,7 @@
             </div>
           </div>
         </div>
-      </section> -->
+      </section>
 
       <section class="content-section">
         <h2>特别鸣谢</h2>
@@ -64,7 +42,7 @@
           <li v-for="(item, index) in specialThanks" :key="index">
             感谢
             <a :href="item.link" target="_blank" rel="noopener noreferrer" v-if="item.link"><strong>{{ item.supporter
-            }}</strong></a>
+                }}</strong></a>
             <strong v-else>{{ item.supporter }}</strong> {{ item.contribution }}
           </li>
         </ul>
@@ -230,32 +208,6 @@ a:hover {
   padding: 0 5px;
   min-width: 40px;
   display: inline-block;
-}
-
-/* 功能介绍样式 */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.feature-card {
-  background: v-bind('colors.background.light');
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid v-bind('colors.border.primary');
-  box-shadow: 0 4px 10px v-bind('colors.shadow.card');
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px v-bind('colors.shadow.cardHover');
-}
-
-.feature-card h3 {
-  margin-top: 0;
-  color: v-bind('colors.brand.primary');
 }
 
 /* 核心贡献者样式 */
