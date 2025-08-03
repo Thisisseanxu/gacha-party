@@ -25,7 +25,7 @@ function base64UrlToStandard(base64url) {
 /**
  * 验证并解码激活码
  * @param {string} licenseKey - 用户输入的激活码
- * @returns {{success: boolean, message: string, userId: number | null, expiryTimestamp: number | null}} - 返回的结果
+ * @returns {{success: boolean, message: string, userId: number | null, isExpired: boolean}} - 返回的结果
  */
 export function verifyLicense(licenseKey) {
   // 将 URL-safe Base64 转换为标准格式
@@ -33,9 +33,10 @@ export function verifyLicense(licenseKey) {
   const fullData = Buffer.from(standardBase64Key, 'base64')
 
   // Ed25519 签名固定为 64 字节
+
   const signatureLength = 64
   if (fullData.length <= signatureLength) {
-    return { success: false, message: '激活码格式错误', userId: null, expiryTimestamp: null }
+    return { success: false, message: '激活码格式错误', userId: null, isExpired: true }
   }
 
   // 从数据中分离出 payload 和 signature
@@ -46,7 +47,7 @@ export function verifyLicense(licenseKey) {
   const isVerified = nacl.sign.detached.verify(payload, signature, publicKeyBytes)
 
   if (!isVerified) {
-    return { success: false, message: '无效的激活码', userId: null, expiryTimestamp: null }
+    return { success: false, message: '无效的激活码', userId: null, isExpired: true }
   }
 
   // payload 长度应为 4 (userId) + 8 (timestamp) = 12 字节
@@ -55,7 +56,7 @@ export function verifyLicense(licenseKey) {
       success: false,
       message: '激活码数据格式不正确',
       userId: null,
-      expiryTimestamp: null,
+      isExpired: true,
     }
   }
 
@@ -68,13 +69,8 @@ export function verifyLicense(licenseKey) {
   // 检查激活码是否已过期
   const nowTimestamp = Math.floor(Date.now() / 1000)
   if (nowTimestamp > expiryTimestamp) {
-    return {
-      success: true,
-      message: '激活码已过期',
-      userId: userId,
-      expiryTimestamp: expiryTimestamp,
-    }
+    return { success: true, message: '激活码已过期', userId: userId, isExpired: true }
   }
 
-  return { success: true, message: '获取成功', userId, expiryTimestamp }
+  return { success: true, message: '获取成功', userId, isExpired: false }
 }

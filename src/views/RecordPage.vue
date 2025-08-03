@@ -32,7 +32,7 @@
         </div>
 
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
-        <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisiseanxu/gacha-party"
+        <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisisseanxu/gacha-party"
             target="_blank">Github链接</a>提出意见/提交代码。</p>
       </div>
     </div>

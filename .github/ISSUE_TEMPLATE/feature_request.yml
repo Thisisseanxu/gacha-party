@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         非常感谢你对改进项目的建议！
-        在提交前，请先[搜索现有的 Issue](https://github.com/Thisiseanxu/gacha-party/issues)，看看是否有人提出过类似的功能。
+        在提交前，请先[搜索现有的 Issue](https://github.com/Thisisseanxu/gacha-party/issues)，看看是否有人提出过类似的功能。
 
   - type: textarea
     id: feature-description
