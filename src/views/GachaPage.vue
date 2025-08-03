@@ -14,8 +14,11 @@
         <div v-if="currentPool" class="gacha-main-content card">
           <div class="controls-and-switch">
             <div class="gacha-controls">
-              <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
-              <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+              <button @click="toChallenge" class="gacha-button challenge-button">进入挑战赛</button>
+              <div class="gacha-controls">
+                <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
+                <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+              </div>
             </div>
           </div>
 
@@ -273,6 +276,16 @@ watch(totalPulls, () => {
   }
 }, { immediate: true });
 
+// 将当前所有的param传递给挑战赛页面
+// 假设当前为/chouka/zaodaoji，则跳转到/choukatiaozhansai/zaodaoji
+// 假设当前为自定义卡池，则跳转到/choukatiaozhansai/custom?data=...
+const toChallenge = () => {
+  const currentPath = route.path;
+  const currentQuery = route.query;
+  const challengePath = currentPath.replace('/chouka', '/choukatiaozhansai');
+  router.push({ path: challengePath, query: currentQuery });
+};
+
 const handleSinglePull = () => {
   performSinglePull();
   showGachaResultOverlay.value = true;
@@ -516,6 +529,8 @@ h1 {
 
 .gacha-controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -549,6 +564,15 @@ h1 {
 
 .ten-pull:hover {
   background-color: v-bind('colors.gacha.tenPullHover');
+  transform: translateY(-2px);
+}
+
+.challenge-button {
+  background-color: v-bind('colors.brand.cancel');
+}
+
+.challenge-button:hover {
+  background-color: v-bind('colors.brand.cancelHover');
   transform: translateY(-2px);
 }
 

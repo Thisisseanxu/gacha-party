@@ -4,12 +4,10 @@
       <div class="header-section">
         <h1>抽卡模拟器</h1>
         <p>选择一个卡池，开始你的欧皇之旅吧！</p>
-        <SwitchComponent v-model="challengeMode" label="熊月的200抽挑战赛模式" />
       </div>
 
       <div class="card-pool-list">
-        <router-link v-for="(pool, id) in cardPools" :key="id"
-          :to="challengeMode ? { name: '抽卡挑战赛', params: { poolId: id } } : { name: '抽卡模拟器', params: { poolId: id } }"
+        <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: '抽卡模拟器', params: { poolId: id } }"
           class="card-pool-item">
           <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
           <div v-else class="pool-name-text-wrapper">
@@ -38,12 +36,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { cardPools } from '@/data/cardPools';
 import { colors } from '@/styles/colors.js';
-import SwitchComponent from '@/components/SwitchComponent.vue';
-
-const challengeMode = ref(false);
 </script>
 
 <style scoped>
