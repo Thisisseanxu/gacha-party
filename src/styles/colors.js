@@ -24,6 +24,10 @@ export const colors = {
     primary: 'rgba(232, 169, 100, 1)', // 主要高亮/按钮颜色
     primaryBackground: 'rgba(232, 169, 100, 0.15)', // 主要高亮背景
     hover: 'rgba(240, 195, 138, 1)', // 高亮色悬浮
+    confirm: 'rgba(76, 175, 80, 1)',
+    confirmHover: 'rgba(67, 160, 71, 1)',
+    cancel: 'rgba(244, 67, 54, 1)',
+    cancelHover: 'rgba(229, 57, 53, 1)',
   }, // 稀有度颜色
   rarity: {
     sp: 'rgba(222, 33, 30, 1)',
