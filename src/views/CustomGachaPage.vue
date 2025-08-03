@@ -1,7 +1,10 @@
 <template>
   <div class="custom-gacha-page-background">
     <div class="config-container">
-      <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
+      <div class="button-group">
+        <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
+        <button @click="resetConfiguration" class="reset-button-config">重置配置</button>
+      </div>
       <h1 class="config-title">创建自定义卡池</h1>
       <p class="config-description">在这里创建你独一无二的梦想卡池！</p>
 
@@ -72,13 +75,12 @@
       </div>
 
       <button @click="navigateToGachaPage" class="finalize-button">创建卡池并开始抽卡</button>
-      <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import * as RARITY from '@/data/rarity.js';
 import { cardMap, allCards } from '@/data/cards.js';
@@ -87,20 +89,79 @@ import pako from 'pako';
 
 const router = useRouter();
 
-// --- 配置状态 ---
-const customPool = ref({
+// 定义用于localStorage的key
+const storageKey = 'customGachaPoolConfig';
+
+// 默认配置的函数
+const getDefaultConfig = () => ({
   name: '我的梦想卡池',
   rates: { SP: 1.25, SSR: 8, SR: 20 },
+  selectedCardIds: { SP: [], SSR: [], SR: [], R: [] },
+  upCandidateIds: [],
+  doubleRateSSRIds: [],
 });
-const selectedCardIds = ref({ SP: [], SSR: [], SR: [], R: [] });
-const upCandidateIds = ref([]);
-const doubleRateSSRIds = ref([]);
+
+
+// 配置状态
+// 使用默认配置函数进行初始化
+const customPool = ref({
+  name: getDefaultConfig().name,
+  rates: { ...getDefaultConfig().rates },
+});
+const selectedCardIds = ref(getDefaultConfig().selectedCardIds);
+const upCandidateIds = ref(getDefaultConfig().upCandidateIds);
+const doubleRateSSRIds = ref(getDefaultConfig().doubleRateSSRIds);
 
 const rarities = [RARITY.SP, RARITY.SSR, RARITY.SR, RARITY.R];
 const groupedCards = rarities.reduce((acc, rarity) => {
   acc[rarity] = allCards.filter(card => card.rarity === rarity);
   return acc;
 }, {});
+
+// 页面挂载时加载配置
+onMounted(() => {
+  const savedConfig = localStorage.getItem(storageKey);
+  if (savedConfig) {
+    try {
+      const parsedConfig = JSON.parse(savedConfig);
+      customPool.value.name = parsedConfig.name;
+      customPool.value.rates = parsedConfig.rates;
+      selectedCardIds.value = parsedConfig.selectedCardIds;
+      upCandidateIds.value = parsedConfig.upCandidateIds;
+      doubleRateSSRIds.value = parsedConfig.doubleRateSSRIds;
+    } catch (e) {
+      console.error("解析自定义卡池配置失败:", e);
+      // 如果解析失败，重置为默认值
+      resetConfiguration();
+    }
+  }
+});
+
+// 保存配置到localStorage的函数
+const saveConfiguration = () => {
+  const configToSave = {
+    name: customPool.value.name,
+    rates: customPool.value.rates,
+    selectedCardIds: selectedCardIds.value,
+    upCandidateIds: upCandidateIds.value,
+    doubleRateSSRIds: doubleRateSSRIds.value,
+  };
+  console.log(JSON.stringify(configToSave))
+  localStorage.setItem(storageKey, JSON.stringify(configToSave));
+};
+
+// 重置配置的函数
+const resetConfiguration = () => {
+  const defaultConfig = getDefaultConfig();
+  customPool.value.name = defaultConfig.name;
+  customPool.value.rates = { ...defaultConfig.rates };
+  selectedCardIds.value = defaultConfig.selectedCardIds;
+  upCandidateIds.value = defaultConfig.upCandidateIds;
+  doubleRateSSRIds.value = defaultConfig.doubleRateSSRIds;
+  localStorage.removeItem(storageKey);
+  alert('配置已重置为默认值！');
+};
+
 
 const toggleCardSelection = (rarity, cardId) => {
   const set = selectedCardIds.value[rarity];
@@ -133,59 +194,59 @@ const toggleDoubleRateSSR = (cardId, forceRemove = false) => {
 };
 
 const navigateToGachaPage = () => {
-  const poolCards = [];
-  rarities.forEach(rarity => {
-    selectedCardIds.value[rarity].forEach(id => {
-      if (cardMap.has(id)) poolCards.push({ ...cardMap.get(id) });
-    });
-  });
-
-  if (poolCards.length === 0) {
+  saveConfiguration(); // 保存配置到localStorage
+  const allSelectedIds = Object.values(selectedCardIds.value).flat();
+  if (allSelectedIds.length === 0) {
     alert('请至少向卡池中添加一张卡牌！');
     return;
   }
 
-  const rules = {};
-  if (selectedCardIds.value.SP.length > 0) {
-    rules[RARITY.SP] = {
-      pity: 60,
-      boostAfter: 40,
-      boost: 0.02,
-      UpTrigger: upCandidateIds.value.length > 0,
-      SelectUpCards: upCandidateIds.value.length > 0,
-      UpCards: [...upCandidateIds.value],
-    };
-  }
-  if (selectedCardIds.value.SSR.length > 0) {
-    rules[RARITY.SSR] = {
-      doubleRateCards: [...doubleRateSSRIds.value],
-    };
-  }
-  // 如果对应稀有度没有卡牌被选中，则自动设置概率为0
-  if (selectedCardIds.value.SP.length === 0) customPool.value.rates.SP = 0;
-  if (selectedCardIds.value.SSR.length === 0) customPool.value.rates.SSR = 0;
-  if (selectedCardIds.value.SR.length === 0) customPool.value.rates.SR = 0;
-  // 如果没有设置R卡池，则自动设置其他稀有度的总概率为100%（按原比例换算）
-  if (selectedCardIds.value.R.length === 0) {
-    const totalRate = customPool.value.rates.SP + customPool.value.rates.SSR + customPool.value.rates.SR;
-    customPool.value.rates.SP = (customPool.value.rates.SP / totalRate) * 100;
-    customPool.value.rates.SSR = (customPool.value.rates.SSR / totalRate) * 100;
-    customPool.value.rates.SR = (customPool.value.rates.SR / totalRate) * 100;
-  }
-
-  const finalPoolConfig = {
-    id: 'custom',
-    name: customPool.value.name,
-    cards: poolCards,
-    rules: rules,
-    rates: {
-      SP: customPool.value.rates.SP / 100,
-      SSR: customPool.value.rates.SSR / 100,
-      SR: customPool.value.rates.SR / 100,
+  // 构建最小化的配置对象
+  const minifiedConfig = {
+    n: customPool.value.name,
+    r: {
+      s: selectedCardIds.value.SP.length > 0 ? customPool.value.rates.SP / 100 : 0,
+      x: selectedCardIds.value.SSR.length > 0 ? customPool.value.rates.SSR / 100 : 0,
+      r: selectedCardIds.value.SR.length > 0 ? customPool.value.rates.SR / 100 : 0,
     },
+    c: {
+      s: selectedCardIds.value.SP,
+      x: selectedCardIds.value.SSR,
+      r: selectedCardIds.value.SR,
+      n: selectedCardIds.value.R,
+    },
+    // rules -> u
+    u: {},
   };
 
-  const jsonString = JSON.stringify(finalPoolConfig);
+  // 最小化 SP 规则 (upCandidateIds -> d, SelectUpCards -> l)
+  if (selectedCardIds.value.SP.length > 0 && upCandidateIds.value.length > 0) {
+    minifiedConfig.u.s = {
+      d: upCandidateIds.value,
+      l: 1,
+    };
+  }
+
+  // 最小化 SSR 规则 (doubleRateSSRIds -> b)
+  if (selectedCardIds.value.SSR.length > 0 && doubleRateSSRIds.value.length > 0) {
+    minifiedConfig.u.x = {
+      b: doubleRateSSRIds.value,
+    };
+  }
+
+  // 如果没有R卡，则重新计算并覆盖概率
+  if (selectedCardIds.value.R.length === 0) {
+    const totalRate = minifiedConfig.r.s + minifiedConfig.r.x + minifiedConfig.r.r;
+    if (totalRate > 0) {
+      minifiedConfig.r.s = minifiedConfig.r.s / totalRate;
+      minifiedConfig.r.x = minifiedConfig.r.x / totalRate;
+      minifiedConfig.r.r = minifiedConfig.r.r / totalRate;
+    }
+  }
+
+
+  // 压缩并编码
+  const jsonString = JSON.stringify(minifiedConfig);
   const compressed = pako.deflate(jsonString);
   let binaryString = '';
   for (let i = 0; i < compressed.length; i++) {
@@ -193,13 +254,13 @@ const navigateToGachaPage = () => {
   }
   const encodedData = btoa(binaryString);
 
+  // 跳转
   router.push({
     name: '抽卡模拟器',
-    params: { poolId: 'custom' }, // 使用一个固定的param来标识这是自定义卡池
+    params: { poolId: 'custom' },
     query: { data: encodedData },
   });
 };
-
 </script>
 
 <style scoped>
@@ -220,6 +281,12 @@ const navigateToGachaPage = () => {
   padding: 1.5rem min(4vw, 2rem);
   border-radius: 12px;
   border: 1px solid v-bind('colors.border.primary');
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .config-title {
@@ -325,7 +392,7 @@ const navigateToGachaPage = () => {
   font-size: 0.8rem;
   text-align: center;
   padding: 4px 0px;
-  background: rgba(0, 0, 0, 0.6);
+  background: v-bind('colors.shadow.primaryHover');
   position: absolute;
   bottom: 0;
   left: 0;
@@ -338,8 +405,8 @@ const navigateToGachaPage = () => {
   right: 5px;
   width: 20px;
   height: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
+  background: v-bind('colors.shadow.primaryHover');
+  color: v-bind('colors.text.primary');
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -397,7 +464,7 @@ const navigateToGachaPage = () => {
   height: 16px;
   font-size: 10px;
   background: rgba(0, 0, 0, 0.7);
-  color: white;
+  color: v-bind('colors.text.primary');
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -415,14 +482,15 @@ const navigateToGachaPage = () => {
 }
 
 .finalize-button,
-.back-home-button-config {
+.back-home-button-config,
+.reset-button-config {
   margin-top: 1rem;
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;
   font-weight: bold;
   border: none;
-  color: white;
+  color: v-bind('colors.text.primary');
   padding: 1rem 1.5rem;
   font-size: 1.2rem;
   background-color: v-bind('colors.brand.primary');
@@ -442,5 +510,15 @@ const navigateToGachaPage = () => {
 
 .back-home-button-config:hover {
   background-color: v-bind('colors.background.hover');
+}
+
+.reset-button-config {
+  background-color: v-bind('colors.brand.primary');
+  font-size: 1rem;
+  display: block;
+}
+
+.reset-button-config:hover {
+  background-color: v-bind('colors.brand.hover');
 }
 </style>

@@ -15,9 +15,10 @@ export const allCards = [
   { id: '1809', name: '海洋果冻', rarity: RARITY.SP, imageUrl: '/images/cards/1809.webp' },
   { id: '1811', name: '海军大将', rarity: RARITY.SP, imageUrl: '/images/cards/1811.webp' },
   { id: '11007', name: '光之恶魔', rarity: RARITY.SP, imageUrl: '/images/cards/11007.webp' },
-  //
+  { id: '1710', name: '可可乐', rarity: RARITY.SP, imageUrl: '/images/cards/1710.webp' },
+  { id: '1711', name: '雪糕刺客', rarity: RARITY.SP, imageUrl: '/images/cards/1711.webp' },
   {
-    id: 'CustomSPishuan',
+    id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/1804.webp',
@@ -94,7 +95,7 @@ export const allCards = [
   { id: '1406', name: '闪耀灯球', rarity: RARITY.R, imageUrl: '/images/cards/1406.webp' },
   { id: '1607', name: '火柴女孩', rarity: RARITY.R, imageUrl: '/images/cards/1607.webp' },
   {
-    id: 'CustomRishuan',
+    id: 'CustomRshuan',
     name: '弱力消防栓',
     rarity: RARITY.R,
     imageUrl: '/images/cards/1805.webp',

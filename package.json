@@ -1,10 +1,13 @@
 {
   "name": "gacha-party",
-  "version": "2.4.2",
+  "version": "2.4.5",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "worker": "wrangler dev",
+    "devhost": "vite --host",
+    "workerhost": "wrangler dev --ip 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
@@ -20,6 +23,7 @@
     "file-saver": "^2.0.5",
     "hono": "^4.8.4",
     "pako": "^2.1.0",
+    "qrcode": "^1.5.4",
     "tweetnacl": "^1.0.3",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

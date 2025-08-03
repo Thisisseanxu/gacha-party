@@ -64,7 +64,7 @@
 1. **克隆仓库:**
 
         ```bash
-        git clone https://github.com/Thisiseanxu/gacha-party.git
+        git clone https://github.com/Thisisseanxu/gacha-party.git
         cd gacha-party
         ```
 
@@ -192,14 +192,14 @@
 
 如果你在使用过程中遇到问题，或者有任何建议和想法，欢迎通过以下方式提出：
 
-- **创建 Issue**: 在[Issue页面](https://github.com/Thisiseanxu/gacha-party/issues)上创建一个新的 Issue 来报告 Bug、提出功能请求或进行讨论。请尽可能详细地描述你的问题或想法。
+- **创建 Issue**: 在[Issue页面](https://github.com/Thisisseanxu/gacha-party/issues)上创建一个新的 Issue 来报告 Bug、提出功能请求或进行讨论。请尽可能详细地描述你的问题或想法。
 - **在 TapTap 发帖** 在 TapTap 的[盲盒派对模拟器发布贴](https://www.taptap.cn/moment/686712261263229792)下方留言。
 
 ---
 
 ## 许可证
 
-本项目采用 [MIT 许可证](https://github.com/Thisiseanxu/gacha-party/blob/main/LICENSE) 开源。
+本项目采用 [MIT 许可证](https://github.com/Thisisseanxu/gacha-party/blob/main/LICENSE) 开源。
 
 ---
 

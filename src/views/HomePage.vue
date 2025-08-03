@@ -22,7 +22,7 @@
       </div>
 
       <div class="info-footer">
-        <a href="https://github.com/Thisiseanxu/gacha-party" rel="noopener noreferrer" target="_blank"
+        <a href="https://github.com/Thisisseanxu/gacha-party" rel="noopener noreferrer" target="_blank"
           class="footer-link">
           <github-one theme="outline" size="20" />
           <span>开源地址</span>

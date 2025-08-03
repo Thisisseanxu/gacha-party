@@ -24,6 +24,10 @@ export const colors = {
     primary: 'rgba(232, 169, 100, 1)', // 主要高亮/按钮颜色
     primaryBackground: 'rgba(232, 169, 100, 0.15)', // 主要高亮背景
     hover: 'rgba(240, 195, 138, 1)', // 高亮色悬浮
+    confirm: 'rgba(76, 175, 80, 1)',
+    confirmHover: 'rgba(67, 160, 71, 1)',
+    cancel: 'rgba(244, 67, 54, 1)',
+    cancelHover: 'rgba(229, 57, 53, 1)',
   }, // 稀有度颜色
   rarity: {
     sp: 'rgba(222, 33, 30, 1)',
@@ -34,6 +38,8 @@ export const colors = {
   status: {
     error: 'rgba(255, 107, 107, 1)', // 错误文字/边框
     errorBg: 'rgba(255, 107, 107, 0.1)', // 错误信息背景
+    success: '#52c41a', // 成功颜色
+    successBg: 'rgba(82, 196, 26, 0.1)', // 成功背景
   }, // 历史记录进度条颜色
   colorOfLuck: {
     veryLow: 'rgba(40, 167, 69, 1)', // 绿色 (低抽数)
@@ -43,7 +49,7 @@ export const colors = {
     veryHigh: 'rgba(201, 49, 64, 1)', // 红色 (高抽数)
     background: 'rgba(74, 61, 76, 1)', // 进度条的背景（SP历史项的原始背景）
   },
-  // 新增：抽卡相关颜色
+  // 抽卡相关颜色
   gacha: {
     singlePull: '#e110d0',
     singlePullHover: '#b610c2',
@@ -52,7 +58,7 @@ export const colors = {
     confirm: 'rgb(255, 215, 0)',
     confirmHover: 'rgb(240, 235, 143)',
   },
-  // 新增：边框颜色
+  // 边框颜色
   border: {
     primary: 'rgba(58, 59, 64, 1)',
     secondary: 'rgba(44, 45, 50, 1)',

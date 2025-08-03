@@ -14,8 +14,11 @@
         <div v-if="currentPool" class="gacha-main-content card">
           <div class="controls-and-switch">
             <div class="gacha-controls">
-              <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
-              <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+              <button @click="toChallenge" class="gacha-button challenge-button">进入挑战赛</button>
+              <div class="gacha-controls">
+                <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
+                <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+              </div>
             </div>
           </div>
 
@@ -97,6 +100,20 @@
         </div>
       </div>
     </div>
+    <div v-if="showShareModal" class="share-modal-overlay" @click.self="closeShareModal">
+      <div class="share-modal-content card">
+        <button @click="closeShareModal" class="close-modal-button">&times;</button>
+        <h2>分享你的卡池</h2>
+        <p class="share-modal-text-info">长按二维码保存或点击下方链接复制</p>
+        <p v-if="shareText.length > 1000" class="share-modal-text-info">无法生成二维码，请手动复制链接。</p>
+        <div class="qr-code-container" v-else>
+          <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code">
+          <p v-else class="share-modal-text-info">正在生成二维码...</p>
+        </div>
+        <textarea readonly class="share-modal-textarea" @click="copyShareText" v-model="shareText"></textarea>
+        <p v-if="copyStatusMessage" class="copy-status-message">{{ copyStatusMessage }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -107,7 +124,8 @@ import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import { colors } from '@/styles/colors.js';
-import pako from 'pako'; // 引入pako库解压缩json数据
+import { getGachaSource } from '@/utils/getGachaSource.js';
+import QRCode from 'qrcode';
 
 // 动画相关的ref
 const showGachaResultOverlay = ref(false);
@@ -116,8 +134,29 @@ const isAnimating = ref(false);
 let animationTimeout = null;
 const cardsContainerRef = ref(null); // 卡片容器引用
 
+// 控制分享弹窗的ref
+const showShareModal = ref(false);
+const shareText = ref('');
+const qrCodeDataUrl = ref('');
+const copyStatusMessage = ref('');
+
 const isHighlightRarity = (rarity) => {
   return rarity === RARITY.SP || rarity === RARITY.SSR;
+};
+
+const getDelayTime = (rarity) => {
+  switch (rarity) {
+    case RARITY.SP:
+      return 1000; // 限定卡片
+    case RARITY.SSR:
+      return 500; // SSR卡片
+    case RARITY.SR:
+      return 100; // SR卡片
+    case RARITY.R:
+      return 100; // R卡片
+    default:
+      return 100; // 默认延迟
+  }
 };
 
 const startPullAnimation = () => {
@@ -131,7 +170,7 @@ const startPullAnimation = () => {
   function revealNextCard() {
     if (index < cardsToAnimate.length) {
       const card = cardsToAnimate[index];
-      const delay = isHighlightRarity(card.rarity) ? 300 : 100; // 抽到高稀有度时增加动画间隔时间
+      const delay = getDelayTime(card.rarity);
       displayedCards.value.push(card);
       // 当显示新卡片时，确保容器滚动到底部
       nextTick(() => {
@@ -169,28 +208,7 @@ const selectedUpCard = ref(null);
 
 // 动态获取卡池数据
 const isCustomPool = computed(() => route.params.poolId === 'custom');
-const gachaSource = computed(() => {
-  // 检查是否是自定义卡池并带有数据
-  if (isCustomPool.value && route.query.data) {
-    try {
-      // Base64 解码 -> pako 解压缩 -> JSON 解析
-      const binaryString = atob(route.query.data);
-      const compressed = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        compressed[i] = binaryString.charCodeAt(i);
-      }
-      const jsonString = pako.inflate(compressed, { to: 'string' });
-      return JSON.parse(jsonString);
-    } catch (error) {
-      console.error('解析自定义卡池数据失败:', error);
-      // 如果解析失败，返回一个默认卡池ID
-      return 'Normal01';
-    }
-  }
-  // 如果不是自定义卡池模式则使用路由参数中的 poolId
-  return route.params.poolId;
-});
-
+const gachaSource = computed(() => getGachaSource(route));
 
 const {
   currentPool,
@@ -258,6 +276,16 @@ watch(totalPulls, () => {
   }
 }, { immediate: true });
 
+// 将当前所有的param传递给挑战赛页面
+// 假设当前为/chouka/zaodaoji，则跳转到/choukatiaozhansai/zaodaoji
+// 假设当前为自定义卡池，则跳转到/choukatiaozhansai/custom?data=...
+const toChallenge = () => {
+  const currentPath = route.path;
+  const currentQuery = route.query;
+  const challengePath = currentPath.replace('/chouka', '/choukatiaozhansai');
+  router.push({ path: challengePath, query: currentQuery });
+};
+
 const handleSinglePull = () => {
   performSinglePull();
   showGachaResultOverlay.value = true;
@@ -282,22 +310,59 @@ const goBackToEdit = () => {
   router.back();
 };
 
-const shareCustomPool = () => {
+// 分享自定义卡池
+const shareCustomPool = async () => {
   if (!isCustomPool.value || !currentPool.value) return;
+  // 重置状态
+  qrCodeDataUrl.value = ''; // 先清空，显示“生成中”
+  copyStatusMessage.value = '';
 
   const poolName = currentPool.value.name;
-  const data = route.query.data;
-  // 使用 encodeURIComponent 防止编码问题
-  const encodedData = encodeURIComponent(data);
-  const currentUrl = window.location.origin;
-  const shareText = `这是我在织夜工具箱创建的 ${poolName} 卡池，快来试试吧\n${currentUrl}/chouka/custom?data=${encodedData}`;
+  const data = encodeURIComponent(route.query.data);
+  const shareUrl = `${window.location.origin}${route.path}?data=${data}`;
+  const textToShare = `这是我在织夜工具箱创建的【${poolName}】卡池，快来试试吧！\n${shareUrl}`;
 
-  navigator.clipboard.writeText(shareText).then(() => {
-    alert('分享链接已复制到剪贴板！');
-  }).catch(err => {
+  shareText.value = textToShare;
+  showShareModal.value = true;
+
+  // 确保弹窗和canvas元素已渲染到DOM中
+  await nextTick();
+
+  try {
+    // 使用 toDataURL 方法直接生成 Base64 格式的图片数据
+    const dataUrl = await QRCode.toDataURL(shareUrl, {
+      width: 220,
+      margin: 1,
+      errorCorrectionLevel: 'H'
+    });
+    // 将生成的数据URL赋值给ref，<img>标签会自动显示图片
+    qrCodeDataUrl.value = dataUrl;
+  } catch (err) {
+    console.error('二维码生成失败:', err);
+    // 可以在这里设置一个错误提示
+    qrCodeDataUrl.value = ''; // 清空以显示错误或提示
+  }
+};
+
+// 关闭弹窗
+const closeShareModal = () => {
+  showShareModal.value = false;
+};
+
+// 复制分享文本到剪贴板
+const copyShareText = async (event) => {
+  try {
+    await navigator.clipboard.writeText(shareText.value);
+    copyStatusMessage.value = '已复制到剪贴板！';
+    event.target.select(); // 选中textarea中的所有文本以提供视觉反馈
+  } catch (err) {
+    copyStatusMessage.value = '复制失败，请手动复制。';
     console.error('复制失败: ', err);
-    alert('复制失败，请手动复制分享内容。');
-  });
+  }
+  // 2秒后清除提示信息
+  setTimeout(() => {
+    copyStatusMessage.value = '';
+  }, 2000);
 };
 
 </script>
@@ -306,23 +371,105 @@ const shareCustomPool = () => {
 /* 分享按钮样式 */
 .title-with-share {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
 }
 
-.share-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 0.5rem 1rem;
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  /* 需要比结果页的 z-index 更高 */
+  backdrop-filter: blur(5px);
+}
+
+.share-modal-content {
+  position: relative;
+  text-align: center;
+  padding: 2rem;
+  padding-top: 3rem;
+  width: 90%;
+  max-width: 380px;
+}
+
+.share-modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: v-bind('colors.text.highlight');
+}
+
+.share-modal-text-info {
   font-size: 0.9rem;
-  border-radius: 6px;
-  border: none;
+  color: v-bind('colors.text.secondary');
+  margin-bottom: 1.5rem;
+}
+
+.qr-code-container {
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.share-modal-qr-code {
+  display: block;
+}
+
+.share-modal-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  background-color: v-bind('colors.background.primary');
+  border: 1px solid v-bind('colors.border.primary');
+  border-radius: 8px;
+  color: v-bind('colors.text.primary');
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
   cursor: pointer;
-  transition: background-color 0.2s;
+}
+
+.copy-status-message {
+  margin-top: 0.5rem;
+  color: v-bind('colors.brand.primary');
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
+.close-modal-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: v-bind('colors.text.secondary');
+  cursor: pointer;
+  padding: 0;
+}
+
+.close-modal-button:hover {
+  color: v-bind('colors.text.primary');
+}
+
+/* 移除分享按钮的特定颜色，使其与其他按钮风格一致 */
+.share-button {
+  background-color: v-bind('colors.brand.confirm');
 }
 
 .share-button:hover {
-  background-color: #45a049;
+  background-color: v-bind('colors.brand.confirmHover');
 }
 
 
@@ -350,6 +497,7 @@ const shareCustomPool = () => {
 
 .header-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-bottom: -1rem;
@@ -359,6 +507,7 @@ h1 {
   font-size: 2rem;
   font-weight: bold;
   color: v-bind('colors.text.primary');
+  text-wrap: wrap;
 }
 
 .loading-text {
@@ -380,13 +529,16 @@ h1 {
 
 .gacha-controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
 }
 
 .gacha-button,
 .back-home-button,
 .pagination-controls button,
-.confirm-button {
+.confirm-button,
+.share-button {
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -412,6 +564,15 @@ h1 {
 
 .ten-pull:hover {
   background-color: v-bind('colors.gacha.tenPullHover');
+  transform: translateY(-2px);
+}
+
+.challenge-button {
+  background-color: v-bind('colors.brand.cancel');
+}
+
+.challenge-button:hover {
+  background-color: v-bind('colors.brand.cancelHover');
   transform: translateY(-2px);
 }
 
@@ -753,7 +914,7 @@ h1 {
 
 /* --- 动画关键帧 & 过渡 --- */
 
-@keyframes highlight-flash {
+@keyframes highlight-flash-sp {
 
   0%,
   100% {
@@ -767,10 +928,28 @@ h1 {
   }
 }
 
-.highlight-rarity.rarity-border-sp,
-.highlight-rarity.rarity-border-ssr {
-  animation: highlight-flash 0.6s ease-in-out;
+@keyframes highlight-flash-ssr {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px 2px v-bind('colors.rarity.ssr');
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px 10px v-bind('colors.rarity.ssr');
+    transform: scale(1.1);
+  }
 }
+
+.highlight-rarity.rarity-border-sp {
+  animation: highlight-flash-sp 1s ease-in-out;
+}
+
+.highlight-rarity.rarity-border-ssr {
+  animation: highlight-flash-ssr 0.5s ease-in-out;
+}
+
 
 /* 角色弹出动画 */
 .card-reveal-enter-active {
