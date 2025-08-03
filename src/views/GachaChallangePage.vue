@@ -130,6 +130,21 @@ const isHighlightRarity = (rarity) => {
   return rarity === RARITY.SP || rarity === RARITY.SSR;
 };
 
+const getDelayTime = (rarity) => {
+  switch (rarity) {
+    case RARITY.SP:
+      return 1000; // 限定卡片
+    case RARITY.SSR:
+      return 500; // SSR卡片
+    case RARITY.SR:
+      return 100; // SR卡片
+    case RARITY.R:
+      return 100; // R卡片
+    default:
+      return 100; // 默认延迟
+  }
+};
+
 // 组件逻辑
 const route = useRoute();
 const selectedUpCard = ref(null);
@@ -215,7 +230,7 @@ const startPullAnimation = () => {
   function revealNextCard() {
     if (index < cardsToAnimate.length) {
       const card = cardsToAnimate[index];
-      const delay = isHighlightRarity(card.rarity) ? 300 : 100;
+      const delay = getDelayTime(card.rarity);
       displayedCards.value.push(card);
       nextTick(() => {
         if (cardsContainerRef.value) {
@@ -693,7 +708,7 @@ h2 {
 }
 
 /* --- 动画 --- */
-@keyframes highlight-flash {
+@keyframes highlight-flash-sp {
 
   0%,
   100% {
@@ -707,10 +722,28 @@ h2 {
   }
 }
 
-.highlight-rarity.rarity-border-sp,
-.highlight-rarity.rarity-border-ssr {
-  animation: highlight-flash 0.6s ease-in-out;
+@keyframes highlight-flash-ssr {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px 2px v-bind('colors.rarity.ssr');
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px 10px v-bind('colors.rarity.ssr');
+    transform: scale(1.1);
+  }
 }
+
+.highlight-rarity.rarity-border-sp {
+  animation: highlight-flash-sp 1s ease-in-out;
+}
+
+.highlight-rarity.rarity-border-ssr {
+  animation: highlight-flash-ssr 0.5s ease-in-out;
+}
+
 
 .card-reveal-enter-active {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
