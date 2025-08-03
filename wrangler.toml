@@ -9,4 +9,4 @@ not_found_handling = "single-page-application"
 # 定义KV命名空间绑定
 [[kv_namespaces]]
 binding = "GACHA_PARTY_RECORDS" # KV 数据库的命名空间
-id = "${{ secrets.KV_NAMESPACE_ID }}" # KV数据库的ID
+id = "91be14f46c174618af8980503577680e"
