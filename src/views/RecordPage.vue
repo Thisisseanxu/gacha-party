@@ -41,8 +41,9 @@
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
         <p class="input-title">织夜云服务 BETA</p>
-        <p class="input-description">如果您有织夜云服务的时长，则可将当前页面的抽卡记录上传至云端（每天一次）</p>
-        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（需有效的织夜云服务时长）" />
+        <p class="input-description">【限时免费】您可将当前页面的抽卡记录上传至云端（每天一次）</p>
+        <p class="input-description highlight">强烈建议您在上传前点击分析结果最下方的“下载抽卡记录文件”在本地保存一份数据</p>
+        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
         <button @click="handleUploadRecord" :disabled="isUploading" class="action-button">
           {{ isUploading ? '正在上传...' : '上传记录至云端' }}
         </button>
@@ -207,6 +208,34 @@ const milisecondsToTime = (milliseconds) => {
   return `${hours}小时 ${minutes % 60}分钟 ${seconds % 60}秒`;
 };
 
+// 设置查询锁定状态
+const setFetchLock = (userID, isExpired, duration) => {
+  const expiryTime = Date.now() + duration;
+  const lockInfo = JSON.stringify({ expiry: expiryTime });
+  try {
+    localStorage.setItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''), lockInfo);
+  } catch (error) {
+    logger.error("设置查询状态时出错:", error);
+    uploadErrorMessage.value = '设置查询状态失败，请检查浏览器的本地存储设置。';
+  }
+};
+// 检查查询锁定状态
+const FetchLockTime = (userID, isExpired) => {
+  try {
+    const lockInfo = localStorage.getItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''));
+    if (!lockInfo) return false;
+    const { expiry } = JSON.parse(lockInfo);
+    if (Date.now() > expiry) {
+      localStorage.removeItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''));
+      return { locked: false, timeLeft: 0 };
+    }
+    return { locked: true, timeLeft: expiry - Date.now() };
+  } catch (error) {
+    logger.error("获取查询状态时出错:", error);
+    return { locked: true, timeLeft: -1 };
+  }
+};
+
 //  处理云端获取的抽卡记录
 const handleGetRecord = async () => {
   if (!fetchLicenseInput.value.trim()) {
@@ -229,6 +258,14 @@ const handleGetRecord = async () => {
         throw new Error(`激活码已过期！`);
       }
     }
+    const lockTime = FetchLockTime(userID, result.isExpired);
+    if (lockTime.locked && lockTime.timeLeft > 0) {
+      cloudErrorMessage.value = `查询次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
+      return;
+    } else if (lockTime.locked && lockTime.timeLeft === -1) {
+      cloudErrorMessage.value = '获取查询状态失败，请检查浏览器的本地存储设置。';
+      return;
+    }
     logger.log(`客户端验证成功`);
 
     // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
@@ -236,7 +273,8 @@ const handleGetRecord = async () => {
       method: 'GET',
       headers: { 'X-License-Key': licenseKey, 'X-Player-ID': fetchPlayerId },
     });
-    if (!response.ok) throw new Error(await response.text() || `服务器错误: ${response.status}`);
+    if (response.ok) setFetchLock(userID, result.isExpired, result.isExpired ? 30 * 60 * 1000 : 30 * 1000); // 设置查询锁定时间
+    else throw new Error(await response.text() || `服务器错误: ${response.status}`);
 
     const compressedString = await response.text();
     const wrappedJson = { cloud: true, compressed: true, data: compressedString };
@@ -293,9 +331,10 @@ const handleUploadRecord = async () => {
     if (!validationResult.success) {
       throw new Error(validationResult.message || '激活码无效。');
     }
-    if (validationResult.isExpired) {
-      throw new Error('您没有可用的织夜云服务时长，无法上传数据。');
-    }
+    // 限时免费，不验证是否过期
+    // if (validationResult.isExpired) {
+    //   throw new Error('您没有可用的织夜云服务时长，无法上传数据。');
+    // }
     const userID = String(validationResult.userId);
     const lockTime = UploadLockTime(userID);
     if (lockTime.locked && lockTime.timeLeft > 0) {

@@ -110,9 +110,10 @@ app.post('/upload-record', async (c) => {
 
     // 在服务器端进行严格验证
     const { userId, isExpired } = await verifyLicenseForWorker(licenseKey)
-    if (isExpired) {
-      return c.text('激活码已过期，请联系管理员获取新的激活码', 403)
-    }
+    // 限时免费功能，暂不验证过期状态
+    // if (isExpired) {
+    //   return c.text('激活码已过期，请联系管理员获取新的激活码', 403)
+    // }
     const playerId = c.req.header('X-Player-Id')
     if (!playerId) {
       return c.text('请求头中缺少 X-Player-Id', 400)
