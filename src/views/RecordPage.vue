@@ -538,7 +538,6 @@ const resetView = () => {
   errorMessage.value = '';
   playerId.value = '';
   cloudErrorMessage.value = '';
-  uploadLicenseInput.value = '';
   uploadErrorMessage.value = '';
   uploadMessage.value = '';
 };
