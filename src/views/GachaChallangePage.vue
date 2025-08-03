@@ -107,18 +107,19 @@ import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import { colors } from '@/styles/colors.js';
+import { getGachaSource } from '@/utils/getGachaSource.js';
 
-// --- 挑战赛配置 ---
+// 挑战赛配置
 const CHALLENGE_PULL_LIMIT = 200; // 规定总抽数
 
-// --- 挑战赛状态 ref ---
+// 挑战赛状态
 const totalScore = ref(0);
 const remainingPulls = ref(CHALLENGE_PULL_LIMIT);
 const challengeInProgress = ref(true);
 const currentPullScore = ref(0);
 const challengeHistory = ref([]); // 存储每次十连的结果和得分
 
-// --- 动画相关 ref ---
+// 动画相关 ref
 const showGachaResultOverlay = ref(false);
 const displayedCards = ref([]);
 const isAnimating = ref(false);
@@ -129,12 +130,12 @@ const isHighlightRarity = (rarity) => {
   return rarity === RARITY.SP || rarity === RARITY.SSR;
 };
 
-// --- 组件逻辑 ---
+// 组件逻辑
 const route = useRoute();
 const selectedUpCard = ref(null);
 
-// 使用固定的挑战卡池ID，或者从路由获取
-const gachaSource = computed(() => route.params.poolId || 'SP01');
+// 动态获取卡池数据
+const gachaSource = computed(() => getGachaSource(route));
 
 const {
   currentPool,

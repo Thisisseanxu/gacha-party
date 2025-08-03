@@ -107,7 +107,7 @@ import { useGacha } from '@/utils/useGacha';
 import * as RARITY from '@/data/rarity.js'
 import { cardMap } from '@/data/cards';
 import { colors } from '@/styles/colors.js';
-import pako from 'pako'; // 引入pako库解压缩json数据
+import { getGachaSource } from '@/utils/getGachaSource.js';
 
 // 动画相关的ref
 const showGachaResultOverlay = ref(false);
@@ -169,28 +169,7 @@ const selectedUpCard = ref(null);
 
 // 动态获取卡池数据
 const isCustomPool = computed(() => route.params.poolId === 'custom');
-const gachaSource = computed(() => {
-  // 检查是否是自定义卡池并带有数据
-  if (isCustomPool.value && route.query.data) {
-    try {
-      // Base64 解码 -> pako 解压缩 -> JSON 解析
-      const binaryString = atob(route.query.data);
-      const compressed = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        compressed[i] = binaryString.charCodeAt(i);
-      }
-      const jsonString = pako.inflate(compressed, { to: 'string' });
-      return JSON.parse(jsonString);
-    } catch (error) {
-      console.error('解析自定义卡池数据失败:', error);
-      // 如果解析失败，返回一个默认卡池ID
-      return 'Normal01';
-    }
-  }
-  // 如果不是自定义卡池模式则使用路由参数中的 poolId
-  return route.params.poolId;
-});
-
+const gachaSource = computed(() => getGachaSource(route));
 
 const {
   currentPool,
