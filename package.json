@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "worker": "wrangler dev",
+    "devhost": "vite --host",
+    "workerhost": "wrangler dev --ip 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
