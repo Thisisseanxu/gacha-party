@@ -34,3 +34,4 @@ dev-dist
 
 # 不上传本地wrangler运行时生成的文件
 .wrangler
+.dev.vars

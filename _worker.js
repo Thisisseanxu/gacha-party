@@ -3,10 +3,6 @@ import { cors } from 'hono/cors'
 import nacl from 'tweetnacl'
 import { Buffer } from 'buffer'
 
-const base64Key = 'MCowBQYDK2VwAyEADP+1gTQo1/wWSQMCphypaTCzj4gJsmzugl2dURn0Q6I='
-const derKey = Buffer.from(base64Key, 'base64')
-const publicKey = derKey.subarray(derKey.length - 32)
-
 /**
  * 将 URL-safe Base64 字符串转换为标准的 Base64 字符串。
  * @param {string} base64url - URL-safe Base64 字符串。
@@ -32,7 +28,12 @@ app.use('/upload-record', cors())
  * @returns {Promise<{userId: number, isExpired: boolean}>} 返回包含用户ID和过期状态的对象。
  * @throws {Error} 如果验证失败，则抛出错误。
  */
-async function verifyLicenseForWorker(licenseKey) {
+async function verifyLicenseForWorker(licenseKey, base64Key) {
+  if (!base64Key) {
+    throw new Error('环境变量 PUBLIC_KEY 未设置，请检查配置。')
+  }
+  const derKey = Buffer.from(base64Key, 'base64')
+  const publicKey = derKey.subarray(derKey.length - 32)
   const standardBase64Key = base64UrlToStandard(licenseKey)
   const fullData = Buffer.from(standardBase64Key, 'base64')
 
@@ -66,7 +67,7 @@ app.get('/get-record', async (c) => {
     }
 
     // 在服务器端进行最终的、可信的验证 (当前为限时免费功能，获取记录时，不强制检查过期)
-    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey)
+    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
     const playerId = c.req.header('X-Player-Id')
     if (!playerId) {
       return c.text('请求头中缺少 X-Player-Id', 400)
@@ -109,7 +110,7 @@ app.post('/upload-record', async (c) => {
     }
 
     // 在服务器端进行严格验证
-    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey)
+    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
     // 限时免费功能，暂不验证过期状态
     // if (isExpired) {
     //   return c.text('激活码已过期，请联系管理员获取新的激活码', 403)
@@ -143,11 +144,12 @@ app.post('/upload-record', async (c) => {
 
       // 如果上次更新时间在限制时间内，则拒绝写入
       if (now - lastUpdated < writeTimeLimit) {
-        return c.text(
-          // 用.分隔额外返回一个毫秒时间给前端
-          `上传过于频繁，请在 ${Math.ceil((writeTimeLimit - (now - lastUpdated)) / 1000)} 秒后再试。. ${writeTimeLimit - (now - lastUpdated)}`,
-          429,
-        )
+        const timeLeft = writeTimeLimit - (now - lastUpdated)
+        const errorResponse = {
+          message: `上传过于频繁，请在 ${Math.ceil(timeLeft / 1000)} 秒后再试。`,
+          timeLeft: timeLeft,
+        }
+        return c.json(errorResponse, 429)
       }
     }
 
