@@ -74,6 +74,37 @@ const isDev = import.meta.env.DEV;
 
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
 
+// 本地保存激活码
+const LICENSE_KEY = 'gachaLicenseKey';
+const PLAYER_ID_KEY = 'gachaPlayerId';
+
+const loadLicenseKey = () => {
+  const savedKey = localStorage.getItem(LICENSE_KEY);
+  const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
+  if (savedKey) {
+    fetchLicenseInput.value = savedKey;
+    uploadLicenseInput.value = savedKey;
+  }
+  if (savedPlayerId) {
+    fetchPlayerIdInput.value = savedPlayerId;
+  }
+};
+
+const saveLicenseKey = (key = null, playerId = null) => {
+  if (key) {
+    localStorage.setItem(LICENSE_KEY, key);
+  }
+  if (playerId) {
+    localStorage.setItem(PLAYER_ID_KEY, playerId);
+  }
+  loadLicenseKey();
+};
+
+onMounted(() => {
+  // 页面加载时，尝试从localStorage加载已保存的激活码
+  loadLicenseKey();
+});
+
 // 云端获取抽卡记录相关的变量
 const fetchPlayerIdInput = ref(''); // 绑定的玩家ID输入框
 const fetchLicenseInput = ref(''); // 绑定的许可证输入框
@@ -205,28 +236,28 @@ const milisecondsToTime = (milliseconds) => {
   const seconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
-  return `${hours}小时 ${minutes % 60}分钟 ${seconds % 60}秒`;
+  return `${hours > 0 ? hours + '小时 ' : ''}${minutes > 0 || hours > 0 ? minutes % 60 + '分钟 ' : ''}${seconds % 60}秒`;
 };
 
 // 设置查询锁定状态
-const setFetchLock = (userID, isExpired, duration) => {
+const setFetchLock = (isExpired, duration) => {
   const expiryTime = Date.now() + duration;
   const lockInfo = JSON.stringify({ expiry: expiryTime });
   try {
-    localStorage.setItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''), lockInfo);
+    localStorage.setItem("gachaFetchTimestampLock" + (isExpired ? '_expired' : ''), lockInfo);
   } catch (error) {
     logger.error("设置查询状态时出错:", error);
     uploadErrorMessage.value = '设置查询状态失败，请检查浏览器的本地存储设置。';
   }
 };
 // 检查查询锁定状态
-const FetchLockTime = (userID, isExpired) => {
+const FetchLockTime = (isExpired) => {
   try {
-    const lockInfo = localStorage.getItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''));
+    const lockInfo = localStorage.getItem("gachaFetchTimestampLock" + (isExpired ? '_expired' : ''));
     if (!lockInfo) return false;
     const { expiry } = JSON.parse(lockInfo);
     if (Date.now() > expiry) {
-      localStorage.removeItem("gachaFetchTimestampLock" + userID + (isExpired ? '_expired' : ''));
+      localStorage.removeItem("gachaFetchTimestampLock" + (isExpired ? '_expired' : ''));
       return { locked: false, timeLeft: 0 };
     }
     return { locked: true, timeLeft: expiry - Date.now() };
@@ -234,6 +265,70 @@ const FetchLockTime = (userID, isExpired) => {
     logger.error("获取查询状态时出错:", error);
     return { locked: true, timeLeft: -1 };
   }
+};
+
+const CACHE_PREFIX = 'gachaRecord_';
+/**
+ * 管理本地缓存的抽卡记录，实现LRU（最近最少使用）策略。
+ * @param {string} userID - 要缓存数据的用户ID。
+ * @param {string} data - 要缓存的抽卡记录数据（Base64字符串）。
+ */
+const addRecordToCache = (userID, data) => {
+  try {
+    // 获取当前的访问顺序列表
+    let order = JSON.parse(localStorage.getItem("gachaRecord_access_order")) || [];
+
+    // 如果此用户已在缓存中，先从顺序列表中移除，稍后会加到末尾
+    const existingIndex = order.indexOf(userID);
+    if (existingIndex > -1) {
+      order.splice(existingIndex, 1);
+    }
+
+    // 检查缓存是否已满
+    if (order.length >= 5) {
+      // 如果已满，移除最久未使用的记录（列表的第一个元素）
+      const oldestUserID = order.shift(); // .shift()会移除并返回数组的第一个元素
+      localStorage.removeItem(CACHE_PREFIX + oldestUserID);
+      logger.log(`缓存已满，已移除最旧的记录: ${oldestUserID}`);
+    }
+
+    // 将新记录的ID添加到列表末尾，标记为最新
+    order.push(userID);
+
+    // 存入新数据和更新后的顺序列表
+    localStorage.setItem(CACHE_PREFIX + userID, data);
+    localStorage.setItem("gachaRecord_access_order", JSON.stringify(order));
+
+    logger.log(`记录 ${userID} 已成功缓存。当前缓存顺序:`, order);
+
+  } catch (error) {
+    logger.error("管理本地缓存时出错:", error);
+    // 如果发生错误，清空所有的缓存记录
+    for (const key in localStorage) {
+      if (key.startsWith(CACHE_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    }
+    // 清空访问顺序列表
+    localStorage.removeItem("gachaRecord_access_order");
+
+    cloudErrorMessage.value = '管理本地缓存失败，可能存储已满。';
+  }
+};
+
+// 获取记录成功后保存到本地
+const saveFetchedRecord = (userID, data) => {
+  addRecordToCache(userID, data);
+};
+// 在云端不可用时，尝试读取本地存储的记录
+const loadLocalRecord = (userID) => {
+  try {
+    const data = localStorage.getItem(`gachaRecord_${userID}`);
+    return data;
+  } catch (error) {
+    logger.error("从本地存储加载记录时出错:", error);
+  }
+  return null;
 };
 
 //  处理云端获取的抽卡记录
@@ -258,8 +353,16 @@ const handleGetRecord = async () => {
         throw new Error(`激活码已过期！`);
       }
     }
-    const lockTime = FetchLockTime(userID, result.isExpired);
+    const lockTime = FetchLockTime(result.isExpired);
     if (lockTime.locked && lockTime.timeLeft > 0) {
+      const localdata = loadLocalRecord(fetchPlayerId);
+      if (localdata) {
+        logger.log("从本地存储加载记录");
+        const wrappedJson = { cloud: false, compressed: true, data: localdata };
+        jsonInput.value = JSON.stringify(wrappedJson);
+        handleJsonAnalysis(); // 调用已有的分析逻辑分析合成的json
+        return;
+      }
       cloudErrorMessage.value = `查询次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
       return;
     } else if (lockTime.locked && lockTime.timeLeft === -1) {
@@ -273,10 +376,15 @@ const handleGetRecord = async () => {
       method: 'GET',
       headers: { 'X-License-Key': licenseKey, 'X-Player-ID': fetchPlayerId },
     });
-    if (response.ok) setFetchLock(userID, result.isExpired, result.isExpired ? 30 * 60 * 1000 : 30 * 1000); // 设置查询锁定时间
-    else throw new Error(await response.text() || `服务器错误: ${response.status}`);
+    if (response.ok) {
+      saveLicenseKey(licenseKey, fetchPlayerId); // 保存激活码和玩家ID
+      setFetchLock(result.isExpired, result.isExpired ? 30 * 60 * 1000 : 30 * 1000); // 设置查询锁定时间
+    } else {
+      throw new Error(await response.text() || `服务器错误: ${response.status}`);
+    }
 
     const compressedString = await response.text();
+    saveFetchedRecord(fetchPlayerId, compressedString); // 保存到本地存储
     const wrappedJson = { cloud: true, compressed: true, data: compressedString };
     jsonInput.value = JSON.stringify(wrappedJson);
     handleJsonAnalysis(); // 调用已有的分析逻辑分析合成的json
@@ -287,24 +395,24 @@ const handleGetRecord = async () => {
 };
 
 // 设置上传锁定状态
-const setUploadLock = (userID, duration) => {
+const setUploadLock = (isExpired, duration) => {
   const expiryTime = Date.now() + duration;
   const lockInfo = JSON.stringify({ expiry: expiryTime });
   try {
-    localStorage.setItem("gachaUploadTimestampLock" + userID, lockInfo);
+    localStorage.setItem("gachaUploadTimestampLock" + (isExpired ? '_expired' : ''), lockInfo);
   } catch (error) {
     logger.error("设置上传状态时出错:", error);
     uploadErrorMessage.value = '设置上传状态失败，请检查浏览器的本地存储设置。';
   }
 };
 // 检查上传锁定状态
-const UploadLockTime = (userID) => {
+const UploadLockTime = (isExpired) => {
   try {
-    const lockInfo = localStorage.getItem("gachaUploadTimestampLock" + userID);
+    const lockInfo = localStorage.getItem("gachaUploadTimestampLock" + (isExpired ? '_expired' : ''));
     if (!lockInfo) return false;
     const { expiry } = JSON.parse(lockInfo);
     if (Date.now() > expiry) {
-      localStorage.removeItem("gachaUploadTimestampLock" + userID);
+      localStorage.removeItem("gachaUploadTimestampLock" + (isExpired ? '_expired' : ''));
       return { locked: false, timeLeft: 0 };
     }
     return { locked: true, timeLeft: expiry - Date.now() };
@@ -336,7 +444,7 @@ const handleUploadRecord = async () => {
     //   throw new Error('您没有可用的织夜云服务时长，无法上传数据。');
     // }
     const userID = String(validationResult.userId);
-    const lockTime = UploadLockTime(userID);
+    const lockTime = UploadLockTime(validationResult.isExpired);
     if (lockTime.locked && lockTime.timeLeft > 0) {
       uploadErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
       isUploading.value = false;
@@ -401,11 +509,12 @@ const handleUploadRecord = async () => {
     const responseText = await response.text();
     if (response.ok) {
       uploadMessage.value = `上传成功！${responseText}`;
-      setUploadLock(userID, userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000); // 设置上传锁定时间
+      saveLicenseKey(licenseKey); // 保存激活码
+      setUploadLock(validationResult.isExpired, userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000); // 设置上传锁定时间
     } else if (response.status === 429) { // 后端返回“过于频繁”
-      const responseContent = responseText.split('.');
-      uploadErrorMessage.value = responseContent[0] || '上传过于频繁，请稍后再试。';
-      setUploadLock(userID, responseContent[1] ? parseInt(responseContent[1]) : (userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000));
+      const errorData = await response.json();
+      uploadErrorMessage.value = errorData.message;
+      setUploadLock(validationResult.isExpired, errorData.timeLeft);
       throw new Error(uploadErrorMessage.value || '上传过于频繁，请稍后再试。');
     } else { // 其他错误
       throw new Error(responseText || `服务器错误: ${response.status}`);
