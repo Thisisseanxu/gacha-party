@@ -20,14 +20,16 @@
           </label>
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-        <div class="cloud-section">
+
+        <div class="cloud-section split">
           <p class="input-title">织夜云服务 BETA</p>
           <p class="input-description">【限时免费】使用激活码查询您的抽卡记录。</p>
-          <input type="text" v-model="licenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
+          <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
+          <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
           <button @click="handleGetRecord" class="action-button">获取云端抽卡记录</button>
-          <p v-if="isDev">awa</p>
         </div>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
+
         <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisisseanxu/gacha-party"
             target="_blank">Github链接</a>提出意见/提交代码。</p>
       </div>
@@ -35,6 +37,19 @@
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
       :normal-gacha-data="NormalGachaData" :player-id="playerId" :json-input="jsonInput" @reset-view="resetView" />
+
+    <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
+      <div class="cloud-section">
+        <p class="input-title">织夜云服务 BETA</p>
+        <p class="input-description">如果您有织夜云服务的时长，则可将当前页面的抽卡记录上传至云端（每天一次）</p>
+        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（需有效的织夜云服务时长）" />
+        <button @click="handleUploadRecord" :disabled="isUploading" class="action-button">
+          {{ isUploading ? '正在上传...' : '上传记录至云端' }}
+        </button>
+        <p v-if="uploadMessage" class="success-message">{{ uploadMessage }}</p>
+        <p v-if="uploadErrorMessage" class="error-message">{{ uploadErrorMessage }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -48,17 +63,26 @@ import { colors } from '@/styles/colors.js';
 // 导入分析组件
 import GachaAnalysis from '@/components/GachaAnalysis.vue';
 
-const viewState = ref('input'); // 'input' 则为用户输入 'analysis' 则为用户上传json文件
+const viewState = ref('input'); // 'input' 为用户输入模式 'analysis' 则展示分析结果
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
-const licenseInput = ref(''); // 绑定的许可证输入框
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const errorMessage = ref('');
-const cloudErrorMessage = ref(''); // 织夜云的错误信息
 const isDev = import.meta.env.DEV;
 
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
+
+// 云端获取抽卡记录相关的变量
+const fetchPlayerIdInput = ref(''); // 绑定的玩家ID输入框
+const fetchLicenseInput = ref(''); // 绑定的许可证输入框
+const cloudErrorMessage = ref(''); // 织夜云的错误信息
+
+// 上传抽卡记录相关的变量
+const uploadLicenseInput = ref('');
+const isUploading = ref(false);
+const uploadMessage = ref('');
+const uploadErrorMessage = ref('');
 
 // 分析 JSON 数据
 const handleJsonAnalysis = () => {
@@ -165,24 +189,52 @@ const handleFileUpload = (event) => {
   event.target.value = '';
 };
 
+// 获取worker的URL，开发模式下使用地址+8787端口，生产模式下直接使用当前地址
+const WorkerUrl = ref('');
+onMounted(() => {
+  const url = new URL(window.location.href);
+  if (isDev) {
+    WorkerUrl.value = `${url.protocol}//${url.hostname}:8787`;
+  } else {
+    WorkerUrl.value = url.origin;
+  }
+});
+
+const milisecondsToTime = (milliseconds) => {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  return `${hours}小时 ${minutes % 60}分钟 ${seconds % 60}秒`;
+};
+
 //  处理云端获取的抽卡记录
 const handleGetRecord = async () => {
-  if (!licenseInput.value.trim()) {
+  if (!fetchLicenseInput.value.trim()) {
     cloudErrorMessage.value = '请输入激活码！';
     return;
   }
-  const licenseKey = licenseInput.value.trim();
+  const licenseKey = fetchLicenseInput.value.trim();
+  const fetchPlayerId = fetchPlayerIdInput.value.trim();
+  if (!fetchPlayerId || isNaN(fetchPlayerId)) {
+    cloudErrorMessage.value = '玩家ID必须为数字且不能为空！';
+    return;
+  }
   try {
     logger.log("正在客户端验证激活码...");
     const result = verifyLicense(licenseKey);
     if (!result.success) throw new Error(result.message || '激活码验证失败，请检查激活码是否正确。');
-    logger.log(`客户端验证成功, User ID: ${result.userId}`);
+    let userID = String(result.userId);
+    if ((String(result.userId) !== fetchPlayerId) && (userID.slice(2) !== fetchPlayerId)) {
+      if (!(userID.length === 9 && userID.startsWith('33') && !result.isExpired)) {
+        throw new Error(`激活码已过期！`);
+      }
+    }
+    logger.log(`客户端验证成功`);
 
-    const currentUrl = window.location.origin;
     // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
-    const response = await fetch(`${currentUrl}/get-record`, {
+    const response = await fetch(`${WorkerUrl.value}/get-record`, {
       method: 'GET',
-      headers: { 'X-License-Key': licenseKey }
+      headers: { 'X-License-Key': licenseKey, 'X-Player-ID': fetchPlayerId },
     });
     if (!response.ok) throw new Error(await response.text() || `服务器错误: ${response.status}`);
 
@@ -196,6 +248,139 @@ const handleGetRecord = async () => {
   }
 };
 
+// 设置上传锁定状态
+const setUploadLock = (userID, duration) => {
+  const expiryTime = Date.now() + duration;
+  const lockInfo = JSON.stringify({ expiry: expiryTime });
+  try {
+    localStorage.setItem("gachaUploadTimestampLock" + userID, lockInfo);
+  } catch (error) {
+    logger.error("设置上传状态时出错:", error);
+    uploadErrorMessage.value = '设置上传状态失败，请检查浏览器的本地存储设置。';
+  }
+};
+// 检查上传锁定状态
+const UploadLockTime = (userID) => {
+  try {
+    const lockInfo = localStorage.getItem("gachaUploadTimestampLock" + userID);
+    if (!lockInfo) return false;
+    const { expiry } = JSON.parse(lockInfo);
+    if (Date.now() > expiry) {
+      localStorage.removeItem("gachaUploadTimestampLock" + userID);
+      return { locked: false, timeLeft: 0 };
+    }
+    return { locked: true, timeLeft: expiry - Date.now() };
+  } catch (error) {
+    logger.error("获取上传状态时出错:", error);
+    return { locked: true, timeLeft: -1 };
+  }
+};
+
+// 处理上传抽卡记录到云端
+const handleUploadRecord = async () => {
+  isUploading.value = true;
+  uploadMessage.value = '';
+  uploadErrorMessage.value = '';
+
+  try {
+    const licenseKey = uploadLicenseInput.value.trim();
+    const localPlayerId = playerId.value.trim();
+    if (!licenseKey || !localPlayerId) {
+      throw new Error('玩家ID和激活码均不能为空。');
+    }
+    logger.log("正在本地验证激活码以进行上传...");
+    const validationResult = verifyLicense(licenseKey);
+    if (!validationResult.success) {
+      throw new Error(validationResult.message || '激活码无效。');
+    }
+    if (validationResult.isExpired) {
+      throw new Error('您没有可用的织夜云服务时长，无法上传数据。');
+    }
+    const userID = String(validationResult.userId);
+    const lockTime = UploadLockTime(userID);
+    if (lockTime.locked && lockTime.timeLeft > 0) {
+      uploadErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
+      isUploading.value = false;
+      return;
+    } else if (lockTime.locked && lockTime.timeLeft === -1) {
+      uploadErrorMessage.value = '获取上传状态失败，请检查浏览器的本地存储设置。';
+      return;
+    }
+    if (!((userID === localPlayerId) || (userID.length === 9 && userID.startsWith('33')))) {
+      throw new Error(`激活码与玩家ID不匹配！`);
+    }
+    logger.log(`本地验证成功`);
+
+    let dataToProcess;
+    const parsedInput = JSON.parse(jsonInput.value);
+
+    // 如果输入数据是压缩格式，则解压缩
+    if (parsedInput?.compressed) {
+      const binaryString = atob(parsedInput.data);
+      const bytes = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i));
+      dataToProcess = JSON.parse(pako.inflate(bytes, { to: 'string' }));
+    } else {
+      dataToProcess = parsedInput;
+    }
+
+    // 清洗数据，删除 gacha_id 字段
+    const playerData = dataToProcess[localPlayerId];
+    if (!playerData) {
+      throw new Error(`当前JSON数据中找不到玩家ID ${localPlayerId} 的记录。`);
+    }
+
+    for (const poolId in playerData) {
+      if (Array.isArray(playerData[poolId])) {
+        playerData[poolId].forEach(record => {
+          // 删除 gacha_id 以节省空间
+          if ('gacha_id' in record && String(record.gacha_id) == poolId) {
+            delete record.gacha_id;
+          }
+        });
+      }
+    }
+    logger.log("数据清洗完成，已移除所有 gacha_id。");
+
+    // 压缩数据
+    const cleanedJsonString = JSON.stringify(dataToProcess);
+    const compressedData = pako.gzip(cleanedJsonString);
+    const finalPayload = btoa(String.fromCharCode.apply(null, compressedData));
+    logger.log("数据已重新压缩并编码为Base64。");
+
+    // 上传数据到服务器
+    uploadMessage.value = '正在上传，请稍候...';
+    const response = await fetch(`${WorkerUrl.value}/upload-record`, {
+      method: 'POST',
+      headers: {
+        'X-License-Key': licenseKey,
+        'X-Player-ID': localPlayerId,
+        'Content-Type': 'text/plain',
+      },
+      body: finalPayload,
+    });
+
+    const responseText = await response.text();
+    if (response.ok) {
+      uploadMessage.value = `上传成功！${responseText}`;
+      setUploadLock(userID, userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000); // 设置上传锁定时间
+    } else if (response.status === 429) { // 后端返回“过于频繁”
+      const responseContent = responseText.split('.');
+      uploadErrorMessage.value = responseContent[0] || '上传过于频繁，请稍后再试。';
+      setUploadLock(userID, responseContent[1] ? parseInt(responseContent[1]) : (userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000));
+      throw new Error(uploadErrorMessage.value || '上传过于频繁，请稍后再试。');
+    } else { // 其他错误
+      throw new Error(responseText || `服务器错误: ${response.status}`);
+    }
+
+  } catch (error) {
+    logger.error("上传记录时出错:", error);
+    uploadErrorMessage.value = error.message;
+    uploadMessage.value = ''; // Clear any pending messages
+  } finally {
+    isUploading.value = false;
+  }
+};
+
 // 重置网页
 const resetView = () => {
   viewState.value = 'input';
@@ -205,6 +390,9 @@ const resetView = () => {
   errorMessage.value = '';
   playerId.value = '';
   cloudErrorMessage.value = '';
+  uploadLicenseInput.value = '';
+  uploadErrorMessage.value = '';
+  uploadMessage.value = '';
 };
 </script>
 
@@ -218,7 +406,6 @@ const resetView = () => {
   align-items: flex-start;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 5vw;
 }
 
 .gacha-analysis-container {
@@ -279,8 +466,11 @@ const resetView = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 16px;
   padding-top: 16px;
+}
+
+.split {
+  margin-top: 16px;
   border-top: 1px solid v-bind('colors.background.light');
 }
 
@@ -311,8 +501,14 @@ const resetView = () => {
   transition: background-color 0.2s;
 }
 
-.action-button:hover {
+.action-button:hover:not(:disabled) {
   background-color: v-bind('colors.brand.hover');
+}
+
+.action-button:disabled {
+  background-color: v-bind('colors.background.light');
+  color: v-bind('colors.text.disabled');
+  cursor: not-allowed;
 }
 
 .file-upload-button {
@@ -323,6 +519,17 @@ const resetView = () => {
   color: v-bind('colors.status.error');
   background-color: v-bind('colors.status.errorBg');
   border: 1px solid v-bind('colors.status.error');
+  padding: 10px;
+  border-radius: 8px;
+  margin: 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.success-message {
+  color: v-bind('colors.status.success');
+  background-color: v-bind('colors.status.successBg');
+  border: 1px solid v-bind('colors.status.success');
   padding: 10px;
   border-radius: 8px;
   margin: 0;
