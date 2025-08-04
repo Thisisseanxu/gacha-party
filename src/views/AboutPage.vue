@@ -108,6 +108,11 @@ onUnmounted(() => clearInterval(timer));
 const specialThanks = ref([
   { supporter: 'B站UP熊月', contribution: '对盲盒派对及本项目的宣传推广', link: 'https://space.bilibili.com/481588861' },
   { supporter: '狸子', contribution: '对本项目的慷慨赞助' },
+  { supporter: '莹烛', contribution: '管理QQ群并帮助班长解决问题' },
+  { supporter: '好奇害不死', contribution: '管理QQ群并帮助班长解决问题' },
+  { supporter: 'code8804', contribution: '管理QQ群并帮助班长解决问题' },
+  { supporter: 'xie1000', contribution: '管理QQ群并帮助班长解决问题' },
+  { supporter: '所有参与测试的班长', contribution: '提出宝贵的意见和建议' },
 ]);
 
 </script>
