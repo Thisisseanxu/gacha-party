@@ -3,18 +3,18 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
-        <p>此页面可分析使用抽卡记录导出工具导出的抽卡数据<br />
+        <p class="input-description">此页面可分析抽卡记录导出工具导出的抽卡记录<br />
           工具和激活码请加 <a class="highlight"
             href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
             target="_blank">
             Q群1049576192</a> 获取
         </p>
-        <p class="input-description">请在下方文本框粘贴您的抽卡记录 JSON 数据，或上传导出的文件。</p>
+        <p class="input-description">请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。</p>
         <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
           placeholder='请在此处粘贴 JSON 数据... 例如：{"version":2,"9999999":{"9":[{"id":7579416,"gacha_id":9,"item_id":"151406","created_at":1751324096},...]}}'></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button">开始分析</button>
-          <label class="file-upload-button action-button">
+          <label class="action-button">
             上传文件
             <input type="file" @change="handleFileUpload" accept=".json,application/json" style="display: none;" />
           </label>
@@ -23,10 +23,15 @@
 
         <div class="cloud-section split">
           <p class="input-title">织夜云服务 BETA</p>
-          <p class="input-description">【限时免费】使用激活码查询您的抽卡记录。</p>
+          <p class="input-description">【限时免费】使用激活码查询已保存的抽卡记录。<br />已订阅云服务的班长可在线获取新的记录（开发中）</p>
           <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
-          <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
-          <button @click="handleGetRecord" class="action-button">获取云端抽卡记录</button>
+          <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
+          <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
+              href="#">《织夜云用户协议》</a></p>
+          <div class="button-group">
+            <button class="action-button">在线获取（开发中）</button>
+            <button @click="handleGetRecord" class="action-button">读取抽卡记录</button>
+          </div>
         </div>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
 
@@ -43,15 +48,51 @@
         <p class="input-title">织夜云服务 BETA</p>
         <p class="input-description">【限时免费】您可将当前页面的抽卡记录上传至云端（每天一次）</p>
         <p class="input-description highlight">强烈建议您在上传前点击分析结果最下方的“下载抽卡记录文件”在本地保存一份数据</p>
-        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="在此处输入您的激活码（与导出工具相同）" />
+        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
+        <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
+        </p>
         <button @click="handleUploadRecord" :disabled="isUploading" class="action-button">
-          {{ isUploading ? '正在上传...' : '上传记录至云端' }}
+          {{ isUploading ? '正在上传...' : '上传抽卡记录' }}
         </button>
         <p v-if="uploadMessage" class="success-message">{{ uploadMessage }}</p>
         <p v-if="uploadErrorMessage" class="error-message">{{ uploadErrorMessage }}</p>
       </div>
     </div>
+    <PopUp :display="showAgreementPopUp" title="《织夜云用户协议》" @close="closeAgreementPopUp">
+      <p>欢迎使用织夜云服务！<br />在使用前，请您仔细阅读以下用户协议：</p>
+      <ol class="agreement-list">
+        <li>
+          <strong>服务描述与接受条款：</strong>
+          本服务（“织夜云”）是一个为《盲盒派对》玩家提供抽卡记录上传、存储和分析的辅助工具。您点击“我已阅读并同意”按钮并继续使用本服务，即表示您已同意并接受本协议的所有条款。
+        </li>
+        <li>
+          <strong>用户责任：</strong> 您应对您上传数据的合法性、真实性以及您激活码和玩家ID的准确性负全部责任。请妥善保管您的激活码，任何通过您激活码进行的操作，都将被视为您本人的行为。
+        </li>
+        <li>
+          <strong>数据使用与隐私保护：</strong>
+          我们承诺保护您的个人隐私。您上传的原始抽卡记录将与您的玩家ID关联存储。我们可能会将您的数据（在去除所有可识别的个人身份信息，如玩家ID后）用于匿名的统计分析，以改善服务或生成宏观的游戏数据报告。我们不会将您的个人数据与任何第三方分享，除非法律法规另有规定。
+        </li>
+        <li>
+          <strong>数据所有权：</strong> 您对自己上传的原始抽卡记录拥有完整的所有权。
+        </li>
+        <li>
+          <strong>服务变更、中断或终止：</strong> 本服务目前处于 BETA 测试阶段且免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。我们不保证服务的永久可用性。
+        </li>
+        <li>
+          <strong>免责声明（不可抗力）：</strong>
+          因黑客攻击、服务器故障、自然灾害等不可抗力因素导致的数据丢失、损坏或泄露，我们将尽力恢复，但不承担任何法律责任。强烈建议您在上传云端的同时，也在本地保留一份数据备份。
+        </li>
+        <li>
+          <strong>退出服务：</strong> 如果您希望退出本服务，可以随时停止使用。对于已上传的数据，您可以通过关于页的联系方式或加入QQ群组与我们联系并要求删除数据。
+        </li>
+        <li>
+          <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
+        </li>
+      </ol>
+      <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
+    </PopUp>
   </div>
+
 </template>
 
 <script setup>
@@ -61,8 +102,8 @@ import { logger } from '@/utils/logger.js';
 import { verifyLicense } from '@/utils/licenseManager.js';
 import { colors } from '@/styles/colors.js';
 
-// 导入分析组件
-import GachaAnalysis from '@/components/GachaAnalysis.vue';
+import GachaAnalysis from '@/components/GachaAnalysis.vue'; // 导入分析结果展示组件
+import PopUp from '@/components/PopUp.vue'; // 导入弹窗组件
 
 const viewState = ref('input'); // 'input' 为用户输入模式 'analysis' 则展示分析结果
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
@@ -70,6 +111,7 @@ const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const errorMessage = ref('');
+const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
@@ -529,6 +571,11 @@ const handleUploadRecord = async () => {
   }
 };
 
+
+// 打开或关闭用户协议弹窗
+const openAgreementPopUp = () => showAgreementPopUp.value = true;
+const closeAgreementPopUp = () => showAgreementPopUp.value = false;
+
 // 重置网页
 const resetView = () => {
   viewState.value = 'input';
@@ -637,6 +684,7 @@ const resetView = () => {
 
 .action-button {
   flex-grow: 1;
+  flex: 1;
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -656,10 +704,6 @@ const resetView = () => {
   background-color: v-bind('colors.background.light');
   color: v-bind('colors.text.disabled');
   cursor: not-allowed;
-}
-
-.file-upload-button {
-  text-align: center;
 }
 
 .error-message {
@@ -682,5 +726,42 @@ const resetView = () => {
   margin: 0;
   font-size: 0.9rem;
   word-break: break-word;
+}
+
+/* 为协议列表添加样式 */
+.agreement-list {
+  max-height: 20rem;
+
+  overflow-y: auto;
+
+  /* 美化列表，增加一些内边距和边框 */
+  border: 1px solid #e0e0e0;
+  /* 左侧留出空间给数字序号 */
+  padding: 0 0 0 20px;
+  border-radius: 8px;
+  background-color: v-bind('colors.shadow.primaryHover');
+}
+
+/* 列表项的样式 */
+.agreement-list li {
+  /* 设置行高和行间距 */
+  line-height: 1.6;
+  margin-bottom: 12px;
+  /* 文字靠左侧对齐 */
+  text-align: left;
+}
+
+/* 隐藏滚动条轨道（在兼容的浏览器中） */
+.agreement-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agreement-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.agreement-list::-webkit-scrollbar-thumb {
+  background-color: v-bind('colors.scrollbar');
+  border-radius: 3px;
 }
 </style>

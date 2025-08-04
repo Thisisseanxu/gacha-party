@@ -100,20 +100,18 @@
         </div>
       </div>
     </div>
-    <div v-if="showShareModal" class="share-modal-overlay" @click.self="closeShareModal">
-      <div class="share-modal-content card">
-        <button @click="closeShareModal" class="close-modal-button">&times;</button>
-        <h2>分享你的卡池</h2>
-        <p class="share-modal-text-info">长按二维码保存或点击下方链接复制</p>
-        <p v-if="shareText.length > 1000" class="share-modal-text-info">无法生成二维码，请手动复制链接。</p>
-        <div class="qr-code-container" v-else>
-          <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code">
-          <p v-else class="share-modal-text-info">正在生成二维码...</p>
-        </div>
-        <textarea readonly class="share-modal-textarea" @click="copyShareText" v-model="shareText"></textarea>
-        <p v-if="copyStatusMessage" class="copy-status-message">{{ copyStatusMessage }}</p>
+    <PopUp :display="showSharePopUp" title="分享你的卡池" @close="closeSharePopUp">
+      <p class="share-modal-text-info">长按二维码保存或点击下方链接复制分享</p>
+
+      <div class="qr-code-container">
+        <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code">
+        <p v-else>二维码生成中...</p>
       </div>
-    </div>
+
+      <textarea readonly class="share-modal-textarea" @click="copyShareText" v-model="shareText"></textarea>
+
+      <p v-if="copyStatusMessage" class="copy-status-message">{{ copyStatusMessage }}</p>
+    </PopUp>
   </div>
 </template>
 
@@ -127,6 +125,8 @@ import { colors } from '@/styles/colors.js';
 import { getGachaSource } from '@/utils/getGachaSource.js';
 import QRCode from 'qrcode';
 
+import PopUp from '@/components/PopUp.vue';
+
 // 动画相关的ref
 const showGachaResultOverlay = ref(false);
 const displayedCards = ref([]);
@@ -135,7 +135,7 @@ let animationTimeout = null;
 const cardsContainerRef = ref(null); // 卡片容器引用
 
 // 控制分享弹窗的ref
-const showShareModal = ref(false);
+const showSharePopUp = ref(false);
 const shareText = ref('');
 const qrCodeDataUrl = ref('');
 const copyStatusMessage = ref('');
@@ -323,7 +323,6 @@ const shareCustomPool = async () => {
   const textToShare = `这是我在织夜工具箱创建的【${poolName}】卡池，快来试试吧！\n${shareUrl}`;
 
   shareText.value = textToShare;
-  showShareModal.value = true;
 
   // 确保弹窗和canvas元素已渲染到DOM中
   await nextTick();
@@ -342,11 +341,12 @@ const shareCustomPool = async () => {
     // 可以在这里设置一个错误提示
     qrCodeDataUrl.value = ''; // 清空以显示错误或提示
   }
+  showSharePopUp.value = true;
 };
 
 // 关闭弹窗
-const closeShareModal = () => {
-  showShareModal.value = false;
+const closeSharePopUp = () => {
+  showSharePopUp.value = false;
 };
 
 // 复制分享文本到剪贴板
@@ -374,36 +374,6 @@ const copyShareText = async (event) => {
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
-}
-
-.share-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1100;
-  /* 需要比结果页的 z-index 更高 */
-  backdrop-filter: blur(5px);
-}
-
-.share-modal-content {
-  position: relative;
-  text-align: center;
-  padding: 2rem;
-  padding-top: 3rem;
-  width: 90%;
-  max-width: 380px;
-}
-
-.share-modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: v-bind('colors.text.highlight');
 }
 
 .share-modal-text-info {
@@ -444,23 +414,6 @@ const copyShareText = async (event) => {
   font-weight: bold;
   font-size: 0.9rem;
   min-height: 1.2em;
-}
-
-.close-modal-button {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  line-height: 1;
-  color: v-bind('colors.text.secondary');
-  cursor: pointer;
-  padding: 0;
-}
-
-.close-modal-button:hover {
-  color: v-bind('colors.text.primary');
 }
 
 /* 移除分享按钮的特定颜色，使其与其他按钮风格一致 */
