@@ -102,22 +102,29 @@ app.get('/get-record', async (c) => {
  * 验证激活码，并将请求体中的数据存入到KV中。
  */
 app.post('/upload-record', async (c) => {
+  let jsonResponse = {
+    message: '',
+    timeLeft: 0,
+  }
   try {
     // 从请求头获取激活码
     const licenseKey = c.req.header('X-License-Key')
     if (!licenseKey) {
-      return c.text('请求头中缺少 X-License-Key', 400)
+      jsonResponse.message = '请求头中缺少 X-License-Key'
+      return c.json(jsonResponse, 400)
     }
 
     // 在服务器端进行严格验证
     const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
     // 限时免费功能，暂不验证过期状态
     // if (isExpired) {
-    //   return c.text('激活码已过期，请联系管理员获取新的激活码', 403)
+    //   jsonResponse.message = '激活码已过期，请联系管理员获取新的激活码'
+    //   return c.json(jsonResponse, 403)
     // }
     const playerId = c.req.header('X-Player-Id')
     if (!playerId) {
-      return c.text('请求头中缺少 X-Player-Id', 400)
+      jsonResponse.message = '请求头中缺少 X-Player-Id'
+      return c.json(jsonResponse, 400)
     }
 
     const userIdStr = String(userId)
@@ -125,13 +132,15 @@ app.post('/upload-record', async (c) => {
       playerId &&
       !(playerId === userIdStr || (userIdStr.startsWith('33') && userIdStr.length === 9))
     ) {
-      return c.text('上传的抽卡记录不属于激活码对应的玩家！', 403)
+      jsonResponse.message = '上传的抽卡记录不属于激活码对应的玩家！'
+      return c.json(jsonResponse, 403)
     }
 
     // 获取请求体中的数据 (前端已处理好的Base64字符串)
     const payload = await c.req.text()
     if (!payload) {
-      return c.text('请求体为空，没有需要上传的数据', 400)
+      jsonResponse.message = '请求体为空，没有需要上传的数据'
+      return c.json(jsonResponse, 400)
     }
 
     // 将数据存入KV
@@ -145,11 +154,9 @@ app.post('/upload-record', async (c) => {
       // 如果上次更新时间在限制时间内，则拒绝写入
       if (now - lastUpdated < writeTimeLimit) {
         const timeLeft = writeTimeLimit - (now - lastUpdated)
-        const errorResponse = {
-          message: `上传过于频繁，请在 ${Math.ceil(timeLeft / 1000)} 秒后再试。`,
-          timeLeft: timeLeft,
-        }
-        return c.json(errorResponse, 429)
+        jsonResponse.message = `上传过于频繁！`
+        jsonResponse.timeLeft = timeLeft
+        return c.json(jsonResponse, 429)
       }
     }
 
@@ -158,10 +165,12 @@ app.post('/upload-record', async (c) => {
     })
 
     // 返回成功信息
-    return c.text(`玩家ID ${playerId} 的记录已成功上传/更新。`, 200)
+    jsonResponse.message = '抽卡记录上传成功！'
+    return c.json(jsonResponse, 200)
   } catch (error) {
     // 如果验证失败或发生其他错误，返回403 Forbidden
-    return c.text(`上传失败： ${error.message}`, 403)
+    jsonResponse.message = `验证失败： ${error.message}`
+    return c.json(jsonResponse, 403)
   }
 })
 

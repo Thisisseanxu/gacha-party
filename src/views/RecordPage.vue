@@ -436,7 +436,12 @@ const handleGetRecord = async () => {
   }
 };
 
-// 设置上传锁定状态
+/**
+ * 设置上传锁定状态
+ *
+ * @param {boolean} isExpired - 是否为过期的激活码
+ * @param {number} duration - 锁定持续时间（毫秒）
+ */
 const setUploadLock = (isExpired, duration) => {
   const expiryTime = Date.now() + duration;
   const lockInfo = JSON.stringify({ expiry: expiryTime });
@@ -537,7 +542,6 @@ const handleUploadRecord = async () => {
     logger.log("数据已重新压缩并编码为Base64。");
 
     // 上传数据到服务器
-    uploadMessage.value = '正在上传，请稍候...';
     const response = await fetch(`${WorkerUrl.value}/upload-record`, {
       method: 'POST',
       headers: {
@@ -548,18 +552,22 @@ const handleUploadRecord = async () => {
       body: finalPayload,
     });
 
-    const responseText = await response.text();
+    const responseJson = await response.json(); // 服务器返回的JSON响应中message为错误信息，timeLeft为剩余锁定时间（单位：毫秒）
     if (response.ok) {
-      uploadMessage.value = `上传成功！${responseText}`;
+      uploadMessage.value = `抽卡记录上传成功！`;
       saveLicenseKey(licenseKey); // 保存激活码
       setUploadLock(validationResult.isExpired, userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000); // 设置上传锁定时间
+      setFetchLock(validationResult.isExpired, 0); // 上传成功后立即取消本地的读取锁定状态
     } else if (response.status === 429) { // 后端返回“过于频繁”
-      const errorData = await response.json();
-      uploadErrorMessage.value = errorData.message;
-      setUploadLock(validationResult.isExpired, errorData.timeLeft);
-      throw new Error(uploadErrorMessage.value || '上传过于频繁，请稍后再试。');
+      uploadErrorMessage.value = responseJson.message;
+      if (responseJson.timeLeft > 0) {
+        uploadErrorMessage.value += ` 请在 ${milisecondsToTime(responseJson.timeLeft)} 后再试。`;
+        setUploadLock(validationResult.isExpired, responseJson.timeLeft);
+      } else {
+        throw new Error(uploadErrorMessage.value);
+      }
     } else { // 其他错误
-      throw new Error(responseText || `服务器错误: ${response.status}`);
+      throw new Error(responseJson.message || `服务器错误: ${response.status}`);
     }
 
   } catch (error) {
