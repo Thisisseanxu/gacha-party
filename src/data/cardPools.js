@@ -233,7 +233,7 @@ export const cardPools = {
     },
   },
   // 常驻扭蛋
-  Normal: {
+  changzhu: {
     type: '常驻',
     name: '常驻扭蛋',
     imageUrl: '/images/cardpools-icon/9.webp', // 基础概率
@@ -246,7 +246,7 @@ export const cardPools = {
         pity: 60, // 60抽必出SSR
         pityUP: true, // 触发保底时必定抽到UP的SSR
         UpTrigger: true, // 该卡池有UP机制
-        SelectUpCardsGroup: true, // 新增：标记为可从多组UP中选择
+        SelectUpCardsGroup: true, // 标记为可从多组UP中选择
         UpGroups: [
           {
             id: '1', // UP组ID
@@ -342,10 +342,10 @@ export const cardPools = {
     },
   },
   // 冬日奇饮-预测卡池
-  dongriqiying_preview: {
+  gaojichangzhu_preview: {
     type: '限定',
-    name: '冬日奇饮-预测卡池',
-    imageUrl: '/images/cardpools-icon/30.webp',
+    name: '高级常驻扭蛋-预测卡池',
+    imageUrl: '/images/cardpools-icon/10000.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -359,15 +359,89 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1710', '1711'],
+        UpCards: ['1710', '1309'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['1703'], // 双倍概率SSR角色（限定池SSR概率提升）
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCardsGroup: true, // 标记为可从多组UP中选择
+        UpGroups: [
+          {
+            id: '1', // UP组ID
+            name: '甜品派对', // 组的显示名称
+            image_url: '/images/cardpools-icon/1.webp', // 组的封面图片SPL
+            cards: ['1102', '1106', '1108', '1109'], // 该组包含的卡片ID列表
+          },
+          {
+            id: '2',
+            name: '梦境守护',
+            image_url: '/images/cardpools-icon/2.webp',
+            cards: ['1201', '1202', '1203', '1210'],
+          },
+          {
+            id: '3',
+            name: '电玩大战',
+            image_url: '/images/cardpools-icon/3.webp',
+            cards: ['1301', '1302', '1305', '1310'],
+          },
+          {
+            id: '4',
+            name: '电音国度',
+            image_url: '/images/cardpools-icon/4.webp',
+            cards: ['1401', '1402', '1403', '1504'],
+          },
+          {
+            id: '6',
+            name: '冰雪世界',
+            image_url: '/images/cardpools-icon/6.webp',
+            cards: ['1701', '1703', '1704', '1708'],
+          },
+          {
+            id: '5',
+            name: '火焰国度',
+            image_url: '/images/cardpools-icon/5.webp',
+            cards: ['1601', '1602', '1603', '1608'],
+          },
+          {
+            id: '8',
+            name: '水流世界',
+            image_url: '/images/cardpools-icon/8.webp',
+            cards: ['1801', '1806', '1803', '1807'],
+          },
+        ],
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1710', '1711'],
-      [RARITY.SSR]: ['1703', '1701', '1704', '1708'],
+      [RARITY.SP]: ['1710', '1309'],
+      [RARITY.SSR]: [
+        '1102',
+        '1106',
+        '1108',
+        '1109',
+        '1201',
+        '1202',
+        '1203',
+        '1210',
+        '1301',
+        '1302',
+        '1305',
+        '1310',
+        '1401',
+        '1402',
+        '1403',
+        '1701',
+        '1703',
+        '1704',
+        '1708',
+        '1601',
+        '1602',
+        '1603',
+        '1608',
+        '1801',
+        '1806',
+        '1803',
+        '1504',
+        '1804',
+      ],
       [RARITY.SR]: [
         '1103',
         '1104',
