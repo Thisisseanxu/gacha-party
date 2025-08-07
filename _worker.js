@@ -115,6 +115,7 @@ app.post('/upload-record', async (c) => {
     }
 
     // 在服务器端进行严格验证
+    // eslint-disable-next-line no-unused-vars
     const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
     // 限时免费功能，暂不验证过期状态
     // if (isExpired) {

@@ -429,8 +429,9 @@ const handleGetRecord = async () => {
     });
     if (response.ok) {
       saveLicenseKey(licenseKey, fetchPlayerId); // 保存激活码和玩家ID
-      setFetchLock(result.isExpired, result.isExpired ? 30 * 60 * 1000 : 30 * 1000); // 设置查询锁定时间
+      setFetchLock(result.isExpired, result.isExpired ? 30 * 60 * 1000 : 60 * 1000); // 设置查询锁定时间
     } else {
+      setFetchLock(result.isExpired, 60 * 1000);
       throw new Error(await response.text() || `服务器错误: ${response.status}`);
     }
 
@@ -576,6 +577,7 @@ const handleUploadRecord = async () => {
         throw new Error(uploadErrorMessage.value);
       }
     } else { // 其他错误
+      setFetchLock(validationResult.isExpired, 60 * 1000); // 设置上传锁定时间
       throw new Error(responseJson.message || `服务器错误: ${response.status}`);
     }
 
