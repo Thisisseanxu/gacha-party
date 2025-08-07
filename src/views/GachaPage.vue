@@ -14,10 +14,22 @@
         <div v-if="currentPool" class="gacha-main-content card">
           <div class="controls-and-switch">
             <div class="gacha-controls">
-              <button @click="toChallenge" class="gacha-button challenge-button">进入挑战赛</button>
+              <button @click="toChallenge" v-if="currentPool.type === '限定'"
+                class="gacha-button challenge-button">进入挑战赛</button>
               <div class="gacha-controls">
                 <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
                 <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="isSelectableUpPool" class="select-up-container">
+            <h3 class="select-up-title">{{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}</h3>
+            <div class="up-cards-selection">
+              <div v-for="card in upCardDetails" :key="card.id"
+                :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
+                @click="selectUpCard(card.id)">
+                <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
               </div>
             </div>
           </div>
@@ -37,17 +49,6 @@
                 </div>
               </div>
             </transition>
-          </div>
-
-          <div v-if="isSelectableUpPool" class="select-up-container">
-            <h3 class="select-up-title">{{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}</h3>
-            <div class="up-cards-selection">
-              <div v-for="card in upCardDetails" :key="card.id"
-                :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
-                @click="selectUpCard(card.id)">
-                <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
-              </div>
-            </div>
           </div>
         </div>
 
