@@ -13,8 +13,8 @@
         <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
           placeholder='请在此处粘贴 JSON 数据... 例如：{"version":2,"9999999":{"9":[{"id":7579416,"gacha_id":9,"item_id":"151406","created_at":1751324096},...]}}'></textarea>
         <div class="button-group">
-          <button @click="handleJsonAnalysis" class="action-button">开始分析</button>
-          <label class="action-button">
+          <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
+          <label class="action-button" :disabled="isFetchingOnline">
             上传文件
             <input type="file" @change="handleFileUpload" accept=".json,application/json" style="display: none;" />
           </label>
@@ -29,10 +29,13 @@
           <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
               href="#">《织夜云用户协议》</a></p>
           <div class="button-group">
-            <button class="action-button">在线获取（开发中）</button>
-            <button @click="handleGetRecord" class="action-button">读取抽卡记录</button>
+            <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
+              {{ isFetchingOnline ? '正在在线获取...' : '在线获取' }}
+            </button>
+            <button @click="handleGetRecord" :disabled="isFetchingOnline" class="action-button">读取抽卡记录</button>
           </div>
         </div>
+        <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
 
         <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisisseanxu/gacha-party"
@@ -47,16 +50,16 @@
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
         <p class="input-title">织夜云服务 BETA</p>
-        <p class="input-description">【限时免费】您可将当前页面的抽卡记录上传至云端（每天一次）</p>
-        <p class="input-description highlight">强烈建议您在上传前点击分析结果最下方的“下载抽卡记录文件”在本地保存一份数据</p>
+        <p class="input-description">将当前的抽卡记录上传至云端</p>
+        <p class="input-description highlight">使用在线获取后会自动上传，无需手动上传</p>
         <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
         <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
         </p>
         <button @click="handleUploadRecord" :disabled="isUploading" class="action-button">
           {{ isUploading ? '正在上传...' : '上传抽卡记录' }}
         </button>
-        <p v-if="uploadMessage" class="success-message">{{ uploadMessage }}</p>
-        <p v-if="uploadErrorMessage" class="error-message">{{ uploadErrorMessage }}</p>
+        <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
+        <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
       </div>
     </div>
     <PopUp :display="showAgreementPopUp" title="《织夜云用户协议》" @close="closeAgreementPopUp">
@@ -67,24 +70,21 @@
           本服务（“织夜云”）是一个为《盲盒派对》玩家提供抽卡记录上传、存储和分析的辅助工具。您点击“我已阅读并同意”按钮并继续使用本服务，即表示您已同意并接受本协议的所有条款。
         </li>
         <li>
-          <strong>用户责任：</strong> 您应对您上传数据的合法性、真实性以及您激活码和玩家ID的准确性负全部责任。请妥善保管您的激活码，任何通过您激活码进行的操作，都将被视为您本人的行为。
+          <strong>用户责任：</strong> 您应对您上传的数据以及您的激活码和玩家ID的准确性负全部责任。请妥善保管您的激活码，任何通过您激活码进行的操作，都将被视为您本人的行为。
         </li>
         <li>
           <strong>数据使用与隐私保护：</strong>
           我们承诺保护您的个人隐私。您上传的原始抽卡记录将与您的玩家ID关联存储。我们可能会将您的数据（在去除所有可识别的个人身份信息，如玩家ID后）用于匿名的统计分析，以改善服务或生成宏观的游戏数据报告。我们不会将您的个人数据与任何第三方分享，除非法律法规另有规定。
         </li>
         <li>
-          <strong>数据所有权：</strong> 您对自己上传的原始抽卡记录拥有完整的所有权。
+          <strong>退出服务：</strong> 如果您希望退出本服务，可以随时停止使用。对于已上传的数据，您可以通过关于页的联系方式或加入QQ群组与我们联系并要求删除数据。
         </li>
         <li>
           <strong>服务变更、中断或终止：</strong> 本服务目前处于 BETA 测试阶段且免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。我们不保证服务的永久可用性。
         </li>
         <li>
-          <strong>免责声明（不可抗力）：</strong>
-          因黑客攻击、服务器故障、自然灾害等不可抗力因素导致的数据丢失、损坏或泄露，我们将尽力恢复，但不承担任何法律责任。强烈建议您在上传云端的同时，也在本地保留一份数据备份。
-        </li>
-        <li>
-          <strong>退出服务：</strong> 如果您希望退出本服务，可以随时停止使用。对于已上传的数据，您可以通过关于页的联系方式或加入QQ群组与我们联系并要求删除数据。
+          <strong>免责说明：</strong>
+          因黑客攻击、服务器故障、自然灾害等不可抗力因素导致的数据丢失、损坏或泄露，我们将尽力恢复，但不承担任何法律责任。强烈建议您在上传云端的同时，也在本地保留一份数据备份。您对自己上传的原始抽卡记录拥有完整的所有权，本网站不对数据真实性提供担保。您通过本服务获取抽卡记录的行为视为您本人的自愿行为，我们不对您在使用本工具时导致您抽卡记录，游戏账号等的任何直接或间接损失承担责任。
         </li>
         <li>
           <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
@@ -122,7 +122,7 @@ const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "10000"]; // 限定
 const LICENSE_KEY = 'gachaLicenseKey';
 const PLAYER_ID_KEY = 'gachaPlayerId';
 
-const loadLicenseKey = () => {
+const loadInputData = () => {
   const savedKey = localStorage.getItem(LICENSE_KEY);
   const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
   if (savedKey) {
@@ -134,31 +134,33 @@ const loadLicenseKey = () => {
   }
 };
 
-const saveLicenseKey = (key = null, playerId = null) => {
+const saveInputData = (key = null, playerId = null) => {
   if (key) {
     localStorage.setItem(LICENSE_KEY, key);
   }
   if (playerId) {
     localStorage.setItem(PLAYER_ID_KEY, playerId);
   }
-  loadLicenseKey();
+  loadInputData();
 };
 
 onMounted(() => {
   // 页面加载时，尝试从localStorage加载已保存的激活码
-  loadLicenseKey();
+  loadInputData();
 });
 
 // 云端获取抽卡记录相关的变量
 const fetchPlayerIdInput = ref(''); // 绑定的玩家ID输入框
 const fetchLicenseInput = ref(''); // 绑定的许可证输入框
+const cloudMessage = ref(''); // 织夜云的成功消息
 const cloudErrorMessage = ref(''); // 织夜云的错误信息
+const isFetchingOnline = ref(false); // 是否正在在线获取数据的状态
+const pollingIntervalId = ref(null); // 存储轮询的定时器ID
 
 // 上传抽卡记录相关的变量
 const uploadLicenseInput = ref('');
 const isUploading = ref(false);
-const uploadMessage = ref('');
-const uploadErrorMessage = ref('');
+
 
 // 分析 JSON 数据
 const handleJsonAnalysis = () => {
@@ -298,7 +300,7 @@ const setFetchLock = (isExpired, duration) => {
     localStorage.setItem("gachaFetchTimestampLock" + (isExpired ? '_expired' : ''), lockInfo);
   } catch (error) {
     logger.error("设置查询状态时出错:", error);
-    uploadErrorMessage.value = '设置查询状态失败，请检查浏览器的本地存储设置。';
+    cloudErrorMessage.value = '设置查询状态失败，请检查浏览器的本地存储设置。';
   }
 };
 // 检查查询锁定状态
@@ -428,7 +430,7 @@ const handleGetRecord = async () => {
       headers: { 'X-License-Key': licenseKey, 'X-Player-ID': fetchPlayerId },
     });
     if (response.ok) {
-      saveLicenseKey(licenseKey, fetchPlayerId); // 保存激活码和玩家ID
+      saveInputData(licenseKey, fetchPlayerId); // 保存激活码和玩家ID
       setFetchLock(result.isExpired, result.isExpired ? 30 * 60 * 1000 : 60 * 1000); // 设置查询锁定时间
     } else {
       setFetchLock(result.isExpired, 60 * 1000);
@@ -447,6 +449,169 @@ const handleGetRecord = async () => {
 };
 
 /**
+ * 设置在线获取锁定状态
+ *
+ * @param {boolean} isExpired - 是否为过期的激活码
+ * @param {number} duration - 锁定持续时间（毫秒）
+ */const setOnlineFetchingLock = (isExpired, duration) => {
+  const expiryTime = Date.now() + duration;
+  const lockInfo = JSON.stringify({ expiry: expiryTime });
+  try {
+    localStorage.setItem("gachaOnlineFetchingLock" + (isExpired ? '_expired' : ''), lockInfo);
+  } catch (error) {
+    logger.error("设置在线获取状态时出错:", error);
+    cloudErrorMessage.value = '设置在线获取状态失败，请检查浏览器的本地存储设置。';
+  }
+};
+
+const OnlineFetchingLockTime = (isExpired) => {
+  try {
+    const lockInfo = localStorage.getItem("gachaOnlineFetchingLock" + (isExpired ? '_expired' : ''));
+    if (!lockInfo) return { locked: false, timeLeft: 0 };
+    const { expiry } = JSON.parse(lockInfo);
+    if (Date.now() > expiry) {
+      localStorage.removeItem("gachaOnlineFetchingLock" + (isExpired ? '_expired' : ''));
+      return { locked: false, timeLeft: 0 };
+    }
+    return { locked: true, timeLeft: expiry - Date.now() };
+  } catch (error) {
+    logger.error("获取在线获取状态时出错:", error);
+    return { locked: true, timeLeft: -1 };
+  }
+};
+
+// 轮询函数
+const pollTaskStatus = async (playerId, licenseKey) => {
+  logger.log(`正在轮询玩家 ${playerId} 的任务状态`);
+  try {
+    // 注意：这里的路由是 /task-status/:playerId
+    const response = await fetch(`${WorkerUrl.value}/task-status/${playerId}`);
+    if (!response.ok) {
+      throw new Error(`无法获取任务状态: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data.success) {
+      cloudMessage.value = data.progress || '正在处理...';
+
+      // 任务完成或失败，停止轮询
+      if (data.status === 'completed' || data.status === 'failed') {
+        stopPolling();
+        isFetchingOnline.value = false;
+
+        if (data.status === 'completed') {
+          cloudMessage.value = data.progress; // 显示最终成功信息
+          // 任务成功后，设置前端冷却锁
+          const licenseInfo = verifyLicense(licenseKey);
+          // 使用 Worker 返回的冷却时间逻辑
+          const duration = licenseInfo.userId === playerId ? (licenseInfo.isExpired ? 40 * 60 * 60 * 1000 : 60 * 60 * 1000) : 60 * 1000;
+          setOnlineFetchingLock(licenseInfo.isExpired, duration);
+
+          // 重新读取一次完整的云端记录来刷新页面
+          await handleGetRecord();
+        } else { // status === 'failed'
+          cloudErrorMessage.value = `任务失败: ${data.error}`;
+        }
+      }
+    } else {
+      throw new Error(data.message || '获取状态失败');
+    }
+  } catch (error) {
+    logger.error("轮询时出错:", error);
+    cloudErrorMessage.value = `查询状态时出错: ${error.message}`;
+    stopPolling();
+    isFetchingOnline.value = false;
+  }
+};
+
+// 启动轮询
+const startPolling = (playerId, licenseKey) => {
+  stopPolling(); // 先确保没有正在运行的轮询
+  isFetchingOnline.value = true;
+  cloudMessage.value = "正在获取最新状态...";
+  // 立即执行一次，然后设置定时器
+  pollTaskStatus(playerId, licenseKey);
+  pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 3000); // 每5秒轮询一次
+};
+
+// 停止轮询
+const stopPolling = () => {
+  if (pollingIntervalId.value) {
+    clearInterval(pollingIntervalId.value);
+    pollingIntervalId.value = null;
+  }
+};
+
+// 在线更新主函数
+const handleOnlineUpdate = async () => {
+  isFetchingOnline.value = true;
+  cloudErrorMessage.value = '';
+  cloudMessage.value = '';
+
+  const playerId = fetchPlayerIdInput.value.trim();
+  const licenseKey = fetchLicenseInput.value.trim();
+
+  if (!licenseKey || !playerId) {
+    cloudErrorMessage.value = '请输入玩家ID和激活码！';
+    return;
+  }
+
+  try {
+    // 客户端预验证
+    const result = verifyLicense(licenseKey);
+    if (!result.success) {
+      throw new Error(result.message || '激活码验证失败。');
+    }
+
+    // 检查前端冷却锁
+    const lock = OnlineFetchingLockTime(result.isExpired);
+    if (lock.locked) {
+      if (lock.timeLeft > 0) {
+        cloudErrorMessage.value = `请求过于频繁，请在 ${milisecondsToTime(lock.timeLeft)} 后再试。`;
+        isFetchingOnline.value = false;
+        return;
+      } else if (lock.timeLeft === -1) {
+        throw new Error('获取本地锁定状态失败，请检查浏览器设置。');
+      }
+    }
+
+    cloudMessage.value = "正在连接服务器以启动更新任务...";
+
+    // 调用Worker启动任务
+    const response = await fetch(`${WorkerUrl.value}/start-update-task`, {
+      method: 'POST',
+      headers: {
+        'X-License-Key': licenseKey,
+        'X-Player-Id': playerId,
+      },
+    });
+
+    const data = await response.json();
+
+    // 检查响应是否成功，并且后端返回了成功状态
+    if (response.ok && data.success) {
+      // 任务启动成功 (status: 'started') 或已在运行 (status: 'already_running')
+      // 两种情况都直接开始轮询
+      logger.log(`Task status: ${data.status}. Starting polling for player ${playerId}.`);
+      startPolling(playerId, licenseKey);
+    } else if (response.status === 429) {
+      // 处理Worker返回的频率限制
+      setOnlineFetchingLock(result.isExpired, data.timeLeft);
+      cloudErrorMessage.value = `更新过于频繁，请在 ${milisecondsToTime(data.timeLeft)} 后再试。`;
+      isFetchingOnline.value = false;
+    } else {
+      // 处理其他错误
+      throw new Error(data.message || `启动任务失败 (${response.status})`);
+    }
+
+  } catch (error) {
+    logger.error("在线更新时出错:", error);
+    cloudErrorMessage.value = error.message;
+    isFetchingOnline.value = false;
+  }
+};
+
+/**
  * 设置上传锁定状态
  *
  * @param {boolean} isExpired - 是否为过期的激活码
@@ -459,7 +624,7 @@ const setUploadLock = (isExpired, duration) => {
     localStorage.setItem("gachaUploadTimestampLock" + (isExpired ? '_expired' : ''), lockInfo);
   } catch (error) {
     logger.error("设置上传状态时出错:", error);
-    uploadErrorMessage.value = '设置上传状态失败，请检查浏览器的本地存储设置。';
+    cloudErrorMessage.value = '设置上传状态失败，请检查浏览器的本地存储设置。';
   }
 };
 // 检查上传锁定状态
@@ -482,8 +647,8 @@ const UploadLockTime = (isExpired) => {
 // 处理上传抽卡记录到云端
 const handleUploadRecord = async () => {
   isUploading.value = true;
-  uploadMessage.value = '';
-  uploadErrorMessage.value = '';
+  cloudMessage.value = '';
+  cloudErrorMessage.value = '';
 
   try {
     const licenseKey = uploadLicenseInput.value.trim();
@@ -503,11 +668,11 @@ const handleUploadRecord = async () => {
     const userID = String(validationResult.userId);
     const lockTime = UploadLockTime(validationResult.isExpired);
     if (lockTime.locked && lockTime.timeLeft > 0) {
-      uploadErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
-      isUploading.value = false;
-      return;
+      cloudErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`;
+      // isUploading.value = false;
+      // return;
     } else if (lockTime.locked && lockTime.timeLeft === -1) {
-      uploadErrorMessage.value = '获取上传状态失败，请检查浏览器的本地存储设置。';
+      cloudErrorMessage.value = '获取上传状态失败，请检查浏览器的本地存储设置。';
       return;
     }
     if (!((userID === localPlayerId) || (userID.length === 9 && userID.startsWith('33')))) {
@@ -564,17 +729,17 @@ const handleUploadRecord = async () => {
 
     const responseJson = await response.json(); // 服务器返回的JSON响应中message为错误信息，timeLeft为剩余锁定时间（单位：毫秒）
     if (response.ok) {
-      uploadMessage.value = `抽卡记录上传成功！`;
-      saveLicenseKey(licenseKey); // 保存激活码
-      setUploadLock(validationResult.isExpired, userID === localPlayerId ? 20 * 60 * 60 * 1000 : 60 * 1000); // 设置上传锁定时间
+      cloudMessage.value = `抽卡记录上传成功！`;
+      saveInputData(licenseKey); // 保存激活码
+      setUploadLock(validationResult.isExpired, userID === localPlayerId ? (validationResult.isExpired ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000) : 60 * 1000); // 设置上传锁定时间
       setFetchLock(validationResult.isExpired, 0); // 上传成功后立即取消本地的读取锁定状态
     } else if (response.status === 429) { // 后端返回“过于频繁”
-      uploadErrorMessage.value = responseJson.message;
+      cloudErrorMessage.value = responseJson.message;
       if (responseJson.timeLeft > 0) {
-        uploadErrorMessage.value += ` 请在 ${milisecondsToTime(responseJson.timeLeft)} 后再试。`;
+        cloudErrorMessage.value += ` 请在 ${milisecondsToTime(responseJson.timeLeft)} 后再试。`;
         setUploadLock(validationResult.isExpired, responseJson.timeLeft);
       } else {
-        throw new Error(uploadErrorMessage.value);
+        throw new Error(cloudErrorMessage.value);
       }
     } else { // 其他错误
       setFetchLock(validationResult.isExpired, 60 * 1000); // 设置上传锁定时间
@@ -583,8 +748,8 @@ const handleUploadRecord = async () => {
 
   } catch (error) {
     logger.error("上传记录时出错:", error);
-    uploadErrorMessage.value = error.message;
-    uploadMessage.value = ''; // Clear any pending messages
+    cloudErrorMessage.value = error.message;
+    cloudMessage.value = ''; // Clear any pending messages
   } finally {
     isUploading.value = false;
   }
@@ -604,8 +769,7 @@ const resetView = () => {
   errorMessage.value = '';
   playerId.value = '';
   cloudErrorMessage.value = '';
-  uploadErrorMessage.value = '';
-  uploadMessage.value = '';
+  cloudMessage.value = '';
 };
 </script>
 
