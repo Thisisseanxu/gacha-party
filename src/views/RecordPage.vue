@@ -41,7 +41,8 @@
     </div>
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
-      :normal-gacha-data="NormalGachaData" :player-id="playerId" :json-input="jsonInput" @reset-view="resetView" />
+      :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="Normal10000GachaData" :player-id="playerId"
+      :json-input="jsonInput" @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -110,11 +111,12 @@ const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
+const Normal10000GachaData = ref([]); // 存储高级常驻卡池抽卡记录
 const errorMessage = ref('');
 const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "10000"]; // 限定卡池ID列表
 
 // 本地保存激活码
 const LICENSE_KEY = 'gachaLicenseKey';
@@ -227,8 +229,10 @@ const handleJsonAnalysis = () => {
   // 分离限定卡池和常驻卡池数据
   const LimitGachaRecords = [];
   const NormalGachaRecords = [];
+  const Normal10000Records = []; // 用于存储高级常驻卡池的记录
   for (const [gachaId, records] of Object.entries(playerData)) {
     if (gachaId === '9') NormalGachaRecords.push(...records); // 常驻卡池ID固定为9
+    else if (gachaId === '10000') { Normal10000Records.push(...records); }// 高级常驻卡池ID固定为10000
     else if (LIMITED_CARD_POOLS_ID.includes(gachaId)) LimitGachaRecords.push(...records);
   }
 
@@ -242,9 +246,14 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：部分常驻卡池抽卡记录缺少必须字段。';
     return;
   }
+  if (!Normal10000GachaData.value.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分高级常驻卡池抽卡记录缺少必须字段。';
+    return;
+  }
 
   LimitGachaData.value = LimitGachaRecords;
   NormalGachaData.value = NormalGachaRecords;
+  Normal10000GachaData.value = Normal10000Records;
   viewState.value = 'analysis'; // 切换到分析视图
 };
 

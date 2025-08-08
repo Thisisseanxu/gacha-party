@@ -341,10 +341,10 @@ export const cardPools = {
       [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
     },
   },
-  // 冬日奇饮-预测卡池
-  gaojichangzhu_preview: {
+  // 高级常驻扭蛋
+  gaojichangzhu: {
     type: '限定',
-    name: '高级常驻扭蛋-预测卡池',
+    name: '高级常驻扭蛋',
     imageUrl: '/images/cardpools-icon/10000.webp',
     // 基础概率
     rates: {
@@ -360,54 +360,6 @@ export const cardPools = {
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
         UpCards: ['1710', '1309'],
-      },
-      [RARITY.SSR]: {
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCardsGroup: true, // 标记为可从多组UP中选择
-        UpGroups: [
-          {
-            id: '1', // UP组ID
-            name: '甜品派对', // 组的显示名称
-            image_url: '/images/cardpools-icon/1.webp', // 组的封面图片SPL
-            cards: ['1102', '1106', '1108', '1109'], // 该组包含的卡片ID列表
-          },
-          {
-            id: '2',
-            name: '梦境守护',
-            image_url: '/images/cardpools-icon/2.webp',
-            cards: ['1201', '1202', '1203', '1210'],
-          },
-          {
-            id: '3',
-            name: '电玩大战',
-            image_url: '/images/cardpools-icon/3.webp',
-            cards: ['1301', '1302', '1305', '1310'],
-          },
-          {
-            id: '4',
-            name: '电音国度',
-            image_url: '/images/cardpools-icon/4.webp',
-            cards: ['1401', '1402', '1403', '1504'],
-          },
-          {
-            id: '6',
-            name: '冰雪世界',
-            image_url: '/images/cardpools-icon/6.webp',
-            cards: ['1701', '1703', '1704', '1708'],
-          },
-          {
-            id: '5',
-            name: '火焰国度',
-            image_url: '/images/cardpools-icon/5.webp',
-            cards: ['1601', '1602', '1603', '1608'],
-          },
-          {
-            id: '8',
-            name: '水流世界',
-            image_url: '/images/cardpools-icon/8.webp',
-            cards: ['1801', '1806', '1803', '1807'],
-          },
-        ],
       },
     },
     cardIds: {

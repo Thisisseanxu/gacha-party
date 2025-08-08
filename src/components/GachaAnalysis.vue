@@ -16,35 +16,40 @@
             </template>
           </SelectorComponent>
 
-          <CustomPlayerTitle
-            v-if="(CurrentSelectedPool !== 'Normal' && singleAnalysis && singleAnalysis.avgPullsForSP > 0) || (CurrentSelectedPool === 'Normal' && normalAnalysis && normalAnalysis.avgPullsForSSR > 0)"
+          <CustomPlayerTitle v-if="analysisForTitle"
             :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP"
-            :value="CurrentSelectedPool === 'Normal' ? normalAnalysis.avgPullsForSSR : singleAnalysis.avgPullsForSP" />
+            :value="CurrentSelectedPool === 'Normal' ? analysisForTitle.avgPullsForSSR : analysisForTitle.avgPullsForSP" />
         </div>
         <div
-          :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' && CurrentSelectedPool !== 'Normal' }">
+          :class="{ 'total-pulls': true, 'highlight': CurrentSelectedPool !== 'Limited' && CurrentSelectedPool !== 'Normal' && CurrentSelectedPool !== '10000' }">
           {{
-            CurrentSelectedPool === 'Normal' ? normalAnalysis.totalPulls : singleAnalysis.totalPulls
+            CurrentSelectedPool === 'Normal' ? normalAnalysis.totalPulls :
+              CurrentSelectedPool === '10000' ? Normal10000Analysis.totalPulls :
+                singleAnalysis.totalPulls
           }} <span class="pulls-text">抽</span>
         </div>
 
         <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleAnalysis.SinglePulls + '次'
-          }}<br />
+        }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
-        <div class="pity-counters" v-if="CurrentSelectedPool === 'Normal' || CurrentSelectedPool === 'Limited'">
-          <div class="history-item" :style="{ ...getHistoryItemStyle(limitAnalysis.SP), flex: '1' }"
+        <div class="pity-counters" v-if="CurrentSelectedPool !== '9'">
+          <div class="history-item"
+            :style="{ ...getHistoryItemStyle(CurrentSelectedPool === '10000' ? (Normal10000Analysis?.SP ?? 0) : (limitAnalysis?.SP ?? 0)), flex: '1' }"
             v-if="CurrentSelectedPool !== 'Normal'">
             <span>距上个限定 </span>
-            <span class="pity-count">{{ limitAnalysis.SP }}</span>
+            <span class="pity-count">{{ CurrentSelectedPool === '10000' ? (Normal10000Analysis?.SP ?? 0) :
+              (limitAnalysis?.SP ?? 0) }}</span>
           </div>
           <div class="history-item"
-            :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR : 0, isNormal = true), flex: '1' }">
+            :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? (normalAnalysis?.SSR ?? 0) : (CurrentSelectedPool === '10000' ? (Normal10000Analysis?.SSR ?? 0) : (limitAnalysis?.SSR ?? 0)), CurrentSelectedPool === 'Normal'), flex: '1' }">
             <span>距上个SSR</span>
-            <span class="pity-count">{{ CurrentSelectedPool === 'Normal' ? normalAnalysis.SSR :
-              limitAnalysis.SSR
-              }}</span>
+            <span class="pity-count">{{
+              CurrentSelectedPool === 'Normal' ? (normalAnalysis?.SSR ?? 0) :
+                CurrentSelectedPool === '10000' ? (Normal10000Analysis?.SSR ?? 0) :
+                  (limitAnalysis?.SSR ?? 0)
+            }}</span>
           </div>
         </div>
         <div class="tertiary-text">{{ dateRange }}
@@ -58,25 +63,31 @@
         </div>
         <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
           <div class="stat-title">限定平均</div>
-          <div v-if="singleAnalysis.avgPullsForSP > 0"
+          <div
+            v-if="(CurrentSelectedPool === '10000' ? Normal10000Analysis?.avgPullsForSP : singleAnalysis?.avgPullsForSP) > 0"
             :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">{{
-              singleAnalysis.avgPullsForSP.toFixed(2) }} 抽
+              (CurrentSelectedPool === '10000' ? Normal10000Analysis.avgPullsForSP :
+                singleAnalysis.avgPullsForSP).toFixed(2)
+            }} 抽
           </div>
           <div v-else class="stat-value">暂无数据</div>
         </div>
 
         <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
           <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-            <div v-if="singleAnalysis.maxSP > 0"
+            <div v-if="(CurrentSelectedPool === '10000' ? Normal10000Analysis?.maxSP : singleAnalysis?.maxSP) > 0"
               :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最非 {{
-                singleAnalysis.maxSP }} 抽
+                CurrentSelectedPool === '10000' ? Normal10000Analysis.maxSP : singleAnalysis.maxSP
+              }} 抽
             </div>
             <div v-else class="stat-value">未抽到</div>
           </div>
           <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-            <div v-if="singleAnalysis.minSP > 0 && singleAnalysis.minSP !== Infinity"
+            <div
+              v-if="(CurrentSelectedPool === '10000' ? Normal10000Analysis?.minSP : singleAnalysis?.minSP) > 0 && (CurrentSelectedPool === '10000' ? Normal10000Analysis?.minSP : singleAnalysis?.minSP) !== Infinity"
               :class="{ 'stat-value': true, 'highlight': CurrentSelectedPool !== 'Limited' }">最欧 {{
-                singleAnalysis.minSP }} 抽
+                CurrentSelectedPool === '10000' ? Normal10000Analysis.minSP : singleAnalysis.minSP
+              }} 抽
             </div>
             <div v-else class="stat-value">限定</div>
           </div>
@@ -84,9 +95,12 @@
         <div class="stat-box">
           <div class="stat-title">SSR平均</div>
           <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
-            {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
-          <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{ limitAnalysis.avgPullsForSSR > 0 ?
-            singleAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
+            {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}
+          </div>
+          <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{ (CurrentSelectedPool === '10000' ?
+            Normal10000Analysis?.avgPullsForSSR : singleAnalysis?.avgPullsForSSR) > 0 ?
+            (CurrentSelectedPool === '10000' ? Normal10000Analysis.avgPullsForSSR :
+              singleAnalysis.avgPullsForSSR).toFixed(2) + ' 抽' : '暂无数据' }}</div>
         </div>
         <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
           <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
@@ -121,7 +135,7 @@
         <!-- 进度条区域 -->
         <div v-if="activeTab === 'progressBar'" class="history-list" ref="historyListRef">
           <div
-            v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
+            v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : (CurrentSelectedPool === '10000' ? Normal10000Analysis?.SPHistory : singleAnalysis?.SPHistory))"
             :key="index" class="history-item"
             :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
             <div class="char-info">
@@ -137,7 +151,7 @@
         <!-- 角色一览区域 -->
         <div v-if="activeTab === 'characterOverview'" class="character-overview-list">
           <div
-            v-for="(item, index) in CurrentSelectedPool === 'Normal' ? normalAnalysis.SSRHistory : singleAnalysis.SPHistory"
+            v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : (CurrentSelectedPool === '10000' ? Normal10000Analysis?.SPHistory : singleAnalysis?.SPHistory))"
             :key="index" class="overview-item"
             :style="{ backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal') }">
             <img :src="item.imageUrl" :alt="item.name" class="overview-avatar">
@@ -205,10 +219,6 @@
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
     </div>
-
-    <p v-if="(!limitAnalysis || limitAnalysis.totalPulls === 0)">
-      欸？好像没有抽卡记录
-    </p>
   </div>
 </template>
 
@@ -236,6 +246,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  advancedNormalGachaData: {
+    type: Array,
+    required: true,
+  },
   playerId: {
     type: String,
     required: true,
@@ -245,6 +259,8 @@ const props = defineProps({
     required: true,
   }
 });
+
+console.log(props)
 
 // 绑定父组件的重置事件给返回按钮
 const emit = defineEmits(['reset-view']);
@@ -259,10 +275,11 @@ const CARDPOOLS_NAME_MAP = {
   '41': '童话国盲盒机',
   '42': '扭蛋大作战',
   '43': '早稻叽',
+  '10000': '高级常驻扭蛋'
 };
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池的ID列表
 
-// 抽数<字典键值时显示对应称号
+// 抽数小于字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
   32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
   34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
@@ -286,6 +303,7 @@ const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
 // 合成下拉框的选项
 const cardPoolOptions = ref([
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
+  { id: '10000', name: CARDPOOLS_NAME_MAP['10000'] }, // 高级常驻卡池
   { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
   ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
 ]);
@@ -311,7 +329,7 @@ const getCardInfoAndRemovePrefix = (itemId) => {
 // 限定卡池分析逻辑
 const limitAnalysis = computed(() => {
   // 仅当有有效数据时才执行计算
-  if (props.limitGachaData.length === 0) return null;
+  if (props.limitGachaData.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
 
   // 将数据改成从最久远到最近排序，方便计算抽数
   const records = [...props.limitGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
@@ -371,9 +389,52 @@ const singleAnalysis = computed(() => {
   return { ...limitAnalysis.value }; // 如果选中的卡池不存在，则返回全部限定卡池的分析数据
 });
 
+// 高级常驻卡池分析逻辑
+const Normal10000Analysis = computed(() => {
+  // 仅当有有效数据时才执行计算
+  if (props.advancedNormalGachaData.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+
+  // 将数据改成从最久远到最近排序，方便计算抽数
+  const records = [...props.advancedNormalGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  let SPCounter = 0, SSRCounter = 0;
+  const SPHistory = [], SSRHistory = [];
+
+  records.forEach((record) => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    if (!cardInfo) {
+      logger.warn(`(高级常驻) 未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      return;
+    }
+    SPCounter++;
+    SSRCounter++;
+    if (cardInfo.rarity === RARITY.SP) {
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPCounter = 0;
+    }
+    if (cardInfo.rarity === RARITY.SSR) {
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRCounter = 0;
+    }
+  });
+
+  return {
+    totalPulls: records.length,
+    SP: SPCounter,
+    SSR: SSRCounter,
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
+    avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0),
+    minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory,
+    SSRHistory,
+    records,
+  };
+});
+
+
 // 常驻卡池分析逻辑
 const normalAnalysis = computed(() => {
-  if (props.normalGachaData.length === 0) return null;
+  if (props.normalGachaData.length === 0) return { totalPulls: 0, SSR: 0, avgPullsForSSR: 0, maxSSR: 0, minSSR: 0, SSRHistory: [], totalSSRs: 0 };
   const records = [...props.normalGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
   let SSRCounter = 0;
   const SSRHistory = [], SSRPulls = [];
@@ -399,6 +460,17 @@ const normalAnalysis = computed(() => {
     minSSR: SSRPulls.length > 0 ? Math.min(...SSRPulls) : 0,
     SSRHistory, totalSSRs: SSRPulls.length,
   };
+});
+
+// 为称号组件提供数据
+const analysisForTitle = computed(() => {
+  if (CurrentSelectedPool.value === 'Normal') {
+    return normalAnalysis.value?.avgPullsForSSR > 0 ? normalAnalysis.value : null;
+  }
+  if (CurrentSelectedPool.value === '10000') {
+    return Normal10000Analysis.value?.avgPullsForSP > 0 ? Normal10000Analysis.value : null;
+  }
+  return singleAnalysis.value?.avgPullsForSP > 0 ? singleAnalysis.value : null;
 });
 
 /**
@@ -431,13 +503,25 @@ const quantityStatistics = computed(() => {
     // 将 Map 转换为数组并按角色id排序
     return Array.from(stats.values()).sort((a, b) => a.id - b.id);
   };
+
+  const pool = CurrentSelectedPool.value;
   // 如果是常驻池则直接返回SSR统计
-  if (CurrentSelectedPool.value === 'Normal') return generateStats(normalAnalysis.value?.SSRHistory, RARITY.SSR);
+
+  if (pool === 'Normal') {
+    return generateStats(normalAnalysis.value?.SSRHistory, RARITY.SSR);
+  }
+  if (pool === '10000') {
+    const spStats = generateStats(Normal10000Analysis.value?.SPHistory, RARITY.SP);
+    const ssrStats = generateStats(Normal10000Analysis.value?.SSRHistory, RARITY.SSR);
+    return [...spStats, ...ssrStats];
+  }
+  // 默认处理所有其他限定池
   const spStats = generateStats(singleAnalysis.value?.SPHistory, RARITY.SP);
   const ssrStats = generateStats(singleAnalysis.value?.SSRHistory, RARITY.SSR);
   // 合并列表，SP在前，SSR在后
   return [...spStats, ...ssrStats];
 });
+
 
 // 动态下划线核心逻辑
 const updateUnderline = () => {
@@ -503,6 +587,8 @@ const fullHistory = computed(() => {
   let data = [];
   if (CurrentSelectedPool.value === 'Normal') {
     data = [...props.normalGachaData];
+  } else if (CurrentSelectedPool.value === '10000') {
+    data = [...props.advancedNormalGachaData];
   } else {
     data = [...props.limitGachaData];
     if (CurrentSelectedPool.value !== 'Limited') {
