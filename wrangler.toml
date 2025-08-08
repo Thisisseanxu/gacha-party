@@ -19,4 +19,4 @@ class_name = "TaskRunner" # 调用DO数据库的函数
 # 迁移DO数据库版本
 [[migrations]]
 tag = "v1"
-new_classes = ["TaskRunner"]
+new_sqlite_classes = ["TaskRunner"]
