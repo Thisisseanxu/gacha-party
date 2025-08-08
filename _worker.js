@@ -17,12 +17,28 @@ const CARDPOOLS_NAME_MAP = {
   10000: '高级常驻扭蛋',
 }
 
+// 频率限制配置 (单位：毫秒)
+// 为了方便管理，将所有频率限制相关的配置统一放在这里。
+const RATE_LIMITS = {
+  // 手动上传记录 (/upload-record)
+  manualUpload: {
+    admin: 1 * 60 * 1000, // 管理员: 1分钟
+    subscribed: 1 * 60 * 60 * 1000, // 订阅会员: 1小时
+    normal: 24 * 60 * 60 * 1000, // 普通会员: 24小时
+  },
+  // 在线获取记录 (/start-update-task)
+  onlineUpdate: {
+    admin: 10 * 60 * 1000, // 管理员: 10分钟
+    subscribed: 24 * 60 * 60 * 1000, // 订阅会员: 24小时
+    normal: 'unavailable', // 普通会员: 不可用
+  },
+}
+
 // 定义 Durable Object 类
 export class TaskRunner {
   constructor(state, env) {
     this.state = state
-    this.env = env
-    // 在内存中存储任务状态，避免频繁读写KV
+    this.env = env // 在内存中存储任务状态，避免频繁读写KV
     this.memoryState = {
       status: 'idle',
       progress: '尚未开始',
@@ -30,7 +46,6 @@ export class TaskRunner {
       result: null,
     }
     this.app = new Hono()
-
     // 定义 DO 内部的路由
     this.app.post('/start', async (c) => {
       if (this.memoryState.status === 'running' || this.memoryState.status === 'pending') {
@@ -38,7 +53,6 @@ export class TaskRunner {
       }
 
       const { playerId } = await c.req.json()
-
       // 启动后台任务，但不等待它完成
       this.state.waitUntil(this.runUpdateTask(playerId))
 
@@ -157,22 +171,31 @@ mainApp.post('/start-update-task', async (c) => {
     }
 
     // 检查查询频率限制
+    const isAdmin = userIdStr.startsWith('33') && userIdStr.length === 9
     const recordKvKey = `record_${playerId}`
     const existingRecord = await c.env.GACHA_PARTY_RECORDS.getWithMetadata(recordKvKey)
     const lastUpdated = existingRecord?.metadata?.lastCloudUpdated
-    const writeTimeLimit =
-      playerId === userIdStr ? (isExpired ? 40 * 60 * 60 * 1000 : 60 * 60 * 1000) : 60 * 1000
     const now = Date.now()
-    if (lastUpdated && now - lastUpdated < writeTimeLimit) {
-      const timeLeft = writeTimeLimit - (now - lastUpdated)
-      return c.json({ success: false, message: `更新过于频繁，请稍后再试。`, timeLeft }, 429)
+
+    let timeLimit
+    if (isAdmin) {
+      timeLimit = RATE_LIMITS.onlineUpdate.admin
+    } else if (isExpired) {
+      // 普通会员暂时不可用
+      return c.json({ success: false, message: '普通会员暂时无法使用在线获取功能。' }, 403)
+    } else {
+      // 订阅会员
+      timeLimit = RATE_LIMITS.onlineUpdate.subscribed
     }
 
+    if (lastUpdated && now - lastUpdated < timeLimit) {
+      const timeLeft = timeLimit - (now - lastUpdated)
+      return c.json({ success: false, message: `更新过于频繁，请稍后再试。`, timeLeft }, 429)
+    }
     // 获取Durable Object实例
-    // 我们使用playerId作为DO的唯一标识符，确保每个玩家只有一个任务实例
+    // 使用playerId作为DO的唯一标识符，确保每个玩家只有一个任务实例
     const doId = c.env.GACHA_TASKS.idFromName(playerId)
     const stub = c.env.GACHA_TASKS.get(doId)
-
     // 将请求转发给DO来启动任务
     const response = await stub.fetch(
       new Request(`https://do.task/start`, {
@@ -370,21 +393,26 @@ mainApp.post('/upload-record', async (c) => {
     ) {
       jsonResponse.message = '上传的抽卡记录不属于激活码对应的玩家！'
       return c.json(jsonResponse, 403)
-    }
-    // 获取请求体中的数据 (前端已处理好的Base64字符串)
+    } // 获取请求体中的数据 (前端已处理好的Base64字符串)
     const payload = await c.req.text()
     if (!payload) {
       jsonResponse.message = '请求体为空，没有需要上传的数据'
       return c.json(jsonResponse, 400)
-    }
-    // 将数据存入KV
+    } // 将数据存入KV
     const kvKey = `record_${playerId}`
     const existingRecord = await c.env.GACHA_PARTY_RECORDS.getWithMetadata(kvKey)
     if (existingRecord && existingRecord.metadata && existingRecord.metadata.lastUpdated) {
       const lastUpdated = existingRecord.metadata.lastUpdated
       const now = Date.now()
-      const writeTimeLimit =
-        playerId === userIdStr ? (isExpired ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000) : 60 * 1000 // 普通用户每24小时可写一次，订阅用户每小时一次，管理员每分钟可写一次
+      const isAdmin = userIdStr.startsWith('33') && userIdStr.length === 9
+      let writeTimeLimit
+      if (isAdmin) {
+        writeTimeLimit = RATE_LIMITS.manualUpload.admin
+      } else if (isExpired) {
+        writeTimeLimit = RATE_LIMITS.manualUpload.normal
+      } else {
+        writeTimeLimit = RATE_LIMITS.manualUpload.subscribed
+      }
       // 如果上次更新时间在限制时间内，则拒绝写入
       if (now - lastUpdated < writeTimeLimit) {
         const timeLeft = writeTimeLimit - (now - lastUpdated)
