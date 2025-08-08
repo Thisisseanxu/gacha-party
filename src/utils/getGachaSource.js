@@ -1,5 +1,6 @@
 import pako from 'pako' // 引入pako库解压缩json数据
 import { cardMap } from '@/data/cards' // 引入全局的cardMap，用于通过ID查找卡牌
+import { logger } from './logger'
 
 /**
  * 根据路由信息获取卡池数据源。
@@ -61,7 +62,7 @@ export const getGachaSource = (route) => {
 
       return finalPoolConfig
     } catch (error) {
-      console.error('解析自定义卡池数据失败:', error)
+      logger.error('解析自定义卡池数据失败:', error)
       // 如果解析失败，返回一个默认卡池ID
       return 'Normal01'
     }

@@ -54,6 +54,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { colors } from '@/styles/colors.js';
 import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next';
+import { logger } from '@/utils/logger';
 
 const appVersion = __VERSION__;
 
@@ -64,7 +65,7 @@ const captureInstallPrompt = (e) => {
   e.preventDefault();
   // 保存事件对象，以便后续手动触发
   deferredPrompt.value = e;
-  console.log('PWA 安装提示已被捕获，等待用户手动触发。');
+  logger.log('PWA 安装提示已被捕获，等待用户手动触发。');
 };
 
 // 设置一个监听器来捕获 'beforeinstallprompt' 事件
@@ -84,7 +85,7 @@ const handleInstallClick = async () => {
 
   // 等待用户做出选择
   const { outcome } = await deferredPrompt.value.userChoice;
-  console.log(`PWA 安装提示的用户选择: ${outcome}`);
+  logger.log(`PWA 安装提示的用户选择: ${outcome}`);
 
   // 无论用户选择什么，这个事件都已经用过，无法再次使用。
   // 清空 ref，安装按钮也会因此被 v-if 隐藏。

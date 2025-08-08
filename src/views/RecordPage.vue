@@ -14,9 +14,10 @@
           placeholder='请在此处粘贴 JSON 数据... 例如：{"version":2,"9999999":{"9":[{"id":7579416,"gacha_id":9,"item_id":"151406","created_at":1751324096},...]}}'></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
-          <label class="action-button" :disabled="isFetchingOnline">
+          <label class="action-button">
             上传文件
-            <input type="file" @change="handleFileUpload" accept=".json,application/json" style="display: none;" />
+            <input :disabled="isFetchingOnline" type="file" @change="handleFileUpload" accept=".json,application/json"
+              style="display: none;" />
           </label>
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
@@ -528,7 +529,7 @@ const pollTaskStatus = async (playerId, licenseKey) => {
         isFetchingOnline.value = false;
 
         if (data.status === 'completed') {
-          cloudMessage.value = data.progress; // 显示最终成功信息
+          cloudMessage.value = data.progress + "已上传！"; // 显示最终成功信息
           // 任务成功后，设置前端冷却锁
           const licenseInfo = verifyLicense(licenseKey);
           const isAdmin = String(licenseInfo.userId).length === 9 && String(licenseInfo.userId).startsWith('33');
@@ -611,6 +612,9 @@ const handleOnlineUpdate = async () => {
     }
 
     cloudMessage.value = "正在连接服务器以启动更新任务...";
+    // 解除查询记录的冷却锁，以供后续调用
+    setCooldown('getRecord', isAdmin, result.isExpired, -1);
+
 
     // 调用Worker启动任务
     const response = await fetch(`${WorkerUrl.value}/start-update-task`, {

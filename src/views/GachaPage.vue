@@ -127,6 +127,7 @@ import { getGachaSource } from '@/utils/getGachaSource.js';
 import QRCode from 'qrcode';
 
 import PopUp from '@/components/PopUp.vue';
+import { logger } from '@/utils/logger';
 
 // 动画相关的ref
 const showGachaResultOverlay = ref(false);
@@ -338,7 +339,7 @@ const shareCustomPool = async () => {
     // 将生成的数据URL赋值给ref，<img>标签会自动显示图片
     qrCodeDataUrl.value = dataUrl;
   } catch (err) {
-    console.error('二维码生成失败:', err);
+    logger.error('二维码生成失败:', err);
     // 可以在这里设置一个错误提示
     qrCodeDataUrl.value = ''; // 清空以显示错误或提示
   }
@@ -358,7 +359,7 @@ const copyShareText = async (event) => {
     event.target.select(); // 选中textarea中的所有文本以提供视觉反馈
   } catch (err) {
     copyStatusMessage.value = '复制失败，请手动复制。';
-    console.error('复制失败: ', err);
+    logger.error('复制失败: ', err);
   }
   // 2秒后清除提示信息
   setTimeout(() => {

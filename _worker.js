@@ -177,11 +177,11 @@ mainApp.post('/start-update-task', async (c) => {
     const now = Date.now()
 
     let timeLimit
-    if (isAdmin) {
+    if (isExpired) {
+      // 必须是订阅用户才能在线获取
+      return c.json({ success: false, message: '在线获取功能剩余时长不足。' }, 403)
+    } else if (isAdmin) {
       timeLimit = RATE_LIMITS.onlineUpdate.admin
-    } else if (isExpired) {
-      // 普通会员暂时不可用
-      return c.json({ success: false, message: '普通会员暂时无法使用在线获取功能。' }, 403)
     } else {
       // 订阅会员
       timeLimit = RATE_LIMITS.onlineUpdate.subscribed

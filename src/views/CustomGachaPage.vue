@@ -86,6 +86,7 @@ import * as RARITY from '@/data/rarity.js';
 import { cardMap, allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import pako from 'pako';
+import { logger } from '@/utils/logger';
 
 const router = useRouter();
 
@@ -130,7 +131,7 @@ onMounted(() => {
       upCandidateIds.value = parsedConfig.upCandidateIds;
       doubleRateSSRIds.value = parsedConfig.doubleRateSSRIds;
     } catch (e) {
-      console.error("解析自定义卡池配置失败:", e);
+      logger.error("解析自定义卡池配置失败:", e);
       // 如果解析失败，重置为默认值
       resetConfiguration();
     }
@@ -146,7 +147,6 @@ const saveConfiguration = () => {
     upCandidateIds: upCandidateIds.value,
     doubleRateSSRIds: doubleRateSSRIds.value,
   };
-  console.log(JSON.stringify(configToSave))
   localStorage.setItem(storageKey, JSON.stringify(configToSave));
 };
 
