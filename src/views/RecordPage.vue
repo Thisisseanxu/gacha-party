@@ -23,8 +23,9 @@
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
         <div class="cloud-section split">
-          <p class="input-title">织夜云服务 BETA</p>
-          <p class="input-description">使用激活码查询已上传的抽卡记录。<br />已订阅云服务的班长可在线获取新的记录</p>
+          <p class="input-title">织夜云服务</p>
+          <p class="input-description">使用激活码读取您/管理员上传的抽卡记录。<br />【内测】已订阅云服务的班长可在线获取新的记录</p>
+          <p class="input-description highlight">使用在线获取前请先查询并下载已有数据，以防出现数据损坏</p>
           <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
           <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
           <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
@@ -37,10 +38,9 @@
           </div>
         </div>
         <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
+        <p class="input-description" v-if="cloudErrorMessage">有时自动查询完成后可能不会自动跳转，请尝试使用读取抽卡记录功能</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
-
-        <p class="input-description">本网页完全开源，可查看<a class="highlight" href="https://github.com/Thisisseanxu/gacha-party"
-            target="_blank">Github链接</a>提出意见/提交代码。</p>
+        <p class="input-description">当前版本：v{{ appVersion }}</p>
       </div>
     </div>
 
@@ -50,7 +50,7 @@
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
-        <p class="input-title">织夜云服务 BETA</p>
+        <p class="input-title">织夜云服务</p>
         <p class="input-description">将当前的抽卡记录上传至云端</p>
         <p class="input-description highlight">使用在线获取后会自动上传，无需手动上传</p>
         <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
@@ -106,6 +106,8 @@ import { colors } from '@/styles/colors.js';
 
 import GachaAnalysis from '@/components/GachaAnalysis.vue'; // 导入分析结果展示组件
 import PopUp from '@/components/PopUp.vue'; // 导入弹窗组件
+
+const appVersion = __VERSION__;
 
 const viewState = ref('input'); // 'input' 为用户输入模式 'analysis' 则展示分析结果
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
@@ -559,7 +561,7 @@ const startPolling = (playerId, licenseKey) => {
   cloudMessage.value = "正在获取最新状态...";
   // 立即执行一次，然后设置定时器
   pollTaskStatus(playerId, licenseKey);
-  pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 3000); // 每3秒轮询一次
+  pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 7000); // 每7秒轮询一次
 };
 
 // 停止轮询

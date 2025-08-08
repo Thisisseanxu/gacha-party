@@ -294,7 +294,7 @@ async function fetchIncrementalRecordsForPool(playerId, gachaId, existingRecordS
       player_id: playerId,
       gacha_id: gachaId,
       page: page,
-      page_size: 7,
+      page_size: 20,
     }).toString()
     const headers = {
       Host: env.BACKEND_HOST,
@@ -310,6 +310,8 @@ async function fetchIncrementalRecordsForPool(playerId, gachaId, existingRecordS
         )
       }
       const data = await response.json()
+      // 请求后稍作等待，避免请求过于频繁
+      await new Promise((res) => setTimeout(res, 1000))
       const recordsOnPage = data?.data?.records || []
       if (recordsOnPage.length === 0) {
         keepFetching = false
@@ -332,10 +334,6 @@ async function fetchIncrementalRecordsForPool(playerId, gachaId, existingRecordS
         newlyFetched.push(...newRecordsThisPage)
       }
       page++
-      // 在两次请求之间稍作等待，避免请求过于频繁
-      if (keepFetching) {
-        await new Promise((res) => setTimeout(res, 1000))
-      }
     } catch (e) {
       if (reTryCount >= 3) {
         return { data: [], error: `获取卡池 ${gachaId} 数据时发生错误： ${e.message}` }
