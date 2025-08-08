@@ -23,7 +23,7 @@
 
         <div class="cloud-section split">
           <p class="input-title">织夜云服务 BETA</p>
-          <p class="input-description">【限时免费】使用激活码查询已保存的抽卡记录。<br />已订阅云服务的班长可在线获取新的记录（开发中）</p>
+          <p class="input-description">使用激活码查询已上传的抽卡记录。<br />已订阅云服务的班长可在线获取新的记录</p>
           <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
           <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
           <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
@@ -633,6 +633,7 @@ const handleOnlineUpdate = async () => {
       // 处理Worker返回的频率限制，使用后端返回的精确剩余时间
       setCooldown('onlineUpdate', isAdmin, result.isExpired, data.timeLeft);
       cloudErrorMessage.value = `更新过于频繁，请在 ${milisecondsToTime(data.timeLeft)} 后再试。`;
+      cloudMessage.value = '';
       isFetchingOnline.value = false;
     } else {
       // 处理其他错误

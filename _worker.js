@@ -6,9 +6,8 @@ import pako from 'pako'
 
 const ALL_GACHA_IDS = ['9', '28', '29', '40', '41', '42', '43', '10000'] // 卡池列表
 const CARDPOOLS_NAME_MAP = {
-  Normal: '常驻扭蛋',
-  Limited: '限定扭蛋',
   9: '常驻扭蛋',
+  28: '新手扭蛋',
   29: '车手盲盒机',
   40: '塔菲扭蛋',
   41: '童话国盲盒机',
