@@ -11,7 +11,7 @@
         </p>
         <p class="input-description">请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。</p>
         <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
-          placeholder='请在此处粘贴 JSON 数据... 例如：{"version":2,"9999999":{"9":[{"id":7579416,"gacha_id":9,"item_id":"151406","created_at":1751324096},...]}}'></textarea>
+          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
           <label class="action-button">
@@ -31,9 +31,9 @@
           <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
               href="#">《织夜云用户协议》</a></p>
           <div class="button-group">
-            <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
+            <!-- <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
               {{ isFetchingOnline ? '正在在线获取...' : '在线获取' }}
-            </button>
+            </button> -->
             <button @click="handleGetRecord" :disabled="isFetchingOnline" class="action-button">读取抽卡记录</button>
           </div>
         </div>
@@ -129,21 +129,21 @@ const PLAYER_ID_KEY = 'gachaPlayerId';
 const FRONTEND_COOLDOWNS = {
   // 读取记录 (get-record)
   getRecord: {
-    admin: 30 * 1000,                   // 管理员: 30秒
-    subscribed: 30 * 60 * 1000,         // 订阅用户: 30分钟
-    normal: 3 * 60 * 60 * 1000,         // 普通用户: 3小时
+    admin: 30 * 1000,           // 管理员: 30秒
+    subscribed: 3 * 60 * 1000,  // 订阅用户: 3分钟
+    normal: 30 * 60 * 1000,     // 普通用户: 30分钟
   },
   // 在线获取记录 (start-update-task)
   onlineUpdate: {
-    admin: 10 * 60 * 1000,              // 管理员: 10分钟
-    subscribed: 24 * 60 * 60 * 1000,    // 订阅用户: 24小时
-    normal: 'unavailable',              // 普通用户: 不可用
+    admin: 1 * 60 * 60 * 1000,            // 管理员: 1小时
+    subscribed: 24 * 60 * 60 * 1000,  // 订阅用户: 24小时
+    normal: 'unavailable',            // 普通用户: 不可用
   },
   // 手动上传记录 (upload-record)
   uploadRecord: {
-    admin: 1 * 60 * 1000,               // 管理员: 1分钟
-    subscribed: 1 * 60 * 60 * 1000,     // 订阅用户: 1小时
-    normal: 24 * 60 * 60 * 1000,        // 普通用户: 24小时
+    admin: 5 * 60 * 1000,            // 管理员: 5分钟
+    subscribed: 1 * 60 * 60 * 1000,  // 订阅用户: 1小时
+    normal: 24 * 60 * 60 * 1000,     // 普通用户: 24小时
   },
 };
 

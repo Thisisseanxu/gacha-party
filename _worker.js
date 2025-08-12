@@ -21,13 +21,13 @@ const CARDPOOLS_NAME_MAP = {
 const RATE_LIMITS = {
   // 手动上传记录 (/upload-record)
   manualUpload: {
-    admin: 1 * 60 * 1000, // 管理员: 1分钟
+    admin: 5 * 60 * 1000, // 管理员: 5分钟
     subscribed: 1 * 60 * 60 * 1000, // 订阅会员: 1小时
     normal: 24 * 60 * 60 * 1000, // 普通会员: 24小时
   },
   // 在线获取记录 (/start-update-task)
   onlineUpdate: {
-    admin: 10 * 60 * 1000, // 管理员: 10分钟
+    admin: 1 * 60 * 60 * 1000, // 管理员: 1小时
     subscribed: 24 * 60 * 60 * 1000, // 订阅会员: 24小时
     normal: 'unavailable', // 普通会员: 不可用
   },
@@ -433,6 +433,159 @@ mainApp.post('/upload-record', async (c) => {
   }
 })
 
+/**
+ * POST /incremental-update
+ * 接收本地保存的增量抽卡数据，与云端记录合并后更新。
+ */
+mainApp.post('/incremental-update', async (c) => {
+  let jsonResponse = { message: '', timeLeft: 0 }
+  try {
+    // 验证和授权
+    const licenseKey = c.req.header('X-License-Key')
+    const playerId = c.req.header('X-Player-Id')
+    if (!licenseKey || !playerId) {
+      jsonResponse.message = '请求头中缺少 X-License-Key 或 X-Player-Id'
+      return c.json(jsonResponse, 400)
+    }
+
+    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
+    const userIdStr = String(userId)
+    const isAdmin = userIdStr.startsWith('33') && userIdStr.length === 9
+
+    if (!isAdmin && playerId !== userIdStr) {
+      jsonResponse.message = '增量更新的抽卡记录不属于激活码对应的玩家！'
+      return c.json(jsonResponse, 403)
+    }
+
+    // 频率限制 (与 /upload-record 共享)
+    const kvKey = `record_${playerId}`
+    const existingRecordMeta = await c.env.GACHA_PARTY_RECORDS.getWithMetadata(kvKey)
+    if (
+      existingRecordMeta &&
+      existingRecordMeta.metadata &&
+      existingRecordMeta.metadata.lastUpdated
+    ) {
+      const lastUpdated = existingRecordMeta.metadata.lastUpdated
+      const now = Date.now()
+      let writeTimeLimit
+      if (isAdmin) {
+        writeTimeLimit = RATE_LIMITS.manualUpload.admin
+      } else if (isExpired) {
+        writeTimeLimit = RATE_LIMITS.manualUpload.normal
+      } else {
+        writeTimeLimit = RATE_LIMITS.manualUpload.subscribed
+      }
+
+      if (now - lastUpdated < writeTimeLimit) {
+        const timeLeft = writeTimeLimit - (now - lastUpdated)
+        jsonResponse.message = `上传过于频繁！`
+        jsonResponse.timeLeft = timeLeft
+        return c.json(jsonResponse, 429)
+      }
+    }
+
+    // 获取并解析请求体
+    const body = await c.req.json()
+    const { fixUpload = false, data: compressedNewData } = body
+    if (!compressedNewData) {
+      jsonResponse.message = '请求体中缺少增量数据 (data)'
+      return c.json(jsonResponse, 400)
+    }
+
+    // 获取并解压现有数据
+    let finalData = { version: 2, [playerId]: {} }
+    if (existingRecordMeta.value) {
+      const gzipped = Buffer.from(existingRecordMeta.value, 'base64')
+      const jsonString = pako.inflate(gzipped, { to: 'string' })
+      finalData = JSON.parse(jsonString)
+    }
+
+    // 解压新数据
+    let newData
+    try {
+      const gzippedNew = Buffer.from(compressedNewData, 'base64')
+      const jsonStringNew = pako.inflate(gzippedNew, { to: 'string' })
+      newData = JSON.parse(jsonStringNew)
+    } catch (error) {
+      jsonResponse.message = '上传的数据格式无效，无法解压或解析。' + error.message
+      return c.json(jsonResponse, 400)
+    }
+
+    // 合并与去重
+    const newRecordsByPool = newData[playerId] || {}
+    const existingIdsByPool = {}
+    if (finalData[playerId]) {
+      for (const gachaId in finalData[playerId]) {
+        existingIdsByPool[gachaId] = new Set(finalData[playerId][gachaId].map((r) => r.id))
+      }
+    }
+
+    let totalAddedCount = 0
+
+    for (const gachaId in newRecordsByPool) {
+      if (!ALL_GACHA_IDS.includes(String(gachaId))) continue // 忽略未知的卡池ID
+
+      const newRecords = newRecordsByPool[gachaId]
+      if (!Array.isArray(newRecords)) continue
+
+      const existingIds = existingIdsByPool[gachaId] || new Set()
+      const recordsToAdd = []
+      let discardPool = false
+
+      for (const newRecord of newRecords) {
+        // 校验记录的基本结构
+        if (typeof newRecord.id === 'undefined' || typeof newRecord.created_at === 'undefined') {
+          continue
+        }
+
+        if (existingIds.has(newRecord.id)) {
+          if (fixUpload) {
+            // fixUpload模式: 跳过此重复条目
+            continue
+          } else {
+            // 普通模式: 发现重复，抛弃整个卡池的更新
+            discardPool = true
+            break
+          }
+        }
+        recordsToAdd.push(newRecord)
+      }
+
+      if (!discardPool && recordsToAdd.length > 0) {
+        if (!finalData[playerId]) finalData[playerId] = {}
+        if (!finalData[playerId][gachaId]) finalData[playerId][gachaId] = []
+
+        const combined = [...finalData[playerId][gachaId], ...recordsToAdd]
+        finalData[playerId][gachaId] = combined.sort((a, b) => b.created_at - a.created_at)
+        totalAddedCount += recordsToAdd.length
+      }
+    }
+
+    // 写回KV
+    const finalJsonString = JSON.stringify(finalData)
+    const compressedBytes = pako.gzip(finalJsonString)
+    const finalBase64Payload = Buffer.from(compressedBytes).toString('base64')
+
+    await c.env.GACHA_PARTY_RECORDS.put(kvKey, finalBase64Payload, {
+      metadata: {
+        lastUpdated: Date.now(),
+        lastCloudUpdated: existingRecordMeta?.metadata?.lastCloudUpdated || null,
+      },
+    })
+
+    jsonResponse.message = `增量更新成功！新增 ${totalAddedCount} 条记录。`
+    return c.json(jsonResponse, 200)
+  } catch (error) {
+    console.error('增量更新失败:', error)
+    jsonResponse.message = `处理失败： ${error.message}`
+    return c.json(jsonResponse, error instanceof SyntaxError ? 400 : 500)
+  }
+})
+
 export default {
   fetch: mainApp.fetch,
+  // 必须导出 Durable Object 类
+  scheduled: (event, env, ctx) => {
+    ctx.waitUntil(Promise.resolve())
+  },
 }
