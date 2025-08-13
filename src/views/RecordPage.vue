@@ -471,7 +471,7 @@ const handleGetRecord = async () => {
       const localData = loadLocalRecord(fetchPlayerId);
       if (localData) {
         logger.warn(`读取请求处于冷却中，当前展示的是本地缓存数据。剩余冷却时间: ${milisecondsToTime(lockTime.timeLeft)}`);
-        const wrappedJson = { cloud: false, compressed: true, data: localData };
+        const wrappedJson = { cloud: true, compressed: true, data: localData };
         jsonInput.value = JSON.stringify(wrappedJson);
         handleJsonAnalysis();
         return; // 使用缓存后，终止后续网络请求
