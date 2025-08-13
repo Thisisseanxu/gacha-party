@@ -147,8 +147,43 @@ export class TaskRunner {
 
 const mainApp = new Hono()
 
-// --- 中间件 ---
-mainApp.use('*', cors()) // 简化CORS设置
+// 增强的 CORS 配置，支持动态 localhost 端口
+mainApp.use(
+  '*',
+  cors({
+    origin: (origin) => {
+      // 检查请求来源 (origin) 是否是允许的
+      // 生产域名 (请务必替换为您自己的域名)
+      const productionDomain = '.gacha-party.fans'
+      const devDomain = '-gacha-party.thisisseanxu.workers.dev'
+
+      // 使用 URL 对象来解析来源，这样更可靠
+      try {
+        const url = new URL(origin)
+
+        // 允许 *.gacha-party.fans
+        if (url.hostname.endsWith(productionDomain)) {
+          return origin
+        }
+
+        // 允许 *.thisisseanxu.workers.dev
+        if (url.hostname.endsWith(devDomain)) {
+          return origin
+        }
+
+        // 允许任何来自 localhost 的端口
+        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+          return origin
+        }
+      } catch (e) {
+        console.error('CORS origin parsing error:', e)
+      }
+
+      // 对于所有其他来源，返回 undefined，Hono 将不会发送 Access-Control-Allow-Origin 头
+      return undefined
+    },
+  }),
+)
 
 /**
  * POST /start-update-task
@@ -583,8 +618,80 @@ mainApp.post('/incremental-update', async (c) => {
 })
 
 export default {
-  fetch: mainApp.fetch,
-  // 必须导出 Durable Object 类
+  /**
+   * Worker 的主入口 fetch 函数
+   * @param {Request} request - 收到的请求
+   * @param {object} env - 环境变量
+   * @param {object} ctx - 执行上下文
+   * @returns {Promise<Response>}
+   */
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url)
+
+    // 检查是否是 API 请求。如果是，则由 Hono 应用处理。
+    // 这里列出您所有的 API 路径前缀。
+    const isApiRequest =
+      url.pathname.startsWith('/start-update-task') ||
+      url.pathname.startsWith('/task-status/') ||
+      url.pathname.startsWith('/get-record') ||
+      url.pathname.startsWith('/upload-record') ||
+      url.pathname.startsWith('/incremental-update')
+
+    if (isApiRequest) {
+      // 将 API 请求交给 Hono 处理
+      return mainApp.fetch(request, env, ctx)
+    }
+
+    // --- 新增逻辑：处理前端静态资源 ---
+    try {
+      // 默认处理为静态资源请求，从 Cloudflare Pages 的存储中获取文件
+      // `env.ASSETS` 是 Cloudflare Pages 提供的，用于访问部署的静态文件
+      const assetResponse = await env.ASSETS.fetch(request)
+
+      // 创建一个可修改的响应副本
+      const newResponse = new Response(assetResponse.body, assetResponse)
+
+      const path = url.pathname
+
+      // 关键：为 HTML 和 JS 文件设置严格的无缓存策略
+      // 这会告诉浏览器和 Cloudflare 都不要缓存这些文件
+      if (path.endsWith('.html') || path === '/' || path.endsWith('.js')) {
+        newResponse.headers.set(
+          'Cache-Control',
+          'no-store, no-cache, must-revalidate, proxy-revalidate',
+        )
+        newResponse.headers.set('Pragma', 'no-cache') // 兼容旧版 HTTP/1.0
+        newResponse.headers.set('Expires', '0') // 代理服务器缓存策略
+      } else {
+        // 对于其他资源 (如 CSS, 图片), 我们可以让它们被缓存以提高性能
+        // 这里设置为缓存一天
+        newResponse.headers.set('Cache-Control', 'public, max-age=86400')
+      }
+
+      return newResponse
+    } catch (e) {
+      // 如果找不到资源，对于单页应用(SPA)，我们应该返回 index.html
+      // 这样可以确保客户端路由正常工作
+      try {
+        console.warn(`资源未找到: ${url.pathname}, 错误: ${e.message}`)
+        const indexResponse = await env.ASSETS.fetch(
+          new Request(new URL('/', request.url), request),
+        )
+        const newIndexResponse = new Response(indexResponse.body, indexResponse)
+
+        // 同样，为回退的 index.html 设置无缓存策略
+        newIndexResponse.headers.set(
+          'Cache-Control',
+          'no-store, no-cache, must-revalidate, proxy-revalidate',
+        )
+        return newIndexResponse
+      } catch (err) {
+        return new Response(err.message, { status: 404 })
+      }
+    }
+  },
+
+  // 保留您已有的 Durable Object 导出和 scheduled 导出
   scheduled: (event, env, ctx) => {
     ctx.waitUntil(Promise.resolve())
   },

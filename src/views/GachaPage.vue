@@ -50,7 +50,24 @@
               </div>
             </transition>
           </div>
+          <div v-if="poolSsrCards.length > 0" class="ssr-list-container">
+            <h3 @click="toggleSsrListExpansion" class="collapsible-header">
+              <span>{{ isSsrListExpanded ? '▼' : '▶' }}</span>
+              卡池SSR一览 (共 {{ poolSsrCards.length }} 位)
+            </h3>
+            <transition name="collapse-transition">
+              <div v-if="isSsrListExpanded" class="ssr-list-grid">
+                <div v-for="card in poolSsrCards" :key="card.id" class="ssr-list-item">
+                  <img :src="card.imageUrl" :alt="card.name" class="ssr-list-card-image">
+                  <span v-if="upSsrIds.has(card.id)" class="up-marker">UP</span>
+                  <p class="ssr-list-card-name">{{ card.name }}</p>
+                </div>
+              </div>
+            </transition>
+          </div>
         </div>
+
+
 
         <div class="gacha-stats card">
           <h2>抽卡统计</h2>
@@ -227,12 +244,50 @@ const {
 const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
 const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
 const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || []);
+const isSsrListExpanded = ref(false);
 
 const upCardDetails = computed(() => {
   if (!isSelectableUpPool.value) return [];
   const upCardIds = currentPool.value.rules.SP.UpCards || [];
   return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
 });
+
+// 计算当前UP的SSR角色ID
+const upSsrIds = computed(() => {
+  const ids = new Set();
+  const ssrRules = currentPool.value?.rules?.[RARITY.SSR];
+  if (!ssrRules) return ids;
+
+  // 优先处理分组UP的情况
+  if (ssrRules.SelectUpCardsGroup && selectedUpGroup.value?.cards) {
+    selectedUpGroup.value.cards.forEach(id => ids.add(id));
+  }
+  // 再处理固定的UP卡
+  if (ssrRules.doubleRateCards) {
+    ssrRules.doubleRateCards.forEach(id => ids.add(id));
+  }
+  return ids;
+});
+
+// 获取卡池内所有的SSR角色详情
+const poolSsrCards = computed(() => {
+  if (!currentPool.value?.cards) return [];
+
+  return currentPool.value.cards
+    .filter(card => card && card.rarity === RARITY.SSR)
+    .sort((a, b) => {
+      const aIsUp = upSsrIds.value.has(a.id);
+      const bIsUp = upSsrIds.value.has(b.id);
+      if (aIsUp && !bIsUp) return -1;
+      if (!aIsUp && bIsUp) return 1;
+      return a.id - b.id; // 按ID排序
+    });
+});
+
+// 切换SSR列表展开/折叠状态的方法
+const toggleSsrListExpansion = () => {
+  isSsrListExpanded.value = !isSsrListExpanded.value;
+};
 
 watch(currentPool, (newPool) => {
   if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
@@ -551,7 +606,7 @@ h1 {
 .select-up-title,
 .collapsible-header {
   font-weight: bold;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   color: v-bind('colors.text.primary');
 }
 
@@ -630,6 +685,68 @@ h1 {
   height: auto;
   aspect-ratio: 16/7;
   object-fit: cover;
+}
+
+.ssr-list-container {
+  margin-top: 2rem;
+  border-top: 1px solid v-bind('colors.border.primary');
+  padding-top: 1.5rem;
+}
+
+.ssr-list-grid {
+  display: grid;
+  /* 自动填充，每列最小80px，最大1fr */
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+
+.ssr-list-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ssr-list-card-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  /* 使用SSR稀有度颜色作为边框 */
+  border: 3px solid v-bind('colors.rarity.ssr');
+  object-fit: cover;
+  background-color: #2c2c2c;
+  /* 图片加载前的占位背景 */
+}
+
+.ssr-list-card-name {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  color: v-bind('colors.text.secondary');
+  font-weight: 500;
+  /* 限制名字长度，防止换行 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.up-marker {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: v-bind('colors.brand.cancel');
+  /* 使用一个醒目的颜色 */
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  z-index: 5;
+  /* 确保在图片上层 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* --- 历史记录相关样式 --- */

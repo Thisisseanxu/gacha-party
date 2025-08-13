@@ -132,6 +132,7 @@ import { colors } from '@/styles/colors.js';
   line-height: 1.8;
   max-width: min(100%, 100dvw - 40px);
   border: 1px solid v-bind('colors.border.primary');
+  margin-bottom: 1rem;
 }
 
 .info-section h3 {
