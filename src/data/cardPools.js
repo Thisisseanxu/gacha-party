@@ -25,7 +25,7 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1711', 'shayumei'],
+        UpCards: ['1809', 'shayumei'],
       },
       [RARITY.SSR]: {
         doubleRateCards: ['1310'], // 双倍概率SSR角色（限定池SSR概率提升）
