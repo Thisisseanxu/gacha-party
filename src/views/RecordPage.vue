@@ -41,7 +41,13 @@
         <p class="input-description" v-if="cloudErrorMessage">有时自动查询完成后可能不会自动跳转，请尝试使用读取抽卡记录功能</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
         <p class="input-description">当前版本：v{{ appVersion }}</p>
+
+        <div class="mp-weixin split">
+          <p>抽卡记录获取小程序正在内测中，欢迎试用</p>
+          <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+        </div>
       </div>
+
     </div>
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
@@ -955,5 +961,21 @@ const resetView = () => {
 .agreement-list::-webkit-scrollbar-thumb {
   background-color: v-bind('colors.scrollbar');
   border-radius: 3px;
+}
+
+.mp-weixin-image {
+  width: 128px;
+  height: 128px;
+  border-radius: 64px;
+}
+
+.mp-weixin {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  color: v-bind('colors.text.primary');
+  font-size: 1rem;
 }
 </style>
