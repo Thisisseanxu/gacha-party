@@ -14,11 +14,9 @@
           placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
-          <label class="action-button">
-            上传文件
-            <input :disabled="isFetchingOnline" type="file" @change="handleFileUpload" accept=".json,application/json"
-              style="display: none;" />
-          </label>
+          <button @click="triggerFileUpload" class="action-button" :disabled="isFetchingOnline">上传文件</button>
+          <input type="file" ref="fileUploader" @change="handleFileUpload" accept=".json,application/json"
+            style="display: none;" />
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         <p class="input-description">当前版本：v{{ appVersion }}</p>
@@ -153,6 +151,11 @@ const FRONTEND_COOLDOWNS = {
   },
 };
 
+// 通过按钮来驱动Input
+const fileUploader = ref(null);
+const triggerFileUpload = () => {
+  fileUploader.value.click();
+};
 
 const loadInputData = () => {
   const savedKey = localStorage.getItem(LICENSE_KEY);
@@ -450,6 +453,8 @@ const loadLocalRecord = (userID) => {
 
 // 处理云端获取抽卡记录的函数
 const handleGetRecord = async () => {
+  cloudMessage.value = '';
+  cloudErrorMessage.value = '';
   if (!fetchLicenseInput.value.trim()) {
     cloudErrorMessage.value = '请输入激活码！';
     return;
@@ -460,6 +465,7 @@ const handleGetRecord = async () => {
     cloudErrorMessage.value = '玩家ID必须为数字且不能为空！';
     return;
   }
+  isFetchingOnline.value = true;
   try {
     logger.log("正在客户端验证激活码...");
     const result = verifyLicense(licenseKey);
@@ -479,7 +485,9 @@ const handleGetRecord = async () => {
         logger.warn(`读取请求处于冷却中，当前展示的是本地缓存数据。剩余冷却时间: ${milisecondsToTime(lockTime.timeLeft)}`);
         const wrappedJson = { cloud: true, compressed: true, data: localData };
         jsonInput.value = JSON.stringify(wrappedJson);
+        cloudMessage.value = `服务器繁忙，已从本地缓存读取记录...`;
         handleJsonAnalysis();
+        cloudMessage.value = '';
         return; // 使用缓存后，终止后续网络请求
       }
       // 如果没有缓存，才提示冷却中
@@ -491,6 +499,7 @@ const handleGetRecord = async () => {
     }
     logger.log(`客户端验证成功`);
 
+    cloudMessage.value = '正在查询中...';
     // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
     const response = await fetch(`${WorkerUrl.value}/get-record`, {
       method: 'GET',
@@ -510,10 +519,16 @@ const handleGetRecord = async () => {
     saveFetchedRecord(fetchPlayerId, compressedString); // 保存到本地存储
     const wrappedJson = { cloud: true, compressed: true, data: compressedString };
     jsonInput.value = JSON.stringify(wrappedJson);
+    cloudMessage.value = '已成功获取云端记录，正在分析中...';
+    await new Promise(resolve => setTimeout(resolve, 2000));
     handleJsonAnalysis(); // 调用已有的分析逻辑分析合成的json
+    cloudMessage.value = '';
   } catch (error) {
-    logger.error("激活码处理错误:", error);
-    cloudErrorMessage.value = error.message;
+    logger.error(error);
+    cloudErrorMessage.value = `查询失败：${error.message}`;
+    cloudMessage.value = '';
+  } finally {
+    isFetchingOnline.value = false;
   }
 };
 
@@ -761,8 +776,8 @@ const handleUploadRecord = async () => {
     }
 
   } catch (error) {
-    logger.error("上传记录时出错:", error);
-    cloudErrorMessage.value = error.message;
+    logger.error(error);
+    cloudErrorMessage.value = `上传记录时出错: ${error.message}`;
     cloudMessage.value = ''; // Clear any pending messages
   } finally {
     isUploading.value = false;
