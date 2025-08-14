@@ -16,7 +16,7 @@
             <template #trigger>
               <div class="title-bar">
                 <span>
-                  {{ playerId }}-{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                  {{ playerId }}-{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
                 </span>
               </div>
             </template>
@@ -179,7 +179,7 @@
       </div>
 
       <div class="full-history-section">
-        <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
+        <h3 class="section-title">{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
         <div class="full-history-list">
           <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
             <div class="char-info">
@@ -219,7 +219,7 @@
       </div>
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-        <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
+        <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
         }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
@@ -263,25 +263,30 @@ const props = defineProps({
   jsonInput: {
     type: String,
     required: true,
+  },
+  LIMITED_CARD_POOLS_ID: {
+    type: Array,
+    default: () => ['29', '40', '41', '42', '43', "44"], // 默认限定卡池ID列表
+  },
+  CARDPOOLS_NAME_MAP: {
+    type: Object,
+    default: () => ({
+      'Normal': '常驻扭蛋',
+      'Limited': '限定扭蛋',
+      '9': '常驻扭蛋',
+      '29': '车手盲盒机',
+      '40': '塔菲扭蛋',
+      '41': '童话国盲盒机',
+      '42': '扭蛋大作战-海军',
+      '43': '早稻叽',
+      '44': '扭蛋大作战-雪糕',
+      '10000': '高级常驻扭蛋'
+    })
   }
 });
 
 // 绑定父组件的重置事件给返回按钮
 const emit = defineEmits(['reset-view']);
-
-// 卡池id和名称的映射
-const CARDPOOLS_NAME_MAP = {
-  'Normal': '常驻扭蛋',
-  'Limited': '限定扭蛋',
-  '9': '常驻扭蛋',
-  '29': '车手盲盒机',
-  '40': '塔菲扭蛋',
-  '41': '童话国盲盒机',
-  '42': '扭蛋大作战',
-  '43': '早稻叽',
-  '10000': '高级常驻扭蛋'
-};
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43']; // 限定卡池的ID列表
 
 // 抽数小于字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
@@ -306,10 +311,10 @@ const NORMALPOOL_TITLE_MAP = {
 const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
 // 合成下拉框的选项
 const cardPoolOptions = ref([
-  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
-  { id: '10000', name: CARDPOOLS_NAME_MAP['10000'] }, // 高级常驻卡池
-  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
-  ...LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
+  { id: 'Limited', name: props.CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
+  { id: '10000', name: props.CARDPOOLS_NAME_MAP['10000'] }, // 高级常驻卡池
+  { id: 'Normal', name: props.CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
+  ...props.LIMITED_CARD_POOLS_ID.map(id => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
 ]);
 
 // 导航栏相关的响应式变量
@@ -338,7 +343,7 @@ const isDev = import.meta.env.DEV;
 // 这些 computed 属性会根据是否在回顾模式下，切换其数据源
 // 这样，我们就不需要重写所有的分析逻辑了
 const activeLimitData = computed(() =>
-  isReviewing.value && (LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || CurrentSelectedPool.value === 'Limited')
+  isReviewing.value && (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || CurrentSelectedPool.value === 'Limited')
     ? reviewRecords.value
     : props.limitGachaData
 );
@@ -419,7 +424,7 @@ const limitAnalysis = computed(() => {
 // 限定卡池单卡池分析逻辑
 const singleAnalysis = computed(() => {
   if (!limitAnalysis.value) return null;
-  if (LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+  if (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
     // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
     const filteredSPHistory = limitAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
     const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
@@ -819,7 +824,7 @@ const exportToExcel = async (filename, historyData) => {
 
 // 触发导出抽卡记录的函数
 const exportPoolData = () => {
-  exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
+  exportToExcel('盲盒派对' + props.CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
 
 const stopReviewAnimation = () => {
@@ -851,7 +856,7 @@ const startReviewAnimation = () => {
     sourceData = [...props.advancedNormalGachaData];
   } else if (poolId === 'Limited') {
     sourceData = [...props.limitGachaData];
-  } else if (LIMITED_CARD_POOLS_ID.includes(poolId)) {
+  } else if (props.LIMITED_CARD_POOLS_ID.includes(poolId)) {
     sourceData = props.limitGachaData.filter(r => r.gacha_id === Number(poolId));
   }
 

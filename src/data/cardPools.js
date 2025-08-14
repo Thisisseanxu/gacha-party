@@ -11,7 +11,7 @@ export const cardPools = {
   niudandazuozhan: {
     type: '限定',
     name: '扭蛋大作战',
-    imageUrl: '/images/cardpools-icon/niudandazuozhan.webp',
+    imageUrl: '/images/cardpools-icon/10062.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -25,14 +25,14 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1711', 'shayumei'],
+        UpCards: ['1711', '1810'],
       },
       [RARITY.SSR]: {
         doubleRateCards: ['1310'], // 双倍概率SSR角色（限定池SSR概率提升）
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1711', 'shayumei'],
+      [RARITY.SP]: ['1711', '1810'],
       [RARITY.SSR]: ['1310', '1701', '1703', '1704', '1708'],
       [RARITY.SR]: [
         '1103',

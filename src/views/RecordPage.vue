@@ -50,7 +50,8 @@
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
       :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="Normal10000GachaData" :player-id="playerId"
-      :json-input="jsonInput" @reset-view="resetView" />
+      :json-input="jsonInput" :limited-card-pools-id="LIMITED_CARD_POOLS_ID" :card-pools-name-map="CARDPOOLS_NAME_MAP"
+      @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -123,7 +124,19 @@ const errorMessage = ref('');
 const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "10000"]; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44"]; // 限定卡池ID列表
+const CARDPOOLS_NAME_MAP = {
+  'Normal': '常驻扭蛋',
+  'Limited': '限定扭蛋',
+  '9': '常驻扭蛋',
+  '29': '车手盲盒机',
+  '40': '塔菲扭蛋',
+  '41': '童话国盲盒机',
+  '42': '扭蛋大作战-海军',
+  '43': '早稻叽',
+  '44': '扭蛋大作战-雪糕',
+  '10000': '高级常驻扭蛋'
+};
 
 // 本地保存激活码
 const LICENSE_KEY = 'gachaLicenseKey';
