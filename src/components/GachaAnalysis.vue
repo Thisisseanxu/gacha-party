@@ -1,12 +1,18 @@
 <template>
   <div class="gacha-analysis-container">
     <div class="gacha-analysis-page">
-      <button @click="emit('reset-view')" class="button">← 返回</button>
+      <div class="gacha-analysis-button-container">
+        <button @click="emit('reset-view')" class="button">← 返回</button>
+        <button @click="startReviewAnimation" class="button"
+          v-if="['Limited', 'Normal', '10000'].includes(CurrentSelectedPool)">
+          {{ reviewButtonText }}
+        </button>
+      </div>
 
       <div>
         <div class="header-top-row">
           <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
-            option-value-key="id">
+            option-value-key="id" :disabled="isReviewing">
             <template #trigger>
               <div class="title-bar">
                 <span>
@@ -31,10 +37,10 @@
 
         <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleAnalysis.SinglePulls + '次'
-          }}<br />
+        }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
-        <div class="pity-counters" v-if="CurrentSelectedPool !== '9'">
+        <div class="pity-counters" v-if="['Limited', 'Normal', '10000'].includes(CurrentSelectedPool)">
           <div class="history-item"
             :style="{ ...getHistoryItemStyle(CurrentSelectedPool === '10000' ? (Normal10000Analysis?.SP ?? 0) : (limitAnalysis?.SP ?? 0)), flex: '1' }"
             v-if="CurrentSelectedPool !== 'Normal'">
@@ -214,7 +220,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -312,8 +318,42 @@ const progressBarButton = ref(null);
 const quantityStatisticsButton = ref(null);
 const characterOverviewButton = ref(null);
 const underlineStyle = ref({});
+
+// --- 新增状态变量 ---
+const isReviewing = ref(false); // 是否正在回顾
+const reviewRecords = ref([]); // 用于回顾动画的临时记录数组
+let animationTimer = ref(null); // 用于存储 setTimeout 的 ID，方便清除
+const ANIMATION_INTERVAL = 50; // 每条记录的播放间隔（毫秒）
+
+// --- 回顾按钮的文本 ---
+const reviewButtonText = computed(() => {
+  if (animationTimer.value) return '⏹️ 停止回顾';
+  return '🎬 回顾历史';
+});
+
 // 检查是否为开发环境
 const isDev = import.meta.env.DEV;
+
+// --- 核心修改：创建动态数据源 ---
+// 这些 computed 属性会根据是否在回顾模式下，切换其数据源
+// 这样，我们就不需要重写所有的分析逻辑了
+const activeLimitData = computed(() =>
+  isReviewing.value && (LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || CurrentSelectedPool.value === 'Limited')
+    ? reviewRecords.value
+    : props.limitGachaData
+);
+
+const activeNormalData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'Normal'
+    ? reviewRecords.value
+    : props.normalGachaData
+);
+
+const activeAdvancedNormalData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === '10000'
+    ? reviewRecords.value
+    : props.advancedNormalGachaData
+);
 
 // 计算列表平均值的通用函数
 const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
@@ -327,10 +367,10 @@ const getCardInfoAndRemovePrefix = (itemId) => {
 // 限定卡池分析逻辑
 const limitAnalysis = computed(() => {
   // 仅当有有效数据时才执行计算
-  if (props.limitGachaData.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+  if (activeLimitData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
 
   // 将数据改成从最久远到最近排序，方便计算抽数
-  const records = [...props.limitGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  const records = [...activeLimitData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
   let SPCounter = 0, SSRCounter = 0;
   const SPHistory = [], SSRHistory = [];
 
@@ -351,6 +391,16 @@ const limitAnalysis = computed(() => {
       SSRCounter = 0;
     }
   });
+  // 添加“即将到来”占位符给动画
+  if (isReviewing.value && SPCounter > 0) {
+    SPHistory.unshift({
+      name: '即将到来',
+      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
+      count: SPCounter,
+      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
+      id: 'placeholder-sp' // 给一个唯一的key
+    });
+  }
 
   return {
     totalPulls: records.length,
@@ -390,10 +440,10 @@ const singleAnalysis = computed(() => {
 // 高级常驻卡池分析逻辑
 const Normal10000Analysis = computed(() => {
   // 仅当有有效数据时才执行计算
-  if (props.advancedNormalGachaData.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+  if (activeAdvancedNormalData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
 
   // 将数据改成从最久远到最近排序，方便计算抽数
-  const records = [...props.advancedNormalGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  const records = [...activeAdvancedNormalData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
   let SPCounter = 0, SSRCounter = 0;
   const SPHistory = [], SSRHistory = [];
 
@@ -414,6 +464,16 @@ const Normal10000Analysis = computed(() => {
       SSRCounter = 0;
     }
   });
+  // 添加“即将到来”占位符给动画
+  if (isReviewing.value && SPCounter > 0) {
+    SPHistory.unshift({
+      name: '即将到来',
+      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
+      count: SPCounter,
+      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
+      id: 'placeholder-sp' // 给一个唯一的key
+    });
+  }
 
   return {
     totalPulls: records.length,
@@ -432,8 +492,8 @@ const Normal10000Analysis = computed(() => {
 
 // 常驻卡池分析逻辑
 const normalAnalysis = computed(() => {
-  if (props.normalGachaData.length === 0) return { totalPulls: 0, SSR: 0, avgPullsForSSR: 0, maxSSR: 0, minSSR: 0, SSRHistory: [], totalSSRs: 0 };
-  const records = [...props.normalGachaData].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  if (activeNormalData.value.length === 0) return { totalPulls: 0, SSR: 0, avgPullsForSSR: 0, maxSSR: 0, minSSR: 0, SSRHistory: [], totalSSRs: 0 };
+  const records = [...activeNormalData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
   let SSRCounter = 0;
   const SSRHistory = [], SSRPulls = [];
 
@@ -450,6 +510,16 @@ const normalAnalysis = computed(() => {
       SSRCounter = 0;
     }
   });
+  // 添加“即将到来”占位符给动画
+  if (isReviewing.value && SSRCounter > 0) {
+    SSRHistory.unshift({
+      name: '即将到来',
+      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
+      count: SSRCounter,
+      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
+      id: 'placeholder-ssr' // 给一个唯一的key
+    });
+  }
 
   return {
     totalPulls: records.length, SSR: SSRCounter,
@@ -548,8 +618,10 @@ onMounted(() => {
   window.addEventListener('resize', updateUnderline);
 });
 
+// 组件卸载时清理工作
 onUnmounted(() => {
   window.removeEventListener('resize', updateUnderline);
+  stopReviewAnimation();
 });
 
 // 根据传入的参数获取对应的修改过透明度的背景颜色
@@ -626,8 +698,11 @@ const goToPage = () => {
   pageInput.value = currentPage.value;
 };
 
-// 监听限定卡池选择变化，重置页码为1
-watch(CurrentSelectedPool, () => { currentPage.value = 1; });
+// 监听限定卡池选择变化，重置页码为1，停止动画
+watch(CurrentSelectedPool, () => {
+  currentPage.value = 1;
+  stopReviewAnimation();
+});
 // 监听 currentPage 的变化，同步更新输入框的值
 watch(currentPage, (newPage) => { pageInput.value = newPage; });
 // 监听 itemsPerPage 的变化，重置页码为1
@@ -730,6 +805,71 @@ const exportToExcel = async (filename, historyData) => {
 const exportPoolData = () => {
   exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
+
+const stopReviewAnimation = () => {
+  if (animationTimer.value) {
+    clearTimeout(animationTimer.value);
+    animationTimer.value = null;
+  }
+  isReviewing.value = false;
+  reviewRecords.value = [];
+};
+
+// 动画相关函数
+const startReviewAnimation = () => {
+  // 如果动画播放完成，再次点击则重置
+  if (isReviewing.value) {
+    stopReviewAnimation();
+    return; // 点击后执行停止操作，并立即退出函数
+  }
+
+  // 停止任何正在进行的动画
+  stopReviewAnimation();
+
+  // 获取当前卡池的完整、原始数据
+  let sourceData = [];
+  const poolId = CurrentSelectedPool.value;
+  if (poolId === 'Normal') {
+    sourceData = [...props.normalGachaData];
+  } else if (poolId === '10000') {
+    sourceData = [...props.advancedNormalGachaData];
+  } else if (poolId === 'Limited') {
+    sourceData = [...props.limitGachaData];
+  } else if (LIMITED_CARD_POOLS_ID.includes(poolId)) {
+    sourceData = props.limitGachaData.filter(r => r.gacha_id === Number(poolId));
+  }
+
+  if (sourceData.length === 0) {
+    alert('当前卡池没有记录可供回顾。');
+    return;
+  }
+
+  // 按时间从远到近排序
+  const sortedSource = sourceData.sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+
+  // 初始化动画状态
+  isReviewing.value = true;
+  reviewRecords.value = []; // 确保开始时是空的
+  let currentIndex = 0;
+
+  // 定义动画的单步操作
+  const animateStep = () => {
+    if (currentIndex < sortedSource.length) {
+      // 向临时数组中添加一条记录，触发UI更新
+      reviewRecords.value.push(sortedSource[currentIndex]);
+      currentIndex++;
+      // 设置下一次执行
+      animationTimer.value = setTimeout(animateStep, ANIMATION_INTERVAL);
+    } else {
+      // 动画播放完毕
+      animationTimer.value = null;
+      isReviewing.value = false;
+    }
+  };
+
+  // 启动动画
+  animateStep();
+};
 </script>
 
 <style scoped>
@@ -746,6 +886,13 @@ const exportPoolData = () => {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 2px solid v-bind('colors.background.light');
+  gap: 10px;
+}
+
+.gacha-analysis-button-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 
 .button {
@@ -818,7 +965,7 @@ const exportPoolData = () => {
 }
 
 .tertiary-text {
-  margin-top: 10px;
+  margin-top: 8px;
   color: v-bind('colors.text.tertiary');
   font-size: 0.9rem;
 }
