@@ -21,34 +21,34 @@
           </label>
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-
-        <div class="cloud-section split">
-          <p class="input-title">织夜云服务</p>
-          <p class="input-description">使用激活码读取您/管理员上传的抽卡记录。<br />【内测】已订阅云服务的班长可在线获取新的记录</p>
-          <p class="input-description highlight">使用在线获取前请先查询并下载已有数据，以防出现数据损坏</p>
-          <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
-          <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
-          <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp"
-              href="#">《织夜云用户协议》</a></p>
-          <div class="button-group">
-            <!-- <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
+        <p class="input-description">当前版本：v{{ appVersion }}</p>
+      </div>
+    </div>
+    <div v-if="viewState === 'input'" class="gacha-analysis-container">
+      <div class="cloud-section">
+        <p class="input-title">织夜云服务</p>
+        <p class="input-description">使用您的激活码读取云端的抽卡记录。</p>
+        <p class="input-description highlight">目前织夜工具箱所有工具均使用同一个激活码（v2）</p>
+        <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
+        <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
+        <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
+        </p>
+        <div class="button-group">
+          <!-- <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
               {{ isFetchingOnline ? '正在在线获取...' : '在线获取' }}
             </button> -->
-            <button @click="handleGetRecord" :disabled="isFetchingOnline" class="action-button">读取抽卡记录</button>
-          </div>
+          <button @click="handleGetRecord" :disabled="isFetchingOnline" class="action-button">读取抽卡记录</button>
         </div>
         <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
-        <p class="input-description" v-if="cloudErrorMessage">有时自动查询完成后可能不会自动跳转，请尝试使用读取抽卡记录功能</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
-        <p class="input-description">当前版本：v{{ appVersion }}</p>
-
-        <div class="mp-weixin split">
-          <p>抽卡记录获取小程序正在内测中，欢迎试用</p>
-          <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
-        </div>
       </div>
 
+      <div class="mp-weixin split">
+        <p>抽卡记录获取小程序正在内测中，欢迎试用</p>
+        <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+      </div>
     </div>
+
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
       :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="Normal10000GachaData" :player-id="playerId"
@@ -58,7 +58,7 @@
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
         <p class="input-description">将当前的抽卡记录上传至云端</p>
-        <p class="input-description highlight">使用在线获取后会自动上传，无需手动上传</p>
+        <p class="input-description highlight">普通用户每24小时在所有工具内只能上传一次！</p>
         <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
         <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
         </p>
@@ -187,7 +187,7 @@ const fetchLicenseInput = ref(''); // 绑定的许可证输入框
 const cloudMessage = ref(''); // 织夜云的成功消息
 const cloudErrorMessage = ref(''); // 织夜云的错误信息
 const isFetchingOnline = ref(false); // 是否正在在线获取数据的状态
-const pollingIntervalId = ref(null); // 存储轮询的定时器ID
+// const pollingIntervalId = ref(null); // 存储轮询的定时器ID
 
 // 上传抽卡记录相关的变量
 const uploadLicenseInput = ref('');
@@ -517,148 +517,148 @@ const handleGetRecord = async () => {
   }
 };
 
+// ==========（暂时停用）===========
 // 轮询函数
-const pollTaskStatus = async (playerId, licenseKey) => {
-  logger.log(`正在轮询玩家 ${playerId} 的任务状态`);
-  try {
-    // 注意：这里的路由是 /task-status/:playerId
-    const response = await fetch(`${WorkerUrl.value}/task-status/${playerId}`);
-    if (!response.ok) {
-      throw new Error(`无法获取任务状态: ${response.status}`);
-    }
-    const data = await response.json();
+// const pollTaskStatus = async (playerId, licenseKey) => {
+//   logger.log(`正在轮询玩家 ${playerId} 的任务状态`);
+//   try {
+//     // 注意：这里的路由是 /task-status/:playerId
+//     const response = await fetch(`${WorkerUrl.value}/task-status/${playerId}`);
+//     if (!response.ok) {
+//       throw new Error(`无法获取任务状态: ${response.status}`);
+//     }
+//     const data = await response.json();
 
-    if (data.success) {
-      cloudMessage.value = data.progress || '正在处理...';
+//     if (data.success) {
+//       cloudMessage.value = data.progress || '正在处理...';
 
-      // 任务完成或失败，停止轮询
-      if (data.status === 'completed' || data.status === 'failed') {
-        stopPolling();
-        isFetchingOnline.value = false;
+//       // 任务完成或失败，停止轮询
+//       if (data.status === 'completed' || data.status === 'failed') {
+//         stopPolling();
+//         isFetchingOnline.value = false;
 
-        if (data.status === 'completed') {
-          cloudMessage.value = data.progress + "已上传！"; // 显示最终成功信息
-          // 任务成功后，设置前端冷却锁
-          const licenseInfo = verifyLicense(licenseKey);
-          const isAdmin = String(licenseInfo.userId).length === 9 && String(licenseInfo.userId).startsWith('33');
-          setCooldown('onlineUpdate', isAdmin, licenseInfo.isExpired);
+//         if (data.status === 'completed') {
+//           cloudMessage.value = data.progress + "已上传！"; // 显示最终成功信息
+//           // 任务成功后，设置前端冷却锁
+//           const licenseInfo = verifyLicense(licenseKey);
+//           const isAdmin = String(licenseInfo.userId).length === 9 && String(licenseInfo.userId).startsWith('33');
+//           setCooldown('onlineUpdate', isAdmin, licenseInfo.isExpired);
 
-          // 重新读取一次完整的云端记录来刷新页面
-          await handleGetRecord();
-        } else { // status === 'failed'
-          cloudErrorMessage.value = `任务失败: ${data.error}`;
-        }
-      }
-    } else {
-      throw new Error(data.message || '获取状态失败');
-    }
-  } catch (error) {
-    logger.error("轮询时出错:", error);
-    cloudErrorMessage.value = `查询状态时出错: ${error.message}`;
-    stopPolling();
-    isFetchingOnline.value = false;
-  }
-};
-
+//           // 重新读取一次完整的云端记录来刷新页面
+//           await handleGetRecord();
+//         } else { // status === 'failed'
+//           cloudErrorMessage.value = `任务失败: ${data.error}`;
+//         }
+//       }
+//     } else {
+//       throw new Error(data.message || '获取状态失败');
+//     }
+//   } catch (error) {
+//     logger.error("轮询时出错:", error);
+//     cloudErrorMessage.value = `查询状态时出错: ${error.message}`;
+//     stopPolling();
+//     isFetchingOnline.value = false;
+//   }
+// };
 // 启动轮询
-const startPolling = (playerId, licenseKey) => {
-  stopPolling(); // 先确保没有正在运行的轮询
-  isFetchingOnline.value = true;
-  cloudMessage.value = "正在获取最新状态...";
-  // 立即执行一次，然后设置定时器
-  pollTaskStatus(playerId, licenseKey);
-  pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 7000); // 每7秒轮询一次
-};
+// const startPolling = (playerId, licenseKey) => {
+//   stopPolling(); // 先确保没有正在运行的轮询
+//   isFetchingOnline.value = true;
+//   cloudMessage.value = "正在获取最新状态...";
+//   // 立即执行一次，然后设置定时器
+//   pollTaskStatus(playerId, licenseKey);
+//   pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 7000); // 每7秒轮询一次
+// };
 
 // 停止轮询
-const stopPolling = () => {
-  if (pollingIntervalId.value) {
-    clearInterval(pollingIntervalId.value);
-    pollingIntervalId.value = null;
-  }
-};
+// const stopPolling = () => {
+//   if (pollingIntervalId.value) {
+//     clearInterval(pollingIntervalId.value);
+//     pollingIntervalId.value = null;
+//   }
+// };
 
 // 在线更新主函数
-const handleOnlineUpdate = async () => {
-  isFetchingOnline.value = true;
-  cloudErrorMessage.value = '';
-  cloudMessage.value = '';
+// const handleOnlineUpdate = async () => {
+//   isFetchingOnline.value = true;
+//   cloudErrorMessage.value = '';
+//   cloudMessage.value = '';
 
-  const playerId = fetchPlayerIdInput.value.trim();
-  const licenseKey = fetchLicenseInput.value.trim();
+//   const playerId = fetchPlayerIdInput.value.trim();
+//   const licenseKey = fetchLicenseInput.value.trim();
 
-  if (!licenseKey || !playerId) {
-    cloudErrorMessage.value = '请输入玩家ID和激活码！';
-    return;
-  }
+//   if (!licenseKey || !playerId) {
+//     cloudErrorMessage.value = '请输入玩家ID和激活码！';
+//     return;
+//   }
 
-  try {
-    // 客户端预验证
-    const result = verifyLicense(licenseKey);
-    if (!result.success) {
-      throw new Error(result.message || '激活码验证失败。');
-    }
-    const isAdmin = String(result.userId).length === 9 && String(result.userId).startsWith('33');
+//   try {
+//     // 客户端预验证
+//     const result = verifyLicense(licenseKey);
+//     if (!result.success) {
+//       throw new Error(result.message || '激活码验证失败。');
+//     }
+//     const isAdmin = String(result.userId).length === 9 && String(result.userId).startsWith('33');
 
-    // 普通用户不可用
-    if (!isAdmin && result.isExpired) {
-      cloudErrorMessage.value = '普通会员暂时无法使用在线获取功能。';
-      isFetchingOnline.value = false;
-      return;
-    }
+//     // 普通用户不可用
+//     if (!isAdmin && result.isExpired) {
+//       cloudErrorMessage.value = '普通会员暂时无法使用在线获取功能。';
+//       isFetchingOnline.value = false;
+//       return;
+//     }
 
-    // 检查前端冷却锁
-    const lock = getCooldown('onlineUpdate');
-    if (lock.locked) {
-      if (lock.timeLeft > 0) {
-        cloudErrorMessage.value = `请求过于频繁，请在 ${milisecondsToTime(lock.timeLeft)} 后再试。`;
-        isFetchingOnline.value = false;
-        return;
-      } else if (lock.timeLeft === -1) {
-        throw new Error('获取本地锁定状态失败，请检查浏览器设置。');
-      }
-    }
+//     // 检查前端冷却锁
+//     const lock = getCooldown('onlineUpdate');
+//     if (lock.locked) {
+//       if (lock.timeLeft > 0) {
+//         cloudErrorMessage.value = `请求过于频繁，请在 ${milisecondsToTime(lock.timeLeft)} 后再试。`;
+//         isFetchingOnline.value = false;
+//         return;
+//       } else if (lock.timeLeft === -1) {
+//         throw new Error('获取本地锁定状态失败，请检查浏览器设置。');
+//       }
+//     }
 
-    cloudMessage.value = "正在连接服务器以启动更新任务...";
-    // 解除查询记录的冷却锁，以供后续调用
-    setCooldown('getRecord', isAdmin, result.isExpired, -1);
+//     cloudMessage.value = "正在连接服务器以启动更新任务...";
+//     // 解除查询记录的冷却锁，以供后续调用
+//     setCooldown('getRecord', isAdmin, result.isExpired, -1);
 
 
-    // 调用Worker启动任务
-    const response = await fetch(`${WorkerUrl.value}/start-update-task`, {
-      method: 'POST',
-      headers: {
-        'X-License-Key': licenseKey,
-        'X-Player-Id': playerId,
-      },
-    });
+//     // 调用Worker启动任务
+//     const response = await fetch(`${WorkerUrl.value}/start-update-task`, {
+//       method: 'POST',
+//       headers: {
+//         'X-License-Key': licenseKey,
+//         'X-Player-Id': playerId,
+//       },
+//     });
 
-    const data = await response.json();
+//     const data = await response.json();
 
-    // 检查响应是否成功，并且后端返回了成功状态
-    if (response.ok && data.success) {
-      // 任务启动成功 (status: 'started') 或已在运行 (status: 'already_running')
-      // 两种情况都直接开始轮询
-      logger.log(`Task status: ${data.status}. Starting polling for player ${playerId}.`);
-      startPolling(playerId, licenseKey);
-    } else if (response.status === 429) {
-      // 处理Worker返回的频率限制，使用后端返回的精确剩余时间
-      setCooldown('onlineUpdate', isAdmin, result.isExpired, data.timeLeft);
-      cloudErrorMessage.value = `更新过于频繁，请在 ${milisecondsToTime(data.timeLeft)} 后再试。`;
-      cloudMessage.value = '';
-      isFetchingOnline.value = false;
-    } else {
-      // 处理其他错误
-      throw new Error(data.message || `启动任务失败 (${response.status})`);
-    }
+//     // 检查响应是否成功，并且后端返回了成功状态
+//     if (response.ok && data.success) {
+//       // 任务启动成功 (status: 'started') 或已在运行 (status: 'already_running')
+//       // 两种情况都直接开始轮询
+//       logger.log(`Task status: ${data.status}. Starting polling for player ${playerId}.`);
+//       startPolling(playerId, licenseKey);
+//     } else if (response.status === 429) {
+//       // 处理Worker返回的频率限制，使用后端返回的精确剩余时间
+//       setCooldown('onlineUpdate', isAdmin, result.isExpired, data.timeLeft);
+//       cloudErrorMessage.value = `更新过于频繁，请在 ${milisecondsToTime(data.timeLeft)} 后再试。`;
+//       cloudMessage.value = '';
+//       isFetchingOnline.value = false;
+//     } else {
+//       // 处理其他错误
+//       throw new Error(data.message || `启动任务失败 (${response.status})`);
+//     }
 
-  } catch (error) {
-    logger.error("在线更新时出错:", error);
-    cloudErrorMessage.value = error.message;
-    isFetchingOnline.value = false;
-  }
-};
-
+//   } catch (error) {
+//     logger.error("在线更新时出错:", error);
+//     cloudErrorMessage.value = error.message;
+//     isFetchingOnline.value = false;
+//   }
+// };
+// ================================
 
 // 处理上传抽卡记录到云端
 const handleUploadRecord = async () => {
