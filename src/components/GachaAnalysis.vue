@@ -37,7 +37,7 @@
 
         <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleAnalysis.SinglePulls + '次'
-        }}<br />
+          }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="['Limited', 'Normal', '10000'].includes(CurrentSelectedPool)">
@@ -220,7 +220,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -677,10 +677,26 @@ const fullHistory = computed(() => {
 // 计算当前卡池最早和最新的抽卡记录的时间范围
 const formatDate = (ts) => ts ? new Date(ts * 1000).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.') : '';
 const dateRange = computed(() => {
-  if (fullHistory.value.length === 0) return '';
-  const startDate = formatDate(fullHistory.value[fullHistory.value.length - 1]?.created_at);
-  const endDate = formatDate(fullHistory.value[0]?.created_at);
-  return `${startDate} - ${endDate}`;
+  // 回顾动画播放时显示最后一抽具体时间
+  if (isReviewing.value) {
+    // reviewRecords 是动画播放时使用的数据源
+    const records = reviewRecords.value;
+    // 如果动画还没开始显示提示文本
+    if (records.length === 0) {
+      return '即将开始回顾...';
+    }
+    // 获取当前动画播放到的最后一条记录
+    const latestRecord = records[records.length - 1];
+    return formatDateTime(latestRecord.created_at);
+  }
+  // 正常状态下显示日期范围
+  else {
+    if (fullHistory.value.length === 0) return '';
+    // 计算并格式化起始和结束日期
+    const startDate = formatDate(fullHistory.value[fullHistory.value.length - 1]?.created_at);
+    const endDate = formatDate(fullHistory.value[0]?.created_at);
+    return `${startDate} - ${endDate}`;
+  }
 });
 
 const totalPages = computed(() => Math.ceil(fullHistory.value.length / itemsPerPage.value));
@@ -869,6 +885,18 @@ const startReviewAnimation = () => {
 
   // 启动动画
   animateStep();
+};
+
+const formatDateTime = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp * 1000); // 时间戳是秒，需要乘以1000
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 };
 </script>
 
