@@ -1,6 +1,6 @@
 {
   "name": "gacha-party",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -38,7 +38,7 @@
     "globals": "^16.0.0",
     "prettier": "3.5.3",
     "vite": "^6.2.4",
-    "vite-plugin-pwa": "^1.0.1",
+    "vite-plugin-pwa": "^1.0.2",
     "vite-plugin-vue-devtools": "^7.7.2"
   }
 }
