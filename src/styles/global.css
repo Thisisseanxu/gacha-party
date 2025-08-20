@@ -1,12 +1,12 @@
-/* src/assets/styles/global.css */
+/* 从CDN加载字体 */
 
-/* 定义本地字体 */
 @font-face {
   font-family: 'Alibaba PuHuiTi';
-  src: url('/fonts/AlibabaPuHuiTi-3-55-Regular.ttf') format('truetype');
-  font-weight: normal;
+  src: url('https://cdn.jsdelivr.net/npm/@tslsmart/font-puhuiti@1.0.0/assets/alibaba-puhuiti-regular.ttf')
+    format('truetype');
+  font-weight: 400; /* Normal / Regular */
   font-style: normal;
-  font-display: swap; /* 优化字体加载行为 */
+  font-display: swap;
 }
 
 /* 将字体应用到整个应用 */
