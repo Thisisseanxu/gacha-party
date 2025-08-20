@@ -7,6 +7,9 @@
           v-if="['Limited', 'Normal', '10000'].includes(CurrentSelectedPool)">
           {{ reviewButtonText }}
         </button>
+        <button @click="switchReviewSpeed" class="button" v-if="isReviewing">
+          {{ reviewSpeedText }}
+        </button>
       </div>
 
       <div>
@@ -324,24 +327,30 @@ const quantityStatisticsButton = ref(null);
 const characterOverviewButton = ref(null);
 const underlineStyle = ref({});
 
-// --- 新增状态变量 ---
+// 回顾动画相关的变量
 const isReviewing = ref(false); // 是否正在回顾
 const reviewRecords = ref([]); // 用于回顾动画的临时记录数组
 let animationTimer = ref(null); // 用于存储 setTimeout 的 ID，方便清除
-const ANIMATION_INTERVAL = 50; // 每条记录的播放间隔（毫秒）
+const ANIMATION_INTERVAL = [50, 25, 5]; // 1x,2x,3x速度下的回放间隔
+const reviewSpeed = ref(1);
 
-// --- 回顾按钮的文本 ---
+// 回顾按钮的文本
 const reviewButtonText = computed(() => {
   if (animationTimer.value) return '⏹️ 停止回顾';
   return '🎬 回顾历史';
 });
 
+// 倍速按钮的文本
+const reviewSpeedText = computed(() => {
+  if (reviewSpeed.value === 3) return '3x▶▶▶';
+  if (reviewSpeed.value === 2) return '2x▶▶';
+  return '1x▶';
+});
+
 // 检查是否为开发环境
 const isDev = import.meta.env.DEV;
 
-// --- 核心修改：创建动态数据源 ---
-// 这些 computed 属性会根据是否在回顾模式下，切换其数据源
-// 这样，我们就不需要重写所有的分析逻辑了
+// 根据是否在回顾模式下，切换数据源
 const activeLimitData = computed(() =>
   isReviewing.value && (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || CurrentSelectedPool.value === 'Limited')
     ? reviewRecords.value
@@ -827,6 +836,7 @@ const exportPoolData = () => {
   exportToExcel('盲盒派对' + props.CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
 
+// 动画相关函数
 const stopReviewAnimation = () => {
   if (animationTimer.value) {
     clearTimeout(animationTimer.value);
@@ -836,7 +846,24 @@ const stopReviewAnimation = () => {
   reviewRecords.value = [];
 };
 
-// 动画相关函数
+// 切换速度
+const switchReviewSpeed = () => {
+  if (reviewSpeed.value === 3) {
+    reviewSpeed.value = 1; // 重置为1x
+  } else {
+    reviewSpeed.value++; // 增加速度
+  }
+};
+
+// 设置回放速度
+const reviewInterval = computed(() => {
+  switch (reviewSpeed.value) {
+    case 3: return ANIMATION_INTERVAL[2]; // 3x速度
+    case 2: return ANIMATION_INTERVAL[1]; // 2x速度
+    default: return ANIMATION_INTERVAL[0]; // 1x速度
+  }
+});
+
 const startReviewAnimation = () => {
   // 如果动画播放完成，再次点击则重置
   if (isReviewing.value) {
@@ -880,7 +907,7 @@ const startReviewAnimation = () => {
       reviewRecords.value.push(sortedSource[currentIndex]);
       currentIndex++;
       // 设置下一次执行
-      animationTimer.value = setTimeout(animateStep, ANIMATION_INTERVAL);
+      animationTimer.value = setTimeout(animateStep, reviewInterval.value);
     } else {
       // 动画播放完毕
       animationTimer.value = null;
