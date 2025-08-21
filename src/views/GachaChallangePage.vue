@@ -168,8 +168,10 @@ const calculateScore = (cards) => {
   // 计算SP得分
   if (spCount === 1) {
     score += 10;
-  } else if (spCount >= 2) {
-    score += spCount * 20; // 双SP及以上每个SP得20分
+  } else if (spCount === 2) {
+    score += 40; // 双SP翻倍分数
+  } else if (spCount >= 3) {
+    score += spCount * 30; // 三个及以上每个SP得30分
   }
 
   // 计算SSR得分
@@ -178,11 +180,9 @@ const calculateScore = (cards) => {
   } else if (ssrCount === 2) {
     score += 15; // 5 + 5 + 5 额外分数
   } else if (ssrCount === 3) {
-    score += 20; // 5 + 5 + 5 + 5 额外分数
-  } else if (ssrCount === 4) {
-    score += 30; // 5 + 5 + 5 + 5 + 10 额外分数
-  } else if (ssrCount >= 5) {
-    score += ssrCount * 10; // 五个及以上SSR每个得10分
+    score += 25; // 5 + 5 + 5 + 10 额外分数
+  } else if (ssrCount >= 4) {
+    score += ssrCount * 10; // 四个及以上SSR每个得10分
   }
 
   return score;
