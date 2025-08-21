@@ -50,7 +50,7 @@
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
       :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="Normal10000GachaData" :player-id="playerId"
-      :json-input="jsonInput" :limited-card-pools-id="LIMITED_CARD_POOLS_ID" :card-pools-name-map="CARDPOOLS_NAME_MAP"
+      :json-input="jsonInput" :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
       @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">

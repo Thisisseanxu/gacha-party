@@ -40,7 +40,7 @@
 
         <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleAnalysis.SinglePulls + '次'
-        }}<br />
+          }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="['Limited', 'Normal', '10000'].includes(CurrentSelectedPool)">
@@ -223,7 +223,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -269,22 +269,9 @@ const props = defineProps({
   },
   LIMITED_CARD_POOLS_ID: {
     type: Array,
-    default: () => ['29', '40', '41', '42', '43', "44"], // 默认限定卡池ID列表
   },
   CARDPOOLS_NAME_MAP: {
     type: Object,
-    default: () => ({
-      'Normal': '常驻扭蛋',
-      'Limited': '限定扭蛋',
-      '9': '常驻扭蛋',
-      '29': '车手盲盒机',
-      '40': '塔菲扭蛋',
-      '41': '童话国盲盒机',
-      '42': '扭蛋大作战-海军',
-      '43': '早稻叽',
-      '44': '扭蛋大作战-雪糕',
-      '10000': '高级常驻扭蛋'
-    })
   }
 });
 
