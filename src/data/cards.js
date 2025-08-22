@@ -20,6 +20,7 @@ export const allCards = [
   { id: '1309', name: '电池霓昂', rarity: RARITY.SP, imageUrl: '/images/cards/1309.webp' },
   { id: '1212', name: '暗夜公主', rarity: RARITY.SP, imageUrl: '/images/cards/1212.webp' },
   { id: '1810', name: '深海鲨鱼', rarity: RARITY.SP, imageUrl: '/images/cards/1810.webp' },
+  { id: '1502', name: '烧烤大师', rarity: RARITY.SP, imageUrl: '/images/cards/1502.webp' },
   {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',

@@ -25,7 +25,7 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
-        <p class="input-description">使用您的激活码读取云端的抽卡记录。</p>
+        <p class="input-description">使用您的激活码读取云端的抽卡记录。<br />（不是从游戏读取，请先使用工具自己导出抽卡记录！）</p>
         <p class="input-description highlight">目前织夜工具箱所有工具均使用同一个激活码（v2）</p>
         <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
         <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
@@ -42,7 +42,7 @@
       </div>
 
       <div class="mp-weixin split">
-        <p>抽卡记录获取小程序正在内测中，欢迎试用</p>
+        <p>可以使用小程序获取抽卡记录啦，快来试试吧！<br /><span class="highlight">点击上传到云端后可能会有30分钟左右的延迟</span></p>
         <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
       </div>
     </div>
