@@ -404,11 +404,11 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1710', '1309'],
+        UpCards: ['1710', '1309', '1503'],
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1710', '1309'],
+      [RARITY.SP]: ['1710', '1309', '1503'],
       [RARITY.SSR]: [
         '1102',
         '1106',
