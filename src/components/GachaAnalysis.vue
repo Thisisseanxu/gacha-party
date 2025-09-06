@@ -40,7 +40,7 @@
 
         <div v-if="singleAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleAnalysis.SinglePulls + '次'
-          }}<br />
+        }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="!isSinglePool">
@@ -223,7 +223,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -289,12 +289,12 @@ const LIMITPOOL_TITLE_MAP = {
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
 }; // 区间：0-32，32-34.5，34.5-35.75，35.75-37.5，37.5-39，39-41，41+
 const NORMALPOOL_TITLE_MAP = {
-  9.5: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
-  10.25: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  10.75: { title: '小欧皇', background: colors.colorOfLuck.low },
-  11.25: { title: '平平无奇', background: colors.colorOfLuck.medium },
-  11.75: { title: '小非酋', background: colors.colorOfLuck.high },
-  12.5: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
+  8.75: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
+  9.75: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
+  10.5: { title: '小欧皇', background: colors.colorOfLuck.low },
+  11.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
+  12.25: { title: '小非酋', background: colors.colorOfLuck.high },
+  13.25: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
 }; // 区间：0-9.5，9.5-10.25，10.25-10.75，10.75-11.25，11.25-11.75，11.75-12.5，12.5+
 
