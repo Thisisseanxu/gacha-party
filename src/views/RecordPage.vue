@@ -268,22 +268,21 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：未找到有效的卡池数据！';
     return;
   }
-  if (finalData.cloud) {
-    // 处理云端数据时要手动加上gacha_id
-    for (const [gachaId, records] of Object.entries(playerData)) {
-      if (Array.isArray(records)) {
-        records.forEach(record => { if (record) record.gacha_id = Number(gachaId); });
-      }
+
+  // 默认给每条记录添加gacha_id字段
+  for (const [gachaId, records] of Object.entries(playerData)) {
+    if (Array.isArray(records)) {
+      records.forEach(record => { if (record) record.gacha_id = Number(gachaId); });
     }
   }
 
   // 分离限定卡池和常驻卡池数据
   const LimitGachaRecords = [];
   const NormalGachaRecords = [];
-  const Normal10000Records = []; // 用于存储高级常驻卡池的记录
+  const AdvanceNormalRecords = []; // 用于存储高级常驻卡池的记录
   for (const [gachaId, records] of Object.entries(playerData)) {
     if (gachaId === '9') NormalGachaRecords.push(...records); // 常驻卡池ID固定为9
-    else if (gachaId === '10000') { Normal10000Records.push(...records); }// 高级常驻卡池ID固定为10000
+    else if (gachaId === '10000') { AdvanceNormalRecords.push(...records); }// 高级常驻卡池ID固定为10000
     else if (LIMITED_CARD_POOLS_ID.includes(gachaId)) LimitGachaRecords.push(...records);
   }
 
@@ -304,7 +303,7 @@ const handleJsonAnalysis = () => {
 
   LimitGachaData.value = LimitGachaRecords;
   NormalGachaData.value = NormalGachaRecords;
-  Normal10000GachaData.value = Normal10000Records;
+  Normal10000GachaData.value = AdvanceNormalRecords;
   viewState.value = 'analysis'; // 切换到分析视图
 };
 
