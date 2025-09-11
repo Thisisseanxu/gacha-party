@@ -25,8 +25,8 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
-        <p class="input-description">使用您的激活码读取云端的抽卡记录。<br />（不是从游戏读取，请先使用工具自己导出抽卡记录！）</p>
-        <p class="input-description highlight">目前织夜工具箱所有工具均使用同一个激活码（v2）</p>
+        <p class="input-description">使用您的激活码读取云端的抽卡记录。<br />（请先使用小程序导出抽卡记录并上传！）</p>
+        <p class="input-description highlight">织夜工具箱所有工具均使用同一个激活码</p>
         <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
         <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
         <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
@@ -42,8 +42,15 @@
       </div>
 
       <div class="mp-weixin split">
-        <p>可以使用小程序获取抽卡记录啦，快来试试吧！<br /><span class="highlight">点击上传到云端后可能会有30分钟左右的延迟</span></p>
+        <p>使用小程序获取抽卡记录<br /><span class="highlight">上传云端后可能会有30分钟左右的延迟</span></p>
         <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+        <p>使用教程</p>
+        <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0;">
+          <iframe
+            src="//player.bilibili.com/player.html?isOutside=true&aid=115111482167059&bvid=BV1ZZhXzGEVd&cid=32027246871&p=1"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" scrolling="no" border="0"
+            frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+        </div>
       </div>
     </div>
 
@@ -86,7 +93,7 @@
           <strong>退出服务：</strong> 如果您希望退出本服务，可以随时停止使用。对于已上传的数据，您可以通过关于页的联系方式或加入QQ群组与我们联系并要求删除数据。
         </li>
         <li>
-          <strong>服务变更、中断或终止：</strong> 本服务目前处于 BETA 测试阶段且免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。我们不保证服务的永久可用性。
+          <strong>服务变更、中断或终止：</strong> 本服务目前免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。我们不保证服务的永久可用性。
         </li>
         <li>
           <strong>免责说明：</strong>

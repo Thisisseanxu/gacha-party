@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-// 定义组件接收的属性 (Props) 和发出的事件 (Emits)
+import { colors } from '@/styles/colors.js';
 defineProps({
   display: {
     type: Boolean,
@@ -41,7 +41,7 @@ const close = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: v-bind('colors.shadow.primary');
   display: flex;
   justify-content: center;
   align-items: center;
@@ -52,22 +52,22 @@ const close = () => {
 .share-modal-content {
   position: relative;
   text-align: center;
-  padding: 2rem;
+  padding: 0.5rem;
   padding-top: 3rem;
   width: 90%;
   max-width: 380px;
-  /* 从父组件继承 card 样式，或者在这里定义背景色等 */
-  background-color: #2c2c3e;
-  /* 示例背景色 */
-  border: 1px solid #4a4a6a;
+  background-color: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
   border-radius: 12px;
 }
 
 .share-modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #f0f0f0;
-  /* 示例文字颜色 */
+  margin: 0;
+  color: v-bind('colors.text.primary');
+}
+
+.share-modal-content p {
+  color: v-bind('colors.text.secondary');
 }
 
 .close-modal-button {
@@ -78,13 +78,13 @@ const close = () => {
   border: none;
   font-size: 2rem;
   line-height: 1;
-  color: #888;
+  color: v-bind('colors.text.tertiary');
   cursor: pointer;
   padding: 0;
 }
 
 .close-modal-button:hover {
-  color: #fff;
+  color: v-bind('colors.text.primary');
 }
 
 /* 过渡动画 */
