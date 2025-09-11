@@ -296,7 +296,7 @@ const NORMALPOOL_TITLE_MAP = {
   12.25: { title: '小非酋', background: colors.colorOfLuck.high },
   13.25: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
-}; // 区间：0-9.5，9.5-10.25，10.25-10.75，10.75-11.25，11.25-11.75，11.75-12.5，12.5+
+}; // 区间：0-8.75，8.75-9.75，9.75-10.5，10.5-11.5，11.5-12.25，12.25-13.25，13.25+
 
 const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
 // 合成下拉框的选项

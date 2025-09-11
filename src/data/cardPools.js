@@ -7,6 +7,50 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
+  // 地下车手招募
+  dixiacheshouzhaomu: {
+    type: '限定',
+    name: '地下车手招募',
+    imageUrl: '/images/cardpools-icon/10012.webp',
+    // 基础概率
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2, // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.SP]: {
+        pity: 60, // 60抽必出SP
+        boostAfter: 40, // 40抽后每抽提升SP概率
+        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
+        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        UpCards: ['1311', '1312'],
+      },
+      [RARITY.SSR]: {
+        doubleRateCards: ['1808'], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
+    },
+    cardIds: {
+      [RARITY.SP]: ['1311', '1312'],
+      [RARITY.SSR]: ['1301', '1302', '1305', '1808', '1310'],
+      [RARITY.SR]: [
+        '1103',
+        '1104',
+        '1207',
+        '1303',
+        '1405',
+        '1604',
+        '1606',
+        '1702',
+        '1205',
+        '1304',
+        '1805',
+        '1209',
+      ],
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
+    },
+  },
   // 扭蛋大作战
   niudandazuozhan: {
     type: '限定',

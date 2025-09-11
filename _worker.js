@@ -23,7 +23,7 @@ const RATE_LIMITS = {
   manualUpload: {
     admin: 5 * 60 * 1000, // 管理员: 5分钟
     subscribed: 1 * 60 * 60 * 1000, // 订阅会员: 1小时
-    normal: 24 * 60 * 60 * 1000, // 普通会员: 24小时
+    normal: 12 * 60 * 60 * 1000, // 普通会员: 12小时
   },
   // 在线获取记录 (/start-update-task)
   onlineUpdate: {
