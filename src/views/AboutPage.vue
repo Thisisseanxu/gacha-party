@@ -42,7 +42,7 @@
           <li v-for="(item, index) in specialThanks" :key="index">
             感谢
             <a :href="item.link" target="_blank" rel="noopener noreferrer" v-if="item.link"><strong>{{ item.supporter
-            }}</strong></a>
+                }}</strong></a>
             <strong v-else>{{ item.supporter }}</strong> {{ item.contribution }}
           </li>
         </ul>
@@ -112,6 +112,7 @@ const specialThanks = ref([
   { supporter: '好奇害不死', contribution: '管理QQ群并帮助班长解决问题' },
   { supporter: 'code8804', contribution: '管理QQ群并帮助班长解决问题' },
   { supporter: 'xie1000', contribution: '管理QQ群并帮助班长解决问题' },
+  { supporter: '糖瓶', contribution: '提供主页UI思路&管理QQ群' },
   { supporter: '所有参与测试的班长', contribution: '提出宝贵的意见和建议' },
 ]);
 
