@@ -395,16 +395,6 @@ const limitAnalysis = computed(() => {
       SSRCounter = 0;
     }
   });
-  // 添加“即将到来”占位符给动画
-  if (isReviewing.value && SPCounter > 0) {
-    SPHistory.unshift({
-      name: '即将到来',
-      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
-      count: SPCounter,
-      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
-      id: 'placeholder-sp' // 给一个唯一的key
-    });
-  }
 
   return {
     totalPulls: records.length,
@@ -468,16 +458,6 @@ const AdvanceNormalAnalysis = computed(() => {
       SSRCounter = 0;
     }
   });
-  // 添加“即将到来”占位符给动画
-  if (isReviewing.value && SPCounter > 0) {
-    SPHistory.unshift({
-      name: '即将到来',
-      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
-      count: SPCounter,
-      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
-      id: 'placeholder-sp' // 给一个唯一的key
-    });
-  }
 
   return {
     totalPulls: records.length,
@@ -514,16 +494,6 @@ const normalAnalysis = computed(() => {
       SSRCounter = 0;
     }
   });
-  // 添加“即将到来”占位符给动画
-  if (isReviewing.value && SSRCounter > 0) {
-    SSRHistory.unshift({
-      name: '即将到来',
-      imageUrl: '/images/cards/placeholder.webp', // 确保这个路径是正确的
-      count: SSRCounter,
-      isPlaceholder: true, // 添加一个标志位，方便未来做特殊样式
-      id: 'placeholder-ssr' // 给一个唯一的key
-    });
-  }
 
   return {
     totalPulls: records.length, SSR: SSRCounter,
