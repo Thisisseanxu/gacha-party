@@ -3,8 +3,7 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
-        <p class="input-description">此页面可分析抽卡记录导出小程序导出的抽卡记录<br /><span
-            class="highlight">小程序码和教程请见下方（PC端在右侧）</span><br />
+        <p class="input-description">在这里分析小程序导出的抽卡记录<br /><span class="highlight">小程序码和教程请见下方（PC端在右侧）</span><br />
           需要帮助？加入 <a class="highlight"
             href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
             target="_blank">

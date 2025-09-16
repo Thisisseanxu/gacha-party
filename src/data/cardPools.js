@@ -412,6 +412,7 @@ export const cardPools = {
         '1803',
         '1504',
         '1804',
+        '1807',
       ],
       [RARITY.SR]: [
         '1103',
