@@ -11,15 +11,16 @@
           {{ reviewSpeedText }}
         </button>
       </div>
+      <span class="tertiary-text">UID: {{ playerId }}</span>
 
       <div>
         <div class="header-top-row">
           <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
-            option-value-key="id" :disabled="isReviewing">
+            option-value-key="id" :disabled="isReviewing" style="min-width: 160px;">
             <template #trigger>
               <div class="title-bar">
                 <span>
-                  {{ playerId }}-{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                  {{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
                 </span>
               </div>
             </template>

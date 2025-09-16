@@ -45,7 +45,7 @@
         </a>
       </div>
 
-      <span class="version">当前版本：v{{ appVersion }} <br />若发现版本过低请连续刷新几次网页</span>
+      <span class="version">当前版本：v{{ appVersion }}</span>
     </div>
   </div>
 </template>

@@ -30,6 +30,8 @@
         <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
         <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
         <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
+          <br />
+          上传记录可能会有延迟，如果没更新请稍后查询
         </p>
         <div class="button-group">
           <!-- <button @click="handleOnlineUpdate" :disabled="isFetchingOnline" class="action-button">
@@ -42,12 +44,14 @@
       </div>
 
       <div class="mp-weixin split">
-        <p>使用小程序获取抽卡记录<br /><span class="highlight">上传云端后可能会有30分钟左右的延迟</span></p>
-        <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+        <p>使用小程序获取抽卡记录<br /><span class="highlight">微信搜索“织夜工具箱”或扫描二维码</span></p>
+        <a href="weixin://dl/business/?appid=wx1e9dcc30a4481663">
+          <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+        </a>
         <p>使用教程</p>
         <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0;">
           <iframe
-            src="//player.bilibili.com/player.html?isOutside=true&aid=115111482167059&bvid=BV1ZZhXzGEVd&cid=32027246871&p=1"
+            src="//player.bilibili.com/player.html?isOutside=true&aid=115111482167059&bvid=BV1ZZhXzGEVd&cid=32027246871&p=1&autoplay=0"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" scrolling="no" border="0"
             frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
         </div>
@@ -63,7 +67,7 @@
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
-        <p class="input-description">将当前的抽卡记录上传至云端</p>
+        <p class="input-description">手动将当前的抽卡记录上传至云端</p>
         <p class="input-description highlight">普通用户每24小时在所有工具内只能上传一次！</p>
         <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
         <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
