@@ -4,17 +4,17 @@ import nacl from 'tweetnacl'
 import { Buffer } from 'buffer'
 import pako from 'pako'
 
-const ALL_GACHA_IDS = ['9', '28', '29', '40', '41', '42', '43', '10000'] // 卡池列表
-const CARDPOOLS_NAME_MAP = {
-  9: '常驻扭蛋',
-  28: '新手扭蛋',
-  29: '车手盲盒机',
-  40: '塔菲扭蛋',
-  41: '童话国盲盒机',
-  42: '扭蛋大作战',
-  43: '早稻叽',
-  10000: '高级常驻扭蛋',
-}
+// const ALL_GACHA_IDS = ['9', '28', '29', '40', '41', '42', '43', '10000'] // 卡池列表
+// const CARDPOOLS_NAME_MAP = {
+//   9: '常驻扭蛋',
+//   28: '新手扭蛋',
+//   29: '车手盲盒机',
+//   40: '塔菲扭蛋',
+//   41: '童话国盲盒机',
+//   42: '扭蛋大作战',
+//   43: '早稻叽',
+//   10000: '高级常驻扭蛋',
+// }
 
 // 频率限制配置 (单位：毫秒)
 // 为了方便管理，将所有频率限制相关的配置统一放在这里。
@@ -71,78 +71,78 @@ export class TaskRunner {
   /**
    * 实际执行增量更新的后台函数。
    */
-  async runUpdateTask(playerId) {
-    this.memoryState = {
-      status: 'pending',
-      progress: '任务已创建，正在等待执行...',
-      progress_percent: 0,
-    }
+  // async runUpdateTask(playerId) {
+  //   this.memoryState = {
+  //     status: 'pending',
+  //     progress: '任务已创建，正在等待执行...',
+  //     progress_percent: 0,
+  //   }
 
-    try {
-      // 从 KV 读取现有数据
-      const recordKvKey = `record_${playerId}`
-      const compressedData = await this.env.GACHA_PARTY_RECORDS.get(recordKvKey)
-      let playerGachaData = {}
-      if (compressedData) {
-        const gzipped = Buffer.from(compressedData, 'base64')
-        const jsonString = pako.inflate(gzipped, { to: 'string' })
-        playerGachaData = JSON.parse(jsonString)
-      } else {
-        playerGachaData = { version: 2, [playerId]: {} }
-      }
+  //   try {
+  //     // 从 KV 读取现有数据
+  //     const recordKvKey = `record_${playerId}`
+  //     const compressedData = await this.env.GACHA_PARTY_RECORDS.get(recordKvKey)
+  //     let playerGachaData = {}
+  //     if (compressedData) {
+  //       const gzipped = Buffer.from(compressedData, 'base64')
+  //       const jsonString = pako.inflate(gzipped, { to: 'string' })
+  //       playerGachaData = JSON.parse(jsonString)
+  //     } else {
+  //       playerGachaData = { version: 2, [playerId]: {} }
+  //     }
 
-      // 增量获取所有卡池
-      const allNewRecords = {}
-      let totalNewCount = 0
+  //     // 增量获取所有卡池
+  //     const allNewRecords = {}
+  //     let totalNewCount = 0
 
-      for (const [index, gachaId] of ALL_GACHA_IDS.entries()) {
-        // 更新内存中的状态
-        this.memoryState.status = 'running'
-        this.memoryState.progress = `( ${index + 1} / ${ALL_GACHA_IDS.length} ) 正在更新${CARDPOOLS_NAME_MAP[gachaId]}的数据...`
+  //     for (const [index, gachaId] of ALL_GACHA_IDS.entries()) {
+  //       // 更新内存中的状态
+  //       this.memoryState.status = 'running'
+  //       this.memoryState.progress = `( ${index + 1} / ${ALL_GACHA_IDS.length} ) 正在更新${CARDPOOLS_NAME_MAP[gachaId]}的数据...`
 
-        const poolRecords = playerGachaData[playerId]?.[gachaId] || []
-        const existingRecordSet = new Set(poolRecords.map((r) => r.id))
+  //       const poolRecords = playerGachaData[playerId]?.[gachaId] || []
+  //       const existingRecordSet = new Set(poolRecords.map((r) => r.id))
 
-        const result = await fetchIncrementalRecordsForPool(
-          playerId,
-          gachaId,
-          existingRecordSet,
-          this.env,
-        )
+  //       const result = await fetchIncrementalRecordsForPool(
+  //         playerId,
+  //         gachaId,
+  //         existingRecordSet,
+  //         this.env,
+  //       )
 
-        if (result.error) {
-          throw new Error(`获取卡池 ${gachaId} 数据时出错: ${result.error}`)
-        }
+  //       if (result.error) {
+  //         throw new Error(`获取卡池 ${gachaId} 数据时出错: ${result.error}`)
+  //       }
 
-        if (result.data.length > 0) {
-          allNewRecords[gachaId] = result.data
-          totalNewCount += result.data.length
-          const combined = [...result.data, ...poolRecords]
-          if (!playerGachaData[playerId]) playerGachaData[playerId] = {}
-          playerGachaData[playerId][gachaId] = combined.sort((a, b) => b.created_at - a.created_at)
-        }
-      }
+  //       if (result.data.length > 0) {
+  //         allNewRecords[gachaId] = result.data
+  //         totalNewCount += result.data.length
+  //         const combined = [...result.data, ...poolRecords]
+  //         if (!playerGachaData[playerId]) playerGachaData[playerId] = {}
+  //         playerGachaData[playerId][gachaId] = combined.sort((a, b) => b.created_at - a.created_at)
+  //       }
+  //     }
 
-      // 如果没有错误，则将更新后的数据写回主记录KV
-      const finalJsonString = JSON.stringify(playerGachaData)
-      const compressedBytes = pako.gzip(finalJsonString)
-      const finalBase64Payload = Buffer.from(compressedBytes).toString('base64')
+  //     // 如果没有错误，则将更新后的数据写回主记录KV
+  //     const finalJsonString = JSON.stringify(playerGachaData)
+  //     const compressedBytes = pako.gzip(finalJsonString)
+  //     const finalBase64Payload = Buffer.from(compressedBytes).toString('base64')
 
-      await this.env.GACHA_PARTY_RECORDS.put(recordKvKey, finalBase64Payload, {
-        metadata: { lastCloudUpdated: Date.now(), lastUpdated: Date.now() },
-      })
+  //     await this.env.GACHA_PARTY_RECORDS.put(recordKvKey, finalBase64Payload, {
+  //       metadata: { lastCloudUpdated: Date.now(), lastUpdated: Date.now() },
+  //     })
 
-      // 更新最终任务状态为 "completed"
-      this.memoryState.status = 'completed'
-      this.memoryState.progress = `更新完成！共获取到 ${totalNewCount} 条新记录。`
-      this.memoryState.result = { newRecords: allNewRecords }
-    } catch (error) {
-      // 发生错误时更新任务状态为 "failed"
-      console.error(`玩家 ${playerId} 更新任务失败:`, error)
-      this.memoryState.status = 'failed'
-      this.memoryState.error = error.message
-    }
-  }
+  //     // 更新最终任务状态为 "completed"
+  //     this.memoryState.status = 'completed'
+  //     this.memoryState.progress = `更新完成！共获取到 ${totalNewCount} 条新记录。`
+  //     this.memoryState.result = { newRecords: allNewRecords }
+  //   } catch (error) {
+  //     // 发生错误时更新任务状态为 "failed"
+  //     console.error(`玩家 ${playerId} 更新任务失败:`, error)
+  //     this.memoryState.status = 'failed'
+  //     this.memoryState.error = error.message
+  //   }
+  // }
 }
 
 const mainApp = new Hono()
@@ -317,69 +317,69 @@ function base64UrlToStandard(base64url) {
  * @param {object} env - Worker 的环境变量。
  * @returns {Promise<{data: any[], error: string | null}>} 返回新获取的记录数组或错误信息。
  */
-async function fetchIncrementalRecordsForPool(playerId, gachaId, existingRecordSet, env) {
-  const newlyFetched = []
-  let page = 1
-  let keepFetching = true
-  const X_TOKEN_FORMAT = env.TOKEN_FORMAT
-  let reTryCount = 0
-  while (keepFetching) {
-    const url = new URL(env.BACKEND_URL)
-    url.search = new URLSearchParams({
-      player_id: playerId,
-      gacha_id: gachaId,
-      page: page,
-      page_size: 20,
-    }).toString()
-    const headers = {
-      Host: env.BACKEND_HOST,
-      'X-Token': X_TOKEN_FORMAT.replace('{}', playerId),
-      'User-Agent': env.API_USER_AGENT,
-      Accept: env.API_ACCEPT,
-    }
-    try {
-      const response = await fetch(url.toString(), { headers })
-      if (!response.ok) {
-        throw new Error(
-          `获取 ${gachaId} 卡池的第 ${page} 页出错： ${response.status} ${response.statusText}`,
-        )
-      }
-      const data = await response.json()
-      // 请求后稍作等待，避免请求过于频繁
-      await new Promise((res) => setTimeout(res, 1000))
-      const recordsOnPage = data?.data?.records || []
-      if (recordsOnPage.length === 0) {
-        keepFetching = false
-        break
-      }
-      const newRecordsThisPage = []
-      for (const record of recordsOnPage) {
-        if (existingRecordSet.has(record.id)) {
-          keepFetching = false
-          break
-        }
-        newRecordsThisPage.push({
-          id: record.id,
-          item_id: record.item_id,
-          created_at: record.created_at,
-          gacha_id: parseInt(gachaId, 10),
-        })
-      }
-      if (newRecordsThisPage.length > 0) {
-        newlyFetched.push(...newRecordsThisPage)
-      }
-      page++
-    } catch (e) {
-      if (reTryCount >= 3) {
-        return { data: [], error: `获取卡池 ${gachaId} 数据时发生错误： ${e.message}` }
-      }
-      reTryCount++
-      await new Promise((res) => setTimeout(res, reTryCount * 1000))
-      console.error(`${e.message}，开始重试，次数: ${reTryCount}`)
-    }
-  }
-  return { data: newlyFetched, error: null }
-}
+// async function fetchIncrementalRecordsForPool(playerId, gachaId, existingRecordSet, env) {
+//   const newlyFetched = []
+//   let page = 1
+//   let keepFetching = true
+//   const X_TOKEN_FORMAT = env.TOKEN_FORMAT
+//   let reTryCount = 0
+//   while (keepFetching) {
+//     const url = new URL(env.BACKEND_URL)
+//     url.search = new URLSearchParams({
+//       player_id: playerId,
+//       gacha_id: gachaId,
+//       page: page,
+//       page_size: 20,
+//     }).toString()
+//     const headers = {
+//       Host: env.BACKEND_HOST,
+//       'X-Token': X_TOKEN_FORMAT.replace('{}', playerId),
+//       'User-Agent': env.API_USER_AGENT,
+//       Accept: env.API_ACCEPT,
+//     }
+//     try {
+//       const response = await fetch(url.toString(), { headers })
+//       if (!response.ok) {
+//         throw new Error(
+//           `获取 ${gachaId} 卡池的第 ${page} 页出错： ${response.status} ${response.statusText}`,
+//         )
+//       }
+//       const data = await response.json()
+//       // 请求后稍作等待，避免请求过于频繁
+//       await new Promise((res) => setTimeout(res, 1000))
+//       const recordsOnPage = data?.data?.records || []
+//       if (recordsOnPage.length === 0) {
+//         keepFetching = false
+//         break
+//       }
+//       const newRecordsThisPage = []
+//       for (const record of recordsOnPage) {
+//         if (existingRecordSet.has(record.id)) {
+//           keepFetching = false
+//           break
+//         }
+//         newRecordsThisPage.push({
+//           id: record.id,
+//           item_id: record.item_id,
+//           created_at: record.created_at,
+//           gacha_id: parseInt(gachaId, 10),
+//         })
+//       }
+//       if (newRecordsThisPage.length > 0) {
+//         newlyFetched.push(...newRecordsThisPage)
+//       }
+//       page++
+//     } catch (e) {
+//       if (reTryCount >= 3) {
+//         return { data: [], error: `获取卡池 ${gachaId} 数据时发生错误： ${e.message}` }
+//       }
+//       reTryCount++
+//       await new Promise((res) => setTimeout(res, reTryCount * 1000))
+//       console.error(`${e.message}，开始重试，次数: ${reTryCount}`)
+//     }
+//   }
+//   return { data: newlyFetched, error: null }
+// }
 
 mainApp.get('/get-record', async (c) => {
   try {
@@ -558,8 +558,6 @@ mainApp.post('/incremental-update', async (c) => {
     let totalAddedCount = 0
 
     for (const gachaId in newRecordsByPool) {
-      if (!ALL_GACHA_IDS.includes(String(gachaId))) continue // 忽略未知的卡池ID
-
       const newRecords = newRecordsByPool[gachaId]
       if (!Array.isArray(newRecords)) continue
 
