@@ -545,7 +545,6 @@ const handleGetRecord = async () => {
     const wrappedJson = { cloud: true, compressed: true, data: compressedString };
     jsonInput.value = JSON.stringify(wrappedJson);
     cloudMessage.value = '已成功获取云端记录，正在分析中...';
-    await new Promise(resolve => setTimeout(resolve, 2000));
     handleJsonAnalysis(); // 调用已有的分析逻辑分析合成的json
     cloudMessage.value = '';
   } catch (error) {
