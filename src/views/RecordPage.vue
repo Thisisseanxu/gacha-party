@@ -60,7 +60,7 @@
 
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
-      :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="Normal10000GachaData" :player-id="playerId"
+      :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="AdvanceNormalGachaData" :player-id="playerId"
       :json-input="jsonInput" :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
       @reset-view="resetView" />
 
@@ -130,12 +130,13 @@ const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
-const Normal10000GachaData = ref([]); // 存储高级常驻卡池抽卡记录
+const AdvanceNormalGachaData = ref([]); // 存储高级常驻卡池抽卡记录
+
 const errorMessage = ref('');
 const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "107"]; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "48", "107"]; // 限定卡池ID列表
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
   'Limited': '限定扭蛋',
@@ -147,6 +148,7 @@ const CARDPOOLS_NAME_MAP = {
   '43': '早稻叽',
   '44': '扭蛋大作战-雪糕',
   '46': '车手盲盒机-复刻1',
+  '48': '童话国盲盒机-复刻1',
   '107': '地下车手招募',
   '10000': '高级常驻扭蛋'
 };
@@ -308,14 +310,14 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：部分常驻卡池抽卡记录缺少必须字段。';
     return;
   }
-  if (!Normal10000GachaData.value.every(isValidRecord)) {
+  if (!AdvanceNormalGachaData.value.every(isValidRecord)) {
     errorMessage.value = '数据格式错误：部分高级常驻卡池抽卡记录缺少必须字段。';
     return;
   }
 
   LimitGachaData.value = LimitGachaRecords;
   NormalGachaData.value = NormalGachaRecords;
-  Normal10000GachaData.value = AdvanceNormalRecords;
+  AdvanceNormalGachaData.value = AdvanceNormalRecords;
   viewState.value = 'analysis'; // 切换到分析视图
 };
 
