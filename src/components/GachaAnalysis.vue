@@ -37,7 +37,7 @@
 
         <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleLimitAnalysis.SinglePulls + '次'
-        }}<br />
+          }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="!isSinglePool">
@@ -51,7 +51,7 @@
             <span>距上个SSR</span>
             <span class="pity-count">{{
               CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+            }}</span>
           </div>
         </div>
         <div class="tertiary-text">{{ dateRange }}
@@ -213,7 +213,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -299,6 +299,7 @@ const cardPoolOptions = ref([
   { id: 'Normal', name: props.CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
   { id: 'AdvanceNormal', name: props.CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻卡池
   { id: 'SingleBox', name: props.CARDPOOLS_NAME_MAP['SingleBox'] }, // 祈愿盲盒卡池
+  { id: '分隔符------', name: '分隔符------' }, // 分隔符
   ...props.LIMITED_CARD_POOLS_ID.map(id => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
 ]);
 
@@ -315,6 +316,9 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   }
   if (option.id === 'SingleBox') {
     return props.singleBoxGachaData.length > 0;
+  }
+  if (option.id === '分隔符------') {
+    return true; // 保留分隔符
   }
   // 单卡池判断：限定池数据中有该gacha_id的记录才保留
   return props.limitGachaData.some(r => r.gacha_id === Number(option.id));

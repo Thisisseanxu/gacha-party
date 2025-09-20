@@ -7,9 +7,14 @@
 
     <div v-if="isOpen" class="options-dropdown">
       <ul>
-        <li v-for="option in options" :key="option[optionValueKey]" @click="selectOption(option)"
-          :class="{ 'is-selected': modelValue === option[optionValueKey] }">
-          {{ option[optionTextKey] }}
+        <li v-for="option in options" :key="option[optionValueKey]">
+          <div v-if="option[optionTextKey] !== '分隔符------'" @click="selectOption(option)"
+            :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+            {{ option[optionTextKey] }}
+          </div>
+          <div v-else class="option-divider" aria-hidden="true">
+            <hr />
+          </div>
         </li>
       </ul>
     </div>
@@ -166,11 +171,15 @@ const colorScrollbar = colors.scrollbar;
 
 /* 单个选项 */
 .options-dropdown li {
-  padding: 10px 0px;
   transition: background-color 0.2s;
   border-radius: 4px;
   white-space: nowrap;
   color: v-bind(colorOptionText);
+}
+
+/* 单个选项的div增加padding */
+.options-dropdown li div {
+  padding: 10px 2px;
 }
 
 .options-dropdown li:hover {
@@ -179,7 +188,7 @@ const colorScrollbar = colors.scrollbar;
 }
 
 /* 当前选中的选项高亮 */
-.options-dropdown li.is-selected {
+.options-dropdown li div.is-selected {
   color: v-bind(colorSelectedText);
   background-color: v-bind(colorSelectedBg);
   font-weight: bold;
