@@ -3,33 +3,14 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="input-section">
         <h2 class="input-title">抽卡记录分析</h2>
-        <p class="input-description">在这里分析小程序导出的抽卡记录<br /><span class="highlight">小程序码和教程请见下方（PC端在右侧）</span><br />
-          需要帮助？加入 <a class="highlight"
-            href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
-            target="_blank">
-            Q群1049576192</a> 愉快交流吧
-        </p>
-        <p class="input-description">请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。</p>
-        <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
-          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'></textarea>
-        <div class="button-group">
-          <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
-          <button @click="triggerFileUpload" class="action-button" :disabled="isFetchingOnline">上传文件</button>
-          <input type="file" ref="fileUploader" @change="handleFileUpload" accept=".json,application/json"
-            style="display: none;" />
-        </div>
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-        <p class="input-description">当前版本：v{{ appVersion }}</p>
       </div>
-    </div>
-    <div v-if="viewState === 'input'" class="gacha-analysis-container">
+
       <div class="cloud-section">
-        <p class="input-title">织夜云服务</p>
         <p class="input-description">使用您的激活码读取云端的抽卡记录。<br />（请先使用小程序导出抽卡记录并上传！）</p>
-        <p class="input-description highlight">织夜工具箱所有工具均使用同一个激活码</p>
+        <p class="input-description highlight">小程序码和教程请见下方（PC端在右侧）<br />织夜工具箱所有工具均使用同一个激活码</p>
         <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
         <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
-        <p class="input-description">使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
+        <p class="input-description">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云服务用户协议》</a>
           <br />
           上传记录可能会有延迟，如果没更新请稍后查询
         </p>
@@ -43,8 +24,23 @@
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
       </div>
 
-      <div class="mp-weixin split">
-        <p>使用小程序获取抽卡记录<br /><span class="highlight">微信搜索“织夜工具箱”或扫描二维码</span></p>
+      <div class="input-section split">
+        <p class="input-description">请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。</p>
+        <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
+          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'></textarea>
+        <div class="button-group">
+          <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">开始分析</button>
+          <button @click="triggerFileUpload" class="action-button" :disabled="isFetchingOnline">上传文件</button>
+          <input type="file" ref="fileUploader" @change="handleFileUpload" accept=".json,application/json"
+            style="display: none;" />
+        </div>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      </div>
+    </div>
+    <div v-if="viewState === 'input'" class="gacha-analysis-container">
+
+      <div class="mp-weixin">
+        <p>使用小程序获取抽卡记录<br /><span class="highlight">微信搜索“织夜工具箱”或扫描小程序码</span></p>
         <a href="weixin://dl/business/?appid=wx1e9dcc30a4481663">
           <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
         </a>
@@ -56,8 +52,15 @@
             frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
         </div>
       </div>
-    </div>
 
+      <p class="input-description"><span class="highlight"></span><br />
+        需要帮助？加入 <a class="highlight"
+          href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
+          target="_blank">
+          Q群1049576192</a> 愉快交流吧
+      </p>
+      <p class="input-description">当前版本：v{{ appVersion }}</p>
+    </div>
 
     <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
       :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="AdvanceNormalGachaData"
@@ -79,7 +82,7 @@
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
       </div>
     </div>
-    <PopUp :display="showAgreementPopUp" title="《织夜云用户协议》" @close="closeAgreementPopUp">
+    <PopUp :display="showAgreementPopUp" title="《织夜云服务用户协议》" @close="closeAgreementPopUp">
       <p>欢迎使用织夜云服务！<br />在使用前，请您仔细阅读以下用户协议：</p>
       <ol class="agreement-list">
         <li>
@@ -915,6 +918,7 @@ const resetView = () => {
 
 .split {
   margin-top: 16px;
+  padding-top: 8px;
   border-top: 1px solid v-bind('colors.background.light');
 }
 

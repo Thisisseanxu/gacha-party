@@ -55,7 +55,7 @@ const close = () => {
   padding: 0.5rem;
   padding-top: 3rem;
   width: 90%;
-  max-width: 380px;
+  max-width: 800px;
   background-color: v-bind('colors.background.light');
   border: 1px solid v-bind('colors.border.primary');
   border-radius: 12px;
