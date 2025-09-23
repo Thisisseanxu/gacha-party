@@ -37,7 +37,7 @@
 
         <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleLimitAnalysis.SinglePulls + '次'
-          }}<br />
+        }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="!isSinglePool">
@@ -51,7 +51,7 @@
             <span>距上个SSR</span>
             <span class="pity-count">{{
               CurrentSelectedPoolAnalysis?.SSR ?? 0
-            }}</span>
+              }}</span>
           </div>
         </div>
         <div class="tertiary-text">{{ dateRange }}
@@ -213,7 +213,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -582,7 +582,7 @@ const analysisForTitle = computed(() => {
     return AdvanceNormalAnalysis.value?.avgPullsForSP > 0 ? AdvanceNormalAnalysis.value : null;
   }
   if (CurrentSelectedPool.value === 'SingleBox') {
-    return null; // 祈愿盲盒不显示称号
+    return singleBoxAnalysis.value?.avgPullsForSP > 0 ? singleBoxAnalysis.value : null;
   }
   return singleLimitAnalysis.value?.avgPullsForSP > 0 ? singleLimitAnalysis.value : null;
 });
