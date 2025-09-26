@@ -24,7 +24,8 @@ export const cardPools = {
         pity: 60, // 60抽必出SP
         boostAfter: 40, // 40抽后每抽提升SP概率
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
         UpCards: ['1408', '1610'],
       },
       // [RARITY.SSR]: {
@@ -110,7 +111,8 @@ export const cardPools = {
         pity: 60, // 60抽必出SP
         boostAfter: 40, // 40抽后每抽提升SP概率
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
         UpCards: ['1311', '1312'],
       },
       [RARITY.SSR]: {
