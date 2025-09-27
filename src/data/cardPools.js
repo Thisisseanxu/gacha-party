@@ -10,8 +10,8 @@ export const cardPools = {
   // 游园邀请
   youyaunyaoqing: {
     type: '限定',
-    name: '游园邀请-预览',
-    imageUrl: '/images/cardpools-icon/youyuanyaoqing.webp',
+    name: '游园邀请',
+    imageUrl: '/images/cardpools-icon/49.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -28,13 +28,13 @@ export const cardPools = {
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
         UpCards: ['1408', '1610'],
       },
-      // [RARITY.SSR]: {
-      //   doubleRateCards: ['1808'], // 双倍概率SSR角色（限定池SSR概率提升）
-      // },
+      [RARITY.SSR]: {
+        doubleRateCards: ['1206'], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
     },
     cardIds: {
       [RARITY.SP]: ['1408', '1610'],
-      [RARITY.SSR]: ['1601', '1602', '1603', '1608'],
+      [RARITY.SSR]: ['1206', '1203', '1504', '1402', '1403'],
       [RARITY.SR]: [
         '1103',
         '1104',
