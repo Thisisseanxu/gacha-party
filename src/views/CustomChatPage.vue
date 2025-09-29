@@ -1,7 +1,6 @@
 <template>
   <div class="chat-page-container">
-    <FloatingHomeButton />
-    <h1 class="page-title">自定义聊天生成器</h1>
+    <h1 class="page-title">盲盒派对对话生成器</h1>
 
     <div class="chat-editor">
       <div class="editor-row">
@@ -22,8 +21,8 @@
         <button @click="addMessage" class="editor-button">添加对话</button>
       </div>
       <div class="actions-container">
-        <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出所有消息</button>
-        <button @click="triggerImport" class="action-button">导入消息</button>
+        <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出对话</button>
+        <button @click="triggerImport" class="action-button">导入对话</button>
         <button @click="toggleFullscreen" class="action-button">
           {{ isFullscreen ? '退出全屏' : '全屏显示' }}
         </button>
@@ -32,13 +31,12 @@
     </div>
 
 
-    <p class="long-press-hint">提示：长按某条消息可以删除它。</p>
+    <p class="long-press-hint">提示：点击某条消息就可以删除它。</p>
 
     <div class="chat-log-container {{ isFullscreen ? 'fullscreen' : '' }} " ref="chatContainerRef">
       <div class="chat-log">
         <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="{ right: message.isRight }"
-          @mousedown="startPress(index)" @mouseup="cancelPress" @mouseleave="cancelPress"
-          @touchstart.prevent="startPress(index)" @touchend="cancelPress" @touchmove="cancelPress">
+          @click="deleteMessage(index)">
           <img v-if="!message.isRight" :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
           <div class="message-content">
             <div v-if="message.displayName" class="character-name">
@@ -56,7 +54,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import FloatingHomeButton from '../components/FloatingHomeButton.vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 
@@ -131,28 +128,6 @@ const addMessage = () => {
 
   // 清空文本框和自定义名称框
   newMessage.value.text = '';
-};
-
-
-// --- 新增：长按删除功能逻辑 ---
-let longPressTimer = null;
-// 定义长按的时间阈值
-const LONG_PRESS_DURATION = 500;
-
-// 按下时开始计时
-const startPress = (index) => {
-  // 清除任何可能存在的旧计时器
-  cancelPress();
-  // 创建一个新计时器
-  longPressTimer = setTimeout(() => {
-    // 长按时长足够，执行删除操作
-    deleteMessage(index);
-  }, LONG_PRESS_DURATION);
-};
-
-// 释放时取消计时
-const cancelPress = () => {
-  clearTimeout(longPressTimer);
 };
 
 const deleteMessage = (index) => {
