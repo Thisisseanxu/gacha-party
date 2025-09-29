@@ -24,6 +24,9 @@
       <div class="actions-container">
         <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出所有消息</button>
         <button @click="triggerImport" class="action-button">导入消息</button>
+        <button @click="toggleFullscreen" class="action-button">
+          {{ isFullscreen ? '退出全屏' : '全屏显示' }}
+        </button>
         <input type="file" ref="fileInput" @change="importChatLog" accept=".json" style="display: none;" />
       </div>
     </div>
@@ -31,7 +34,7 @@
 
     <p class="long-press-hint">提示：长按某条消息可以删除它。</p>
 
-    <div class="chat-log-container">
+    <div class="chat-log-container {{ isFullscreen ? 'fullscreen' : '' }} " ref="chatContainerRef">
       <div class="chat-log">
         <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="{ right: message.isRight }"
           @mousedown="startPress(index)" @mouseup="cancelPress" @mouseleave="cancelPress"
@@ -52,13 +55,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import FloatingHomeButton from '../components/FloatingHomeButton.vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
-
-
-
 
 
 // 存储所有聊天记录
@@ -220,6 +220,47 @@ const importChatLog = (event) => {
   };
   reader.readAsText(file);
 };
+
+// 全屏功能
+
+// 引用聊天容器元素实现全屏
+const chatContainerRef = ref(null);
+// 是否处于全屏状态
+const isFullscreen = ref(false);
+
+// 切换全屏状态
+const toggleFullscreen = () => {
+  // 检查浏览器是否支持全屏 API
+  if (!document.fullscreenEnabled) {
+    alert('您的浏览器不支持全屏功能。');
+    return;
+  }
+
+  // 如果当前不是全屏状态，则请求进入全屏
+  if (!document.fullscreenElement) {
+    chatContainerRef.value.requestFullscreen();
+  }
+  // 如果当前是全屏状态，则退出全屏
+  else {
+    document.exitFullscreen();
+  }
+};
+
+// 监听全屏变化事件，更新 isFullscreen 状态
+const updateFullscreenState = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+};
+
+// 在组件挂载后，添加对全屏变化的事件监听
+onMounted(() => {
+  document.addEventListener('fullscreenchange', updateFullscreenState);
+});
+
+// 组件卸载前移除监听器
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', updateFullscreenState);
+});
+
 </script>
 
 <style scoped>
@@ -238,14 +279,14 @@ const importChatLog = (event) => {
   margin-bottom: 20px;
 }
 
-/* 导入导出按钮容器的样式 */
+/* 小按钮样式 */
 .actions-container {
   display: flex;
   justify-content: center;
   gap: 10px;
 }
 
-/* 通用操作按钮样式 */
+/* 按钮样式 */
 .action-button {
   padding: 8px 16px;
   border: 1px solid #344767;
@@ -287,6 +328,13 @@ const importChatLog = (event) => {
   display: none;
 }
 
+/* 全屏状态下的样式 */
+.chat-log-container:fullscreen {
+  height: 100%;
+  border-radius: 0;
+  padding: 20px;
+}
+
 .chat-log {
   display: flex;
   flex-direction: column;
@@ -306,8 +354,8 @@ const importChatLog = (event) => {
 }
 
 .avatar {
-  width: 80px;
-  height: 80px;
+  width: 4rem;
+  height: 4rem;
   border-radius: 50%;
   margin-right: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
