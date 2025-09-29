@@ -28,6 +28,11 @@ export const colors = {
     confirmHover: 'rgba(67, 160, 71, 1)',
     cancel: 'rgba(244, 67, 54, 1)',
     cancelHover: 'rgba(229, 57, 53, 1)',
+  }, // 游戏内颜色
+  game: {
+    primary: 'rgba(126, 12, 255, 1)', // 主题色
+    primaryText: 'rgba(128, 0, 255, 1)', // 白底文字颜色
+    backgroundBlack: 'rgba(45, 39, 57, 1)', // 黑色背景
   }, // 稀有度颜色
   rarity: {
     sp: 'rgba(222, 33, 30, 1)',
@@ -38,7 +43,7 @@ export const colors = {
   status: {
     error: 'rgba(255, 107, 107, 1)', // 错误文字/边框
     errorBg: 'rgba(255, 107, 107, 0.1)', // 错误信息背景
-    success: '#52c41a', // 成功颜色
+    success: 'rgba(82, 196, 26, 1)', // 成功颜色
     successBg: 'rgba(82, 196, 26, 0.1)', // 成功背景
   }, // 历史记录进度条颜色
   colorOfLuck: {
@@ -51,8 +56,8 @@ export const colors = {
   },
   // 抽卡相关颜色
   gacha: {
-    singlePull: '#e110d0',
-    singlePullHover: '#b610c2',
+    singlePull: 'rgba(225, 16, 208, 1)',
+    singlePullHover: 'rgba(182, 16, 194, 1)',
     tenPull: 'rgb(230, 195, 0)',
     tenPullHover: 'rgb(200, 170, 0)',
     confirm: 'rgb(255, 215, 0)',
