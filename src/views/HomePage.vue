@@ -4,19 +4,19 @@
       <h1 class="title">织夜工具箱</h1>
 
       <div class="button-group">
-        <router-link to="chouka" class="btn chouka-btn">
+        <router-link to="chouka" class="btn chouka">
           <span>✨ 抽卡模拟器 ✨</span>
         </router-link>
 
-        <router-link to="fenxi" class="btn fenxi-btn">
+        <router-link to="fenxi" class="btn fenxi">
           <span>📊 抽卡数据分析 📈</span>
         </router-link>
 
-        <router-link to="kejin" class="btn kejin-btn">
-          <span>🎁 礼包价值计算 💰</span>
+        <router-link to="daoyan" class="btn daoyan">
+          <span>🎬 导演模式（BETA） 🎥</span>
         </router-link>
 
-        <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon-btn">
+        <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon">
           <span>{{ comingSoonText }}</span>
         </button>
       </div>
@@ -201,26 +201,26 @@ const colorTextHighlight = colors.text.highlight;
   filter: brightness(1.1);
 }
 
-.chouka-btn {
+.chouka {
   background: linear-gradient(145deg, #8B5CF6, #6D28D9);
 }
 
-.fenxi-btn {
+.fenxi {
   background: linear-gradient(145deg, #F9A8D4, #EC4899);
 }
 
-.kejin-btn {
+.daoyan {
   background: linear-gradient(145deg, #10B981, #059669);
 }
 
 /* --- 开发中功能的按钮 --- */
-.coming-soon-btn {
+.coming-soon {
   background: linear-gradient(145deg, #6B7280, #4B5563);
   color: #D1D5DB;
 }
 
 /* 按钮被禁用时的样式 */
-.coming-soon-btn:disabled {
+.coming-soon:disabled {
   background: linear-gradient(145deg, #4B5563, #374151);
   color: #9CA3AF;
   cursor: not-allowed;

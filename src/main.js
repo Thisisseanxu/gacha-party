@@ -74,14 +74,18 @@ const routes = [
     },
   },
   {
-    path: '/kejin',
-    name: '礼包价值计算器',
-    component: () => import('./views/GiftValueCalculator.vue'), // 礼包价值计算器页面组件
+    path: '/daoyan',
+    name: '导演模式',
+    component: () => import('./views/CustomChatPage.vue'), // 导演模式页面组件
     meta: {
-      title: '礼包价值计算器 - 织夜工具箱',
+      title: '导演模式 - 织夜工具箱',
     },
   },
-  { path: '/:pathMatch(.*)*', name: '404', component: () => import('./views/NotFound.vue') }, // 404 页面处理
+  {
+    path: '/:pathMatch(.*)*',
+    name: '404',
+    component: () => import('./views/NotFound.vue'),
+  }, // 404 页面处理
 ]
 
 // 创建路由实例
