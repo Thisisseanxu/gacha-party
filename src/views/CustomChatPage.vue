@@ -106,14 +106,14 @@ const getCardName = (cardId) => {
 
 // 修改：添加新消息到聊天记录
 const addMessage = () => {
-  if (!newMessage.value.cardId || !newMessage.value.text.trim()) {
+  if (!newMessage.value.cardId || !newMessage.value.text) {
     alert('请选择一个角色并输入对话内容。');
     return;
   }
   let displayName = null;
   // 如果自定义名称不为空，则优先使用自定义名称
   if (customName.value.trim()) {
-    displayName = customName.value.trim();
+    displayName = customName.value;
   }
   // 否则，如果不是班长，则使用角色的默认名称
   else if (newMessage.value.cardId !== 'banzhang') {
@@ -361,6 +361,7 @@ onUnmounted(() => {
   font-size: 1.4rem;
   display: flex;
   align-items: center;
+  white-space: pre-wrap;
 }
 
 /* 聊天气泡的小尾巴 (左上角) */
