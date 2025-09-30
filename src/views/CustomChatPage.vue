@@ -349,6 +349,7 @@ onUnmounted(() => {
   font-size: 1.4rem;
 }
 
+/* 聊天气泡样式 */
 .bubble {
   background-color: v-bind('colors.game.primary');
   color: white;
@@ -362,6 +363,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* 聊天气泡的小尾巴 (左上角) */
