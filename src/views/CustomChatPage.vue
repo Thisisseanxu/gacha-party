@@ -97,7 +97,7 @@ watch(() => newMessage.value.cardId, (newCardId) => {
 const cardOptions = computed(() => {
   const sortedCards = allCards.map(card => ({
     id: card.id,
-    name: card.name
+    name: card.realname ? `${card.name} (${card.realname})` : card.name
   })).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
 
   // 在列表最前面添加“班长”选项
@@ -118,7 +118,7 @@ const getCardName = (cardId) => {
     return null; // 没有名称
   }
   const card = allCards.find(c => c.id === cardId);
-  return card ? card.name : '未知角色';
+  return card ? card.realname ? card.realname : card.name : '未知角色';
 };
 
 // 修改：添加新消息到聊天记录
