@@ -32,20 +32,27 @@
 
 
     <p class="long-press-hint">提示：点击某条消息就可以删除它。</p>
-
-    <div class="chat-log-container {{ isFullscreen ? 'fullscreen' : '' }} " ref="chatContainerRef">
+    <div class="chat-log-container" ref="chatContainerRef">
       <div class="chat-log">
-        <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="{ right: message.isRight }"
+        <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="message.position"
           @click="deleteMessage(index)">
-          <img v-if="!message.isRight" :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
-          <div class="message-content">
-            <div v-if="message.displayName" class="character-name">
-              {{ message.displayName }}
+
+          <template v-if="message.position === 'center'">
+            <div class="bubble center">{{ message.text }}</div>
+          </template>
+
+          <template v-else>
+            <img v-if="message.position === 'left'" :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
+            <div class="message-content">
+              <div v-if="message.displayName" class="character-name">
+                {{ message.displayName }}
+              </div>
+              <div class="bubble">
+                {{ message.text }}
+              </div>
             </div>
-            <div class="bubble">
-              {{ message.text }}
-            </div>
-          </div>
+          </template>
+
         </div>
       </div>
     </div>
@@ -66,16 +73,22 @@ const newMessage = ref({
   displayName: null,
   cardId: null,
   text: '',
-  isRight: false,
+  type: 'text',
+  position: 'left',
 });
 
 // 新增：自定义名称的响应式变量
 const customName = ref('');
 
-// 监听 cardId 的变化，自动设置 isRight 属性
+// 监听 cardId 的变化，自动设置 position 属性
 watch(() => newMessage.value.cardId, (newCardId) => {
-  // 如果选择的是“班长”，则消息放在右侧，否则在左侧
-  newMessage.value.isRight = newCardId === 'banzhang';
+  if (newCardId === "_旁白") {
+    newMessage.value.position = 'center';
+  } else if (newCardId === '_班长') {
+    newMessage.value.position = 'right';
+  } else {
+    newMessage.value.position = 'left';
+  }
   // 清空自定义名称
   customName.value = '';
 });
@@ -89,7 +102,8 @@ const cardOptions = computed(() => {
 
   // 在列表最前面添加“班长”选项
   return [
-    { id: 'banzhang', name: '班长' },
+    { id: '_班长', name: '班长' },
+    { id: '_旁白', name: '旁白' },
     ...sortedCards
   ];
 });
@@ -100,6 +114,9 @@ const getCardAvatar = (cardId) => {
 };
 
 const getCardName = (cardId) => {
+  if (cardId === '_班长' || cardId === '_旁白') {
+    return null; // 没有名称
+  }
   const card = allCards.find(c => c.id === cardId);
   return card ? card.name : '未知角色';
 };
@@ -115,12 +132,8 @@ const addMessage = () => {
   if (customName.value.trim()) {
     displayName = customName.value;
   }
-  // 否则，如果不是班长，则使用角色的默认名称
-  else if (newMessage.value.cardId !== 'banzhang') {
-    displayName = getCardName(newMessage.value.cardId);
-  }
-  // 如果是班长且没有自定义名称，则 displayName 为 null，不显示名字
-
+  // 否则使用角色的默认名称
+  displayName = getCardName(newMessage.value.cardId);
   chatLog.value.push({
     ...newMessage.value,
     displayName: displayName, // 将最终要显示的名字存入消息对象
@@ -354,7 +367,7 @@ onUnmounted(() => {
   background-color: v-bind('colors.game.primary');
   color: white;
   border-radius: 15px;
-  padding: 6px 8px;
+  padding: 4px 8px 6px 8px;
   position: relative;
   text-align: left;
   font-family: 'Source Han Sans SC VF';
@@ -367,7 +380,7 @@ onUnmounted(() => {
 }
 
 /* 聊天气泡的小尾巴 (左上角) */
-.chat-message:not(.right) .bubble::before {
+.chat-message.left .bubble::before {
   content: '';
   position: absolute;
   width: 0;
@@ -409,6 +422,29 @@ onUnmounted(() => {
   border-color: transparent transparent transparent white;
 }
 
+/* 新增：旁白消息的容器样式 */
+.chat-message.center {
+  align-self: center;
+  /* 自身在 flex 容器中居中 */
+  width: 100%;
+  justify-content: center;
+}
+
+/* 新增：旁白的气泡样式 */
+.bubble.center {
+  background-color: #8f8989;
+  /* 浅灰色底 */
+  color: black;
+  /* 黑色文字 */
+  max-width: 70%;
+  /* 防止过长 */
+  text-align: center;
+  /* 文字居中对齐 */
+  padding: 2px 8px 4px 8px;
+  /* 缩小垂直内间距 */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 /* 编辑器样式 */
 .chat-editor {
