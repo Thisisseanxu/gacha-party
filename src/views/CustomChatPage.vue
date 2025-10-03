@@ -1,60 +1,87 @@
 <template>
-  <div class="chat-page-container">
-    <h1 class="page-title">盲盒派对对话生成器</h1>
+  <div class="background">
+    <div class="chat-page-container">
+      <h1 class="page-title">盲盒派对对话生成器</h1>
 
-    <div class="chat-editor">
-      <div class="editor-row">
-        <select v-model="newMessage.cardId" class="editor-select">
-          <option :value="null" disabled>选择聊天角色</option>
-          <option v-for="card in cardOptions" :key="card.id" :value="card.id">
-            {{ card.name }}
-          </option>
-        </select>
-      </div>
-      <div class="editor-row">
-        <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
-      </div>
-      <div class="editor-row">
-        <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."></textarea>
-      </div>
-      <div class="editor-row">
-        <button @click="addMessage" class="editor-button">添加对话</button>
-      </div>
-      <div class="actions-container">
-        <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出对话</button>
-        <button @click="triggerImport" class="action-button">导入对话</button>
-        <button @click="toggleFullscreen" class="action-button">
-          {{ isFullscreen ? '退出全屏' : '全屏显示' }}
-        </button>
-        <input type="file" ref="fileInput" @change="importChatLog" accept=".json" style="display: none;" />
-      </div>
-    </div>
+      <div v-if="isSelectionMode" class="character-selection-container">
+        <h2 class="selection-title">选择本次出场的角色</h2>
+        <p class="selection-description">选择的角色将会出现在下方的对话编辑器中</p>
 
+        <div class="selection-toolbar">
+          <SwitchComponent v-model="showRealName" label="显示角色真名" />
+        </div>
 
-    <p class="long-press-hint">提示：点击某条消息就可以删除它。</p>
-    <div class="chat-log-container" ref="chatContainerRef">
-      <div class="chat-log">
-        <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="message.position"
-          @click="deleteMessage(index)">
+        <div class="card-selector-grid">
+          <div v-for="card in selectableCards" :key="card.id" class="card-option"
+            :class="{ 'selected': selectedCharacterIds.includes(card.id) }" @click="toggleCharacterSelection(card.id)">
+            <img :src="card.imageUrl" :alt="card.name" class="card-image" />
+            <div class="card-name">{{ showRealName && card.realname ? card.realname : card.name }}</div>
+            <div class="checkmark">✔</div>
+          </div>
+        </div>
 
-          <template v-if="message.position === 'center'">
-            <div class="bubble center">{{ message.text }}</div>
-          </template>
-
-          <template v-else>
-            <img v-if="message.position === 'left'" :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
-            <div class="message-content">
-              <div v-if="message.displayName" class="character-name">
-                {{ message.displayName }}
-              </div>
-              <div class="bubble">
-                {{ message.text }}
-              </div>
-            </div>
-          </template>
-
+        <div class="selection-actions">
+          <button @click="confirmSelection" class="finalize-button">选好了，开始创作！</button>
         </div>
       </div>
+
+      <template v-else>
+        <div class="chat-editor">
+          <div class="editor-row">
+            <select v-model="newMessage.cardId" class="editor-select">
+              <option :value="null" disabled>选择聊天角色</option>
+              <option v-for="card in cardOptions" :key="card.id" :value="card.id">
+                {{ card.name }}
+              </option>
+            </select>
+          </div>
+          <div class="editor-row">
+            <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
+          </div>
+          <div class="editor-row">
+            <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."></textarea>
+          </div>
+          <div class="editor-row">
+            <button @click="addMessage" class="editor-button">添加对话</button>
+          </div>
+          <div class="actions-container">
+            <button @click="enterSelectionMode" class="action-button">重选角色</button>
+            <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出对话</button>
+            <button @click="triggerImport" class="action-button">导入对话</button>
+            <button @click="toggleFullscreen" class="action-button">
+              {{ isFullscreen ? '退出全屏' : '全屏显示' }}
+            </button>
+            <input type="file" ref="fileInput" @change="importChatLog" accept=".json" style="display: none;" />
+          </div>
+        </div>
+
+        <p class="hint">提示：点击某条消息就可以删除它。</p>
+        <div class="chat-log-container" ref="chatContainerRef">
+          <div class="chat-log">
+            <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="message.position"
+              @click="deleteMessage(index)">
+
+              <template v-if="message.position === 'center'">
+                <div class="bubble center">{{ message.text }}</div>
+              </template>
+
+              <template v-else>
+                <img v-if="message.position === 'left'" :src="getCardAvatar(message.cardId)" alt="avatar"
+                  class="avatar" />
+                <div class="message-content">
+                  <div v-if="message.displayName" class="character-name">
+                    {{ message.displayName }}
+                  </div>
+                  <div class="bubble">
+                    {{ message.text }}
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -63,7 +90,47 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
+import SwitchComponent from '@/components/SwitchComponent.vue';
 
+// true: 显示角色选择界面, false: 显示聊天编辑器
+const isSelectionMode = ref(true);
+// 存储用户选择的角色ID
+const selectedCharacterIds = ref([]);
+// 用于本地存储的键名
+const characterSelectionKey = 'chatCharacterSelection';
+// 计算出所有可供选择的角色
+const selectableCards = computed(() =>
+  allCards.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'))
+);
+// 开关，是否显示角色真名
+const showRealName = ref(true);
+
+// 切换角色的选中状态
+const toggleCharacterSelection = (cardId) => {
+  const index = selectedCharacterIds.value.indexOf(cardId);
+  if (index > -1) {
+    selectedCharacterIds.value.splice(index, 1);
+  } else {
+    selectedCharacterIds.value.push(cardId);
+  }
+};
+
+// 确认选择，进入聊天编辑器
+const confirmSelection = () => {
+  if (selectedCharacterIds.value.length === 0) {
+    if (!confirm('你没有选择任何角色，对话中将只有班长和旁白可用。确定要继续吗？')) {
+      return;
+    }
+  }
+  // 保存选择到本地存储
+  localStorage.setItem(characterSelectionKey, JSON.stringify(selectedCharacterIds.value));
+  isSelectionMode.value = false;
+};
+
+// 返回角色选择界面
+const enterSelectionMode = () => {
+  isSelectionMode.value = true;
+};
 
 // 存储所有聊天记录
 const chatLog = ref([]);
@@ -77,7 +144,7 @@ const newMessage = ref({
   position: 'left',
 });
 
-// 新增：自定义名称的响应式变量
+// 自定义名称
 const customName = ref('');
 
 // 监听 cardId 的变化，自动设置 position 属性
@@ -93,19 +160,44 @@ watch(() => newMessage.value.cardId, (newCardId) => {
   customName.value = '';
 });
 
-// 修改：一个计算属性，用于生成下拉选择器的选项
+// 生成下拉选择器的选项
 const cardOptions = computed(() => {
-  const sortedCards = allCards.map(card => ({
-    id: card.id,
-    name: card.realname ? `${card.name} (${card.realname})` : card.name
-  })).sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+  // 从 allCards 中过滤出完整的角色对象
+  const selectedCards = allCards
+    .filter(card => selectedCharacterIds.value.includes(card.id))
+    .map(card => ({
+      id: card.id,
+      name: card.realname ? `${card.name} (${card.realname})` : card.name
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
 
-  // 在列表最前面添加“班长”选项
+  // 在列表最前面添加默认的“班长”和“旁白”
   return [
     { id: '_班长', name: '班长' },
     { id: '_旁白', name: '旁白' },
-    ...sortedCards
+    ...selectedCards
   ];
+});
+
+// 在组件挂载时加载已保存的角色选择
+onMounted(() => {
+  const savedSelection = localStorage.getItem(characterSelectionKey);
+  if (savedSelection) {
+    try {
+      selectedCharacterIds.value = JSON.parse(savedSelection);
+      // 如果有保存的记录，直接进入聊天模式，提升体验
+      isSelectionMode.value = false;
+    } catch (e) {
+      console.error("解析已选角色配置失败:", e);
+      // 解析失败则停留在选择模式
+      isSelectionMode.value = true;
+    }
+  } else {
+    // 首次访问，停留在选择模式
+    isSelectionMode.value = true;
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenState);
 });
 
 const getCardAvatar = (cardId) => {
@@ -121,7 +213,7 @@ const getCardName = (cardId) => {
   return card ? card.realname ? card.realname : card.name : '未知角色';
 };
 
-// 修改：添加新消息到聊天记录
+// 添加新消息到聊天记录
 const addMessage = () => {
   if (!newMessage.value.cardId || !newMessage.value.text) {
     alert('请选择一个角色并输入对话内容。');
@@ -210,7 +302,6 @@ const importChatLog = (event) => {
 };
 
 // 全屏功能
-
 // 引用聊天容器元素实现全屏
 const chatContainerRef = ref(null);
 // 是否处于全屏状态
@@ -252,18 +343,138 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.background {
+  min-height: 100vh;
+  background-color: v-bind('colors.background.primary');
+  color: v-bind('colors.text.primary');
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.character-selection-container {
+  background-color: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.selection-title {
+  font-size: 1.8rem;
+  text-align: center;
+  color: v-bind('colors.text.primary');
+}
+
+.selection-description {
+  text-align: center;
+  color: v-bind('colors.text.secondary');
+  margin-top: -1rem;
+}
+
+.card-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1rem;
+  justify-content: center;
+}
+
+.card-option {
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background-color: v-bind('colors.background.light');
+}
+
+.card-option:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+}
+
+.card-option .card-image {
+  width: 100%;
+  display: block;
+}
+
+.card-option .card-name {
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 4px 2px;
+  background: v-bind('colors.shadow.primaryHover');
+  backdrop-filter: blur(2px);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  color: v-bind('colors.text.primary');
+}
+
+.card-option .checkmark {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.primary');
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s;
+}
+
+.card-option.selected {
+  border-color: v-bind('colors.brand.primary');
+}
+
+.card-option.selected .checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.selection-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.finalize-button {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
+  background-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+}
+
+.finalize-button:hover {
+  background-color: v-bind('colors.brand.hover');
+}
+
 .chat-page-container {
   padding: 20px;
+  width: 100%;
   max-width: 800px;
-  margin: 0 auto;
   font-family: 'Inter', sans-serif;
-  color: #333;
+  color: v-bind('colors.text.primary');
 }
 
 .page-title {
   text-align: center;
   font-size: 2em;
-  color: #344767;
+  color: v-bind('colors.text.highlight');
   margin-bottom: 20px;
 }
 
@@ -272,6 +483,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* 按钮样式 */
@@ -292,7 +504,7 @@ onUnmounted(() => {
 }
 
 
-.long-press-hint {
+.hint {
   text-align: center;
   color: #888;
   font-size: 0.9em;
@@ -422,7 +634,7 @@ onUnmounted(() => {
   border-color: transparent transparent transparent white;
 }
 
-/* 新增：旁白消息的容器样式 */
+/* 旁白消息 */
 .chat-message.center {
   align-self: center;
   /* 自身在 flex 容器中居中 */
@@ -448,10 +660,10 @@ onUnmounted(() => {
 
 /* 编辑器样式 */
 .chat-editor {
-  background-color: #fff;
+  background-color: v-bind('colors.background.content');
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid v-bind('colors.border.primary');
 }
 
 .editor-row {
@@ -466,9 +678,11 @@ onUnmounted(() => {
   width: 100%;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
   font-size: 1em;
   box-sizing: border-box;
+  background-color: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
 }
 
 .editor-textarea {
@@ -477,15 +691,15 @@ onUnmounted(() => {
 }
 
 .editor-button {
-  background-color: #344767;
-  color: white;
   font-weight: bold;
   cursor: pointer;
   border: none;
   transition: background-color 0.2s;
+  background-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
 }
 
 .editor-button:hover {
-  background-color: #4a5d80;
+  background-color: v-bind('colors.brand.hover');
 }
 </style>

@@ -12,21 +12,19 @@
 import { colors } from '@/styles/colors.js';
 
 const props = defineProps({
-  // modelValue 是 v-model 的标准 prop 名称
-  // 它接收一个布尔值来控制开关状态
+  // 控制开关状态
   modelValue: {
     type: Boolean,
     required: true,
   },
-  // label prop 用于接收左侧的文本标签
+  // 左侧的文本标签
   label: {
     type: String,
-    default: '', // 默认为空字符串
+    default: '', // 默认为空
   },
 });
 
-// defineEmits 用于声明该组件会触发哪些事件
-// 'update:modelValue' 是 v-model 的标准事件名称
+// 声明状态变化事件
 const emit = defineEmits(['update:modelValue']);
 
 // 点击时反转状态
@@ -40,7 +38,6 @@ const colorTextSecondary = colors.text.secondary;
 
 <style scoped>
 .switch-wrapper {
-  /* 使用 flex 布局方便对齐 */
   display: inline-flex;
   align-items: center;
   /* 鼠标悬浮时改变光标样式 */
