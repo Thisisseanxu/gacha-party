@@ -123,6 +123,7 @@ const isSelectionMode = ref(true);
 const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
 const characterSelectionKey = 'chatCharacterSelection';
+const autoSaveKey = 'chatAutoSaveLog';
 // 开关，是否显示角色真名
 const showRealName = ref(true);
 
@@ -191,27 +192,6 @@ const cardOptions = computed(() => {
     { id: '_旁白', name: '旁白' },
     ...selectedCards
   ];
-});
-
-// 在组件挂载时加载已保存的角色选择
-onMounted(() => {
-  const savedSelection = localStorage.getItem(characterSelectionKey);
-  if (savedSelection) {
-    try {
-      selectedCharacterIds.value = JSON.parse(savedSelection);
-      // 如果有保存的记录，直接进入聊天模式，提升体验
-      isSelectionMode.value = false;
-    } catch (e) {
-      console.error("解析已选角色配置失败:", e);
-      // 解析失败则停留在选择模式
-      isSelectionMode.value = true;
-    }
-  } else {
-    // 首次访问，停留在选择模式
-    isSelectionMode.value = true;
-  }
-
-  document.addEventListener('fullscreenchange', updateFullscreenState);
 });
 
 const getCardAvatar = (cardId) => {
@@ -546,8 +526,40 @@ const updateFullscreenState = () => {
   isFullscreen.value = !!document.fullscreenElement;
 };
 
-// 在组件挂载后，添加对全屏变化的事件监听
+// 自动保存聊天记录到本地存储
+const autoSaveChatLog = () => {
+  localStorage.setItem(autoSaveKey, JSON.stringify(chatLog.value));
+};
+// 每间隔15秒自动保存一次聊天记录
+setInterval(autoSaveChatLog, 15000);
+
+// 在组件挂载时加载已保存的角色选择
 onMounted(() => {
+  const savedSelection = localStorage.getItem(characterSelectionKey);
+  if (savedSelection) {
+    try {
+      selectedCharacterIds.value = JSON.parse(savedSelection);
+      // 如果有保存的记录，直接进入聊天模式，提升体验
+      isSelectionMode.value = false;
+    } catch (e) {
+      console.error("解析已选角色配置失败:", e);
+      // 解析失败则停留在选择模式
+      isSelectionMode.value = true;
+    }
+  } else {
+    // 首次访问，停留在选择模式
+    isSelectionMode.value = true;
+  }
+  // 如果有保存的聊天记录，加载它们
+  const savedLog = localStorage.getItem(autoSaveKey);
+  if (savedLog) {
+    try {
+      chatLog.value = JSON.parse(savedLog);
+    } catch (e) {
+      console.error("解析聊天记录失败:", e);
+    }
+  }
+
   document.addEventListener('fullscreenchange', updateFullscreenState);
 });
 
