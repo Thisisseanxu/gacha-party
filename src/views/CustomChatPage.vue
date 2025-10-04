@@ -88,7 +88,7 @@
                   <div v-if="message.displayName" class="character-name">
                     {{ message.displayName }}
                   </div>
-                  <div class="bubble">
+                  <div class="bubble" :class="{ 'image-bubble': message.type === 'image' }">
                     <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
                     <span v-else>{{ message.text }}</span>
                   </div>
@@ -966,6 +966,10 @@ onUnmounted(() => {
   word-break: break-word;
 }
 
+.bubble.image-bubble {
+  padding: 6px;
+}
+
 /* 聊天气泡的小尾巴 (左上角) */
 .chat-message.left .bubble::before {
   content: '';
@@ -1043,6 +1047,7 @@ onUnmounted(() => {
   /* 图片加载前的占位背景色 */
   object-fit: cover;
   /* 保持图片比例 */
+  border-radius: 8px;
 }
 
 /* 编辑器样式 */
