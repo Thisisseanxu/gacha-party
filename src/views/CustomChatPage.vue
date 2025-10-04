@@ -1,7 +1,7 @@
 <template>
   <div class="background">
     <div class="chat-page-container">
-      <h1 class="page-title">盲盒派对对话生成器</h1>
+      <h1 class="page-title">盲盒派对聊天生成器</h1>
 
       <div v-if="isSelectionMode" class="character-selection-container">
         <h2 class="selection-title">选择出场的角色</h2>
@@ -113,8 +113,38 @@
           </div>
         </div>
       </template>
+      <p class="input-description">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+      </p>
     </div>
   </div>
+
+  <PopUp :display="showAgreementPopUp" title="《织夜工具箱创作条款》" @close="closeAgreementPopUp">
+    <p>欢迎使用织夜工具箱！<br />在使用前，请您仔细阅读以下用户协议：</p>
+    <ol class="agreement-list">
+      <li>
+        <strong>服务描述与接受条款：</strong>
+        织夜工具箱是一个为《盲盒派对》玩家提供增强体验的工具。若您点击“我已阅读并同意”按钮并继续使用本服务，即表示您已同意并接受本协议的所有条款。
+      </li>
+      <li>
+        <strong>版权信息：</strong>
+        工具箱中所使用的所有角色形象、名称及相关内容均为其各自版权所有者所有。织夜工具箱仅用其提供非营利性服务，我们尊重并支持版权保护，任何未经授权的商用均属侵权行为。您可以在非商业用途下自由使用/分享本工具箱生成的内容。
+      </li>
+      <li>
+        <strong>用户责任：</strong> 您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
+      </li>
+      <li>
+        <strong>数据使用与隐私保护：</strong>
+        我们承诺保护您的个人隐私。目前织夜工具箱不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
+      </li>
+      <li>
+        <strong>服务变更、中断或终止：</strong> 本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
+      </li>
+      <li>
+        <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
+      </li>
+    </ol>
+    <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
+  </PopUp>
 </template>
 
 <script setup>
@@ -122,6 +152,15 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import SwitchComponent from '@/components/SwitchComponent.vue';
+import PopUp from '@/components/PopUp.vue';
+
+const showAgreementPopUp = ref(false);
+const openAgreementPopUp = () => {
+  showAgreementPopUp.value = true;
+};
+const closeAgreementPopUp = () => {
+  showAgreementPopUp.value = false;
+};
 
 // true: 显示角色选择界面, false: 显示聊天编辑器
 const isSelectionMode = ref(true);
@@ -1176,5 +1215,46 @@ onUnmounted(() => {
 .editor-action-row .editor-button.cancel:hover {
   background-color: #df9993;
   color: v-bind('colors.text.primary');
+}
+
+.highlight {
+  color: v-bind('colors.text.highlight');
+}
+
+/* 为协议列表添加样式 */
+.agreement-list {
+  max-height: 20rem;
+
+  overflow-y: auto;
+
+  /* 美化列表，增加一些内边距和边框 */
+  border: 1px solid #e0e0e0;
+  /* 左侧留出空间给数字序号 */
+  padding: 0 0 0 20px;
+  border-radius: 8px;
+  background-color: v-bind('colors.shadow.primaryHover');
+}
+
+/* 列表项的样式 */
+.agreement-list li {
+  /* 设置行高和行间距 */
+  line-height: 1.6;
+  margin-bottom: 12px;
+  /* 文字靠左侧对齐 */
+  text-align: left;
+}
+
+/* 隐藏滚动条轨道（在兼容的浏览器中） */
+.agreement-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agreement-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.agreement-list::-webkit-scrollbar-thumb {
+  background-color: v-bind('colors.scrollbar');
+  border-radius: 3px;
 }
 </style>

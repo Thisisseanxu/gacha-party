@@ -34,6 +34,7 @@ import FloatingHomeButton from './components/FloatingHomeButton.vue';
 import './styles/global.css';
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { ref } from 'vue'
+import { colors } from '@/styles/colors.js'
 
 const { needRefresh, updateServiceWorker } = useRegisterSW()
 // 使用 watch 监听是否有新版本
@@ -55,7 +56,7 @@ function confirmUpdate() {
 <style scoped>
 #app {
   text-align: center;
-  color: #2c3e50;
+  color: v-bind('colors.text.primary');
   min-height: 100dvh;
 }
 

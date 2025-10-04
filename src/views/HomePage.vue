@@ -13,7 +13,7 @@
         </router-link>
 
         <router-link to="daoyan" class="btn daoyan">
-          <span>🎬 导演模式（BETA） 🎥</span>
+          <span>🎬 导演模式 🎥</span>
         </router-link>
 
         <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon">
