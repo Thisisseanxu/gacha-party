@@ -39,17 +39,20 @@
           <div class="editor-row">
             <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."
               :disabled="chatLog[editingIndex]?.type === 'image'"></textarea>
-            <button @click="triggerImageUpload" class="editor-button image-button">
+            <button v-if="editingIndex === null" @click="triggerImageUpload" class="editor-button image-button">
               添加图片
             </button>
             <input type="file" ref="imageInputRef" @change="onImageSelected" accept="image/*" style="display: none;" />
           </div>
           <div class="editor-row editor-action-row">
             <button @click="handleFormSubmit" class="editor-button">
-              {{ editingIndex === null ? '添加对话' : '修改这条消息' }}
+              {{ editingIndex !== null ? '修改这条消息' : insertingIndex !== null ? '在此后插入消息' : '添加对话' }}
             </button>
-            <button v-if="editingIndex !== null" @click="cancelEditing" class="editor-button cancel">
+            <button v-if="editingIndex !== null" @click="exitEditing" class="editor-button cancel">
               取消修改
+            </button>
+            <button v-if="insertingIndex !== null" @click="exitInserting" class="editor-button cancel">
+              取消插入
             </button>
           </div>
           <div class="actions-container">
@@ -60,14 +63,18 @@
               {{ isFullscreen ? '退出全屏' : '全屏显示' }}
             </button>
             <input type="file" ref="fileInput" @change="importChatLog" accept=".json" style="display: none;" />
+            <div class="width-slider-container">
+              <label for="width-slider">宽度：{{ chatLogWidth }}%</label>
+              <input type="range" id="width-slider" v-model="chatLogWidth" min="10" max="100" step="1" />
+            </div>
           </div>
         </div>
 
-        <p class="hint">提示：点击对话即可编辑，可通过复制插入对话。</p>
+        <p class="hint">提示：点击对话即可进行编辑、插入、删除等操作。</p>
         <div class="chat-log-container" ref="chatContainerRef">
-          <div class="chat-log">
+          <div class="chat-log" :style="{ width: chatLogWidth + 'vw' }">
             <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
-              :class="{ 'editing-highlight': index === editingIndex, [message.position]: true }"
+              :class="{ 'editing-highlight': index === editingIndex, 'insert-highlight-after': index === insertingIndex, [message.position]: true }"
               @click="openEditMenu(index)">
 
               <template v-if="message.position === 'center'">
@@ -81,7 +88,6 @@
                   <div v-if="message.displayName" class="character-name">
                     {{ message.displayName }}
                   </div>
-
                   <div class="bubble">
                     <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
                     <span v-else>{{ message.text }}</span>
@@ -101,7 +107,7 @@
               @click="triggerImageReplace">
               重新上传图片
             </button>
-            <button class="edit-menu-button" @click="copyMessage">复制消息</button>
+            <button class="edit-menu-button" @click="startInserting">在此后插入消息</button>
             <button class="edit-menu-button delete" @click="deleteMessage">删除消息</button>
             <button class="edit-menu-button close" @click="closeEditMenu">关闭</button>
           </div>
@@ -233,8 +239,12 @@ const addMessage = () => {
 const imageInputRef = ref(null); // 新增：对文件输入框的引用
 // 防止内存泄漏，跟踪所有创建的临时图片URL
 const createdImageUrls = new Set();
+// 当前图片上传模式
+const imageUploadMode = ref('add'); // 'add' 或 'replace'
+
 // 点击“添加图片”按钮时，触发隐藏的文件选择框
 const triggerImageUpload = () => {
+  imageUploadMode.value = 'add';
   if (!newMessage.value.cardId) {
     alert('请先选择一个角色，再添加图片。');
     return;
@@ -252,8 +262,6 @@ const triggerImageReplace = () => {
   imageInputRef.value?.click();
   closeEditMenu();
 };
-
-const imageUploadMode = ref('add'); // 'add' 或 'replace'
 const onImageSelected = (event) => {
   if (imageUploadMode.value === 'add') {
     addImageMessage(event);
@@ -271,25 +279,37 @@ const addImageMessage = (event) => {
   const imageUrl = URL.createObjectURL(file);
   createdImageUrls.add(imageUrl); // 跟踪这个URL以便后续清理
 
-  // 复用 addMessage 的逻辑来创建消息
-  const finalCustomName = customName.value.trim() || null;
-  const displayName = finalCustomName ? finalCustomName : getCardName(newMessage.value.cardId);
+  // 创建消息
+  const displayName = customName.value || getCardName(newMessage.value.cardId);
 
   let position = 'left';
   if (newMessage.value.cardId === '_旁白') position = 'center';
   else if (newMessage.value.cardId === '_班长') position = 'right';
 
-  // 添加图片类型的消息
-  chatLog.value.push({
-    cardId: newMessage.value.cardId,
-    text: imageUrl, // text 字段现在存储URL
-    type: 'image', // 类型为 image
-    displayName: displayName,
-    customName: finalCustomName,
-    position: position,
-  });
-
-  // 清空文件输入框的值，以便用户可以连续选择同一张图片
+  // 在插入模式下，插入到指定位置后
+  if (insertingIndex.value !== null) {
+    chatLog.value.splice(insertingIndex.value + 1, 0, {
+      cardId: newMessage.value.cardId,
+      text: imageUrl, // text 字段现在存储URL
+      type: 'image', // 类型为 image
+      displayName: displayName,
+      customName: customName.value,
+      position: position,
+    });
+    exitInserting();
+    event.target.value = ''; // 清空文件输入框
+  } else {
+    // 添加新消息到末尾
+    chatLog.value.push({
+      cardId: newMessage.value.cardId,
+      text: imageUrl, // text 字段现在存储URL
+      type: 'image', // 类型为 image
+      displayName: displayName,
+      customName: customName.value,
+      position: position,
+    });
+  }
+  // 清空文件输入框的值，以便连续选择同一张图片
   event.target.value = '';
 };
 
@@ -325,6 +345,7 @@ const editMenu = ref({
 // 编辑模式
 const editingIndex = ref(null); // null 表示不在编辑模式, 数字表示正在编辑的消息索引
 const chatEditorRef = ref(null); // 用于滚动到编辑区
+const insertingIndex = ref(null); // null 表示不在插入模式, 数字表示要插入消息的目标索引
 
 // 重置编辑器状态
 const resetEditor = () => {
@@ -339,6 +360,7 @@ const startEditing = () => {
   if (index === null) return;
 
   // 进入编辑模式
+  exitInserting(); // 取消插入模式
   editingIndex.value = index;
   const message = chatLog.value[index];
 
@@ -352,7 +374,11 @@ const startEditing = () => {
   // 使用 nextTick 确保添加角色而更新的选项已渲染
   nextTick(() => {
     customName.value = message.displayName;
-    newMessage.value.text = message.text;
+    if (message.type === 'image') {
+      newMessage.value.text = '【图片消息】'; // 图片消息不加载文本
+    } else {
+      newMessage.value.text = message.text; // 其他情况加载文本
+    }
   });
 
   closeEditMenu();
@@ -386,42 +412,64 @@ const updateMessage = () => {
   else if (newCardId === '_班长') messageToUpdate.position = 'right';
   else messageToUpdate.position = 'left';
 
-  // 退出编辑模式并重置编辑器
+  exitEditing();
+};
+
+// 退出编辑模式并重置编辑器
+const exitEditing = () => {
   editingIndex.value = null;
   resetEditor();
 };
 
-// 取消修改
-const cancelEditing = () => {
-  editingIndex.value = null;
-  resetEditor();
-};
-
-// 根据是否在编辑模式决定添加或更新
-const handleFormSubmit = () => {
-  if (editingIndex.value === null) {
-    addMessage();
-  } else {
-    updateMessage();
-  }
-};
-
-// 开关菜单
-const openEditMenu = (index) => {
-  editMenu.value.index = index;
-  editMenu.value.visible = true;
-};
-const closeEditMenu = () => {
-  editMenu.value.visible = false;
-};
-
-// 复制消息
-const copyMessage = () => {
+// 进入插入消息模式
+const startInserting = () => {
   const index = editMenu.value.index;
   if (index === null) return;
-  const messageToCopy = JSON.parse(JSON.stringify(chatLog.value[index]));
-  chatLog.value.splice(index + 1, 0, messageToCopy);
+
+  // 如果当前在编辑模式，先取消
+  exitEditing();
+
+  insertingIndex.value = index;
   closeEditMenu();
+  resetEditor(); // 清空编辑器以便输入新内容
+  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// 执行插入操作
+const insertMessage = () => {
+  if (insertingIndex.value === null || !newMessage.value.cardId || !newMessage.value.text) {
+    alert('请选择一个角色并输入对话内容。');
+    return;
+  }
+
+  let displayName = customName.value.trim() ? customName.value.trim() : getCardName(newMessage.value.cardId);
+
+  const messageToInsert = {
+    ...newMessage.value,
+    displayName: displayName,
+  };
+
+  // 使用 splice 在指定位置后插入新消息
+  chatLog.value.splice(insertingIndex.value + 1, 0, messageToInsert);
+
+  exitInserting(); // 退出插入模式并重置
+};
+
+// 退出插入模式
+const exitInserting = () => {
+  insertingIndex.value = null;
+  resetEditor();
+};
+
+// 根据模式决定添加/修改/插入消息
+const handleFormSubmit = () => {
+  if (editingIndex.value !== null) {
+    updateMessage();
+  } else if (insertingIndex.value !== null) {
+    insertMessage();
+  } else {
+    addMessage();
+  }
 };
 
 // 删除消息
@@ -432,10 +480,20 @@ const deleteMessage = () => {
     chatLog.value.splice(index, 1);
     // 如果删除的是正在编辑的消息，则取消编辑
     if (editingIndex.value === index) {
-      cancelEditing();
+      exitEditing();
     }
   }
   closeEditMenu();
+};
+
+// 开关菜单
+const openEditMenu = (index) => {
+  editMenu.value.index = index;
+  editMenu.value.visible = true;
+  toggleFullscreen(false); // 退出全屏以便操作
+};
+const closeEditMenu = () => {
+  editMenu.value.visible = false;
 };
 
 // 导出聊天记录为 JSON 文件
@@ -502,15 +560,29 @@ const importChatLog = (event) => {
 const chatContainerRef = ref(null);
 // 是否处于全屏状态
 const isFullscreen = ref(false);
+const chatLogWidth = ref(100); // 聊天记录容器的宽度百分比
 
 // 切换全屏状态
-const toggleFullscreen = () => {
+const toggleFullscreen = (forceToggle = null) => {
   // 检查浏览器是否支持全屏 API
   if (!document.fullscreenEnabled) {
     alert('您的浏览器不支持全屏功能。');
     return;
   }
-
+  // 强制退出全屏
+  if (forceToggle === false) {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    return;
+  }
+  // 强制进入全屏
+  if (forceToggle === true) {
+    if (!document.fullscreenElement) {
+      chatContainerRef.value.requestFullscreen();
+    }
+    return;
+  }
   // 如果当前不是全屏状态，则请求进入全屏
   if (!document.fullscreenElement) {
     chatContainerRef.value.requestFullscreen();
@@ -552,17 +624,22 @@ onMounted(() => {
   }
   // 如果有保存的聊天记录，加载它们
   const savedLog = localStorage.getItem(autoSaveKey);
-  if (savedLog) {
-    try {
-      chatLog.value = JSON.parse(savedLog);
-    } catch (e) {
-      console.error("解析聊天记录失败:", e);
+  try {
+    let savedChatLog = JSON.parse(savedLog);
+    if (savedChatLog && savedChatLog.length > 0) {
+      // 等待3秒后提示用户加载
+      setTimeout(() => {
+        if (window.confirm('检测到自动保存的聊天记录，是否加载？这将覆盖当前内容。')) {
+          chatLog.value = savedChatLog;
+        }
+      }, 1000);
     }
+  } catch (e) {
+    console.error("解析自动保存的聊天记录失败:", e);
   }
 
   document.addEventListener('fullscreenchange', updateFullscreenState);
 });
-
 
 onUnmounted(() => {
   // 组件卸载前清理所有创建的临时图片URL
@@ -736,6 +813,29 @@ onUnmounted(() => {
   color: #ccc;
 }
 
+/* 滑块容器的样式 */
+.width-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: v-bind('colors.text.secondary');
+  padding: 8px 12px;
+  border: 1px solid #344767;
+  border-radius: 5px;
+  background-color: #ccc;
+}
+
+.width-slider-container label {
+  white-space: nowrap;
+  /* 防止标签换行 */
+  font-weight: bold;
+  color: #344767;
+}
+
+.width-slider-container input[type="range"] {
+  cursor: pointer;
+  width: 100px;
+}
 
 .hint {
   text-align: center;
@@ -755,6 +855,8 @@ onUnmounted(() => {
   /* 隐藏滚动条的样式 */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  display: flex;
+  justify-content: center;
 }
 
 .chat-log-container::-webkit-scrollbar {
@@ -763,9 +865,7 @@ onUnmounted(() => {
 
 /* 全屏状态下的样式 */
 .chat-log-container:fullscreen {
-  height: 100%;
   border-radius: 0;
-  padding: 20px;
 }
 
 .chat-log {
@@ -1050,6 +1150,16 @@ onUnmounted(() => {
 .editor-action-row {
   display: flex;
   gap: 10px;
+}
+
+/* 插入行高亮样式 */
+.insert-highlight-after {
+  border-bottom: 2px solid #4CAF50;
+  /* 绿色横线 */
+  padding: 5px;
+  margin: -7px -5px;
+  /* 使用负边距防止布局移动 */
+  transition: all 0.3s ease-in-out;
 }
 
 .editor-action-row .editor-button {
