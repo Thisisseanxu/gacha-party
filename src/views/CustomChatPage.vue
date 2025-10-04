@@ -774,11 +774,12 @@ onUnmounted(() => {
 }
 
 .chat-page-container {
-  padding: 20px;
+  padding: 8px;
   width: 100%;
   max-width: 800px;
   font-family: 'Inter', sans-serif;
   color: v-bind('colors.text.primary');
+  overflow: hidden;
 }
 
 .page-title {
