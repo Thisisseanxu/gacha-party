@@ -897,6 +897,8 @@ onUnmounted(() => {
   -ms-overflow-style: none;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
 }
 
 .chat-log-container::-webkit-scrollbar {
