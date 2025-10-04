@@ -4,15 +4,15 @@
       <h1 class="page-title">盲盒派对对话生成器</h1>
 
       <div v-if="isSelectionMode" class="character-selection-container">
-        <h2 class="selection-title">选择本次出场的角色</h2>
-        <p class="selection-description">选择的角色将会出现在下方的对话编辑器中</p>
+        <h2 class="selection-title">选择出场的角色</h2>
+        <p class="selection-description">放心，你可以随时回来重选！</p>
 
         <div class="selection-toolbar">
           <SwitchComponent v-model="showRealName" label="显示角色真名" />
         </div>
 
         <div class="card-selector-grid">
-          <div v-for="card in selectableCards" :key="card.id" class="card-option"
+          <div v-for="card in allCards" :key="card.id" class="card-option"
             :class="{ 'selected': selectedCharacterIds.includes(card.id) }" @click="toggleCharacterSelection(card.id)">
             <img :src="card.imageUrl" :alt="card.name" class="card-image" />
             <div class="card-name">{{ showRealName && card.realname ? card.realname : card.name }}</div>
@@ -20,13 +20,11 @@
           </div>
         </div>
 
-        <div class="selection-actions">
-          <button @click="confirmSelection" class="finalize-button">选好了，开始创作！</button>
-        </div>
+        <button @click="confirmSelection" class="finalize-button">开始创作</button>
       </div>
 
       <template v-else>
-        <div class="chat-editor">
+        <div class="chat-editor" ref="chatEditorRef">
           <div class="editor-row">
             <select v-model="newMessage.cardId" class="editor-select">
               <option :value="null" disabled>选择聊天角色</option>
@@ -39,10 +37,20 @@
             <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
           </div>
           <div class="editor-row">
-            <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."></textarea>
+            <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."
+              :disabled="chatLog[editingIndex]?.type === 'image'"></textarea>
+            <button @click="triggerImageUpload" class="editor-button image-button">
+              添加图片
+            </button>
+            <input type="file" ref="imageInputRef" @change="onImageSelected" accept="image/*" style="display: none;" />
           </div>
-          <div class="editor-row">
-            <button @click="addMessage" class="editor-button">添加对话</button>
+          <div class="editor-row editor-action-row">
+            <button @click="handleFormSubmit" class="editor-button">
+              {{ editingIndex === null ? '添加对话' : '修改这条消息' }}
+            </button>
+            <button v-if="editingIndex !== null" @click="cancelEditing" class="editor-button cancel">
+              取消修改
+            </button>
           </div>
           <div class="actions-container">
             <button @click="enterSelectionMode" class="action-button">重选角色</button>
@@ -55,11 +63,12 @@
           </div>
         </div>
 
-        <p class="hint">提示：点击某条消息就可以删除它。</p>
+        <p class="hint">提示：点击对话即可编辑，可通过复制插入对话。</p>
         <div class="chat-log-container" ref="chatContainerRef">
           <div class="chat-log">
-            <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="message.position"
-              @click="deleteMessage(index)">
+            <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
+              :class="{ 'editing-highlight': index === editingIndex, [message.position]: true }"
+              @click="openEditMenu(index)">
 
               <template v-if="message.position === 'center'">
                 <div class="bubble center">{{ message.text }}</div>
@@ -72,13 +81,29 @@
                   <div v-if="message.displayName" class="character-name">
                     {{ message.displayName }}
                   </div>
+
                   <div class="bubble">
-                    {{ message.text }}
+                    <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
+                    <span v-else>{{ message.text }}</span>
                   </div>
                 </div>
               </template>
 
             </div>
+          </div>
+        </div>
+
+        <div v-if="editMenu.visible" class="overlay" @click="closeEditMenu">
+          <div class="edit-menu-container">
+            <h3 class="edit-menu-title">编辑消息</h3>
+            <button class="edit-menu-button" @click="startEditing">编辑这条消息</button>
+            <button v-if="chatLog[editMenu.index].type === 'image'" class="edit-menu-button"
+              @click="triggerImageReplace">
+              重新上传图片
+            </button>
+            <button class="edit-menu-button" @click="copyMessage">复制消息</button>
+            <button class="edit-menu-button delete" @click="deleteMessage">删除消息</button>
+            <button class="edit-menu-button close" @click="closeEditMenu">关闭</button>
           </div>
         </div>
       </template>
@@ -87,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import SwitchComponent from '@/components/SwitchComponent.vue';
@@ -98,10 +123,6 @@ const isSelectionMode = ref(true);
 const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
 const characterSelectionKey = 'chatCharacterSelection';
-// 计算出所有可供选择的角色
-const selectableCards = computed(() =>
-  allCards.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'))
-);
 // 开关，是否显示角色真名
 const showRealName = ref(true);
 
@@ -117,13 +138,6 @@ const toggleCharacterSelection = (cardId) => {
 
 // 确认选择，进入聊天编辑器
 const confirmSelection = () => {
-  if (selectedCharacterIds.value.length === 0) {
-    if (!confirm('你没有选择任何角色，对话中将只有班长和旁白可用。确定要继续吗？')) {
-      return;
-    }
-  }
-  // 保存选择到本地存储
-  localStorage.setItem(characterSelectionKey, JSON.stringify(selectedCharacterIds.value));
   isSelectionMode.value = false;
 };
 
@@ -207,7 +221,7 @@ const getCardAvatar = (cardId) => {
 
 const getCardName = (cardId) => {
   if (cardId === '_班长' || cardId === '_旁白') {
-    return null; // 没有名称
+    return null; // 不需要名称
   }
   const card = allCards.find(c => c.id === cardId);
   return card ? card.realname ? card.realname : card.name : '未知角色';
@@ -235,11 +249,213 @@ const addMessage = () => {
   newMessage.value.text = '';
 };
 
-const deleteMessage = (index) => {
-  // 弹出确认框，防止误删
+// 图片上传功能
+const imageInputRef = ref(null); // 新增：对文件输入框的引用
+// 防止内存泄漏，跟踪所有创建的临时图片URL
+const createdImageUrls = new Set();
+// 点击“添加图片”按钮时，触发隐藏的文件选择框
+const triggerImageUpload = () => {
+  if (!newMessage.value.cardId) {
+    alert('请先选择一个角色，再添加图片。');
+    return;
+  }
+  if (newMessage.value.cardId === '_旁白') {
+    alert('旁白不允许发送图片。');
+    return;
+  }
+  imageInputRef.value?.click();
+};
+
+// 触发“重新上传图片”
+const triggerImageReplace = () => {
+  imageUploadMode.value = 'replace';
+  imageInputRef.value?.click();
+  closeEditMenu();
+};
+
+const imageUploadMode = ref('add'); // 'add' 或 'replace'
+const onImageSelected = (event) => {
+  if (imageUploadMode.value === 'add') {
+    addImageMessage(event);
+  } else {
+    replaceImageMessage(event);
+  }
+};
+
+// 当用户选择了图片文件后
+const addImageMessage = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 生成临时的 blob URL
+  const imageUrl = URL.createObjectURL(file);
+  createdImageUrls.add(imageUrl); // 跟踪这个URL以便后续清理
+
+  // 复用 addMessage 的逻辑来创建消息
+  const finalCustomName = customName.value.trim() || null;
+  const displayName = finalCustomName ? finalCustomName : getCardName(newMessage.value.cardId);
+
+  let position = 'left';
+  if (newMessage.value.cardId === '_旁白') position = 'center';
+  else if (newMessage.value.cardId === '_班长') position = 'right';
+
+  // 添加图片类型的消息
+  chatLog.value.push({
+    cardId: newMessage.value.cardId,
+    text: imageUrl, // text 字段现在存储URL
+    type: 'image', // 类型为 image
+    displayName: displayName,
+    customName: finalCustomName,
+    position: position,
+  });
+
+  // 清空文件输入框的值，以便用户可以连续选择同一张图片
+  event.target.value = '';
+};
+
+const replaceImageMessage = (event) => {
+  const file = event.target.files[0];
+  const index = editMenu.value.index;
+  if (!file || index === null) return;
+
+  const messageToUpdate = chatLog.value[index];
+  const oldUrl = messageToUpdate.text;
+
+  // 释放旧的URL以回收内存
+  URL.revokeObjectURL(oldUrl);
+  createdImageUrls.delete(oldUrl);
+
+  // 创建并跟踪新的URL
+  const newUrl = URL.createObjectURL(file);
+  createdImageUrls.add(newUrl);
+
+  // 更新消息内容
+  messageToUpdate.text = newUrl;
+
+  // 清空文件输入框
+  event.target.value = '';
+};
+
+// 编辑菜单
+const editMenu = ref({
+  visible: false,
+  index: null,
+});
+
+// 编辑模式
+const editingIndex = ref(null); // null 表示不在编辑模式, 数字表示正在编辑的消息索引
+const chatEditorRef = ref(null); // 用于滚动到编辑区
+
+// 重置编辑器状态
+const resetEditor = () => {
+  newMessage.value.cardId = null;
+  newMessage.value.text = '';
+  customName.value = '';
+};
+
+// 触发编辑消息
+const startEditing = () => {
+  const index = editMenu.value.index;
+  if (index === null) return;
+
+  // 进入编辑模式
+  editingIndex.value = index;
+  const message = chatLog.value[index];
+
+  // 检查并添加当前编辑的角色ID (如果该角色已被移除)
+  const isSpecialId = message.cardId === '_班长' || message.cardId === '_旁白';
+  if (!isSpecialId && !selectedCharacterIds.value.includes(message.cardId)) {
+    selectedCharacterIds.value.push(message.cardId);
+  }
+  newMessage.value.cardId = message.cardId;
+  // 加载消息数据到编辑器
+  // 使用 nextTick 确保添加角色而更新的选项已渲染
+  nextTick(() => {
+    customName.value = message.displayName;
+    newMessage.value.text = message.text;
+  });
+
+  closeEditMenu();
+  // 滚动到编辑器
+  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// 修改完成
+const updateMessage = () => {
+  if (editingIndex.value === null || !newMessage.value.cardId || !newMessage.value.text) {
+    alert('请确保已选择角色并填写内容。');
+    return;
+  }
+
+  const messageToUpdate = chatLog.value[editingIndex.value];
+
+  // 旁白不允许发送图片
+  if (newMessage.value.cardId === '_旁白') {
+    alert('旁白不允许发送图片。');
+    return;
+  }
+
+  // 从编辑器读取数据并更新
+  messageToUpdate.cardId = newMessage.value.cardId;
+  messageToUpdate.text = newMessage.value.text;
+  messageToUpdate.displayName = customName.value ? customName.value : getCardName(newMessage.value.cardId);
+
+  // 根据新角色更新消息位置
+  const newCardId = newMessage.value.cardId;
+  if (newCardId === "_旁白") messageToUpdate.position = 'center';
+  else if (newCardId === '_班长') messageToUpdate.position = 'right';
+  else messageToUpdate.position = 'left';
+
+  // 退出编辑模式并重置编辑器
+  editingIndex.value = null;
+  resetEditor();
+};
+
+// 取消修改
+const cancelEditing = () => {
+  editingIndex.value = null;
+  resetEditor();
+};
+
+// 根据是否在编辑模式决定添加或更新
+const handleFormSubmit = () => {
+  if (editingIndex.value === null) {
+    addMessage();
+  } else {
+    updateMessage();
+  }
+};
+
+// 开关菜单
+const openEditMenu = (index) => {
+  editMenu.value.index = index;
+  editMenu.value.visible = true;
+};
+const closeEditMenu = () => {
+  editMenu.value.visible = false;
+};
+
+// 复制消息
+const copyMessage = () => {
+  const index = editMenu.value.index;
+  if (index === null) return;
+  const messageToCopy = JSON.parse(JSON.stringify(chatLog.value[index]));
+  chatLog.value.splice(index + 1, 0, messageToCopy);
+  closeEditMenu();
+};
+
+// 删除消息
+const deleteMessage = () => {
+  const index = editMenu.value.index;
+  if (index === null) return;
   if (window.confirm('确定要删除这条消息吗？')) {
     chatLog.value.splice(index, 1);
+    // 如果删除的是正在编辑的消息，则取消编辑
+    if (editingIndex.value === index) {
+      cancelEditing();
+    }
   }
+  closeEditMenu();
 };
 
 // 导出聊天记录为 JSON 文件
@@ -335,11 +551,13 @@ onMounted(() => {
   document.addEventListener('fullscreenchange', updateFullscreenState);
 });
 
-// 组件卸载前移除监听器
+
 onUnmounted(() => {
+  // 组件卸载前清理所有创建的临时图片URL
+  createdImageUrls.forEach(url => URL.revokeObjectURL(url));
+  // 组件卸载前移除监听器
   document.removeEventListener('fullscreenchange', updateFullscreenState);
 });
-
 </script>
 
 <style scoped>
@@ -363,6 +581,7 @@ onUnmounted(() => {
 }
 
 .selection-title {
+  margin-top: 0rem;
   font-size: 1.8rem;
   text-align: center;
   color: v-bind('colors.text.primary');
@@ -374,10 +593,16 @@ onUnmounted(() => {
   margin-top: -1rem;
 }
 
+.selection-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
 .card-selector-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+  gap: 0.8rem;
   justify-content: center;
 }
 
@@ -441,19 +666,15 @@ onUnmounted(() => {
   transform: scale(1);
 }
 
-.selection-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
 .finalize-button {
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;
   font-weight: bold;
   border: none;
-  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  width: 100%;
   font-size: 1.2rem;
   background-color: v-bind('colors.brand.primary');
   color: v-bind('colors.text.black');
@@ -490,7 +711,7 @@ onUnmounted(() => {
 .action-button {
   padding: 8px 16px;
   border: 1px solid #344767;
-  background-color: #fff;
+  background-color: #ccc;
   color: #344767;
   border-radius: 5px;
   cursor: pointer;
@@ -500,7 +721,7 @@ onUnmounted(() => {
 
 .action-button:hover {
   background-color: #344767;
-  color: white;
+  color: #ccc;
 }
 
 
@@ -642,7 +863,7 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-/* 新增：旁白的气泡样式 */
+/* 旁白的气泡样式 */
 .bubble.center {
   background-color: #8f8989;
   /* 浅灰色底 */
@@ -658,6 +879,18 @@ onUnmounted(() => {
   word-break: break-word;
 }
 
+/* 图片消息 */
+.message-image {
+  max-width: 20rem;
+  /* 限制图片最大宽度 */
+  max-height: 20rem;
+  /* 限制图片最大高度 */
+  background-color: #eee;
+  /* 图片加载前的占位背景色 */
+  object-fit: cover;
+  /* 保持图片比例 */
+}
+
 /* 编辑器样式 */
 .chat-editor {
   background-color: v-bind('colors.background.content');
@@ -668,6 +901,9 @@ onUnmounted(() => {
 
 .editor-row {
   margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 /* 输入框样式 */
@@ -690,6 +926,14 @@ onUnmounted(() => {
   resize: vertical;
 }
 
+.image-button {
+  width: auto;
+  min-width: 80px;
+  height: 60px;
+  padding: 4px;
+  margin-left: 4px;
+}
+
 .editor-button {
   font-weight: bold;
   cursor: pointer;
@@ -701,5 +945,113 @@ onUnmounted(() => {
 
 .editor-button:hover {
   background-color: v-bind('colors.brand.hover');
+}
+
+/* 叠加层样式 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 编辑菜单样式 */
+.edit-menu-container {
+  background-color: rgb(153, 153, 153);
+  color: #333;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* 按钮之间的间距 */
+  width: 90%;
+  max-width: 300px;
+}
+
+.edit-menu-title {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #111;
+}
+
+.edit-menu-button {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s, border-color 0.2s;
+  text-align: center;
+}
+
+.edit-menu-button:hover {
+  background-color: #f0f0f0;
+  border-color: #bbb;
+}
+
+.edit-menu-button.delete {
+  background-color: #fff1f0;
+  border-color: #ffa39e;
+  color: #cf1322;
+}
+
+.edit-menu-button.delete:hover {
+  background-color: #ffccc7;
+}
+
+.edit-menu-button.close {
+  margin-top: 10px;
+  /* 与功能按钮分隔开 */
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+}
+
+.edit-menu-button.close:hover {
+  background-color: #bae7ff;
+}
+
+/* 编辑行高亮样式 */
+.editing-highlight {
+  border: 2px solid #4CAF50;
+  /* 绿色边框 */
+  border-radius: 8px;
+  padding: 5px;
+  margin: -7px -5px;
+  /* 使用负边距防止布局移动 */
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+  transition: all 0.3s ease-in-out;
+}
+
+/* 编辑器操作按钮行样式 */
+.editor-action-row {
+  display: flex;
+  gap: 10px;
+}
+
+.editor-action-row .editor-button {
+  flex-grow: 1;
+}
+
+/* 取消按钮的特定样式 */
+.editor-action-row .editor-button.cancel {
+  background-color: #da606a;
+  color: v-bind('colors.text.primary');
+}
+
+.editor-action-row .editor-button.cancel:hover {
+  background-color: #df9993;
+  color: v-bind('colors.text.primary');
 }
 </style>
