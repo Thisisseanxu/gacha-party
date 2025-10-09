@@ -30,6 +30,7 @@
                 :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
                 @click="selectUpCard(card.id)">
                 <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+                <span :style="{ color: colors.text.primary }">{{ card.name }}</span>
               </div>
             </div>
           </div>
