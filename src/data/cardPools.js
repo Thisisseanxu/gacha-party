@@ -7,6 +7,50 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
+  // 暮色邀请函
+  museyaoqinghan: {
+    startTime: '2025-10-10',
+    endTime: '2025-11-10',
+    type: '限定',
+    name: '暮色邀请函',
+    imageUrl: '/images/cardpools-icon/10092.webp',
+    // 基础概率
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2, // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.SP]: {
+        pity: 60, // 60抽必出SP
+        boostAfter: 40, // 40抽后每抽提升SP概率
+        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
+        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        UpCards: ['11008'],
+      },
+    },
+    cardIds: {
+      [RARITY.SP]: ['11008'],
+      [RARITY.SSR]: ['1601', '1602', '1603', '1608'],
+      [RARITY.SR]: [
+        '1103',
+        '1104',
+        '1207',
+        '1303',
+        '1405',
+        '1604',
+        '1606',
+        '1702',
+        '1205',
+        '1304',
+        '1805',
+        '1209',
+        '1404',
+      ],
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
+    },
+  },
   // 游园邀请
   youyaunyaoqing: {
     type: '限定',
@@ -48,6 +92,7 @@ export const cardPools = {
         '1304',
         '1805',
         '1209',
+        '1404',
       ],
       [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
     },

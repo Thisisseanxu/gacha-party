@@ -151,6 +151,13 @@ export const allCards = [
     realname: '早稻叽',
   },
   {
+    id: '11008',
+    name: '穆小泠',
+    realname: '穆小泠',
+    imageUrl: '/images/cards/11008.webp',
+    rarity: RARITY.SP,
+  },
+  {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
