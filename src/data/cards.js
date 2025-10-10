@@ -26,7 +26,7 @@ export const allCards = [
   },
   {
     id: '1211',
-    name: '粉白梦魇',
+    name: '粉白梦魔',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/1211.webp',
     realname: '阿芙洛',
