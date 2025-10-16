@@ -82,6 +82,14 @@ const routes = [
     },
   },
   {
+    path: '/zako',
+    name: 'Zako',
+    component: () => import('./views/ZakoPage.vue'),
+    meta: {
+      title: 'Zako - 织夜工具箱',
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('./views/NotFound.vue'),
