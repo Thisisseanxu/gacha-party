@@ -8,12 +8,15 @@
         <p class="selection-description">放心，你可以随时回来重选！</p>
 
         <div class="selection-toolbar">
+          <button @click="openCustomCharacterForm" class="action-button create-char-btn">创建新角色</button>
           <SwitchComponent v-model="showRealName" label="显示角色真名" />
         </div>
 
         <div class="card-selector-grid">
-          <div v-for="card in allCards" :key="card.id" class="card-option"
+          <div v-for="card in displayableCards" :key="card.id" class="card-option"
             :class="{ 'selected': selectedCharacterIds.includes(card.id) }" @click="toggleCharacterSelection(card.id)">
+            <button v-if="card.isCustom" class="delete-custom-char-btn"
+              @click.stop="deleteCustomCharacter(card.id)">×</button>
             <img :src="card.imageUrl" :alt="card.name" class="card-image" />
             <div class="card-name">{{ showRealName && card.realname ? card.realname : card.name }}</div>
             <div class="checkmark">✔</div>
@@ -113,8 +116,33 @@
           </div>
         </div>
       </template>
+
       <p class="input-description">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
       </p>
+    </div>
+  </div>
+
+  <div v-if="showCustomCharacterForm" class="overlay" @click="closeCustomCharacterForm">
+    <div class="custom-character-form" @click.stop>
+      <h3>创建自定义角色</h3>
+      <div class="form-row">
+        <label for="char-name">角色名称</label>
+        <input id="char-name" type="text" v-model="newCustomCharacterName" placeholder="输入角色名字" />
+      </div>
+      <div class="form-row">
+        <label>角色头像</label>
+        <button @click="triggerCustomAvatarUpload" class="action-button">上传图片</button>
+        <input type="file" ref="customAvatarInputRef" @change="handleCustomAvatarSelected" accept="image/*"
+          style="display: none;" />
+      </div>
+      <div v-if="newCustomCharacterAvatar" class="avatar-preview-container">
+        <p>头像预览：</p>
+        <img :src="newCustomCharacterAvatar" alt="头像预览" class="avatar-preview" />
+      </div>
+      <div class="form-actions">
+        <button @click="saveCustomCharacter" class="action-button">保存角色</button>
+        <button @click="closeCustomCharacterForm" class="action-button cancel">取消</button>
+      </div>
     </div>
   </div>
 
@@ -172,6 +200,84 @@ const autoSaveKey = 'chatAutoSaveLog';
 // 开关，是否显示角色真名
 const showRealName = ref(true);
 
+// 自定义角色相关状态
+const customCharacters = ref([]);
+const customCharactersKey = 'chatCustomCharacters';
+const showCustomCharacterForm = ref(false);
+const newCustomCharacterName = ref('');
+const newCustomCharacterAvatar = ref(null); // 存储Base64头像
+const customAvatarInputRef = ref(null);
+
+// 打开创建角色表单
+const openCustomCharacterForm = () => {
+  showCustomCharacterForm.value = true;
+};
+
+// 关闭并重置创建角色表单
+const closeCustomCharacterForm = () => {
+  showCustomCharacterForm.value = false;
+  newCustomCharacterName.value = '';
+  newCustomCharacterAvatar.value = null;
+};
+
+// 触发自定义头像文件选择
+const triggerCustomAvatarUpload = () => {
+  customAvatarInputRef.value?.click();
+};
+
+// 处理自定义头像上传，转换为Base64
+const handleCustomAvatarSelected = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    newCustomCharacterAvatar.value = e.target.result; // 结果为Base64字符串
+  };
+  reader.readAsDataURL(file);
+  event.target.value = ''; // 清空以便再次选择
+};
+
+// 保存自定义角色
+const saveCustomCharacter = () => {
+  if (!newCustomCharacterName.value.trim() || !newCustomCharacterAvatar.value) {
+    alert('请输入角色名称并上传头像。');
+    return;
+  }
+  customCharacters.value.push({
+    id: `custom_${Date.now()}`, // 使用时间戳确保ID唯一
+    name: newCustomCharacterName.value.trim(),
+    imageUrl: newCustomCharacterAvatar.value,
+  });
+  closeCustomCharacterForm();
+};
+
+// 删除自定义角色
+const deleteCustomCharacter = (characterId) => {
+  if (window.confirm('确定要删除这个自定义角色吗？')) {
+    // 从自定义角色列表中删除
+    const index = customCharacters.value.findIndex(c => c.id === characterId);
+    if (index > -1) {
+      customCharacters.value.splice(index, 1);
+    }
+    // 如果该角色已被选中，也从选中列表中移除
+    const selectedIndex = selectedCharacterIds.value.indexOf(characterId);
+    if (selectedIndex > -1) {
+      selectedCharacterIds.value.splice(selectedIndex, 1);
+    }
+  }
+};
+
+// 合并预设角色和自定义角色，用于选择界面显示
+const displayableCards = computed(() => {
+  const formattedCustom = customCharacters.value.map(c => ({
+    ...c,
+    realname: c.name, // 保持数据结构统一
+    isCustom: true,  // 添加一个标记，用于UI区分
+  }));
+  return [...allCards, ...formattedCustom];
+});
+
 // 切换角色的选中状态
 const toggleCharacterSelection = (cardId) => {
   const index = selectedCharacterIds.value.indexOf(cardId);
@@ -181,6 +287,11 @@ const toggleCharacterSelection = (cardId) => {
     selectedCharacterIds.value.push(cardId);
   }
 };
+
+// 监听自定义角色数组的变化，并自动保存到localStorage
+watch(customCharacters, (newValue) => {
+  localStorage.setItem(customCharactersKey, JSON.stringify(newValue));
+}, { deep: true });
 
 // 确认选择，进入聊天编辑器
 const confirmSelection = () => {
@@ -223,7 +334,7 @@ watch(() => newMessage.value.cardId, (newCardId) => {
 // 生成下拉选择器的选项
 const cardOptions = computed(() => {
   // 从 allCards 中过滤出完整的角色对象
-  const selectedCards = allCards
+  const selectedPredefined = allCards
     .filter(card => selectedCharacterIds.value.includes(card.id))
     .map(card => ({
       id: card.id,
@@ -231,25 +342,52 @@ const cardOptions = computed(() => {
     }))
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
 
-  // 在列表最前面添加默认的“班长”和“旁白”
+  // 【新增】从 customCharacters 中过滤
+  const selectedCustom = customCharacters.value
+    .filter(card => selectedCharacterIds.value.includes(card.id))
+    .map(card => ({
+      id: card.id,
+      name: `${card.name} (自定义)`
+    }));
+
   return [
     { id: '_班长', name: '班长' },
     { id: '_旁白', name: '旁白' },
-    ...selectedCards
+    ...selectedPredefined,
+    ...selectedCustom // 添加到列表
   ];
 });
 
 const getCardAvatar = (cardId) => {
-  const card = allCards.find(c => c.id === cardId);
-  return card ? card.imageUrl : '/images/cards/placeholder.jpg';
+  // 优先在预设角色中查找
+  const predefinedCard = allCards.find(c => c.id === cardId);
+  if (predefinedCard) {
+    return predefinedCard.imageUrl;
+  }
+  // 如果找不到，则在自定义角色中查找
+  const customCard = customCharacters.value.find(c => c.id === cardId);
+  if (customCard) {
+    return customCard.imageUrl;
+  }
+  // 都找不到则返回占位图
+  return '/images/cards/placeholder.jpg';
 };
 
 const getCardName = (cardId) => {
   if (cardId === '_班长' || cardId === '_旁白') {
-    return null; // 不需要名称
+    return null;
   }
-  const card = allCards.find(c => c.id === cardId);
-  return card ? card.realname ? card.realname : card.name : '未知角色';
+  // 优先在预设角色中查找
+  const predefinedCard = allCards.find(c => c.id === cardId);
+  if (predefinedCard) {
+    return predefinedCard.realname || predefinedCard.name;
+  }
+  // 如果找不到，则在自定义角色中查找
+  const customCard = customCharacters.value.find(c => c.id === cardId);
+  if (customCard) {
+    return customCard.name;
+  }
+  return '未知角色';
 };
 
 // 添加新消息到聊天记录
@@ -644,8 +782,16 @@ const autoSaveChatLog = () => {
 // 每间隔15秒自动保存一次聊天记录
 setInterval(autoSaveChatLog, 15000);
 
-// 在组件挂载时加载已保存的角色选择
+// 在组件挂载时加载已保存的角色选择以及自定义角色
 onMounted(() => {
+  const savedCustomCharacters = localStorage.getItem(customCharactersKey);
+  if (savedCustomCharacters) {
+    try {
+      customCharacters.value = JSON.parse(savedCustomCharacters);
+    } catch (e) {
+      console.error("解析自定义角色失败:", e);
+    }
+  }
   const savedSelection = localStorage.getItem(characterSelectionKey);
   if (savedSelection) {
     try {
@@ -1263,5 +1409,132 @@ onUnmounted(() => {
 .agreement-list::-webkit-scrollbar-thumb {
   background-color: v-bind('colors.scrollbar');
   border-radius: 3px;
+}
+
+/* 创建角色按钮的样式 */
+.selection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  /* 修改布局以容纳新按钮 */
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.create-char-btn {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.create-char-btn:hover {
+  background-color: #45a049;
+  color: white;
+}
+
+/* 自定义角色卡片上的删除按钮 */
+.delete-custom-char-btn {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(218, 96, 106, 0.9);
+  color: white;
+  border: 1px solid white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 0;
+  line-height: 1;
+  opacity: 0;
+  /* 默认隐藏 */
+  transition: opacity 0.2s;
+}
+
+.card-option:hover .delete-custom-char-btn {
+  opacity: 1;
+  /* 悬停时显示 */
+}
+
+/* 自定义角色创建表单的样式 */
+.custom-character-form {
+  background-color: v-bind('colors.background.content');
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.custom-character-form h3 {
+  text-align: center;
+  margin-top: 0;
+  color: v-bind('colors.text.primary');
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: v-bind('colors.text.secondary');
+}
+
+.form-row input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+}
+
+.avatar-preview-container {
+  text-align: center;
+}
+
+.avatar-preview {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 8px;
+  border: 2px solid v-bind('colors.border.primary');
+  margin-top: 5px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-actions .action-button {
+  flex-grow: 1;
+}
+
+.form-actions .action-button.cancel {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.form-actions .action-button.cancel:hover {
+  background-color: #5a6268;
+  color: white;
 }
 </style>
