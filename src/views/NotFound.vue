@@ -4,7 +4,7 @@
       <div class="status-code">404</div>
       <h1 class="title">页面未找到</h1>
       <p class="description">
-        抱歉，你访问的页面不存在。可能是链接输入错误，或者页面已被移动或删除。
+        抱歉，找不到您要访问的页面。如果您确信页面存在，请稍作等待后刷新页面。
       </p>
       <router-link to="/" class="home-button">返回首页</router-link>
     </div>
