@@ -158,6 +158,20 @@ export const allCards = [
     rarity: RARITY.SP,
   },
   {
+    id: '11101',
+    name: '喷气机',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11101.webp',
+    realname: '伊芙',
+  },
+  {
+    id: '11105',
+    name: '气球',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11105.webp',
+    realname: '妮妮珐',
+  },
+  {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
