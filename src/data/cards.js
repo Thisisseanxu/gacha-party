@@ -159,14 +159,14 @@ export const allCards = [
   },
   {
     id: '11101',
-    name: '喷气机',
+    name: '猫猫女巫',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/11101.webp',
     realname: '伊芙',
   },
   {
     id: '11105',
-    name: '气球',
+    name: '乐园实验家',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/11105.webp',
     realname: '妮妮珐',

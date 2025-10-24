@@ -28,9 +28,6 @@ export const cardPools = {
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
         UpCards: ['11101', '11105'],
       },
-      [RARITY.SSR]: {
-        doubleRateCards: ['1201'], // 双倍概率SSR角色（限定池SSR概率提升）
-      },
     },
     cardIds: {
       [RARITY.SP]: ['1408', '1610'],
