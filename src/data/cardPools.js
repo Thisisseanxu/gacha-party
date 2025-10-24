@@ -11,7 +11,7 @@ export const cardPools = {
   mengguirenkezhen: {
     type: '限定',
     name: '游园邀请',
-    imageUrl: '/images/cardpools-icon/49.webp',
+    imageUrl: '/images/cardpools-icon/10102.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
