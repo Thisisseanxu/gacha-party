@@ -140,7 +140,7 @@ const errorMessage = ref('');
 const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "48", "49", "50", "51", "52", "53", "107"]; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "48", "49", "50", "51", "52", "53", "54", "107"]; // 限定卡池ID列表
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
   'Limited': '限定扭蛋',
@@ -161,6 +161,7 @@ const CARDPOOLS_NAME_MAP = {
   '51': '塔菲扭蛋-复刻1',
   '52': '车手盲盒机-复刻2',
   '53': '萌鬼认可证',
+  '54': '早稻叽-复刻1',
   '107': '地下车手招募',
   '10000': '高级常驻扭蛋'
 };
