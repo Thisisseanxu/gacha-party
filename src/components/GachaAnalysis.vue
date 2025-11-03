@@ -10,7 +10,8 @@
           {{ reviewSpeedText }}
         </button>
       </div>
-      <span class="tertiary-text">UID: {{ playerId }}</span>
+      <span class="tertiary-text">UID: {{ playerId }}</span><br />
+      <span class="tertiary-text">{{ dateRange }}</span>
 
       <div>
         <div class="header-top-row">
@@ -54,68 +55,88 @@
               }}</span>
           </div>
         </div>
-        <div class="tertiary-text">{{ dateRange }}
-        </div>
       </div>
-
-      <div class="stats-overview">
-        <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-          <div class="stat-title">SSR数量</div>
-          <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
-        </div>
-        <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-          <div class="stat-title">限定平均</div>
-          <div v-if="CurrentSelectedPoolAnalysis?.avgPullsForSP > 0"
-            :class="{ 'stat-value': true, 'highlight': isSinglePool }">{{
-              CurrentSelectedPoolAnalysis?.avgPullsForSP.toFixed(2)
-            }} 抽
-          </div>
-          <div v-else class="stat-value">暂无数据</div>
+      <div>
+        <div class="tabs">
+          <button ref="dataStatsButton" class="nav-button" :class="{ active: statsActiveTab === 'dataStats' }"
+            @click="statsActiveTab = 'dataStats'">
+            数据统计
+          </button>
+          <button ref="percentageAnalysisButton" class="nav-button"
+            :class="{ active: statsActiveTab === 'percentageAnalysis' }" @click="statsActiveTab = 'percentageAnalysis'">
+            占比分析
+          </button>
+          <div class="nav-underline" :style="statsUnderlineStyle"></div>
         </div>
 
-        <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
-          <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-            <div v-if="CurrentSelectedPoolAnalysis?.maxSP > 0"
-              :class="{ 'stat-value': true, 'highlight': isSinglePool }">最非
-              {{
-                CurrentSelectedPoolAnalysis?.maxSP
-              }} 抽
-            </div>
-            <div v-else class="stat-value">未抽到</div>
+        <div v-if="statsActiveTab === 'dataStats'" class="stats-overview">
+          <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+            <div class="stat-title">SSR数量</div>
+            <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
           </div>
           <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-            <div v-if="CurrentSelectedPoolAnalysis?.minSP > 0 && CurrentSelectedPoolAnalysis?.minSP !== Infinity"
-              :class="{ 'stat-value': true, 'highlight': isSinglePool }">最欧 {{
-                CurrentSelectedPoolAnalysis?.minSP
+            <div class="stat-title">限定平均</div>
+            <div v-if="CurrentSelectedPoolAnalysis?.avgPullsForSP > 0"
+              :class="{ 'stat-value': true, 'highlight': isSinglePool }">{{
+                CurrentSelectedPoolAnalysis?.avgPullsForSP.toFixed(2)
               }} 抽
             </div>
-            <div v-else class="stat-value">限定</div>
+            <div v-else class="stat-value">暂无数据</div>
+          </div>
+
+          <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
+            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+              <div v-if="CurrentSelectedPoolAnalysis?.maxSP > 0"
+                :class="{ 'stat-value': true, 'highlight': isSinglePool }">最非
+                {{
+                  CurrentSelectedPoolAnalysis?.maxSP
+                }} 抽
+              </div>
+              <div v-else class="stat-value">未抽到</div>
+            </div>
+            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+              <div v-if="CurrentSelectedPoolAnalysis?.minSP > 0 && CurrentSelectedPoolAnalysis?.minSP !== Infinity"
+                :class="{ 'stat-value': true, 'highlight': isSinglePool }">最欧 {{
+                  CurrentSelectedPoolAnalysis?.minSP
+                }} 抽
+              </div>
+              <div v-else class="stat-value">限定</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-title">SSR平均</div>
+            <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
+              {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}
+            </div>
+            <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{
+              CurrentSelectedPoolAnalysis?.avgPullsForSSR
+                > 0 ?
+                CurrentSelectedPoolAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
+          </div>
+          <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
+            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+              <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
+              <div v-else class="stat-value">未抽到</div>
+            </div>
+            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+              <div v-if="normalAnalysis.minSSR > 0 && normalAnalysis.minSSR !== Infinity" class="stat-value">最欧 {{
+                normalAnalysis.minSSR }} 抽</div>
+              <div v-else class="stat-value">SSR</div>
+            </div>
           </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-title">SSR平均</div>
-          <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
-            {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}
+        <div v-if="statsActiveTab === 'percentageAnalysis'" class="percentage-analysis-container">
+          <div v-if="CurrentSelectedPoolAnalysis?.totalPulls ?? 0 > 0" class="pie-chart-wrapper">
+            <PieChart :chart-data="pieChartJSData" />
           </div>
-          <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{ CurrentSelectedPoolAnalysis?.avgPullsForSSR
-            > 0 ?
-            CurrentSelectedPoolAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
-        </div>
-        <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
-          <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-            <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
-            <div v-else class="stat-value">未抽到</div>
-          </div>
-          <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-            <div v-if="normalAnalysis.minSSR > 0 && normalAnalysis.minSSR !== Infinity" class="stat-value">最欧 {{
-              normalAnalysis.minSSR }} 抽</div>
-            <div v-else class="stat-value">SSR</div>
-          </div>
+          <p v-else class="no - history - text">
+            暂无数据
+          </p>
         </div>
       </div>
 
       <div>
-        <div class="history-nav">
+        <div class="tabs">
           <button ref="progressBarButton" class="nav-button" :class="{ active: activeTab === 'progressBar' }"
             @click="activeTab = 'progressBar'">
             进度条
@@ -234,6 +255,7 @@ import { logger } from '@/utils/logger.js';
 
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
+import PieChart from './AnalysisPieChart.vue';
 
 // 接收传入的参数
 const props = defineProps({
@@ -327,11 +349,15 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
 const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'SingleBox'].includes(CurrentSelectedPool.value));
 
 // 导航栏相关的响应式变量
-const activeTab = ref('progressBar');
+const activeTab = ref('progressBar'); // 切换显示进度条/角色一览/数量统计
 const progressBarButton = ref(null);
 const quantityStatisticsButton = ref(null);
 const characterOverviewButton = ref(null);
 const underlineStyle = ref({});
+const statsActiveTab = ref('dataStats'); // 切换显示数据统计/占比分析
+const dataStatsButton = ref(null);
+const percentageAnalysisButton = ref(null);
+const statsUnderlineStyle = ref({});
 
 // 回顾动画相关的变量
 const isReviewing = ref(false); // 是否正在回顾
@@ -587,6 +613,128 @@ const analysisForTitle = computed(() => {
   return singleLimitAnalysis.value?.avgPullsForSP > 0 ? singleLimitAnalysis.value : null;
 });
 
+
+
+// 计算所有稀有度的数量
+const rarityCounts = computed(() => {
+  const counts = {
+    SP: 0,
+    SSR: 0,
+    SR: 0,
+    R: 0,
+  };
+
+  // 使用fullHistory过滤好的数据
+  for (const item of fullHistory.value) {
+    if (item.rarity === RARITY.SP) {
+      counts.SP++;
+    } else if (item.rarity === RARITY.SSR) {
+      counts.SSR++;
+    } else if (item.rarity === RARITY.SR) {
+      counts.SR++;
+    } else if (item.rarity === RARITY.R) {
+      counts.R++;
+    }
+  }
+  return counts;
+});
+
+const pieChartJSData = computed(() => {
+  const counts = rarityCounts.value;
+  // 使用作为总数
+  const total = CurrentSelectedPoolAnalysis.value?.totalPulls ?? 0;
+
+  if (total === 0) {
+    return {}; // 没有数据
+  }
+
+  const calculatePercentage = (count) => (count / total) * 100;
+
+  // 过滤掉数量为0的稀有度
+  const percentageChartData = [
+    { name: '限定', value: counts.SP, percentage: calculatePercentage(counts.SP), color: colors.rarity.sp },
+    { name: 'SSR', value: counts.SSR, percentage: calculatePercentage(counts.SSR), color: colors.rarity.ssr },
+    { name: 'SR', value: counts.SR, percentage: calculatePercentage(counts.SR), color: colors.rarity.sr },
+    { name: 'R', value: counts.R, percentage: calculatePercentage(counts.R), color: colors.rarity.r },
+  ].filter(item => item.value > 0);
+  const labels = percentageChartData.map(d => d.name);
+  const data = percentageChartData.map(d => d.value);
+  const backgroundColors = percentageChartData.map(d => d.color);
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        data: data,
+        backgroundColor: backgroundColors,
+        borderColor: colors.background.content, // 给色块之间留一个背景色边框
+        borderWidth: 2,
+      },
+    ],
+  };
+});
+
+
+// 历史区域动态下划线逻辑
+const updateUnderline = () => {
+  const buttons = {
+    progressBar: progressBarButton.value,
+    characterOverview: characterOverviewButton.value,
+    quantityStatistics: quantityStatisticsButton.value,
+  };
+  const activeButton = buttons[activeTab.value];
+  if (activeButton) {
+    underlineStyle.value = {
+      left: `${activeButton.offsetLeft}px`,
+      width: `${activeButton.offsetWidth}px`,
+    };
+  }
+};
+
+// 数据区域动态下划线逻辑
+const updateStatsUnderline = () => {
+  const buttons = {
+    dataStats: dataStatsButton.value,
+    percentageAnalysis: percentageAnalysisButton.value,
+  };
+  const activeButton = buttons[statsActiveTab.value];
+  if (activeButton) {
+    statsUnderlineStyle.value = {
+      left: `${activeButton.offsetLeft}px`,
+      width: `${activeButton.offsetWidth}px`,
+    };
+  }
+};
+
+// 监听到切换tabs后更新下划线位置
+watch(activeTab, async () => {
+  // 等待DOM更新完成再计算位置
+  await nextTick();
+  updateUnderline();
+});
+
+watch(statsActiveTab, async () => {
+  await nextTick();
+  updateStatsUnderline();
+});
+
+// 组件加载时挂载监听
+onMounted(() => {
+  nextTick(() => {
+    updateUnderline();
+    updateStatsUnderline();
+  });
+  window.addEventListener('resize', updateUnderline);
+  window.addEventListener('resize', updateStatsUnderline);
+});
+
+// 组件卸载时清理工作
+onUnmounted(() => {
+  window.removeEventListener('resize', updateUnderline);
+  window.removeEventListener('resize', updateStatsUnderline);
+  stopReviewAnimation();
+});
+
 /**
  * 根据抽数计算出金进度条背景样式
  * @param {object} count - 当前抽数
@@ -639,40 +787,6 @@ const quantityStatistics = computed(() => {
   const ssrStats = generateStats(singleLimitAnalysis.value?.SSRHistory, RARITY.SSR);
   // 合并列表，SP在前，SSR在后
   return [...spStats, ...ssrStats];
-});
-
-
-// 动态下划线核心逻辑
-const updateUnderline = () => {
-  const buttons = {
-    progressBar: progressBarButton.value,
-    characterOverview: characterOverviewButton.value,
-    quantityStatistics: quantityStatisticsButton.value,
-  };
-  const activeButton = buttons[activeTab.value];
-  if (activeButton) {
-    underlineStyle.value = {
-      left: `${activeButton.offsetLeft}px`,
-      width: `${activeButton.offsetWidth}px`,
-    };
-  }
-};
-
-watch(activeTab, async () => {
-  // 等待DOM更新完成再计算位置
-  await nextTick();
-  updateUnderline();
-});
-
-onMounted(() => {
-  nextTick(updateUnderline);
-  window.addEventListener('resize', updateUnderline);
-});
-
-// 组件卸载时清理工作
-onUnmounted(() => {
-  window.removeEventListener('resize', updateUnderline);
-  stopReviewAnimation();
 });
 
 // 根据传入的参数获取对应的修改过透明度的背景颜色
@@ -1107,7 +1221,7 @@ const formatDateTime = (timestamp) => {
   font-weight: bold;
 }
 
-.history-nav {
+.tabs {
   position: relative;
   display: flex;
   justify-content: center;
@@ -1118,7 +1232,7 @@ const formatDateTime = (timestamp) => {
 .nav-button {
   background-color: transparent;
   border: none;
-  padding: 4px 20px;
+  padding: 0 20px 4px 20px;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -1415,5 +1529,21 @@ const formatDateTime = (timestamp) => {
   background-color: v-bind('colors.background.light');
   color: v-bind('colors.text.disabled');
   cursor: not-allowed;
+}
+
+/* 饼图相关样式 */
+.pie-chart-wrapper {
+  width: 100%;
+  max-width: 220px;
+  /* 限制最大宽度 */
+  height: 220px;
+  /* 限制高度 */
+  position: relative;
+}
+
+.percentage-analysis-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

@@ -19,6 +19,8 @@
   "dependencies": {
     "@icon-park/vue-next": "^1.4.2",
     "buffer": "^6.0.3",
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "hono": "^4.8.4",
@@ -26,6 +28,7 @@
     "qrcode": "^1.5.4",
     "tweetnacl": "^1.0.3",
     "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
