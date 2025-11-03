@@ -30,7 +30,7 @@ export const cardPools = {
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1408', '1610'],
+      [RARITY.SP]: ['11101', '11105'],
       [RARITY.SSR]: ['1201', '1402', '1603', '1403', '1601'],
       [RARITY.SR]: [
         '1103',

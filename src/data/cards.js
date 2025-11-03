@@ -152,7 +152,7 @@ export const allCards = [
   },
   {
     id: '11008',
-    name: '穆小泠',
+    name: '血族女王',
     realname: '穆小泠',
     imageUrl: '/images/cards/11008.webp',
     rarity: RARITY.SP,
