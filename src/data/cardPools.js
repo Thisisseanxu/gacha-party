@@ -7,11 +7,11 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
-  // 月影空夜-预览卡池
-  yueyingkongye: {
+  // 超频扭蛋机
+  chaopingniudanji: {
     type: '限定',
-    name: '月影空夜-预览卡池',
-    imageUrl: '/images/cardpools-icon/yyky.webp',
+    name: '超频扭蛋机',
+    imageUrl: '/images/cardpools-icon/10112.webp',
     // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
