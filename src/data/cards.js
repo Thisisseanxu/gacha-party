@@ -172,12 +172,18 @@ export const allCards = [
     realname: '妮妮珐',
   },
   {
+    id: '11009',
+    name: '超频游戏姬',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11009.webp',
+    realname: '月隐空夜',
+  },
+  {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/1804.webp',
   },
-
   // SSR 角色
   {
     id: '1102',
