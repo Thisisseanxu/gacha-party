@@ -179,6 +179,20 @@ export const allCards = [
     realname: '月隐空夜',
   },
   {
+    id: '1605',
+    name: '美味香油壶',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1605.webp',
+    realname: '萨拉',
+  },
+  {
+    id: '1611',
+    name: '顶级调料罐',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1611.webp',
+    realname: '茴香',
+  },
+  {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
