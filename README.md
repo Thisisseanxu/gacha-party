@@ -206,6 +206,3 @@
 ## 致谢
 
 感谢所有为本项目提供帮助和支持的朋友们！
-
-特别鸣谢：
-[胡桃工具箱](https://github.com/DGP-Studio/Snap.Hutao)：抽卡分析页UI灵感
