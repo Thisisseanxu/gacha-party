@@ -7,6 +7,83 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
+  xinyuan: {
+    type: '自选', // 类型名称，用于UI显示
+    name: '心愿自选',
+    imageUrl: '/images/cardpools-icon/28.webp', // 请确保有这张图片，或者用其他替代
+    challengeDisabled: true, // 自选卡池不支持挑战赛
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2,
+    },
+    rules: {
+      [RARITY.SP]: {
+        pity: 60,
+        boostAfter: 40, // 40抽后每抽提升SP概率
+        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
+        WishSelection: true, // 启用自选机制
+        MaximumSelection: 4, // 最多可选4张心愿卡
+      },
+    },
+    cardIds: {
+      [RARITY.SP]: [
+        '1110',
+        '1111',
+        '11006',
+        '1906',
+        '1211',
+        '1811',
+        '1809',
+        '11007',
+        '1711',
+        '1810',
+        '1710',
+        '1309',
+        '1503',
+        '1502',
+        '1610',
+        '1408',
+        '11008',
+        '1311',
+        '1312',
+        '11105',
+        '11101',
+      ],
+      [RARITY.SSR]: [
+        '1102',
+        '1106',
+        '1108',
+        '1109',
+        '1201',
+        '1202',
+        '1203',
+        '1210',
+        '1301',
+        '1302',
+        '1305',
+        '1310',
+        '1401',
+        '1402',
+        '1403',
+        '1701',
+        '1703',
+        '1704',
+        '1708',
+        '1601',
+        '1602',
+        '1603',
+        '1608',
+        '1801',
+        '1806',
+        '1803',
+        '1504',
+        '1804',
+      ],
+      [RARITY.SR]: ['1103', '1104', '1207', '1303', '1405'], // 示例SR
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406'], // 示例R
+    },
+  },
   // 厨娘来啦
   chunianglaila: {
     type: '限定',
@@ -228,7 +305,7 @@ export const cardPools = {
   },
   // 祈愿盲盒-烧烤大师
   qiyuanmanghe1: {
-    type: '限定',
+    type: '祈愿盲盒',
     name: '祈愿盲盒-烧烤大师',
     imageUrl: '/images/cardpools-icon/47.webp',
     // 基础概率
@@ -588,6 +665,7 @@ export const cardPools = {
     type: '常驻',
     name: '常驻扭蛋',
     imageUrl: '/images/cardpools-icon/9.webp', // 基础概率
+    challengeDisabled: true, // 常驻卡池不支持挑战赛
     rates: {
       [RARITY.SSR]: 0.08,
       [RARITY.SR]: 0.2, // 其他情况都是 R
@@ -711,11 +789,11 @@ export const cardPools = {
         boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
         UpTrigger: true, // 该卡池有UP机制
         SelectUpCards: true, // 可以选择UpCards中的一个角色UP
-        UpCards: ['1710', '1309', '1503'],
+        UpCards: ['1710', '1309', '1503', '1502'],
       },
     },
     cardIds: {
-      [RARITY.SP]: ['1710', '1309', '1503'],
+      [RARITY.SP]: ['1710', '1309', '1503', '1502'],
       [RARITY.SSR]: [
         '1102',
         '1106',

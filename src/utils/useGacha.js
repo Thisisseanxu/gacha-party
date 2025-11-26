@@ -51,7 +51,7 @@ function weightedRandom(weightedItems) {
  *   performMultiPulls,
  * } = useGacha('standard');
  */
-export function useGacha(poolSource, selectedUpCard = ref(null)) {
+export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishList = ref([])) {
   // currentPool现在可以根据poolSource的类型来决定数据来源
   // 如果poolSource是字符串 (poolId)，则从 cardPools.js 获取数据
   // 如果poolSource是对象 (自定义卡池)，则直接使用该对象
@@ -271,9 +271,25 @@ export function useGacha(poolSource, selectedUpCard = ref(null)) {
     const rulesForRarity = currentPool.value.rules
       ? currentPool.value.rules[selectedRarity]
       : undefined
+
     let possibleCards = []
-    // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
-    if (nextIsUP.value && rulesForRarity?.UpTrigger) {
+
+    // 卡池自选限定和自选UP的逻辑
+    if (rulesForRarity?.WishSelection) {
+      // 如果当前稀有度是配置了心愿规则的稀有度 (如SP)
+      // 则卡池对应稀有度的池子换成用户选择的那些卡
+      const wishIds = selectedWishList.value || []
+      // 过滤出用户选择的卡
+      possibleCards = currentPool.value.cards.filter(
+        (card) => card.rarity === selectedRarity && wishIds.includes(card.id),
+      )
+      // 遇到异常情况时，回退到该稀有度的所有卡
+      if (possibleCards.length === 0) {
+        logger.warn(`心愿池中没有可用的${selectedRarity}卡片，回退到该稀有度的全部卡片。`)
+        possibleCards = currentPool.value.cards.filter((card) => card.rarity === selectedRarity)
+      }
+      // 获取抽到的稀有度对应的所有角色，如果触发对应稀有度的UP机制，则只获取UP角色
+    } else if (nextIsUP.value && rulesForRarity?.UpTrigger) {
       let upCardPoolIds = []
       // 确定UP池中有哪些角色ID
       if (rulesForRarity.SelectUpCards && selectedUpCard?.value) {

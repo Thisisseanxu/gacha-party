@@ -153,9 +153,9 @@ export const allCards = [
   {
     id: '11008',
     name: '血族女王',
+    rarity: RARITY.SP,
     realname: '穆小泠',
     imageUrl: '/images/cards/11008.webp',
-    rarity: RARITY.SP,
   },
   {
     id: '11101',

@@ -14,11 +14,12 @@
         <div v-if="currentPool" class="gacha-main-content card">
           <div class="controls-and-switch">
             <div class="gacha-controls">
-              <button @click="toChallenge" v-if="currentPool.type === '限定'"
-                class="gacha-button challenge-button">进入挑战赛</button>
+              <!-- 挑战赛已停止维护 -->
+              <!-- <button @click="toChallenge" v-if="!currentPool.challengeDisabled"
+                class="gacha-button challenge-button">进入挑战赛</button> -->
               <div class="gacha-controls">
-                <button @click="handleSinglePull" class="gacha-button single-pull">单抽</button>
-                <button @click="handleTenPulls" class="gacha-button ten-pull">十连抽</button>
+                <button @click="checkAndPull(1)" class="gacha-button single-pull">单抽</button>
+                <button @click="checkAndPull(10)" class="gacha-button ten-pull">十连抽</button>
               </div>
             </div>
           </div>
@@ -31,6 +32,27 @@
                 @click="selectUpCard(card.id)">
                 <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
                 <span :style="{ color: colors.text.primary }">{{ card.name }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="isWishPool" class="wish-selection-container">
+            <div class="wish-header">
+              <h3 class="select-up-title">请选择心愿角色 ({{ selectedWishCards.length }}/4)</h3>
+            </div>
+
+            <div class="wish-cards-grid">
+              <div v-for="card in selectableWishCards" :key="card.id" class="wish-card-option"
+                :class="{ 'selected': selectedWishCards.includes(card.id) }" @click="toggleWishCard(card.id)">
+
+                <div class="image-wrapper">
+                  <img :src="card.imageUrl" :alt="card.name" class="wish-card-image">
+                  <div v-if="selectedWishCards.includes(card.id)" class="wish-badge">
+                    {{ selectedWishCards.indexOf(card.id) + 1 }}
+                  </div>
+                  <div v-else class="wish-mask"></div>
+                </div>
+                <span class="wish-card-name">{{ card.name }}</span>
               </div>
             </div>
           </div>
@@ -160,6 +182,32 @@ const shareText = ref('');
 const qrCodeDataUrl = ref('');
 const copyStatusMessage = ref('');
 
+// 组件逻辑
+const route = useRoute();
+const router = useRouter(); // 获取路由实例
+
+// 动态获取卡池数据
+const isCustomPool = computed(() => route.params.poolId === 'custom');
+const gachaSource = computed(() => getGachaSource(route));
+
+// 判断卡池类型
+const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
+const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
+const isWishPool = computed(() => {
+  return currentPool.value?.rules?.[RARITY.SP]?.WishSelection === true;
+});
+
+// UP卡片选择
+const selectedUpCard = ref(null);
+const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || []);
+
+// 自选池选择
+const selectableWishCards = computed(() => {
+  if (!isWishPool.value) return [];
+  return currentPool.value.cardIds?.[RARITY.SP]?.map(id => cardMap.get(id))
+});
+const selectedWishCards = ref([]);
+
 const isHighlightRarity = (rarity) => {
   return rarity === RARITY.SP || rarity === RARITY.SSR;
 };
@@ -221,14 +269,6 @@ const stopAnimation = () => {
   });
 };
 
-// 组件逻辑
-const route = useRoute();
-const router = useRouter(); // 获取路由实例
-const selectedUpCard = ref(null);
-
-// 动态获取卡池数据
-const isCustomPool = computed(() => route.params.poolId === 'custom');
-const gachaSource = computed(() => getGachaSource(route));
 
 const {
   currentPool,
@@ -240,11 +280,8 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(gachaSource, selectedUpCard);
+} = useGacha(gachaSource, selectedUpCard, selectedWishCards);
 
-const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
-const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
-const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || []);
 const isSsrListExpanded = ref(false);
 
 const upCardDetails = computed(() => {
@@ -291,16 +328,28 @@ const toggleSsrListExpansion = () => {
 };
 
 watch(currentPool, (newPool) => {
-  if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
-    selectedUpCard.value = newPool.rules.SP.UpCards[0];
-  } else {
-    selectedUpCard.value = null;
-  }
   document.title = newPool?.name ? `${newPool.name} - 织夜工具箱` : '抽卡模拟器';
 }, { immediate: true, deep: true });
 
+// UP卡选择方法
 const selectUpCard = (cardId) => {
   selectedUpCard.value = cardId;
+};
+
+// 自选卡选择方法
+const toggleWishCard = (cardId) => {
+  const index = selectedWishCards.value.indexOf(cardId);
+  if (index > -1) {
+    // 已存在，取消选择
+    selectedWishCards.value.splice(index, 1);
+  } else {
+    // 不存在，尝试添加
+    if (selectedWishCards.value.length >= 4) {
+      alert('只能选择 4 个心愿角色！请先取消一个已选角色。');
+      return;
+    }
+    selectedWishCards.value.push(cardId);
+  }
 };
 
 const itemsPerPage = 10;
@@ -319,10 +368,12 @@ const paginatedGachaHistory = computed(() => {
 });
 
 const isUpGroupExpanded = ref(true);
+// 切换UP角色组列表的展开/折叠状态
 const toggleUpGroupExpansion = () => {
   isUpGroupExpanded.value = !isUpGroupExpanded.value;
 };
 
+// 历史记录分页控制
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 
@@ -337,23 +388,31 @@ watch(totalPulls, () => {
 // 将当前所有的param传递给挑战赛页面
 // 假设当前为/chouka/zaodaoji，则跳转到/choukatiaozhansai/zaodaoji
 // 假设当前为自定义卡池，则跳转到/choukatiaozhansai/custom?data=...
-const toChallenge = () => {
-  const currentPath = route.path;
-  const currentQuery = route.query;
-  const challengePath = currentPath.replace('/chouka', '/choukatiaozhansai');
-  router.push({ path: challengePath, query: currentQuery });
-};
+// 注意：挑战赛功能已停止维护，此方法仅保留以备将来可能的恢复
+// const toChallenge = () => {
+//   const currentPath = route.path;
+//   const currentQuery = route.query;
+//   const challengePath = currentPath.replace('/chouka', '/choukatiaozhansai');
+//   router.push({ path: challengePath, query: currentQuery });
+// };
 
-const handleSinglePull = () => {
-  performSinglePull();
-  showGachaResultOverlay.value = true;
-  nextTick(startPullAnimation);
-};
+const checkAndPull = (count) => {
+  // 如果是心愿卡池且未选满4个
+  if (isWishPool.value && selectedWishCards.value.length !== 4) {
+    alert('必须选择 4 个心愿角色才能开始抽卡！');
+    return;
+  }
 
-const handleTenPulls = () => {
-  performTenPulls();
-  showGachaResultOverlay.value = true;
-  nextTick(startPullAnimation);
+  // 执行抽卡
+  if (count === 1) {
+    performSinglePull();
+    showGachaResultOverlay.value = true;
+    nextTick(startPullAnimation);
+  } else { // 目前只有单抽和十连抽两种，其他情况默认十连抽
+    performTenPulls();
+    showGachaResultOverlay.value = true;
+    nextTick(startPullAnimation);
+  }
 };
 
 const confirmGachaResult = () => {
@@ -578,14 +637,14 @@ h1 {
   transform: translateY(-2px);
 }
 
-.challenge-button {
+/* .challenge-button {
   background-color: v-bind('colors.brand.cancel');
 }
 
 .challenge-button:hover {
   background-color: v-bind('colors.brand.cancelHover');
   transform: translateY(-2px);
-}
+} */
 
 .back-home-button {
   background-color: v-bind('colors.brand.primary');
@@ -1079,5 +1138,106 @@ h1 {
   .overlay-title {
     font-size: 2.5em;
   }
+}
+
+.wish-selection-container {
+  margin-top: 1.5rem;
+  border-top: 1px solid v-bind('colors.border.primary');
+  padding-top: 1.5rem;
+}
+
+.wish-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.wish-cards-grid {
+  display: grid;
+  /* 响应式网格，适应大量角色 */
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1rem;
+  justify-items: center;
+}
+
+.wish-card-option {
+  cursor: pointer;
+  position: relative;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wish-card-option .image-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  /* 默认无边框 */
+  transition: all 0.2s ease;
+}
+
+.wish-card-option .wish-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 选中状态 */
+.wish-card-option.selected .image-wrapper {
+  border-color: v-bind('colors.rarity.sp');
+  box-shadow: 0 0 10px v-bind('colors.rarity.sp');
+  transform: scale(1.05);
+}
+
+/* 序号角标 */
+.wish-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: v-bind('colors.rarity.sp');
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-bottom-left-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* 未选中的遮罩（可选） */
+.wish-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s;
+}
+
+.wish-card-option:hover .wish-mask {
+  background-color: rgba(0, 0, 0, 0);
+  /* 悬浮时变亮 */
+}
+
+.wish-card-option.selected .wish-mask {
+  background-color: transparent;
+  /* 选中后无遮罩 */
+}
+
+.wish-card-name {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: v-bind('colors.text.secondary');
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 </style>
