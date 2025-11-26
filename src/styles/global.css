@@ -33,3 +33,22 @@ textarea {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+body {
+  user-select: none; /* 禁止选中 */
+  -webkit-user-select: none; /* Chrome/Safari/Edge 兼容 */
+  cursor: default; /* 强制光标默认为箭头 */
+}
+
+/* 恢复输入框的可交互性 */
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* 禁止图片被拖拽 (防止点击图片时出现半透明的拖拽影子) */
+img {
+  -webkit-user-drag: none;
+}
