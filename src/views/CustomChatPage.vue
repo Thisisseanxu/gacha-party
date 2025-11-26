@@ -796,8 +796,6 @@ onMounted(() => {
   if (savedSelection) {
     try {
       selectedCharacterIds.value = JSON.parse(savedSelection);
-      // 如果有保存的记录，直接进入聊天模式，提升体验
-      isSelectionMode.value = false;
     } catch (e) {
       console.error("解析已选角色配置失败:", e);
       // 解析失败则停留在选择模式
