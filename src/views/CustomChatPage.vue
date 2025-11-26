@@ -647,6 +647,7 @@ const handleFormSubmit = () => {
   } else {
     addMessage();
   }
+  saveChatLogToLocalStorage();
 };
 
 // 删除消息
@@ -776,11 +777,9 @@ const updateFullscreenState = () => {
 };
 
 // 自动保存聊天记录到本地存储
-const autoSaveChatLog = () => {
+const saveChatLogToLocalStorage = () => {
   localStorage.setItem(autoSaveKey, JSON.stringify(chatLog.value));
 };
-// 每间隔15秒自动保存一次聊天记录
-setInterval(autoSaveChatLog, 15000);
 
 // 在组件挂载时加载已保存的角色选择以及自定义角色
 onMounted(() => {
@@ -810,10 +809,11 @@ onMounted(() => {
   try {
     let savedChatLog = JSON.parse(savedLog);
     if (savedChatLog && savedChatLog.length > 0) {
-      // 等待3秒后提示用户加载
+      // 等待1秒后提示用户加载
       setTimeout(() => {
         if (window.confirm('检测到自动保存的聊天记录，是否加载？这将覆盖当前内容。')) {
           chatLog.value = savedChatLog;
+          isSelectionMode.value = false;
         }
       }, 1000);
     }
