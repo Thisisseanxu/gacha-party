@@ -10,7 +10,7 @@ export const cardPools = {
   xinyuan: {
     type: '自选', // 类型名称，用于UI显示
     name: '心愿自选',
-    imageUrl: '/images/cardpools-icon/28.webp', // 请确保有这张图片，或者用其他替代
+    imageUrl: '/images/cardpools-icon/1000.webp',
     challengeDisabled: true, // 自选卡池不支持挑战赛
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
@@ -66,9 +66,11 @@ export const cardPools = {
         '1401',
         '1402',
         '1403',
+        '1407',
         '1701',
         '1703',
         '1704',
+        '1706',
         '1708',
         '1601',
         '1602',
@@ -80,8 +82,8 @@ export const cardPools = {
         '1504',
         '1804',
       ],
-      [RARITY.SR]: ['1103', '1104', '1207', '1303', '1405'], // 示例SR
-      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406'], // 示例R
+      [RARITY.SR]: ['1103', '1104', '1207', '1303', '1405'],
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406'],
     },
   },
   // 厨娘来啦
