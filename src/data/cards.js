@@ -348,7 +348,7 @@ export const allCards = [
   },
   {
     id: '1704',
-    name: '超可爱的织夜',
+    name: '织夜超可爱',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/1704.webp',
     realname: '织夜',

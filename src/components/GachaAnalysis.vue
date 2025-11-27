@@ -271,7 +271,11 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  singleBoxGachaData: {
+  qiYuanGachaData: {
+    type: Array,
+    required: true,
+  },
+  wishGachaData: {
     type: Array,
     required: true,
   },
@@ -320,7 +324,8 @@ const cardPoolOptions = ref([
   { id: 'Limited', name: props.CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
   { id: 'Normal', name: props.CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
   { id: 'AdvanceNormal', name: props.CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻卡池
-  { id: 'SingleBox', name: props.CARDPOOLS_NAME_MAP['SingleBox'] }, // 祈愿盲盒卡池
+  { id: 'QiYuan', name: props.CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
+  { id: 'Wish', name: props.CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
   { id: '分隔符------', name: '分隔符------' }, // 分隔符
   ...props.LIMITED_CARD_POOLS_ID.map(id => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
 ]);
@@ -336,8 +341,11 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   if (option.id === 'AdvanceNormal') {
     return props.advancedNormalGachaData.length > 0;
   }
-  if (option.id === 'SingleBox') {
-    return props.singleBoxGachaData.length > 0;
+  if (option.id === 'QiYuan') {
+    return props.qiYuanGachaData.length > 0;
+  }
+  if (option.id === 'Wish') {
+    return props.wishGachaData.length > 0;
   }
   if (option.id === '分隔符------') {
     return true; // 保留分隔符
@@ -346,7 +354,7 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   return props.limitGachaData.some(r => r.gacha_id === Number(option.id));
 });
 
-const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'SingleBox'].includes(CurrentSelectedPool.value));
+const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiYuan', 'Wish'].includes(CurrentSelectedPool.value));
 
 // 导航栏相关的响应式变量
 const activeTab = ref('progressBar'); // 切换显示进度条/角色一览/数量统计
@@ -401,10 +409,16 @@ const activeAdvancedNormalData = computed(() =>
     : props.advancedNormalGachaData
 );
 
-const activeSingleBoxData = computed(() =>
-  isReviewing.value && CurrentSelectedPool.value === 'SingleBox'
+const activeQiYuanData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'QiYuan'
     ? reviewRecords.value
-    : props.singleBoxGachaData
+    : props.qiYuanGachaData
+);
+
+const activeWishData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'Wish'
+    ? reviewRecords.value
+    : props.wishGachaData
 );
 
 // 计算列表平均值的通用函数
@@ -522,10 +536,10 @@ const AdvanceNormalAnalysis = computed(() => {
 });
 
 // 祈愿盲盒卡池分析逻辑
-const singleBoxAnalysis = computed(() => {
-  if (activeSingleBoxData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+const qiYuanAnalysis = computed(() => {
+  if (activeQiYuanData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
 
-  const records = [...activeSingleBoxData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  const records = [...activeQiYuanData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
   let SPCounter = 0, SSRCounter = 0;
   const SPHistory = [], SSRHistory = [];
 
@@ -533,6 +547,46 @@ const singleBoxAnalysis = computed(() => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
     if (!cardInfo) {
       logger.warn(`(祈愿盲盒) 未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      return;
+    }
+    SPCounter++;
+    SSRCounter++;
+    if (cardInfo.rarity === RARITY.SP) {
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPCounter = 0;
+    }
+    if (cardInfo.rarity === RARITY.SSR) {
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRCounter = 0;
+    }
+  });
+
+  return {
+    totalPulls: records.length,
+    SP: SPCounter,
+    SSR: SSRCounter,
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
+    avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0),
+    minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory,
+    SSRHistory,
+    records,
+  };
+});
+
+// 心愿自选卡池分析逻辑（与祈愿盲盒相同）
+const wishAnalysis = computed(() => {
+  if (activeWishData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+
+  const records = [...activeWishData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  let SPCounter = 0, SSRCounter = 0;
+  const SPHistory = [], SSRHistory = [];
+
+  records.forEach((record) => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    if (!cardInfo) {
+      logger.warn(`(心愿自选) 未找到 item_id: ${record.item_id} 的信息，已跳过。`);
       return;
     }
     SPCounter++;
@@ -594,7 +648,8 @@ const normalAnalysis = computed(() => {
 // 根据当前选择的卡池展示对应的分析数据=
 const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value;
-  if (CurrentSelectedPool.value === 'SingleBox') return singleBoxAnalysis.value;
+  if (CurrentSelectedPool.value === 'QiYuan') return qiYuanAnalysis.value;
+  if (CurrentSelectedPool.value === 'Wish') return wishAnalysis.value;
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value;
   return singleLimitAnalysis.value;
 });
@@ -607,8 +662,11 @@ const analysisForTitle = computed(() => {
   if (CurrentSelectedPool.value === 'AdvanceNormal') {
     return AdvanceNormalAnalysis.value?.avgPullsForSP > 0 ? AdvanceNormalAnalysis.value : null;
   }
-  if (CurrentSelectedPool.value === 'SingleBox') {
-    return singleBoxAnalysis.value?.avgPullsForSP > 0 ? singleBoxAnalysis.value : null;
+  if (CurrentSelectedPool.value === 'QiYuan') {
+    return qiYuanAnalysis.value?.avgPullsForSP > 0 ? qiYuanAnalysis.value : null;
+  }
+  if (CurrentSelectedPool.value === 'Wish') {
+    return wishAnalysis.value?.avgPullsForSP > 0 ? wishAnalysis.value : null;
   }
   return singleLimitAnalysis.value?.avgPullsForSP > 0 ? singleLimitAnalysis.value : null;
 });
@@ -777,9 +835,14 @@ const quantityStatistics = computed(() => {
     const ssrStats = generateStats(AdvanceNormalAnalysis.value?.SSRHistory, RARITY.SSR);
     return [...spStats, ...ssrStats];
   }
-  if (pool === 'SingleBox') {
-    const spStats = generateStats(singleBoxAnalysis.value?.SPHistory, RARITY.SP);
-    const ssrStats = generateStats(singleBoxAnalysis.value?.SSRHistory, RARITY.SSR);
+  if (pool === 'QiYuan') {
+    const spStats = generateStats(qiYuanAnalysis.value?.SPHistory, RARITY.SP);
+    const ssrStats = generateStats(qiYuanAnalysis.value?.SSRHistory, RARITY.SSR);
+    return [...spStats, ...ssrStats];
+  }
+  if (pool === 'Wish') {
+    const spStats = generateStats(wishAnalysis.value?.SPHistory, RARITY.SP);
+    const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, RARITY.SSR);
     return [...spStats, ...ssrStats];
   }
   // 默认处理所有其他限定池
@@ -824,8 +887,10 @@ const fullHistory = computed(() => {
     data = [...props.normalGachaData];
   } else if (CurrentSelectedPool.value === 'AdvanceNormal') {
     data = [...props.advancedNormalGachaData];
-  } else if (CurrentSelectedPool.value === 'SingleBox') {
-    data = [...props.singleBoxGachaData];
+  } else if (CurrentSelectedPool.value === 'QiYuan') {
+    data = [...props.qiYuanGachaData];
+  } else if (CurrentSelectedPool.value === 'Wish') {
+    data = [...props.wishGachaData];
   } else {
     data = [...props.limitGachaData];
     if (CurrentSelectedPool.value !== 'Limited') {
@@ -1034,8 +1099,10 @@ const startReviewAnimation = () => {
     sourceData = [...props.normalGachaData];
   } else if (poolId === 'AdvanceNormal') {
     sourceData = [...props.advancedNormalGachaData];
-  } else if (poolId === 'SingleBox') {
-    sourceData = [...props.singleBoxGachaData];
+  } else if (poolId === 'QiYuan') {
+    sourceData = [...props.qiYuanGachaData];
+  } else if (poolId === 'Wish') {
+    sourceData = [...props.wishGachaData];
   } else if (poolId === 'Limited') {
     sourceData = [...props.limitGachaData];
   } else if (props.LIMITED_CARD_POOLS_ID.includes(poolId)) {

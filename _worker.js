@@ -189,84 +189,84 @@ mainApp.use(
  * POST /start-update-task
  * 验证请求并将其转发给Durable Object以启动任务。
  */
-mainApp.post('/start-update-task', async (c) => {
-  try {
-    const licenseKey = c.req.header('X-License-Key')
-    const playerId = c.req.header('X-Player-Id')
-    if (!licenseKey || !playerId) {
-      return c.json({ success: false, message: '请求头中缺少 X-License-Key 或 X-Player-Id' }, 400)
-    }
+// mainApp.post('/start-update-task', async (c) => {
+//   try {
+//     const licenseKey = c.req.header('X-License-Key')
+//     const playerId = c.req.header('X-Player-Id')
+//     if (!licenseKey || !playerId) {
+//       return c.json({ success: false, message: '请求头中缺少 X-License-Key 或 X-Player-Id' }, 400)
+//     }
 
-    // 验证激活码
-    const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
-    const userIdStr = String(userId)
-    if (!(playerId === userIdStr || (userIdStr.startsWith('33') && userIdStr.length === 9))) {
-      return c.json({ success: false, message: '激活码与玩家ID不匹配。' }, 403)
-    }
+//     // 验证激活码
+//     const { userId, isExpired } = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
+//     const userIdStr = String(userId)
+//     if (!(playerId === userIdStr || (userIdStr.startsWith('33') && userIdStr.length === 9))) {
+//       return c.json({ success: false, message: '激活码与玩家ID不匹配。' }, 403)
+//     }
 
-    // 检查查询频率限制
-    const isAdmin = userIdStr.startsWith('33') && userIdStr.length === 9
-    const recordKvKey = `record_${playerId}`
-    const existingRecord = await c.env.GACHA_PARTY_RECORDS.getWithMetadata(recordKvKey)
-    const lastUpdated = existingRecord?.metadata?.lastCloudUpdated
-    const now = Date.now()
+//     // 检查查询频率限制
+//     const isAdmin = userIdStr.startsWith('33') && userIdStr.length === 9
+//     const recordKvKey = `record_${playerId}`
+//     const existingRecord = await c.env.GACHA_PARTY_RECORDS.getWithMetadata(recordKvKey)
+//     const lastUpdated = existingRecord?.metadata?.lastCloudUpdated
+//     const now = Date.now()
 
-    let timeLimit
-    if (isExpired) {
-      // 必须是订阅用户才能在线获取
-      return c.json({ success: false, message: '在线获取功能剩余时长不足。' }, 403)
-    } else if (isAdmin) {
-      timeLimit = RATE_LIMITS.onlineUpdate.admin
-    } else {
-      // 订阅会员
-      timeLimit = RATE_LIMITS.onlineUpdate.subscribed
-    }
+//     let timeLimit
+//     if (isExpired) {
+//       // 必须是订阅用户才能在线获取
+//       return c.json({ success: false, message: '在线获取功能剩余时长不足。' }, 403)
+//     } else if (isAdmin) {
+//       timeLimit = RATE_LIMITS.onlineUpdate.admin
+//     } else {
+//       // 订阅会员
+//       timeLimit = RATE_LIMITS.onlineUpdate.subscribed
+//     }
 
-    if (lastUpdated && now - lastUpdated < timeLimit) {
-      const timeLeft = timeLimit - (now - lastUpdated)
-      return c.json({ success: false, message: `更新过于频繁，请稍后再试。`, timeLeft }, 429)
-    }
-    // 获取Durable Object实例
-    // 使用playerId作为DO的唯一标识符，确保每个玩家只有一个任务实例
-    const doId = c.env.GACHA_TASKS.idFromName(playerId)
-    const stub = c.env.GACHA_TASKS.get(doId)
-    // 将请求转发给DO来启动任务
-    const response = await stub.fetch(
-      new Request(`https://do.task/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerId, licenseKey }),
-      }),
-    )
-    const data = await response.json()
+//     if (lastUpdated && now - lastUpdated < timeLimit) {
+//       const timeLeft = timeLimit - (now - lastUpdated)
+//       return c.json({ success: false, message: `更新过于频繁，请稍后再试。`, timeLeft }, 429)
+//     }
+//     // 获取Durable Object实例
+//     // 使用playerId作为DO的唯一标识符，确保每个玩家只有一个任务实例
+//     const doId = c.env.GACHA_TASKS.idFromName(playerId)
+//     const stub = c.env.GACHA_TASKS.get(doId)
+//     // 将请求转发给DO来启动任务
+//     const response = await stub.fetch(
+//       new Request(`https://do.task/start`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ playerId, licenseKey }),
+//       }),
+//     )
+//     const data = await response.json()
 
-    return c.json(data)
-  } catch (error) {
-    console.error('启动任务失败:', error)
-    return c.json({ success: false, message: `启动任务失败：${error.message}` }, 500)
-  }
-})
+//     return c.json(data)
+//   } catch (error) {
+//     console.error('启动任务失败:', error)
+//     return c.json({ success: false, message: `启动任务失败：${error.message}` }, 500)
+//   }
+// })
 
-/**
- * GET /task-status/:playerId
- * 查询指定玩家任务的当前状态。
- */
-mainApp.get('/task-status/:playerId', async (c) => {
-  const playerId = c.req.param('playerId')
-  if (!playerId) {
-    return c.json({ success: false, message: '缺少玩家ID' }, 400)
-  }
+// /**
+//  * GET /task-status/:playerId
+//  * 查询指定玩家任务的当前状态。
+//  */
+// mainApp.get('/task-status/:playerId', async (c) => {
+//   const playerId = c.req.param('playerId')
+//   if (!playerId) {
+//     return c.json({ success: false, message: '缺少玩家ID' }, 400)
+//   }
 
-  // 获取与玩家ID对应的DO实例
-  const doId = c.env.GACHA_TASKS.idFromName(playerId)
-  const stub = c.env.GACHA_TASKS.get(doId)
+//   // 获取与玩家ID对应的DO实例
+//   const doId = c.env.GACHA_TASKS.idFromName(playerId)
+//   const stub = c.env.GACHA_TASKS.get(doId)
 
-  // 从DO获取状态
-  const response = await stub.fetch(new Request(`https://do.task/status`))
-  const data = await response.json()
+//   // 从DO获取状态
+//   const response = await stub.fetch(new Request(`https://do.task/status`))
+//   const data = await response.json()
 
-  return c.json(data)
-})
+//   return c.json(data)
+// })
 
 /**
  * 将 URL-safe Base64 字符串转换为标准的 Base64 字符串。
