@@ -25,6 +25,9 @@ export const cardPools = {
         WishSelection: true, // 启用自选机制
         MaximumSelection: 4, // 最多可选4张心愿卡
       },
+      [RARITY.SSR]: {
+        doubleRateCards: ['1407', '1706'], // 双倍概率SSR角色（限定池SSR概率提升）
+      },
     },
     cardIds: {
       [RARITY.SP]: [
