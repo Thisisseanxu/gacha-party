@@ -2,6 +2,8 @@
   <div class="background">
     <div class="chat-page-container">
       <h1 class="page-title">盲盒派对聊天生成器</h1>
+      <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+      </p>
 
       <div v-if="isSelectionMode" class="character-selection-container">
         <h2 class="selection-title">选择出场的角色</h2>
@@ -74,8 +76,8 @@
         </div>
 
         <p class="hint">提示：点击对话即可进行编辑、插入、删除等操作。</p>
-        <div class="chat-log-container" ref="chatContainerRef">
-          <div class="chat-log" :style="{ width: chatLogWidth + 'vw' }">
+        <div class="chat-log-container" ref="chatContainerRef" :style="{ width: chatLogWidth + 'vw' }">
+          <div class="chat-log">
             <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
               :class="{ 'editing-highlight': index === editingIndex, 'insert-highlight-after': index === insertingIndex, [message.position]: true }"
               @click="openEditMenu(index)">
@@ -117,8 +119,6 @@
         </div>
       </template>
 
-      <p class="input-description">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
-      </p>
     </div>
   </div>
 
@@ -342,7 +342,7 @@ const cardOptions = computed(() => {
     }))
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
 
-  // 【新增】从 customCharacters 中过滤
+  // 从 customCharacters 中过滤
   const selectedCustom = customCharacters.value
     .filter(card => selectedCharacterIds.value.includes(card.id))
     .map(card => ({
@@ -571,13 +571,6 @@ const updateMessage = () => {
   }
 
   const messageToUpdate = chatLog.value[editingIndex.value];
-
-  // 旁白不允许发送图片
-  if (newMessage.value.cardId === '_旁白') {
-    alert('旁白不允许发送图片。');
-    return;
-  }
-
   // 从编辑器读取数据并更新
   messageToUpdate.cardId = newMessage.value.cardId;
   messageToUpdate.text = newMessage.value.text;
@@ -779,6 +772,7 @@ const updateFullscreenState = () => {
 // 自动保存聊天记录到本地存储
 const saveChatLogToLocalStorage = () => {
   localStorage.setItem(autoSaveKey, JSON.stringify(chatLog.value));
+  localStorage.setItem(characterSelectionKey, JSON.stringify(selectedCharacterIds.value));
 };
 
 // 在组件挂载时加载已保存的角色选择以及自定义角色
@@ -850,6 +844,12 @@ onUnmounted(() => {
   padding: 1.5rem 2rem;
   border-radius: 12px;
   margin-bottom: 20px;
+}
+
+.agreement {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-left: 10px;
 }
 
 .selection-title {
@@ -962,14 +962,14 @@ onUnmounted(() => {
   max-width: 800px;
   font-family: 'Inter', sans-serif;
   color: v-bind('colors.text.primary');
-  overflow: hidden;
+  overflow: visible;
 }
 
 .page-title {
   text-align: center;
   font-size: 2em;
   color: v-bind('colors.text.highlight');
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 /* 小按钮样式 */
@@ -1034,8 +1034,11 @@ onUnmounted(() => {
   padding: 10px;
   height: 50vh;
   overflow-y: auto;
-  margin-bottom: 20px;
+  margin-bottom: 0;
   border: 1px solid #ccc;
+  /* 在网页中居中 */
+  margin-left: auto;
+  margin-right: auto;
   /* 隐藏滚动条的样式 */
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -1167,18 +1170,18 @@ onUnmounted(() => {
 
 /* 旁白的气泡样式 */
 .bubble.center {
-  background-color: #8f8989;
-  /* 浅灰色底 */
-  color: black;
-  /* 黑色文字 */
-  max-width: 70%;
-  /* 防止过长 */
-  text-align: center;
-  /* 文字居中对齐 */
+  background-color: #4B3F66;
+  /* 浅紫色底 */
+  color: #C0BCC9;
+  /* 浅灰文字 */
+  text-align: left;
+  /* 文字对齐 */
   padding: 2px 8px 4px 8px;
   /* 缩小垂直内间距 */
   white-space: pre-wrap;
   word-break: break-word;
+  /* 文字字号缩小 */
+  font-size: 1rem;
 }
 
 /* 图片消息 */
