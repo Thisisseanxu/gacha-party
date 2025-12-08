@@ -193,12 +193,28 @@ export const allCards = [
     realname: '茴香',
   },
   {
+    id: '11001',
+    name: '次元加农炮',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11001.webp',
+    realname: '小爆妹',
+  },
+  {
+    id: '11003',
+    name: '爆米花精灵',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11002.webp',
+    realname: '爆爆',
+  },
+  // ---------------限定角色 结束---------------
+  {
     id: 'CustomSPshuan',
     name: '超·强力消防栓',
     rarity: RARITY.SP,
     imageUrl: '/images/cards/1804.webp',
+    notInGame: true,
   },
-  // SSR 角色
+  // ---------------SSR角色 开始---------------
   {
     id: '1102',
     name: '卷卷战士',
@@ -421,29 +437,31 @@ export const allCards = [
     name: '特别医护',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/1407.webp',
-    realname: '',
+    realname: '伊文捷琳',
   },
   {
     id: '1706',
     name: '冰池娃娃',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/1706.webp',
-    realname: '',
+    realname: '摩洛娜',
   },
+  // ---------------SSR角色 结束---------------
   {
     id: 'UPSSR',
     name: '概率提升的SSR',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/placeholder.webp',
+    notInGame: true,
   },
   {
     id: 'SSR01',
     name: '未知的SSR',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/placeholder.webp',
+    notInGame: true,
   },
-
-  // SR 角色
+  // ---------------SR角色 开始---------------
   {
     id: '1103',
     name: '珍珠射手',
@@ -535,8 +553,8 @@ export const allCards = [
     imageUrl: '/images/cards/1805.webp',
     realname: '卡米拉',
   },
-
-  // R 角色
+  // ---------------SR角色 结束---------------
+  // ---------------R角色 开始---------------
   {
     id: '1101',
     name: '纸杯千竹',
