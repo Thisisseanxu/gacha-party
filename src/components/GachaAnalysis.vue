@@ -38,7 +38,7 @@
 
         <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleLimitAnalysis.SinglePulls + '次'
-        }}<br />
+          }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="!isSinglePool">
@@ -52,7 +52,7 @@
             <span>距上个SSR</span>
             <span class="pity-count">{{
               CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+            }}</span>
           </div>
         </div>
       </div>
@@ -234,7 +234,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -276,6 +276,14 @@ const props = defineProps({
     required: true,
   },
   wishGachaData: {
+    type: Array,
+    required: true,
+  },
+  eventGachaData: {
+    type: Array,
+    required: true,
+  },
+  fukeGachaData: {
     type: Array,
     required: true,
   },
@@ -321,7 +329,9 @@ const NORMALPOOL_TITLE_MAP = {
 const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
 // 合成下拉框的选项
 const cardPoolOptions = ref([
-  { id: 'Limited', name: props.CARDPOOLS_NAME_MAP['Limited'] }, // 限定卡池总览
+  { id: 'Limited', name: props.CARDPOOLS_NAME_MAP['Limited'] },
+  { id: 'Event', name: props.CARDPOOLS_NAME_MAP['Event'] },
+  { id: 'Fuke', name: props.CARDPOOLS_NAME_MAP['Fuke'] },
   { id: 'Normal', name: props.CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
   { id: 'AdvanceNormal', name: props.CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻卡池
   { id: 'QiYuan', name: props.CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
@@ -334,6 +344,12 @@ const cardPoolOptions = ref([
 cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   if (option.id === 'Limited') {
     return props.limitGachaData.length > 0;
+  }
+  if (option.id === 'Event') {
+    return props.eventGachaData.length > 0;
+  }
+  if (option.id === 'Fuke') {
+    return props.fukeGachaData.length > 0;
   }
   if (option.id === 'Normal') {
     return props.normalGachaData.length > 0;
@@ -351,10 +367,11 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
     return true; // 保留分隔符
   }
   // 单卡池判断：限定池数据中有该gacha_id的记录才保留
-  return props.limitGachaData.some(r => r.gacha_id === Number(option.id));
+  const allLimitedPoolsData = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData];
+  return allLimitedPoolsData.some(r => r.gacha_id === Number(option.id));
 });
 
-const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiYuan', 'Wish'].includes(CurrentSelectedPool.value));
+const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiYuan', 'Wish', 'Event', 'Fuke'].includes(CurrentSelectedPool.value));
 
 // 导航栏相关的响应式变量
 const activeTab = ref('progressBar'); // 切换显示进度条/角色一览/数量统计
@@ -392,7 +409,7 @@ const isDev = import.meta.env.DEV;
 
 // 根据是否在回顾模式下，切换数据源
 const activeLimitData = computed(() =>
-  isReviewing.value && (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || CurrentSelectedPool.value === 'Limited')
+  isReviewing.value && (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) || ['Limited', 'Event', 'Fuke'].includes(CurrentSelectedPool.value))
     ? reviewRecords.value
     : props.limitGachaData
 );
@@ -401,6 +418,18 @@ const activeNormalData = computed(() =>
   isReviewing.value && CurrentSelectedPool.value === 'Normal'
     ? reviewRecords.value
     : props.normalGachaData
+);
+
+const activeEventData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'Event'
+    ? reviewRecords.value
+    : props.eventGachaData
+);
+
+const activeFukeData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'Fuke'
+    ? reviewRecords.value
+    : props.fukeGachaData
 );
 
 const activeAdvancedNormalData = computed(() =>
@@ -491,6 +520,80 @@ const singleLimitAnalysis = computed(() => {
     };
   }
   return { ...limitAnalysis.value }; // 如果选中的卡池不存在，则返回全部限定卡池的分析数据
+});
+
+// 联动卡池分析逻辑
+const eventAnalysis = computed(() => {
+  if (activeEventData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+
+  const records = [...activeEventData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  let SPCounter = 0, SSRCounter = 0;
+  const SPHistory = [], SSRHistory = [];
+
+  records.forEach((record) => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    if (!cardInfo) {
+      logger.warn(`(联动) 未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      return;
+    }
+    SPCounter++;
+    SSRCounter++;
+    if (cardInfo.rarity === RARITY.SP) {
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPCounter = 0;
+    }
+    if (cardInfo.rarity === RARITY.SSR) {
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRCounter = 0;
+    }
+  });
+
+  return {
+    totalPulls: records.length,
+    SP: SPCounter,
+    SSR: SSRCounter,
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
+    avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0),
+    minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory,
+    SSRHistory,
+    records,
+  };
+});
+
+// 复刻卡池分析逻辑
+const fukeAnalysis = computed(() => {
+  if (activeFukeData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+
+  const records = [...activeFukeData.value].sort((a, b) => a.created_at - b.created_at || a.id - b.id);
+  let SPCounter = 0, SSRCounter = 0;
+  const SPHistory = [], SSRHistory = [];
+
+  records.forEach((record) => {
+    const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
+    if (!cardInfo) {
+      logger.warn(`(复刻) 未找到 item_id: ${record.item_id} 的信息，已跳过。`);
+      return;
+    }
+    SPCounter++;
+    SSRCounter++;
+    if (cardInfo.rarity === RARITY.SP) {
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPCounter = 0;
+    }
+    if (cardInfo.rarity === RARITY.SSR) {
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRCounter = 0;
+    }
+  });
+
+  return {
+    totalPulls: records.length, SP: SPCounter, SSR: SSRCounter,
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)), avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0), minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory, SSRHistory, records,
+  };
 });
 
 // 高级常驻卡池分析逻辑
@@ -650,6 +753,8 @@ const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value;
   if (CurrentSelectedPool.value === 'QiYuan') return qiYuanAnalysis.value;
   if (CurrentSelectedPool.value === 'Wish') return wishAnalysis.value;
+  if (CurrentSelectedPool.value === 'Event') return eventAnalysis.value;
+  if (CurrentSelectedPool.value === 'Fuke') return fukeAnalysis.value;
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value;
   return singleLimitAnalysis.value;
 });
@@ -667,6 +772,12 @@ const analysisForTitle = computed(() => {
   }
   if (CurrentSelectedPool.value === 'Wish') {
     return wishAnalysis.value?.avgPullsForSP > 0 ? wishAnalysis.value : null;
+  }
+  if (CurrentSelectedPool.value === 'Event') {
+    return eventAnalysis.value?.avgPullsForSP > 0 ? eventAnalysis.value : null;
+  }
+  if (CurrentSelectedPool.value === 'Fuke') {
+    return fukeAnalysis.value?.avgPullsForSP > 0 ? fukeAnalysis.value : null;
   }
   return singleLimitAnalysis.value?.avgPullsForSP > 0 ? singleLimitAnalysis.value : null;
 });
@@ -845,6 +956,14 @@ const quantityStatistics = computed(() => {
     const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, RARITY.SSR);
     return [...spStats, ...ssrStats];
   }
+  if (pool === 'Event') {
+    const spStats = generateStats(eventAnalysis.value?.SPHistory, RARITY.SP);
+    const ssrStats = generateStats(eventAnalysis.value?.SSRHistory, RARITY.SSR);
+    return [...spStats, ...ssrStats];
+  }
+  if (pool === 'Fuke') {
+    return generateStats(fukeAnalysis.value?.SPHistory, RARITY.SP);
+  }
   // 默认处理所有其他限定池
   const spStats = generateStats(singleLimitAnalysis.value?.SPHistory, RARITY.SP);
   const ssrStats = generateStats(singleLimitAnalysis.value?.SSRHistory, RARITY.SSR);
@@ -891,11 +1010,15 @@ const fullHistory = computed(() => {
     data = [...props.qiYuanGachaData];
   } else if (CurrentSelectedPool.value === 'Wish') {
     data = [...props.wishGachaData];
-  } else {
+  } else if (CurrentSelectedPool.value === 'Event') {
+    data = [...props.eventGachaData];
+  } else if (CurrentSelectedPool.value === 'Fuke') {
+    data = [...props.fukeGachaData];
+  } else if (CurrentSelectedPool.value === 'Limited') {
     data = [...props.limitGachaData];
-    if (CurrentSelectedPool.value !== 'Limited') {
-      data = data.filter(r => r.gacha_id === Number(CurrentSelectedPool.value));
-    }
+  } else {
+    // 适用于所有单卡池，包括限定、联动和复刻
+    data = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(r => r.gacha_id === Number(CurrentSelectedPool.value));
   }
   return data.sort((a, b) => b.created_at - a.created_at || b.id - a.id).map(record => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id);
@@ -1103,10 +1226,15 @@ const startReviewAnimation = () => {
     sourceData = [...props.qiYuanGachaData];
   } else if (poolId === 'Wish') {
     sourceData = [...props.wishGachaData];
+  } else if (poolId === 'Event') {
+    sourceData = [...props.eventGachaData];
+  } else if (poolId === 'Fuke') {
+    sourceData = [...props.fukeGachaData];
   } else if (poolId === 'Limited') {
     sourceData = [...props.limitGachaData];
-  } else if (props.LIMITED_CARD_POOLS_ID.includes(poolId)) {
-    sourceData = props.limitGachaData.filter(r => r.gacha_id === Number(poolId));
+  } else {
+    // 适用于所有单卡池，包括限定、联动和复刻
+    sourceData = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(r => r.gacha_id === Number(poolId));
   }
 
   if (sourceData.length === 0) {

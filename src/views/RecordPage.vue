@@ -62,11 +62,11 @@
       <p class="input-description">当前版本：v{{ appVersion }}</p>
     </div>
 
-    <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData"
-      :normal-gacha-data="NormalGachaData" :advanced-normal-gacha-data="AdvanceNormalGachaData"
-      :qi-yuan-gacha-data="QiYuanGachaData" :wish-gacha-data="WishGachaData" :player-id="playerId"
-      :json-input="jsonInput" :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
-      @reset-view="resetView" />
+    <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData" :event-gacha-data="EventGachaData"
+      :fuke-gacha-data="FukeGachaData" :normal-gacha-data="NormalGachaData"
+      :advanced-normal-gacha-data="AdvanceNormalGachaData" :qi-yuan-gacha-data="QiYuanGachaData"
+      :wish-gacha-data="WishGachaData" :player-id="playerId" :json-input="jsonInput"
+      :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -133,6 +133,8 @@ const viewState = ref('input'); // 'input' 为用户输入模式 'analysis' 则�
 const jsonInput = ref(''); // 存储用户输入的 JSON 数据
 const playerId = ref(''); // 存储玩家ID
 const LimitGachaData = ref([]); // 存储限定卡池抽卡记录
+const EventGachaData = ref([]); // 存储联动卡池抽卡记录
+const FukeGachaData = ref([]); // 存储复刻卡池抽卡记录
 const NormalGachaData = ref([]); // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]); // 存储高级常驻卡池抽卡记录
 const QiYuanGachaData = ref([]); // 存储祈愿盲盒卡池抽卡记录
@@ -143,9 +145,13 @@ const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
 const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "48", "49", "50", "51", "52", "53", "54", "55", "58", "59", "107"]; // 限定卡池ID列表
+const EVENT_CARD_POOLS_ID = ['57']; // 联动卡池ID列表
+const FUKE_CARD_POOLS_ID = []; // 复刻卡池ID列表（暂时为空）
 const CARDPOOLS_NAME_MAP = {
   'Normal': '常驻扭蛋',
   'Limited': '限定扭蛋',
+  'Event': '联动扭蛋',
+  'Fuke': '复刻扭蛋',
   'AdvanceNormal': '高级常驻扭蛋',
   'QiYuan': '祈愿盲盒',
   'Wish': '心愿自选',
@@ -166,6 +172,7 @@ const CARDPOOLS_NAME_MAP = {
   '53': '萌鬼认可证',
   '54': '早稻叽-复刻1',
   '55': '超频扭蛋机',
+  '57': '酷玩爆米花',
   '58': '厨娘来啦！',
   '59': '仲夏扭蛋-复刻1',
   '107': '地下车手招募',
@@ -312,6 +319,8 @@ const handleJsonAnalysis = () => {
 
   // 分离限定卡池和常驻卡池数据
   const LimitGachaRecords = [];
+  const EventGachaRecords = [];
+  const FukeGachaRecords = [];
   const NormalGachaRecords = [];
   const AdvanceNormalRecords = []; // 用于存储高级常驻卡池的记录
   const QiYuanGachaRecords = []; // 用于存储祈愿盲盒卡池的记录
@@ -322,12 +331,23 @@ const handleJsonAnalysis = () => {
     else if (gachaId === '47') QiYuanGachaRecords.push(...records); // 目前祈愿盲盒卡池ID固定为47
     else if (gachaId === '1000') WishGachaRecords.push(...records); // 心愿自选卡池ID固定为1000
     else if (LIMITED_CARD_POOLS_ID.includes(gachaId)) LimitGachaRecords.push(...records);
+    else if (EVENT_CARD_POOLS_ID.includes(gachaId)) EventGachaRecords.push(...records);
+    else if (FUKE_CARD_POOLS_ID.includes(gachaId)) FukeGachaRecords.push(...records);
+    else logger.warn(`检测到未知的卡池ID ${gachaId}，已跳过该卡池的数据。`);
   }
 
   // 验证抽卡记录格式
   const isValidRecord = item => typeof item === 'object' && item !== null && 'id' in item && 'item_id' in item && 'created_at' in item;
   if (!LimitGachaRecords.every(isValidRecord)) {
     errorMessage.value = '数据格式错误：部分限定卡池抽卡记录缺少必须字段。';
+    return;
+  }
+  if (!EventGachaRecords.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分联动卡池抽卡记录缺少必须字段。';
+    return;
+  }
+  if (!FukeGachaRecords.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分复刻卡池抽卡记录缺少必须字段。';
     return;
   }
   if (!NormalGachaRecords.every(isValidRecord)) {
