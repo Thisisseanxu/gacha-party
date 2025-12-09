@@ -15,12 +15,12 @@
 
       <div>
         <div class="header-top-row">
-          <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" option-text-key="name"
-            option-value-key="id" :disabled="isReviewing" style="min-width: 160px;">
+          <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible option-text-key="name"
+            option-value-key="id" :disabled="isReviewing" style="min-width: 11.8rem;"><!-- 9字*1.2+1间距 -->
             <template #trigger>
               <div class="title-bar">
                 <span>
-                  {{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                  {{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
                 </span>
               </div>
             </template>
@@ -38,7 +38,7 @@
 
         <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
           singleLimitAnalysis.SinglePulls + '次'
-          }}<br />
+        }}<br />
           抽数会计算到最终抽出限定的卡池中
         </div>
         <div class="pity-counters" v-if="!isSinglePool">
@@ -52,7 +52,7 @@
             <span>距上个SSR</span>
             <span class="pity-count">{{
               CurrentSelectedPoolAnalysis?.SSR ?? 0
-            }}</span>
+              }}</span>
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@
         <div v-if="activeTab === 'progressBar'" class="history-list" ref="historyListRef">
           <div
             v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : CurrentSelectedPoolAnalysis?.SPHistory)"
-            :key="index" class="history-item"
+            :key="index" class="history-item-bar"
             :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
             <div class="char-info">
               <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
@@ -193,7 +193,7 @@
       </div>
 
       <div class="full-history-section">
-        <h3 class="section-title">{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
+        <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
         <div class="full-history-list">
           <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
             <div class="char-info">
@@ -233,8 +233,8 @@
       </div>
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-        <button @click="exportPoolData" class="button">导出{{ props.CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+        <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -298,6 +298,12 @@ const props = defineProps({
   LIMITED_CARD_POOLS_ID: {
     type: Array,
   },
+  EVENT_CARD_POOLS_ID: {
+    type: Array,
+  },
+  FUKE_CARD_POOLS_ID: {
+    type: Array,
+  },
   CARDPOOLS_NAME_MAP: {
     type: Object,
   }
@@ -305,6 +311,18 @@ const props = defineProps({
 
 // 绑定父组件的重置事件给返回按钮
 const emit = defineEmits(['reset-view']);
+
+
+const CARDPOOLS_NAME_MAP = {
+  ...props.CARDPOOLS_NAME_MAP,
+  'Normal': '常驻扭蛋',
+  'Limited': '限定扭蛋总览',
+  'Event': '联动扭蛋总览',
+  'Fuke': '复刻扭蛋总览',
+  'AdvanceNormal': '高级常驻扭蛋',
+  'QiYuan': '祈愿盲盒',
+  'Wish': '心愿自选',
+};
 
 // 抽数小于字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
@@ -327,17 +345,24 @@ const NORMALPOOL_TITLE_MAP = {
 }; // 区间：0-8.75，8.75-9.75，9.75-10.5，10.5-11.5，11.5-12.25，12.25-13.25，13.25+
 
 const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
-// 合成下拉框的选项
+// 合成下拉框的选项，并进行分组
 const cardPoolOptions = ref([
-  { id: 'Limited', name: props.CARDPOOLS_NAME_MAP['Limited'] },
-  { id: 'Event', name: props.CARDPOOLS_NAME_MAP['Event'] },
-  { id: 'Fuke', name: props.CARDPOOLS_NAME_MAP['Fuke'] },
-  { id: 'Normal', name: props.CARDPOOLS_NAME_MAP['Normal'] }, // 常驻卡池
-  { id: 'AdvanceNormal', name: props.CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻卡池
-  { id: 'QiYuan', name: props.CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
-  { id: 'Wish', name: props.CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
-  { id: '分隔符------', name: '分隔符------' }, // 分隔符
-  ...props.LIMITED_CARD_POOLS_ID.map(id => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
+  // 默认展开的顶级选项
+  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
+  { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
+  { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
+  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
+  { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
+  { id: 'Wish', name: CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
+  // 可折叠的分组
+  { id: '---', name: '限定扭蛋机' }, // 分隔符
+  ...props.LIMITED_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
+  { id: '---', name: '联动扭蛋机' }, // 分隔符
+  ...props.EVENT_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 联动单卡池
+  { id: '---', name: '复刻扭蛋机' }, // 分隔符
+  ...props.FUKE_CARD_POOLS_ID.map(id => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
+  { id: '---', name: '其他扭蛋机' }, // 分隔符
+  { id: 'QiYuan', name: CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
 ]);
 
 // 删除抽数为0的卡池
@@ -363,7 +388,7 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   if (option.id === 'Wish') {
     return props.wishGachaData.length > 0;
   }
-  if (option.id === '分隔符------') {
+  if (option.id === '---') {
     return true; // 保留分隔符
   }
   // 单卡池判断：限定池数据中有该gacha_id的记录才保留
@@ -1174,7 +1199,7 @@ const exportToExcel = async (filename, historyData) => {
 
 // 触发导出抽卡记录的函数
 const exportPoolData = () => {
-  exportToExcel('盲盒派对' + props.CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
+  exportToExcel('盲盒派对' + CARDPOOLS_NAME_MAP[CurrentSelectedPool.value] + '抽卡记录.xlsx', fullHistory.value);
 };
 
 // 动画相关函数
@@ -1293,7 +1318,7 @@ const formatDateTime = (timestamp) => {
 }
 
 .gacha-analysis-page>div:not(:first-child) {
-  margin-top: 10px;
+  margin-top: 8px;
   padding-top: 10px;
   border-top: 2px solid v-bind('colors.background.light');
   gap: 10px;
@@ -1339,6 +1364,7 @@ const formatDateTime = (timestamp) => {
   font-size: 3.5rem;
   font-weight: bold;
   letter-spacing: -2px;
+  margin: -1rem 0rem -0.5rem 0rem;
 }
 
 .highlight {
@@ -1403,7 +1429,7 @@ const formatDateTime = (timestamp) => {
   justify-content: center;
   align-items: center;
   flex: 1;
-  padding: 5px 0px;
+  padding: 2px 0px;
 }
 
 .stat-box .stat-title {
@@ -1492,14 +1518,20 @@ const formatDateTime = (timestamp) => {
   border-radius: 3px;
 }
 
-.history-item {
+.history-item,
+.history-item-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 0 0.5rem;
+  border-radius: 6px;
   position: relative;
   z-index: 1;
+}
+
+.history-item-bar {
+  background-color: v-bind('colors.background.lighter');
+  border-radius: 40px;
 }
 
 .quantity-item,
@@ -1558,6 +1590,7 @@ const formatDateTime = (timestamp) => {
   gap: 12px;
   position: relative;
   z-index: 2;
+  margin-left: -0.5rem;
 }
 
 .char-avatar {
@@ -1589,12 +1622,6 @@ const formatDateTime = (timestamp) => {
   color: v-bind('colors.brand.primary');
   text-align: right;
   text-shadow: 1px 1px 3px v-bind('colors.textShadow');
-}
-
-.full-history-section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid v-bind('colors.background.lighter');
 }
 
 .section-title {

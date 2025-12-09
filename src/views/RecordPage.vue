@@ -66,7 +66,8 @@
       :fuke-gacha-data="FukeGachaData" :normal-gacha-data="NormalGachaData"
       :advanced-normal-gacha-data="AdvanceNormalGachaData" :qi-yuan-gacha-data="QiYuanGachaData"
       :wish-gacha-data="WishGachaData" :player-id="playerId" :json-input="jsonInput"
-      :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
+      :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
+      :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -148,13 +149,6 @@ const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "48", "
 const EVENT_CARD_POOLS_ID = ['57']; // 联动卡池ID列表
 const FUKE_CARD_POOLS_ID = []; // 复刻卡池ID列表（暂时为空）
 const CARDPOOLS_NAME_MAP = {
-  'Normal': '常驻扭蛋',
-  'Limited': '限定扭蛋',
-  'Event': '联动扭蛋',
-  'Fuke': '复刻扭蛋',
-  'AdvanceNormal': '高级常驻扭蛋',
-  'QiYuan': '祈愿盲盒',
-  'Wish': '心愿自选',
   '9': '常驻扭蛋',
   '29': '车手盲盒机',
   '40': '塔菲扭蛋',
@@ -368,6 +362,8 @@ const handleJsonAnalysis = () => {
   }
 
   LimitGachaData.value = LimitGachaRecords;
+  EventGachaData.value = EventGachaRecords;
+  FukeGachaData.value = FukeGachaRecords;
   NormalGachaData.value = NormalGachaRecords;
   AdvanceNormalGachaData.value = AdvanceNormalRecords;
   QiYuanGachaData.value = QiYuanGachaRecords;

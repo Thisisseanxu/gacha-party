@@ -6,16 +6,41 @@
     </div>
 
     <div v-if="isOpen" class="options-dropdown">
-      <ul>
+      <ul v-if="!collapsible">
         <li v-for="option in options" :key="option[optionValueKey]">
-          <div v-if="option[optionTextKey] !== '分隔符------'" @click="selectOption(option)"
+          <div v-if="option[optionValueKey] !== '---'" @click="selectOption(option)"
             :class="{ 'is-selected': modelValue === option[optionValueKey] }">
             {{ option[optionTextKey] }}
           </div>
-          <div v-else class="option-divider" aria-hidden="true">
+          <div v-else class="option-divider">
+            <hr /><span>{{ option[optionTextKey] }}</span>
             <hr />
           </div>
         </li>
+      </ul>
+      <ul v-else>
+        <template v-for="(group, index) in groupedOptions" :key="index">
+          <!-- 如果是顶级分组，直接渲染选项 -->
+          <template v-if="group.isUngrouped">
+            <li v-for="option in group.options" :key="option[optionValueKey]" @click="selectOption(option)"
+              :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+              <div>{{ option[optionTextKey] }}</div>
+            </li>
+          </template>
+          <!-- 否则，渲染可折叠的分组 -->
+          <template v-else>
+            <li class="option-divider" @click="toggleGroup(group.name)">
+              <span>{{ group.name }}</span>
+              <span class="group-arrow-indicator" :class="{ 'is-open': expandedGroups[group.name] }"></span>
+            </li>
+            <template v-if="expandedGroups[group.name]">
+              <li v-for="option in group.options" :key="option[optionValueKey]" @click="selectOption(option)"
+                :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+                <div>{{ option[optionTextKey] }}</div>
+              </li>
+            </template>
+          </template>
+        </template>
       </ul>
     </div>
   </div>
@@ -23,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { colors } from '@/styles/colors.js'; // 引入颜色常量
 
 const props = defineProps({
@@ -47,12 +72,64 @@ const props = defineProps({
     type: String,
     default: 'value',
   },
+  // 是否开启折叠分组功能
+  collapsible: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
 const isOpen = ref(false); // 控制下拉框是否显示
 const selectRef = ref(null); // 获取组件根元素的引用
+const expandedGroups = ref({}); // 追踪折叠分组的展开状态
+
+// 如果开启了折叠功能，则对选项进行分组
+const groupedOptions = computed(() => {
+  if (!props.collapsible) return [];
+
+  const firstSeparatorIndex = props.options.findIndex(opt => opt[props.optionValueKey] === '---');
+
+  // 如果没有分隔符，所有选项都在一个默认展开的组里
+  if (firstSeparatorIndex === -1) {
+    return [{ name: 'ungrouped', options: props.options, isUngrouped: true }];
+  }
+
+  const groups = [];
+  let currentGroup = null;
+
+  // 第一个分隔符之前的内容作为顶级分组
+  const topLevelOptions = props.options.slice(0, firstSeparatorIndex);
+  if (topLevelOptions.length > 0) {
+    groups.push({ name: 'ungrouped', options: topLevelOptions, isUngrouped: true });
+  }
+
+  // 后续内容按分隔符分组
+  props.options.forEach(option => {
+    if (option[props.optionValueKey] === '---') {
+      currentGroup = { name: option[props.optionTextKey], options: [] };
+      groups.push(currentGroup);
+    } else if (currentGroup && !groups.find(g => g.isUngrouped && g.options.includes(option))) {
+      currentGroup.options.push(option);
+    }
+  });
+
+  return groups;
+});
+
+// 将第一个可以展开的分组默认展开
+if (props.collapsible) {
+  const firstGroup = groupedOptions.value.find(g => !g.isUngrouped);
+  if (firstGroup) {
+    expandedGroups.value[firstGroup.name] = true;
+  }
+}
+
+// 切换分组的展开/收起状态
+const toggleGroup = (groupName) => {
+  expandedGroups.value[groupName] = !expandedGroups.value[groupName];
+};
 
 // 控制下拉是否显示
 const toggleDropdown = () => {
@@ -83,7 +160,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  // 组件卸载前，移除事件监听，防止内存泄漏
+  // 组件卸载前，移除事件监听
   document.removeEventListener('click', handleClickOutside);
 });
 
@@ -124,7 +201,7 @@ const colorScrollbar = colors.scrollbar;
   transition: background-color 0.2s;
 }
 
-/* 添加一个轻微的悬停效果，告知用户这里可以点击 */
+/* 悬停效果 */
 .select-trigger:hover {
   background-color: v-bind(colorTriggerHover);
 }
@@ -160,6 +237,11 @@ const colorScrollbar = colors.scrollbar;
   max-height: 250px;
   overflow-y: auto;
   padding: 4px;
+  /* 禁止横向滚动 */
+  overflow-x: hidden;
+
+  /* 字体大小 */
+  font-size: 1.2rem;
 }
 
 /* 选项列表 */
@@ -177,18 +259,22 @@ const colorScrollbar = colors.scrollbar;
   color: v-bind(colorOptionText);
 }
 
-/* 单个选项的div增加padding */
-.options-dropdown li div {
-  padding: 10px 2px;
+.options-dropdown li>div {
+  padding: 4px 2px;
 }
 
-.options-dropdown li:hover {
+.options-dropdown li:not(.option-divider):hover {
+  background-color: v-bind(colorOptionHoverBg);
+  color: v-bind(colorOptionTextHover);
+}
+
+.option-divider:hover {
   background-color: v-bind(colorOptionHoverBg);
   color: v-bind(colorOptionTextHover);
 }
 
 /* 当前选中的选项高亮 */
-.options-dropdown li div.is-selected {
+.options-dropdown li.is-selected {
   color: v-bind(colorSelectedText);
   background-color: v-bind(colorSelectedBg);
   font-weight: bold;
@@ -213,5 +299,29 @@ const colorScrollbar = colors.scrollbar;
 .options-dropdown::-webkit-scrollbar-thumb:hover {
   /* 悬浮时使用一个更亮的颜色 */
   background-color: v-bind(colorTriggerHover);
+}
+
+.option-divider {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: v-bind(colorOptionText);
+  font-size: 1rem;
+}
+
+/* 分组标题的箭头 */
+.group-arrow-indicator {
+  display: inline-block;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid v-bind(colorArrow);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* 展开时箭头旋转 */
+.group-arrow-indicator.is-open {
+  transform: rotate(180deg);
 }
 </style>
