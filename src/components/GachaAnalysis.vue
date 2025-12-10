@@ -49,7 +49,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool">
@@ -64,7 +64,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+                }}</span>
             </div>
           </div>
         </div>
@@ -248,7 +248,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -600,6 +600,26 @@ const eventAnalysis = computed(() => {
   };
 });
 
+// 联动卡池单卡池分析逻辑
+const singleEventAnalysis = computed(() => {
+  if (!eventAnalysis.value) return null;
+  if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+    const filteredSPHistory = eventAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    const filteredSSRHistory = eventAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    return {
+      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
+      SinglePulls: fullHistory.value.length,
+      avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
+      avgPullsForSSR: filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
+      maxSP: Math.max(...filteredSPHistory.map(item => item.count), 0),
+      minSP: Math.min(...filteredSPHistory.map(item => item.count), Infinity),
+      SPHistory: filteredSPHistory,
+      SSRHistory: filteredSSRHistory
+    };
+  }
+  return { ...eventAnalysis.value };
+});
+
 // 复刻卡池分析逻辑
 const fukeAnalysis = computed(() => {
   if (activeFukeData.value.length === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
@@ -632,6 +652,26 @@ const fukeAnalysis = computed(() => {
     maxSP: Math.max(...SPHistory.map(item => item.count), 0), minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
     SPHistory, SSRHistory, records,
   };
+});
+
+// 复刻卡池单卡池分析逻辑
+const singleFukeAnalysis = computed(() => {
+  if (!fukeAnalysis.value) return null;
+  if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+    const filteredSPHistory = fukeAnalysis.value.SPHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    const filteredSSRHistory = fukeAnalysis.value.SSRHistory.filter(item => item.gacha_id === Number(CurrentSelectedPool.value));
+    return {
+      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
+      SinglePulls: fullHistory.value.length,
+      avgPullsForSP: calculateAverage(filteredSPHistory.map(item => item.count)),
+      avgPullsForSSR: filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
+      maxSP: Math.max(...filteredSPHistory.map(item => item.count), 0),
+      minSP: Math.min(...filteredSPHistory.map(item => item.count), Infinity),
+      SPHistory: filteredSPHistory,
+      SSRHistory: filteredSSRHistory
+    };
+  }
+  return { ...fukeAnalysis.value };
 });
 
 // 高级常驻卡池分析逻辑
@@ -794,30 +834,20 @@ const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'Event') return eventAnalysis.value;
   if (CurrentSelectedPool.value === 'Fuke') return fukeAnalysis.value;
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value;
+
+  if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) return singleEventAnalysis.value;
+  if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) return singleFukeAnalysis.value;
+
   return singleLimitAnalysis.value;
 });
 
 // 为称号组件提供数据
 const analysisForTitle = computed(() => {
+  const analysis = CurrentSelectedPoolAnalysis.value;
   if (CurrentSelectedPool.value === 'Normal') {
-    return normalAnalysis.value?.avgPullsForSSR > 0 ? normalAnalysis.value : null;
+    return analysis?.avgPullsForSSR > 0 ? analysis : null;
   }
-  if (CurrentSelectedPool.value === 'AdvanceNormal') {
-    return AdvanceNormalAnalysis.value?.avgPullsForSP > 0 ? AdvanceNormalAnalysis.value : null;
-  }
-  if (CurrentSelectedPool.value === 'QiYuan') {
-    return qiYuanAnalysis.value?.avgPullsForSP > 0 ? qiYuanAnalysis.value : null;
-  }
-  if (CurrentSelectedPool.value === 'Wish') {
-    return wishAnalysis.value?.avgPullsForSP > 0 ? wishAnalysis.value : null;
-  }
-  if (CurrentSelectedPool.value === 'Event') {
-    return eventAnalysis.value?.avgPullsForSP > 0 ? eventAnalysis.value : null;
-  }
-  if (CurrentSelectedPool.value === 'Fuke') {
-    return fukeAnalysis.value?.avgPullsForSP > 0 ? fukeAnalysis.value : null;
-  }
-  return singleLimitAnalysis.value?.avgPullsForSP > 0 ? singleLimitAnalysis.value : null;
+  return analysis?.avgPullsForSP > 0 ? analysis : null;
 });
 
 
@@ -1004,8 +1034,9 @@ const quantityStatistics = computed(() => {
     return generateStats(fukeAnalysis.value?.SPHistory, RARITY.SP);
   }
   // 默认处理所有其他限定池
-  const spStats = generateStats(singleLimitAnalysis.value?.SPHistory, RARITY.SP);
-  const ssrStats = generateStats(singleLimitAnalysis.value?.SSRHistory, RARITY.SSR);
+  const analysis = CurrentSelectedPoolAnalysis.value;
+  const spStats = generateStats(analysis?.SPHistory, RARITY.SP);
+  const ssrStats = generateStats(analysis?.SSRHistory, RARITY.SSR);
   // 合并列表，SP在前，SSR在后
   return [...spStats, ...ssrStats];
 });
