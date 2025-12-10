@@ -3,6 +3,9 @@
     <div class="gacha-analysis-page">
       <div class="gacha-analysis-button-container">
         <button @click="emit('reset-view')" class="button">← 返回</button>
+        <button @click="shareAnalysisImage" class="button" :disabled="isReviewing">
+          <span style="font-size: 1.2em; vertical-align: middle;">🔗</span> 分享
+        </button>
         <button @click="startReviewAnimation" class="button" v-if="!isSinglePool">
           {{ reviewButtonText }}
         </button>
@@ -10,185 +13,188 @@
           {{ reviewSpeedText }}
         </button>
       </div>
-      <span class="tertiary-text">UID: {{ playerId }}</span><br />
-      <span class="tertiary-text">{{ dateRange }}</span>
 
-      <div>
-        <div class="header-top-row">
-          <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible option-text-key="name"
-            option-value-key="id" :disabled="isReviewing" style="min-width: 11.8rem;"><!-- 9字*1.2+1间距 -->
-            <template #trigger>
-              <div class="title-bar">
-                <span>
-                  {{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
-                </span>
-              </div>
-            </template>
-          </SelectorComponent>
+      <div ref="analysisContentRef" class="analysis-content-wrapper">
+        <div class="analysis-section">
+          <span class="tertiary-text">{{ dateRange }} UID: {{ playerId }}</span>
+          <div class="header-top-row">
+            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible
+              option-text-key="name" option-value-key="id" :disabled="isReviewing" style="min-width: 11.6rem;">
+              <!-- 9字*1.2+0.8间距 -->
+              <template #trigger>
+                <div class="title-bar">
+                  <span>
+                    {{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                  </span>
+                </div>
+              </template>
+            </SelectorComponent>
 
-          <CustomPlayerTitle v-if="analysisForTitle"
-            :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP"
-            :value="CurrentSelectedPool === 'Normal' ? analysisForTitle.avgPullsForSSR : analysisForTitle.avgPullsForSP" />
-        </div>
-        <div :class="{ 'total-pulls': true, 'highlight': isSinglePool }">
-          {{
-            CurrentSelectedPoolAnalysis?.totalPulls ?? 0
-          }} <span class="pulls-text">抽</span>
-        </div>
-
-        <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
-          singleLimitAnalysis.SinglePulls + '次'
-        }}<br />
-          抽数会计算到最终抽出限定的卡池中
-        </div>
-        <div class="pity-counters" v-if="!isSinglePool">
-          <div class="history-item" :style="{ ...getHistoryItemStyle(CurrentSelectedPoolAnalysis?.SP ?? 0), flex: '1' }"
-            v-if="CurrentSelectedPool !== 'Normal'">
-            <span>距上个限定 </span>
-            <span class="pity-count">{{ CurrentSelectedPoolAnalysis?.SP ?? 0 }}</span>
+            <CustomPlayerTitle v-if="analysisForTitle"
+              :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP"
+              :value="CurrentSelectedPool === 'Normal' ? analysisForTitle.avgPullsForSSR : analysisForTitle.avgPullsForSP" />
           </div>
-          <div class="history-item"
-            :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? (normalAnalysis?.SSR ?? 0) : CurrentSelectedPoolAnalysis?.SSR ?? 0, CurrentSelectedPool === 'Normal'), flex: '1' }">
-            <span>距上个SSR</span>
-            <span class="pity-count">{{
-              CurrentSelectedPoolAnalysis?.SSR ?? 0
+          <div :class="{ 'total-pulls': true, 'highlight': isSinglePool }">
+            {{
+              CurrentSelectedPoolAnalysis?.totalPulls ?? 0
+            }} <span class="pulls-text">抽</span>
+          </div>
+
+          <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
+            singleLimitAnalysis.SinglePulls + '次'
+            }}<br />
+            抽数会计算到最终抽出限定的卡池中
+          </div>
+          <div class="pity-counters" v-if="!isSinglePool">
+            <div class="history-item"
+              :style="{ ...getHistoryItemStyle(CurrentSelectedPoolAnalysis?.SP ?? 0), flex: '1' }"
+              v-if="CurrentSelectedPool !== 'Normal'">
+              <span>距上个限定 </span>
+              <span class="pity-count">{{ CurrentSelectedPoolAnalysis?.SP ?? 0 }}</span>
+            </div>
+            <div class="history-item"
+              :style="{ ...getHistoryItemStyle(CurrentSelectedPool === 'Normal' ? (normalAnalysis?.SSR ?? 0) : CurrentSelectedPoolAnalysis?.SSR ?? 0, CurrentSelectedPool === 'Normal'), flex: '1' }">
+              <span>距上个SSR</span>
+              <span class="pity-count">{{
+                CurrentSelectedPoolAnalysis?.SSR ?? 0
               }}</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="tabs">
-          <button ref="dataStatsButton" class="nav-button" :class="{ active: statsActiveTab === 'dataStats' }"
-            @click="statsActiveTab = 'dataStats'">
-            数据统计
-          </button>
-          <button ref="percentageAnalysisButton" class="nav-button"
-            :class="{ active: statsActiveTab === 'percentageAnalysis' }" @click="statsActiveTab = 'percentageAnalysis'">
-            占比分析
-          </button>
-          <div class="nav-underline" :style="statsUnderlineStyle"></div>
-        </div>
-
-        <div v-if="statsActiveTab === 'dataStats'" class="stats-overview">
-          <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-            <div class="stat-title">SSR数量</div>
-            <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
-          </div>
-          <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-            <div class="stat-title">限定平均</div>
-            <div v-if="CurrentSelectedPoolAnalysis?.avgPullsForSP > 0"
-              :class="{ 'stat-value': true, 'highlight': isSinglePool }">{{
-                CurrentSelectedPoolAnalysis?.avgPullsForSP.toFixed(2)
-              }} 抽
             </div>
-            <div v-else class="stat-value">暂无数据</div>
+          </div>
+        </div>
+        <div class="analysis-section">
+          <div class="tabs">
+            <button ref="dataStatsButton" class="nav-button" :class="{ active: statsActiveTab === 'dataStats' }"
+              @click="statsActiveTab = 'dataStats'">
+              数据统计
+            </button>
+            <button ref="percentageAnalysisButton" class="nav-button"
+              :class="{ active: statsActiveTab === 'percentageAnalysis' }"
+              @click="statsActiveTab = 'percentageAnalysis'">
+              占比分析
+            </button>
+            <div class="nav-underline" :style="statsUnderlineStyle"></div>
           </div>
 
-          <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
-            <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div v-if="CurrentSelectedPoolAnalysis?.maxSP > 0"
-                :class="{ 'stat-value': true, 'highlight': isSinglePool }">最非
-                {{
-                  CurrentSelectedPoolAnalysis?.maxSP
-                }} 抽
-              </div>
-              <div v-else class="stat-value">未抽到</div>
+          <div v-if="statsActiveTab === 'dataStats'" class="stats-overview">
+            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+              <div class="stat-title">SSR数量</div>
+              <div class="stat-value">{{ normalAnalysis.totalSSRs }}</div>
             </div>
             <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
-              <div v-if="CurrentSelectedPoolAnalysis?.minSP > 0 && CurrentSelectedPoolAnalysis?.minSP !== Infinity"
-                :class="{ 'stat-value': true, 'highlight': isSinglePool }">最欧 {{
-                  CurrentSelectedPoolAnalysis?.minSP
+              <div class="stat-title">限定平均</div>
+              <div v-if="CurrentSelectedPoolAnalysis?.avgPullsForSP > 0"
+                :class="{ 'stat-value': true, 'highlight': isSinglePool }">{{
+                  CurrentSelectedPoolAnalysis?.avgPullsForSP.toFixed(2)
                 }} 抽
               </div>
-              <div v-else class="stat-value">限定</div>
+              <div v-else class="stat-value">暂无数据</div>
             </div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-title">SSR平均</div>
-            <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
-              {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}
-            </div>
-            <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{
-              CurrentSelectedPoolAnalysis?.avgPullsForSSR
-                > 0 ?
-                CurrentSelectedPoolAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
-          </div>
-          <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
-            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
-              <div v-else class="stat-value">未抽到</div>
-            </div>
-            <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
-              <div v-if="normalAnalysis.minSSR > 0 && normalAnalysis.minSSR !== Infinity" class="stat-value">最欧 {{
-                normalAnalysis.minSSR }} 抽</div>
-              <div v-else class="stat-value">SSR</div>
-            </div>
-          </div>
-        </div>
-        <div v-if="statsActiveTab === 'percentageAnalysis'" class="percentage-analysis-container">
-          <div v-if="CurrentSelectedPoolAnalysis?.totalPulls ?? 0 > 0" class="pie-chart-wrapper">
-            <PieChart :chart-data="pieChartJSData" />
-          </div>
-          <p v-else class="no - history - text">
-            暂无数据
-          </p>
-        </div>
-      </div>
 
-      <div>
-        <div class="tabs">
-          <button ref="progressBarButton" class="nav-button" :class="{ active: activeTab === 'progressBar' }"
-            @click="activeTab = 'progressBar'">
-            进度条
-          </button>
-          <button ref="characterOverviewButton" class="nav-button"
-            :class="{ active: activeTab === 'characterOverview' }" @click="activeTab = 'characterOverview'">
-            角色一览
-          </button>
-          <button ref="quantityStatisticsButton" class="nav-button"
-            :class="{ active: activeTab === 'quantityStatistics' }" @click="activeTab = 'quantityStatistics'">
-            数量统计
-          </button>
-          <div class="nav-underline" :style="underlineStyle"></div>
-        </div>
-
-        <!-- 进度条区域 -->
-        <div v-if="activeTab === 'progressBar'" class="history-list" ref="historyListRef">
-          <div
-            v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : CurrentSelectedPoolAnalysis?.SPHistory)"
-            :key="index" class="history-item-bar"
-            :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
-            <div class="char-info">
-              <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
-              <span class="char-name">{{ item.name }}</span>
+            <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
+              <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+                <div v-if="CurrentSelectedPoolAnalysis?.maxSP > 0"
+                  :class="{ 'stat-value': true, 'highlight': isSinglePool }">最非
+                  {{
+                    CurrentSelectedPoolAnalysis?.maxSP
+                  }} 抽
+                </div>
+                <div v-else class="stat-value">未抽到</div>
+              </div>
+              <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
+                <div v-if="CurrentSelectedPoolAnalysis?.minSP > 0 && CurrentSelectedPoolAnalysis?.minSP !== Infinity"
+                  :class="{ 'stat-value': true, 'highlight': isSinglePool }">最欧 {{
+                    CurrentSelectedPoolAnalysis?.minSP
+                  }} 抽
+                </div>
+                <div v-else class="stat-value">限定</div>
+              </div>
             </div>
-            <div class="pull-info">
-              <span class="pull-count">{{ item.count }}</span>
+            <div class="stat-box">
+              <div class="stat-title">SSR平均</div>
+              <div v-if="CurrentSelectedPool === 'Normal'" class="stat-value">
+                {{ normalAnalysis.avgPullsForSSR > 0 ? normalAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}
+              </div>
+              <div v-if="CurrentSelectedPool !== 'Normal'" class="stat-value">{{
+                CurrentSelectedPoolAnalysis?.avgPullsForSSR
+                  > 0 ?
+                  CurrentSelectedPoolAnalysis.avgPullsForSSR.toFixed(2) + ' 抽' : '暂无数据' }}</div>
+            </div>
+            <div class="stat-vertical-layout" v-if="CurrentSelectedPool === 'Normal'">
+              <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+                <div v-if="normalAnalysis.maxSSR > 0" class="stat-value">最非 {{ normalAnalysis.maxSSR }} 抽</div>
+                <div v-else class="stat-value">未抽到</div>
+              </div>
+              <div class="stat-box" v-if="CurrentSelectedPool === 'Normal'">
+                <div v-if="normalAnalysis.minSSR > 0 && normalAnalysis.minSSR !== Infinity" class="stat-value">最欧 {{
+                  normalAnalysis.minSSR }} 抽</div>
+                <div v-else class="stat-value">SSR</div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- 角色一览区域 -->
-        <div v-if="activeTab === 'characterOverview'" class="character-overview-list">
-          <div
-            v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : CurrentSelectedPoolAnalysis?.SPHistory)"
-            :key="index" class="overview-item"
-            :style="{ backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal') }">
-            <img :src="item.imageUrl" :alt="item.name" class="overview-avatar">
-            <span class="overview-name">{{ item.name }}</span>
-            <span class="overview-pull-count">{{ item.count }}</span>
+          <div v-if="statsActiveTab === 'percentageAnalysis'" class="percentage-analysis-container">
+            <div v-if="CurrentSelectedPoolAnalysis?.totalPulls ?? 0 > 0" class="pie-chart-wrapper">
+              <PieChart :chart-data="pieChartJSData" />
+            </div>
+            <p v-else class="no - history - text">
+              暂无数据
+            </p>
           </div>
         </div>
-
-        <!-- 数量统计区域 -->
-        <div v-if="activeTab === 'quantityStatistics'" class="quantity-statistics-list">
-          <div v-for="item in quantityStatistics" :key="item.id" class="quantity-item"
-            :style="{ backgroundColor: getAlphaBgWith(item.rarity) }">
-            <img :src="item.imageUrl" :alt="item.name" class="quantity-avatar">
-            <span class="quantity-name">{{ item.name }}</span>
-            <span class="quantity-pull-count">x {{ item.count }}</span>
+        <div class="analysis-section">
+          <div class="tabs">
+            <button ref="progressBarButton" class="nav-button" :class="{ active: activeTab === 'progressBar' }"
+              @click="activeTab = 'progressBar'">
+              进度条
+            </button>
+            <button ref="characterOverviewButton" class="nav-button"
+              :class="{ active: activeTab === 'characterOverview' }" @click="activeTab = 'characterOverview'">
+              角色一览
+            </button>
+            <button ref="quantityStatisticsButton" class="nav-button"
+              :class="{ active: activeTab === 'quantityStatistics' }" @click="activeTab = 'quantityStatistics'">
+              数量统计
+            </button>
+            <div class="nav-underline" :style="underlineStyle"></div>
           </div>
-          <p v-if="quantityStatistics.length === 0" class="no-history-text full-width">暂无记录</p>
+
+          <!-- 进度条区域 -->
+          <div v-if="activeTab === 'progressBar'" class="history-list" ref="historyListRef">
+            <div
+              v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : CurrentSelectedPoolAnalysis?.SPHistory)"
+              :key="index" class="history-item-bar"
+              :style="getHistoryItemStyle(item.count, CurrentSelectedPool === 'Normal')">
+              <div class="char-info">
+                <img :src="item.imageUrl" :alt="item.name" class="char-avatar">
+                <span class="char-name">{{ item.name }}</span>
+              </div>
+              <div class="pull-info">
+                <span class="pull-count">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 角色一览区域 -->
+          <div v-if="activeTab === 'characterOverview'" class="character-overview-list">
+            <div
+              v-for="(item, index) in (CurrentSelectedPool === 'Normal' ? normalAnalysis?.SSRHistory : CurrentSelectedPoolAnalysis?.SPHistory)"
+              :key="index" class="overview-item"
+              :style="{ backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal') }">
+              <img :src="item.imageUrl" :alt="item.name" class="overview-avatar">
+              <span class="overview-name">{{ item.name }}</span>
+              <span class="overview-pull-count">{{ item.count }}</span>
+            </div>
+          </div>
+
+          <!-- 数量统计区域 -->
+          <div v-if="activeTab === 'quantityStatistics'" class="quantity-statistics-list">
+            <div v-for="item in quantityStatistics" :key="item.id" class="quantity-item"
+              :style="{ backgroundColor: getAlphaBgWith(item.rarity) }">
+              <img :src="item.imageUrl" :alt="item.name" class="quantity-avatar">
+              <span class="quantity-name">{{ item.name }}</span>
+              <span class="quantity-pull-count">x {{ item.count }}</span>
+            </div>
+            <p v-if="quantityStatistics.length === 0" class="no-history-text full-width">暂无记录</p>
+          </div>
         </div>
       </div>
 
@@ -234,7 +240,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -247,6 +253,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import pako from 'pako';
 import ExcelJS from 'exceljs';
 import FileSaver from 'file-saver';
+import html2canvas from 'html2canvas';
 
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
@@ -311,6 +318,9 @@ const props = defineProps({
 
 // 绑定父组件的重置事件给返回按钮
 const emit = defineEmits(['reset-view']);
+
+// 用于截图的ref
+const analysisContentRef = ref(null);
 
 
 const CARDPOOLS_NAME_MAP = {
@@ -1294,6 +1304,48 @@ const startReviewAnimation = () => {
   animateStep();
 };
 
+// 分享/下载分析图
+const shareAnalysisImage = async () => {
+  if (!analysisContentRef.value) return;
+
+  const PADDING = 15; // 设置截图的内边距
+
+  try {
+    const canvas = await html2canvas(analysisContentRef.value, {
+      useCORS: true, // 允许加载跨域图片
+      backgroundColor: colors.background.content, // 设置背景色，防止透明
+      scale: 2, // 提高分辨率
+      x: -PADDING, // 从元素左侧 PADDING 像素处开始截图
+      width: analysisContentRef.value.offsetWidth + PADDING * 2, // 截图宽度 = 元素宽度 + 左右边距
+      height: analysisContentRef.value.offsetHeight, // 截图高度
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert('生成图片失败！');
+        return;
+      }
+
+      const filename = `盲盒派对抽卡分析-${props.playerId}.png`;
+      const file = new File([blob], filename, { type: 'image/png' });
+
+      // 检查浏览器是否支持 Web Share API
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: '我的抽卡分析' });
+        } catch (error) {
+          logger.warn('分享失败，可能是用户取消了操作。回退到下载。', error);
+          FileSaver.saveAs(blob, filename); // 用户取消分享或分享失败时，回退到下载
+        }
+      } else {
+        FileSaver.saveAs(blob, filename); // 不支持分享则直接下载
+      }
+    }, 'image/png');
+  } catch (error) {
+    alert(`截图失败: ${error}`);
+  }
+};
+
 const formatDateTime = (timestamp) => {
   if (!timestamp) return '';
   const date = new Date(timestamp * 1000); // 时间戳是秒，需要乘以1000
@@ -1310,18 +1362,21 @@ const formatDateTime = (timestamp) => {
 <style scoped>
 .gacha-analysis-container {
   background-color: v-bind('colors.background.content');
-  padding: 15px;
-  margin: 10px;
+  padding: 0.5rem;
+  margin: 0.5rem;
   min-width: 300px;
   width: 500px;
   border-radius: 12px;
 }
 
-.gacha-analysis-page>div:not(:first-child) {
+.analysis-content-wrapper {
+  padding-top: 10px;
+}
+
+.analysis-section:not(:first-child) {
   margin-top: 8px;
   padding-top: 10px;
   border-top: 2px solid v-bind('colors.background.light');
-  gap: 10px;
 }
 
 .gacha-analysis-button-container {
@@ -1338,6 +1393,12 @@ const formatDateTime = (timestamp) => {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+}
+
+.button:disabled {
+  background-color: v-bind('colors.background.light');
+  color: v-bind('colors.text.disabled');
+  cursor: not-allowed;
 }
 
 .button:hover {
@@ -1627,6 +1688,7 @@ const formatDateTime = (timestamp) => {
 .section-title {
   font-size: 1.1rem;
   color: v-bind('colors.text.secondary');
+  margin-top: 10px;
   margin-bottom: 16px;
 }
 

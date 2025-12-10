@@ -236,7 +236,7 @@ const colorScrollbar = colors.scrollbar;
   /* 限定最大高度，超出部分可滚动 */
   max-height: 250px;
   overflow-y: auto;
-  padding: 4px;
+  padding: 2px 0 2px 2px;
   /* 禁止横向滚动 */
   overflow-x: hidden;
 
