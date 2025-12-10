@@ -254,13 +254,6 @@ const colorTextHighlight = colors.text.highlight;
   transition: all 0.3s ease;
 }
 
-/* 确保icon-park的图标垂直居中 */
-.footer-link :deep(.i-icon) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .footer-link:hover {
   filter: brightness(1.2);
 }

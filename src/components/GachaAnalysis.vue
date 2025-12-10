@@ -2,12 +2,19 @@
   <div class="gacha-analysis-container">
     <div class="gacha-analysis-page">
       <div class="gacha-analysis-button-container">
-        <button @click="emit('reset-view')" class="button">← 返回</button>
-        <button @click="shareAnalysisImage" class="button" :disabled="isReviewing">
-          <span style="font-size: 1.2em; vertical-align: middle;">🔗</span> 分享
+        <button @click="emit('reset-view')" class="button">
+          <ArrowLeft size="20" /> 返回
         </button>
         <button @click="startReviewAnimation" class="button" v-if="!isSinglePool">
-          {{ reviewButtonText }}
+          <template v-if="!isReviewing">
+            <History size="20" /> 回顾
+          </template>
+          <template v-else>
+            <Square size="20" /> 停止回顾
+          </template>
+        </button>
+        <button @click="shareAnalysisImage" class="button" v-if="!isReviewing">
+          <Share size="20" /> 分享
         </button>
         <button @click="switchReviewSpeed" class="button" v-if="isReviewing">
           {{ reviewSpeedText }}
@@ -42,7 +49,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool">
@@ -57,7 +64,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+                }}</span>
             </div>
           </div>
         </div>
@@ -93,7 +100,8 @@
             <div class="stat-vertical-layout" v-if="CurrentSelectedPool !== 'Normal'">
               <div class="stat-box" v-if="CurrentSelectedPool !== 'Normal'">
                 <div v-if="CurrentSelectedPoolAnalysis?.maxSP > 0"
-                  :class="{ 'stat-value': true, 'highlight': isSinglePool }">最非
+                  :class="{ 'stat-value': true, 'highlight': isSinglePool }">
+                  最非
                   {{
                     CurrentSelectedPoolAnalysis?.maxSP
                   }} 抽
@@ -240,7 +248,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -254,6 +262,7 @@ import pako from 'pako';
 import ExcelJS from 'exceljs';
 import FileSaver from 'file-saver';
 import html2canvas from 'html2canvas';
+import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next';
 
 import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
@@ -425,12 +434,6 @@ const reviewRecords = ref([]); // 用于回顾动画的临时记录数组
 let animationTimer = ref(null); // 用于存储 setTimeout 的 ID，方便清除
 const ANIMATION_INTERVAL = [50, 25, 5]; // 1x,2x,3x速度下的回放间隔
 const reviewSpeed = ref(1);
-
-// 回顾按钮的文本
-const reviewButtonText = computed(() => {
-  if (animationTimer.value) return '⏹️ 停止回顾';
-  return '🎬 回顾历史';
-});
 
 // 倍速按钮的文本
 const reviewSpeedText = computed(() => {
@@ -1389,10 +1392,14 @@ const formatDateTime = (timestamp) => {
   background-color: v-bind('colors.background.lighter');
   color: v-bind('colors.text.light');
   border: none;
-  padding: 8px 12px;
+  padding: 4px 6px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .button:disabled {

@@ -52,3 +52,9 @@ textarea {
 img {
   -webkit-user-drag: none;
 }
+/* 确保icon-park的图标垂直居中 */
+.i-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
