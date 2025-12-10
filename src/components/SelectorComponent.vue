@@ -232,6 +232,7 @@ const colorScrollbar = colors.scrollbar;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  font-size: 1.1rem;
 
   /* 限定最大高度，超出部分可滚动 */
   max-height: 250px;
@@ -239,9 +240,6 @@ const colorScrollbar = colors.scrollbar;
   padding: 2px 0 2px 2px;
   /* 禁止横向滚动 */
   overflow-x: hidden;
-
-  /* 字体大小 */
-  font-size: 1.2rem;
 }
 
 /* 选项列表 */

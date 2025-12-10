@@ -26,8 +26,8 @@
           <span class="tertiary-text">{{ dateRange }} UID: {{ playerId }}</span>
           <div class="header-top-row">
             <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible
-              option-text-key="name" option-value-key="id" :disabled="isReviewing" style="min-width: 11.6rem;">
-              <!-- 9字*1.2+0.8间距 -->
+              option-text-key="name" option-value-key="id" :disabled="isReviewing" style="min-width: 10.9rem;">
+              <!-- 9字*1.1+1间距 -->
               <template #trigger>
                 <div class="title-bar">
                   <span>
