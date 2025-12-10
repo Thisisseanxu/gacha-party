@@ -47,8 +47,25 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,json}'],
+        globPatterns: ['**/*.{js,css,html,ico,json}'],
         runtimeCaching: [
+          {
+            // 匹配常见的图片格式
+            urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 缓存有效期 30 天
+              },
+              // 允许跨域图片缓存
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // 原有的代码缓存策略
           {
             urlPattern: /\.(?:js|css|html)$/,
             handler: 'StaleWhileRevalidate',
