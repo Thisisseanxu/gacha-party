@@ -49,7 +49,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-          }}<br />
+            }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool">
@@ -64,7 +64,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-                }}</span>
+              }}</span>
             </div>
           </div>
         </div>
@@ -248,7 +248,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -980,13 +980,13 @@ onUnmounted(() => {
  */
 const getHistoryItemStyle = (count, isNormal = false) => {
   // 进度条最大抽数设为60，超出部分按100%计算
-  const percentage = Math.min(count / 60, 1) * 100;
+  const percentage = Math.min(count / 60, 1) * 95 + 5; // 最少显示2%的进度，防止看不见
   let progressBarColor;
   // 根据不同卡池和抽数应用不同颜色
   if ((isNormal && count < 10) || (!isNormal && count < 31)) progressBarColor = colors.colorOfLuck.veryLow;
   else if ((isNormal && count < 15) || (!isNormal && count < 41)) progressBarColor = colors.colorOfLuck.medium;
   else progressBarColor = colors.colorOfLuck.veryHigh;
-  return { background: `linear-gradient(to right, ${progressBarColor} calc(30px + (100% - 30px) * ${percentage / 100}), ${colors.colorOfLuck.background} 0)` };
+  return { background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${colors.colorOfLuck.background} ${percentage}%)` };
 };
 
 // 数量统计计算逻辑
@@ -1625,13 +1625,15 @@ const formatDateTime = (timestamp) => {
   align-items: center;
   padding: 0 0.5rem;
   border-radius: 6px;
+  border-radius: 6px;
   position: relative;
   z-index: 1;
 }
 
 .history-item-bar {
   background-color: v-bind('colors.background.lighter');
-  border-radius: 40px;
+  border-radius: 0 40px 40px 0;
+  margin-left: 1.25rem;
 }
 
 .quantity-item,
@@ -1690,12 +1692,12 @@ const formatDateTime = (timestamp) => {
   gap: 12px;
   position: relative;
   z-index: 2;
-  margin-left: -0.5rem;
+  margin-left: -1.75rem;
 }
 
 .char-avatar {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   background-color: v-bind('colors.background.avatar');
   object-fit: cover;
