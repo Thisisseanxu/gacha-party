@@ -47,7 +47,7 @@
         <p>使用教程</p>
         <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0;">
           <iframe
-            src="//player.bilibili.com/player.html?isOutside=true&aid=115111482167059&bvid=BV1ZZhXzGEVd&cid=32027246871&p=1&autoplay=0"
+            src="//player.bilibili.com/player.html?isOutside=true&aid=115698315563965&bvid=BV1YomKBsEP5&cid=34650522191&p=1&autoplay=0"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" scrolling="no" border="0"
             frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
         </div>
