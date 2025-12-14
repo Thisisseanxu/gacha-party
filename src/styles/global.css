@@ -32,6 +32,9 @@ textarea {
   /* 推荐：添加抗锯齿效果 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* 默认字体大小 */
+  font-size: 1rem;
 }
 
 body {

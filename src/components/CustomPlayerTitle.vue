@@ -64,7 +64,7 @@ const titleStyle = computed(() => {
   /* 圆角矩形 */
   border-radius: 9px;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1rem;
   min-width: 6em;
   text-align: center;
   /* 防止内部文字换行 */
