@@ -206,6 +206,20 @@ export const allCards = [
     imageUrl: '/images/cards/11002.webp',
     realname: '爆爆',
   },
+  {
+    id: '1410',
+    name: '音叉投手',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1410.webp',
+    realname: '洛可可',
+  },
+  {
+    id: '1411',
+    name: '应援战士',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1411.webp',
+    realname: '莱拉',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',

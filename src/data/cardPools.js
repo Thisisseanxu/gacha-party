@@ -7,6 +7,49 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 因代码限制，目前每个卡池必须包含rules属性，空的也可以
 // 定义卡池配置
 export const cardPools = {
+  // 圣诞邀约
+  shengdanyaoyue: {
+    type: '限定',
+    name: '圣诞邀约',
+    imageUrl: '/images/cardpools-icon/120.webp',
+    // 基础概率
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2, // 其他情况都是 R
+    },
+    // 保底/概率提升规则
+    rules: {
+      [RARITY.SP]: {
+        pity: 60, // 60抽必出SP
+        boostAfter: 40, // 40抽后每抽提升SP概率
+        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
+        UpTrigger: true, // 该卡池有UP机制
+        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        UpCards: ['1410', '1411'],
+      },
+    },
+    cardIds: {
+      [RARITY.SP]: ['1410', '1411'],
+      [RARITY.SSR]: ['1401', '1402', '1403', '1504'],
+      [RARITY.SR]: [
+        '1103',
+        '1104',
+        '1207',
+        '1303',
+        '1405',
+        '1604',
+        '1606',
+        '1702',
+        '1205',
+        '1304',
+        '1805',
+        '1209',
+        '1404',
+      ],
+      [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
+    },
+  },
   // 酷玩爆米花
   kuwanbaomihua: {
     type: '限定',
@@ -49,6 +92,7 @@ export const cardPools = {
       [RARITY.R]: ['1101', '1204', '1107', '1306', '1406', '1607'],
     },
   },
+  // 心愿自选
   xinyuan: {
     type: '自选', // 类型名称，用于UI显示
     name: '心愿自选',
