@@ -5,7 +5,8 @@
         <button @click="emit('reset-view')" class="button">
           <ArrowLeft size="20" /> 返回
         </button>
-        <button @click="startReviewAnimation" class="button" v-if="!isSinglePool">
+        <button @click="startReviewAnimation" class="button"
+          v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
           <template v-if="!isReviewing">
             <History size="20" /> 回顾
           </template>
@@ -52,7 +53,7 @@
             }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
-          <div class="pity-counters" v-if="!isSinglePool">
+          <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
             <div class="history-item"
               :style="{ ...getHistoryItemStyle(CurrentSelectedPoolAnalysis?.SP ?? 0), flex: '1' }"
               v-if="CurrentSelectedPool !== 'Normal'">
@@ -69,7 +70,7 @@
           </div>
         </div>
         <div class="analysis-section">
-          <div class="tabs">
+          <div class="tabs" v-if="CurrentSelectedPool !== 'AllLimited'">
             <button ref="dataStatsButton" class="nav-button" :class="{ active: statsActiveTab === 'dataStats' }"
               @click="statsActiveTab = 'dataStats'">
               数据统计
@@ -206,7 +207,7 @@
         </div>
       </div>
 
-      <div class="full-history-section">
+      <div class="full-history-section" v-if="CurrentSelectedPool !== 'AllLimited'">
         <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
         <div class="full-history-list">
           <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
@@ -334,6 +335,7 @@ const analysisContentRef = ref(null);
 
 const CARDPOOLS_NAME_MAP = {
   ...props.CARDPOOLS_NAME_MAP,
+  'AllLimited': '所有卡池总览',
   'Normal': '常驻扭蛋',
   'Limited': '限定扭蛋总览',
   'Event': '联动扭蛋总览',
@@ -367,6 +369,7 @@ const CurrentSelectedPool = ref("Limited"); // 控制显示哪个卡池
 // 合成下拉框的选项，并进行分组
 const cardPoolOptions = ref([
   // 默认展开的顶级选项
+  { id: 'AllLimited', name: CARDPOOLS_NAME_MAP['AllLimited'] },
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
   { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
   { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
@@ -386,6 +389,9 @@ const cardPoolOptions = ref([
 
 // 删除抽数为0的卡池
 cardPoolOptions.value = cardPoolOptions.value.filter(option => {
+  if (option.id === 'AllLimited') {
+    return [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData, ...props.qiYuanGachaData, ...props.wishGachaData].length > 0;
+  }
   if (option.id === 'Limited') {
     return props.limitGachaData.length > 0;
   }
@@ -415,7 +421,7 @@ cardPoolOptions.value = cardPoolOptions.value.filter(option => {
   return allLimitedPoolsData.some(r => r.gacha_id === Number(option.id));
 });
 
-const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiYuan', 'Wish', 'Event', 'Fuke'].includes(CurrentSelectedPool.value));
+const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiYuan', 'Wish', 'Event', 'Fuke', 'AllLimited'].includes(CurrentSelectedPool.value));
 
 // 导航栏相关的响应式变量
 const activeTab = ref('progressBar'); // 切换显示进度条/角色一览/数量统计
@@ -516,11 +522,11 @@ const limitAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -577,11 +583,11 @@ const eventAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -637,11 +643,11 @@ const fukeAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -693,11 +699,11 @@ const AdvanceNormalAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -733,11 +739,11 @@ const qiYuanAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -773,11 +779,11 @@ const wishAnalysis = computed(() => {
     SPCounter++;
     SSRCounter++;
     if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id });
+      SPHistory.unshift({ ...cardInfo, count: SPCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SPCounter = 0;
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id });
+      SSRHistory.push({ ...cardInfo, count: SSRCounter, gacha_id: record.gacha_id, created_at: record.created_at });
       SSRCounter = 0;
     }
   });
@@ -786,6 +792,53 @@ const wishAnalysis = computed(() => {
     totalPulls: records.length,
     SP: SPCounter,
     SSR: SSRCounter,
+    avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
+    avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
+    maxSP: Math.max(...SPHistory.map(item => item.count), 0),
+    minSP: Math.min(...SPHistory.map(item => item.count), Infinity),
+    SPHistory,
+    SSRHistory,
+    records,
+  };
+});
+
+// 所有卡池总览分析逻辑
+const allLimitedAnalysis = computed(() => {
+  const analyses = [
+    limitAnalysis.value,
+    eventAnalysis.value,
+    fukeAnalysis.value,
+    qiYuanAnalysis.value,
+    wishAnalysis.value
+  ];
+
+  let totalPulls = 0;
+  let SP = 0;
+  let SSR = 0;
+  let SPHistory = [];
+  let SSRHistory = [];
+  let records = [];
+
+  analyses.forEach(a => {
+    if (!a) return;
+    totalPulls += a.totalPulls;
+    SP += a.SP;
+    SSR += a.SSR;
+    if (a.SPHistory) SPHistory.push(...a.SPHistory);
+    if (a.SSRHistory) SSRHistory.push(...a.SSRHistory);
+    if (a.records) records.push(...a.records);
+  });
+
+  if (totalPulls === 0) return { totalPulls: 0, SP: 0, SSR: 0, avgPullsForSP: 0, avgPullsForSSR: 0, maxSP: 0, minSP: Infinity, SPHistory: [], SSRHistory: [], records: [] };
+
+  // 按照时间倒序排列，确保展示顺序正确
+  SPHistory.sort((a, b) => b.created_at - a.created_at);
+  SSRHistory.sort((a, b) => b.created_at - a.created_at);
+
+  return {
+    totalPulls,
+    SP,
+    SSR,
     avgPullsForSP: calculateAverage(SPHistory.map(item => item.count)),
     avgPullsForSSR: calculateAverage(SSRHistory.map(item => item.count)),
     maxSP: Math.max(...SPHistory.map(item => item.count), 0),
@@ -828,6 +881,7 @@ const normalAnalysis = computed(() => {
 
 // 根据当前选择的卡池展示对应的分析数据=
 const CurrentSelectedPoolAnalysis = computed(() => {
+  if (CurrentSelectedPool.value === 'AllLimited') return allLimitedAnalysis.value;
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value;
   if (CurrentSelectedPool.value === 'QiYuan') return qiYuanAnalysis.value;
   if (CurrentSelectedPool.value === 'Wish') return wishAnalysis.value;
@@ -1074,6 +1128,8 @@ const fullHistory = computed(() => {
   let data = [];
   if (CurrentSelectedPool.value === 'Normal') {
     data = [...props.normalGachaData];
+  } else if (CurrentSelectedPool.value === 'AllLimited') {
+    data = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData, ...props.qiYuanGachaData, ...props.wishGachaData];
   } else if (CurrentSelectedPool.value === 'AdvanceNormal') {
     data = [...props.advancedNormalGachaData];
   } else if (CurrentSelectedPool.value === 'QiYuan') {
@@ -1116,6 +1172,7 @@ const dateRange = computed(() => {
   }
   // 正常状态下显示日期范围
   else {
+    if (CurrentSelectedPool.value === 'AllLimited') return '';
     if (fullHistory.value.length === 0) return '';
     // 计算并格式化起始和结束日期
     const startDate = formatDate(fullHistory.value[fullHistory.value.length - 1]?.created_at);
@@ -1143,6 +1200,9 @@ const goToPage = () => {
 watch(CurrentSelectedPool, () => {
   currentPage.value = 1;
   stopReviewAnimation();
+  if (CurrentSelectedPool.value === 'AllLimited') {
+    statsActiveTab.value = 'dataStats';
+  }
 });
 // 监听 currentPage 的变化，同步更新输入框的值
 watch(currentPage, (newPage) => { pageInput.value = newPage; });
@@ -1692,6 +1752,9 @@ const formatDateTime = (timestamp) => {
   gap: 12px;
   position: relative;
   z-index: 2;
+}
+
+.history-item-bar .char-info {
   margin-left: -1.75rem;
 }
 
