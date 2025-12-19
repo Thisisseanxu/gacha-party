@@ -26,17 +26,24 @@
         <div class="analysis-section">
           <span class="tertiary-text">{{ dateRange }} UID: {{ playerId }}</span>
           <div class="header-top-row">
-            <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible
-              option-text-key="name" option-value-key="id" :disabled="isReviewing" style="min-width: 10.9rem;">
-              <!-- 9字*1.1+1间距 -->
-              <template #trigger>
-                <div class="title-bar">
-                  <span>
-                    {{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
-                  </span>
+            <div class="selector-wrapper">
+              <SelectorComponent v-model="CurrentSelectedPool" :options="cardPoolOptions" collapsible
+                option-text-key="name" option-value-key="id" :disabled="isReviewing" style="min-width: 10.9rem;">
+                <!-- 9字*1.1+1间距 -->
+                <template #trigger>
+                  <div class="title-bar">
+                    <span>
+                      {{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}
+                    </span>
+                  </div>
+                </template>
+              </SelectorComponent>
+              <Transition name="fade">
+                <div v-if="showPoolHint" class="pool-hint-bubble">
+                  ↑点击这里可以切换不同的卡池
                 </div>
-              </template>
-            </SelectorComponent>
+              </Transition>
+            </div>
 
             <CustomPlayerTitle v-if="analysisForTitle"
               :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP"
@@ -50,7 +57,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
@@ -65,7 +72,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+                }}</span>
             </div>
           </div>
         </div>
@@ -249,7 +256,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -427,6 +434,7 @@ const isSinglePool = computed(() => !['Limited', 'Normal', 'AdvanceNormal', 'QiY
 const activeTab = ref('progressBar'); // 切换显示进度条/角色一览/数量统计
 const progressBarButton = ref(null);
 const quantityStatisticsButton = ref(null);
+const showPoolHint = ref(true); // 是否显示卡池切换提示气泡
 const characterOverviewButton = ref(null);
 const underlineStyle = ref({});
 const statsActiveTab = ref('dataStats'); // 切换显示数据统计/占比分析
@@ -1011,6 +1019,10 @@ watch(statsActiveTab, async () => {
 
 // 组件加载时挂载监听
 onMounted(() => {
+  setTimeout(() => {
+    showPoolHint.value = false;
+  }, 5000);
+
   nextTick(() => {
     updateUnderline();
     updateStatsUnderline();
@@ -1513,6 +1525,26 @@ const formatDateTime = (timestamp) => {
   gap: 12px;
 }
 
+.selector-wrapper {
+  position: relative;
+}
+
+.pool-hint-bubble {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  background-color: v-bind('colors.shadow.primaryHover');
+  color: v-bind('colors.text.primary');
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
 .title-bar {
   display: flex;
   justify-content: flex-start;
@@ -1933,5 +1965,15 @@ const formatDateTime = (timestamp) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
