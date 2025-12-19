@@ -77,7 +77,7 @@
           </div>
         </div>
         <div class="analysis-section">
-          <div class="tabs" v-if="CurrentSelectedPool !== 'AllLimited'">
+          <div class="tabs">
             <button ref="dataStatsButton" class="nav-button" :class="{ active: statsActiveTab === 'dataStats' }"
               @click="statsActiveTab = 'dataStats'">
               数据统计
@@ -214,7 +214,7 @@
         </div>
       </div>
 
-      <div class="full-history-section" v-if="CurrentSelectedPool !== 'AllLimited'">
+      <div class="full-history-section">
         <h3 class="section-title">{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool] }}抽卡历史记录</h3>
         <div class="full-history-list">
           <div v-for="item in paginatedHistory" :key="item.gacha_id" :class="['full-history-item', item.rarity]">
@@ -342,11 +342,11 @@ const analysisContentRef = ref(null);
 
 const CARDPOOLS_NAME_MAP = {
   ...props.CARDPOOLS_NAME_MAP,
-  'AllLimited': '所有卡池总览',
+  'AllLimited': '所有扭蛋总览',
   'Normal': '常驻扭蛋',
-  'Limited': '限定扭蛋总览',
-  'Event': '联动扭蛋总览',
-  'Fuke': '复刻扭蛋总览',
+  'Limited': '限定扭蛋',
+  'Event': '联动扭蛋',
+  'Fuke': '复刻扭蛋',
   'AdvanceNormal': '高级常驻扭蛋',
   'QiYuan': '祈愿盲盒',
   'Wish': '心愿自选',
@@ -1184,7 +1184,6 @@ const dateRange = computed(() => {
   }
   // 正常状态下显示日期范围
   else {
-    if (CurrentSelectedPool.value === 'AllLimited') return '';
     if (fullHistory.value.length === 0) return '';
     // 计算并格式化起始和结束日期
     const startDate = formatDate(fullHistory.value[fullHistory.value.length - 1]?.created_at);
@@ -1831,8 +1830,8 @@ const formatDateTime = (timestamp) => {
 .full-history-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 640px;
+  gap: 6px;
+  min-height: 534px;
 }
 
 .no-history-text {
@@ -1846,7 +1845,7 @@ const formatDateTime = (timestamp) => {
   justify-content: space-between;
   align-items: center;
   background-color: v-bind('colors.background.light');
-  padding: 8px 12px;
+  padding: 4px 8px;
   border-radius: 8px;
   border-left: 4px solid transparent;
 }

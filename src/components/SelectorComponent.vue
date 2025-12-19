@@ -258,7 +258,7 @@ const colorScrollbar = colors.scrollbar;
 }
 
 .options-dropdown li>div {
-  padding: 4px 2px;
+  padding: 2px 2px;
 }
 
 .options-dropdown li:not(.option-divider):hover {
