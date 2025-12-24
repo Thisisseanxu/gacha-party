@@ -50,9 +50,9 @@
         </div>
       </div>
 
-      <div class="preview-wrapper">
+      <div class="preview-wrapper" ref="previewWrapper">
         <p class="preview-hint">↓ 预览区域 ↓</p>
-        <div class="capture-area" ref="captureRef">
+        <div class="capture-area" ref="captureRef" :style="previewStyle">
 
           <div class="bg-decoration">
             <div class="stars-bg"></div>
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import {
@@ -156,6 +156,8 @@ const recommendText = ref('');
 const captureRef = ref(null);
 const currentSlots = ref([]);
 const iconBase64Map = ref({});
+const previewWrapper = ref(null);
+const previewScale = ref(1);
 
 // 检查角色是否适配
 const isCharAdapted = (id) => {
@@ -168,6 +170,12 @@ onMounted(() => {
   if (firstAdapted) {
     selectedCharId.value = firstAdapted.id;
   }
+  window.addEventListener('resize', updatePreviewScale);
+  updatePreviewScale();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updatePreviewScale);
 });
 
 const selectedCardInfo = computed(() => {
@@ -290,9 +298,37 @@ const getStarImage = (level, starIndex) => {
   return `/images/huizhang/icon_star_${typeIndex}.webp`;
 };
 
+// 预览区域缩放逻辑
+const updatePreviewScale = () => {
+  if (!previewWrapper.value) return;
+  const wrapperWidth = previewWrapper.value.clientWidth;
+  const targetWidth = 820; // 800px + 左右留白
+
+  if (wrapperWidth < targetWidth) {
+    previewScale.value = wrapperWidth / targetWidth;
+  } else {
+    previewScale.value = 1;
+  }
+};
+
+const previewStyle = computed(() => {
+  if (previewScale.value >= 1) return {};
+  return {
+    transform: `scale(${previewScale.value})`,
+    transformOrigin: 'top center',
+    // 缩放后，元素原本占据的空间不会变，需要通过负 margin 抵消底部的空白
+    marginBottom: `${-(550 * (1 - previewScale.value))}px`
+  };
+});
+
 // 生成图片
 const generateImage = async () => {
   if (!captureRef.value) return;
+
+  // 临时重置缩放以保证生成图片的清晰度和尺寸
+  const originalScale = previewScale.value;
+  previewScale.value = 1;
+
   try {
     await nextTick();
     const canvas = await html2canvas(captureRef.value, {
@@ -307,6 +343,8 @@ const generateImage = async () => {
   } catch (err) {
     console.error('生成图片失败:', err);
     alert('生成失败');
+  } finally {
+    previewScale.value = originalScale; // 恢复缩放
   }
 };
 </script>
@@ -317,7 +355,7 @@ const generateImage = async () => {
   background-color: v-bind('colors.background.primary');
   display: flex;
   justify-content: center;
-  padding: 8px;
+  padding: 4px;
   color: v-bind('colors.text.primary');
 }
 
@@ -444,10 +482,10 @@ textarea {
 
 /* --- 预览区 --- */
 .preview-wrapper {
-  overflow: auto;
+  overflow: hidden;
   border: 2px dashed #555;
   background: #222;
-  padding: 10px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
