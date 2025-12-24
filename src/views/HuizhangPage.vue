@@ -32,8 +32,8 @@
           <div class="badge-header">
             <span class="header-col index">槽</span>
             <span class="header-col flex">稀有度</span>
-            <span class="header-col flex">类型</span>
             <span class="header-col fixed">等级</span>
+            <span class="header-col flex">类型</span>
             <span class="header-col auto">形状</span>
           </div>
           <div v-for="(slot, index) in currentSlots" :key="index" class="badge-row">
@@ -41,14 +41,14 @@
             <select v-model="slot.rarityId" class="mini-select">
               <option v-for="r in Object.values(HUIZHANG_RARITY)" :key="r.id" :value="r.id">{{ r.name }}</option>
             </select>
-            <select v-model="slot.typeId" class="mini-select">
-              <option v-for="t in Object.values(HUIZHANG_TYPES)" :key="t.id" :value="t.id">{{ t.name }}</option>
-            </select>
             <div class="mini-input level-btn" @mousedown="handleLevelStart(slot)"
               @touchstart.prevent="handleLevelStart(slot)" @mouseup="handleLevelEnd(slot)"
               @touchend="handleLevelEnd(slot)" @mouseleave="handleLevelCancel" title="点击+1，长按重置">
               {{ slot.level }}
             </div>
+            <select v-model="slot.typeId" class="mini-select">
+              <option v-for="t in Object.values(HUIZHANG_TYPES)" :key="t.id" :value="t.id">{{ t.name }}</option>
+            </select>
             <span class="shape-hint">({{ getShapeName(slot.shape) }})</span>
           </div>
         </div>
@@ -180,10 +180,7 @@ const isCharAdapted = (id) => {
 
 // 初始化
 onMounted(() => {
-  const firstAdapted = allCards.find(c => isCharAdapted(c.id));
-  if (firstAdapted) {
-    selectedCharId.value = firstAdapted.id;
-  }
+  selectedCharId.value = '1111'
   window.addEventListener('resize', updatePreviewScale);
   updatePreviewScale();
 });
@@ -192,7 +189,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', updatePreviewScale);
 });
 
-// --- 等级输入交互逻辑 ---
+// 等级输入交互逻辑
 const pressTimer = ref(null);
 const isLongPress = ref(false);
 
@@ -229,6 +226,7 @@ const currentCharConfig = computed(() => {
   return getCharHuizhangSlots(selectedCharId.value);
 });
 
+// 监听角色变化，更新槽位配置
 watch(selectedCharId, (newId) => {
   if (!newId) return;
   const config = getCharHuizhangSlots(newId);
@@ -236,7 +234,7 @@ watch(selectedCharId, (newId) => {
     currentSlots.value = config.shape.map(shapeStr => ({
       shape: shapeStr,
       rarityId: HUIZHANG_RARITY.GOLD.id,
-      typeId: 'atk',
+      typeId: 'none',
       level: 10
     }));
   } else {
@@ -299,6 +297,8 @@ const calculatedEffects = computed(() => {
   currentSlots.value.forEach(slot => {
     counts[slot.typeId] = (counts[slot.typeId] || 0) + 1;
   });
+  // 忽略无类型
+  delete counts['none'];
 
   const effects = [];
   for (const [typeId, count] of Object.entries(counts)) {
