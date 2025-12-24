@@ -82,6 +82,14 @@ const routes = [
     },
   },
   {
+    path: '/huizhang',
+    name: '徽章编辑器',
+    component: () => import('./views/HuizhangPage.vue'), // 徽章编辑器页面组件
+    meta: {
+      title: '徽章编辑器 - 织夜工具箱',
+    },
+  },
+  {
     path: '/zako',
     name: 'Zako',
     component: () => import('./views/ZakoPage.vue'),

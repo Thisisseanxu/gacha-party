@@ -5,18 +5,27 @@
 
       <div class="button-group">
         <router-link to="chouka" class="btn chouka">
-          <span>✨ 抽卡模拟器 ✨</span>
+          <img src="/images/icons/chouka.webp" class="btn-icon" alt="icon" />
+          <span>抽卡模拟器</span>
         </router-link>
 
         <router-link to="fenxi" class="btn fenxi">
-          <span>📊 抽卡数据分析 📈</span>
+          <img src="/images/icons/fenxi.webp" class="btn-icon" alt="icon" />
+          <span>抽卡数据分析</span>
         </router-link>
 
         <router-link to="daoyan" class="btn daoyan">
-          <span>🎬 导演模式 🎥</span>
+          <img src="/images/icons/daoyan.webp" class="btn-icon" alt="icon" />
+          <span>导演模式</span>
+        </router-link>
+
+        <router-link to="huizhang" class="btn huizhang">
+          <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
+          <span>徽章攻略编辑器</span>
         </router-link>
 
         <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon">
+          <img src="/images/icons/placeholder.webp" class="btn-icon" alt="icon" />
           <span>{{ comingSoonText }}</span>
         </button>
       </div>
@@ -93,7 +102,7 @@ const handleInstallClick = async () => {
 };
 
 // --- 开发中按钮控制逻辑 ---
-const originalComingSoonText = '🛠️ 更多功能即将上线';
+const originalComingSoonText = '更多功能即将上线';
 const comingSoonText = ref(originalComingSoonText);
 const isComingSoonClicked = ref(false);
 
@@ -173,9 +182,9 @@ const colorTextHighlight = colors.text.highlight;
 }
 
 .button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
   width: 100%;
   max-width: 100vw;
 }
@@ -183,15 +192,16 @@ const colorTextHighlight = colors.text.highlight;
 .btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1.2rem;
+  justify-content: flex-start;
+  flex-direction: column;
+  padding: 0.4rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
   border: none;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
   /* 为所有按钮添加指针手势 */
 }
@@ -199,6 +209,12 @@ const colorTextHighlight = colors.text.highlight;
 .btn:hover {
   transform: translateY(-2px);
   filter: brightness(1.1);
+}
+
+.btn-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 .chouka {
@@ -213,10 +229,16 @@ const colorTextHighlight = colors.text.highlight;
   background: linear-gradient(145deg, #10B981, #059669);
 }
 
+.huizhang {
+  background: linear-gradient(145deg, #3B82F6, #2563EB);
+}
+
 /* --- 开发中功能的按钮 --- */
 .coming-soon {
   background: linear-gradient(145deg, #6B7280, #4B5563);
   color: #D1D5DB;
+  grid-column: 1 / -1;
+  justify-content: center;
 }
 
 /* 按钮被禁用时的样式 */
