@@ -8,8 +8,10 @@
         <div class="control-group">
           <label>选择角色</label>
           <select v-model="selectedCharId" class="input-select">
-            <option v-for="card in allCards" :key="card.id" :value="card.id" :disabled="!isCharAdapted(card.id)">
-              {{ card.name }} {{ isCharAdapted(card.id) ? '' : '(未适配)' }}
+            <!-- 仅包含纯数字id的角色 -->
+            <option v-for="card in allCards.filter(c => c.id.match(/^\d+$/))" :key="card.id" :value="card.id"
+              :disabled="!isCharAdapted(card.id)">
+              {{ card.name }} {{ isCharAdapted(card.id) ? '' : '(暂未适配)' }}
             </option>
           </select>
         </div>
@@ -26,6 +28,14 @@
 
         <div class="badge-editors">
           <h3>徽章配置</h3>
+          <p class="badge-hint-text">顺序为从上到下从左到右，点击等级+1级，长按归零</p>
+          <div class="badge-header">
+            <span class="header-col index">槽</span>
+            <span class="header-col flex">稀有度</span>
+            <span class="header-col flex">类型</span>
+            <span class="header-col fixed">等级</span>
+            <span class="header-col auto">形状</span>
+          </div>
           <div v-for="(slot, index) in currentSlots" :key="index" class="badge-row">
             <span class="badge-index">#{{ index + 1 }}</span>
             <select v-model="slot.rarityId" class="mini-select">
@@ -34,7 +44,11 @@
             <select v-model="slot.typeId" class="mini-select">
               <option v-for="t in Object.values(HUIZHANG_TYPES)" :key="t.id" :value="t.id">{{ t.name }}</option>
             </select>
-            <input type="number" v-model.number="slot.level" min="0" max="15" class="mini-input" title="等级0-15">
+            <div class="mini-input level-btn" @mousedown="handleLevelStart(slot)"
+              @touchstart.prevent="handleLevelStart(slot)" @mouseup="handleLevelEnd(slot)"
+              @touchend="handleLevelEnd(slot)" @mouseleave="handleLevelCancel" title="点击+1，长按重置">
+              {{ slot.level }}
+            </div>
             <span class="shape-hint">({{ getShapeName(slot.shape) }})</span>
           </div>
         </div>
@@ -177,6 +191,35 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updatePreviewScale);
 });
+
+// --- 等级输入交互逻辑 ---
+const pressTimer = ref(null);
+const isLongPress = ref(false);
+
+const handleLevelStart = (slot) => {
+  isLongPress.value = false;
+  pressTimer.value = setTimeout(() => {
+    slot.level = 0;
+    isLongPress.value = true;
+  }, 500);
+};
+
+const handleLevelEnd = (slot) => {
+  if (pressTimer.value) {
+    clearTimeout(pressTimer.value);
+    pressTimer.value = null;
+  }
+  if (!isLongPress.value) {
+    slot.level = (slot.level + 1) % 16;
+  }
+};
+
+const handleLevelCancel = () => {
+  if (pressTimer.value) {
+    clearTimeout(pressTimer.value);
+    pressTimer.value = null;
+  }
+};
 
 const selectedCardInfo = computed(() => {
   return allCards.find(c => c.id === selectedCharId.value) || {};
@@ -430,6 +473,40 @@ textarea {
   padding-bottom: 5px;
 }
 
+.badge-hint-text {
+  font-size: 0.8rem;
+  color: #888;
+  margin: -5px 0 10px 0;
+}
+
+.badge-header {
+  display: flex;
+  gap: 5px;
+  padding: 0 8px;
+  margin-bottom: 5px;
+  font-size: 0.8rem;
+  color: #aaa;
+  font-weight: bold;
+}
+
+.header-col.index {
+  width: 24px;
+}
+
+.header-col.flex {
+  flex: 1;
+  text-align: center;
+}
+
+.header-col.fixed {
+  width: 50px;
+  text-align: center;
+}
+
+.header-col.auto {
+  margin-left: auto;
+}
+
 .badge-row {
   display: flex;
   align-items: center;
@@ -459,6 +536,18 @@ textarea {
   padding: 4px;
   border-radius: 4px;
   text-align: center;
+  background: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.level-btn {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .shape-hint {
