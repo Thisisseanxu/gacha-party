@@ -38,12 +38,6 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
           },
-          {
-            src: 'images/icons/icon-512x512-maskable.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
         ],
       },
       workbox: {
