@@ -5,28 +5,9 @@
       <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
       </p>
 
-      <div v-if="isSelectionMode" class="character-selection-container">
-        <h2 class="selection-title">选择出场的角色</h2>
-        <p class="selection-description">放心，你可以随时回来重选！</p>
-
-        <div class="selection-toolbar">
-          <button @click="openCustomCharacterForm" class="action-button create-char-btn">创建新角色</button>
-          <SwitchComponent v-model="showRealName" label="显示角色真名" />
-        </div>
-
-        <div class="card-selector-grid">
-          <div v-for="card in displayableCards" :key="card.id" class="card-option"
-            :class="{ 'selected': selectedCharacterIds.includes(card.id) }" @click="toggleCharacterSelection(card.id)">
-            <button v-if="card.isCustom" class="delete-custom-char-btn"
-              @click.stop="deleteCustomCharacter(card.id)">×</button>
-            <img :src="card.imageUrl" :alt="card.name" class="card-image" />
-            <div class="card-name">{{ showRealName && card.realname ? card.realname : card.name }}</div>
-            <div class="checkmark">✔</div>
-          </div>
-        </div>
-
-        <button @click="confirmSelection" class="finalize-button">开始创作</button>
-      </div>
+      <CharacterSelector v-if="isSelectionMode" v-model="selectedCharacterIds"
+        v-model:customCharacters="customCharacters" :characterList="displayableCharacterList"
+        :allowRealNameToggle="true" mode="multiple" @confirm="confirmSelection" />
 
       <template v-else>
         <div class="chat-editor" ref="chatEditorRef">
@@ -122,29 +103,6 @@
     </div>
   </div>
 
-  <div v-if="showCustomCharacterForm" class="overlay" @click="closeCustomCharacterForm">
-    <div class="custom-character-form" @click.stop>
-      <h3>创建自定义角色</h3>
-      <div class="form-row">
-        <label for="char-name">角色名称</label>
-        <input id="char-name" type="text" v-model="newCustomCharacterName" placeholder="输入角色名字" />
-      </div>
-      <div class="form-row">
-        <label>角色头像</label>
-        <button @click="triggerCustomAvatarUpload" class="action-button">上传图片</button>
-        <input type="file" ref="customAvatarInputRef" @change="handleCustomAvatarSelected" accept="image/*"
-          style="display: none;" />
-      </div>
-      <div v-if="newCustomCharacterAvatar" class="avatar-preview-container">
-        <p>头像预览：</p>
-        <img :src="newCustomCharacterAvatar" alt="头像预览" class="avatar-preview" />
-      </div>
-      <div class="form-actions">
-        <button @click="saveCustomCharacter" class="action-button">保存角色</button>
-        <button @click="closeCustomCharacterForm" class="action-button cancel">取消</button>
-      </div>
-    </div>
-  </div>
 
   <PopUp :display="showAgreementPopUp" title="《织夜工具箱创作条款》" @close="closeAgreementPopUp">
     <p>欢迎使用织夜工具箱！<br />在使用前，请您仔细阅读以下用户协议：</p>
@@ -179,8 +137,8 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
-import SwitchComponent from '@/components/SwitchComponent.vue';
 import PopUp from '@/components/PopUp.vue';
+import CharacterSelector from '@/components/CharacterSelector.vue';
 
 const showAgreementPopUp = ref(false);
 const openAgreementPopUp = () => {
@@ -197,96 +155,20 @@ const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
 const characterSelectionKey = 'chatCharacterSelection';
 const autoSaveKey = 'chatAutoSaveLog';
-// 开关，是否显示角色真名
-const showRealName = ref(true);
 
 // 自定义角色相关状态
 const customCharacters = ref([]);
 const customCharactersKey = 'chatCustomCharacters';
-const showCustomCharacterForm = ref(false);
-const newCustomCharacterName = ref('');
-const newCustomCharacterAvatar = ref(null); // 存储Base64头像
-const customAvatarInputRef = ref(null);
 
-// 打开创建角色表单
-const openCustomCharacterForm = () => {
-  showCustomCharacterForm.value = true;
-};
-
-// 关闭并重置创建角色表单
-const closeCustomCharacterForm = () => {
-  showCustomCharacterForm.value = false;
-  newCustomCharacterName.value = '';
-  newCustomCharacterAvatar.value = null;
-};
-
-// 触发自定义头像文件选择
-const triggerCustomAvatarUpload = () => {
-  customAvatarInputRef.value?.click();
-};
-
-// 处理自定义头像上传，转换为Base64
-const handleCustomAvatarSelected = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    newCustomCharacterAvatar.value = e.target.result; // 结果为Base64字符串
-  };
-  reader.readAsDataURL(file);
-  event.target.value = ''; // 清空以便再次选择
-};
-
-// 保存自定义角色
-const saveCustomCharacter = () => {
-  if (!newCustomCharacterName.value.trim() || !newCustomCharacterAvatar.value) {
-    alert('请输入角色名称并上传头像。');
-    return;
-  }
-  customCharacters.value.push({
-    id: `custom_${Date.now()}`, // 使用时间戳确保ID唯一
-    name: newCustomCharacterName.value.trim(),
-    imageUrl: newCustomCharacterAvatar.value,
-  });
-  closeCustomCharacterForm();
-};
-
-// 删除自定义角色
-const deleteCustomCharacter = (characterId) => {
-  if (window.confirm('确定要删除这个自定义角色吗？')) {
-    // 从自定义角色列表中删除
-    const index = customCharacters.value.findIndex(c => c.id === characterId);
-    if (index > -1) {
-      customCharacters.value.splice(index, 1);
-    }
-    // 如果该角色已被选中，也从选中列表中移除
-    const selectedIndex = selectedCharacterIds.value.indexOf(characterId);
-    if (selectedIndex > -1) {
-      selectedCharacterIds.value.splice(selectedIndex, 1);
-    }
-  }
-};
-
-// 合并预设角色和自定义角色，用于选择界面显示
-const displayableCards = computed(() => {
+const displayableCharacterList = computed(() => {
   const formattedCustom = customCharacters.value.map(c => ({
     ...c,
-    realname: c.name, // 保持数据结构统一
-    isCustom: true,  // 添加一个标记，用于UI区分
+    realname: c.name,
+    isCustom: true,
   }));
-  return [...allCards, ...formattedCustom];
+  // 仅包含纯数字id的预设角色
+  return [...allCards.filter(card => /^\d+$/.test(card.id)), ...formattedCustom];
 });
-
-// 切换角色的选中状态
-const toggleCharacterSelection = (cardId) => {
-  const index = selectedCharacterIds.value.indexOf(cardId);
-  if (index > -1) {
-    selectedCharacterIds.value.splice(index, 1);
-  } else {
-    selectedCharacterIds.value.push(cardId);
-  }
-};
 
 // 监听自定义角色数组的变化，并自动保存到localStorage
 watch(customCharacters, (newValue) => {
@@ -838,124 +720,6 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-.character-selection-container {
-  background-color: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-
-.agreement {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding-left: 10px;
-}
-
-.selection-title {
-  margin-top: 0rem;
-  font-size: 1.8rem;
-  text-align: center;
-  color: v-bind('colors.text.primary');
-}
-
-.selection-description {
-  text-align: center;
-  color: v-bind('colors.text.secondary');
-  margin-top: -1rem;
-}
-
-.selection-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.card-selector-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
-  gap: 0.8rem;
-  justify-content: center;
-}
-
-.card-option {
-  cursor: pointer;
-  position: relative;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background-color: v-bind('colors.background.light');
-}
-
-.card-option:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
-}
-
-.card-option .card-image {
-  width: 100%;
-  display: block;
-}
-
-.card-option .card-name {
-  font-size: 0.8rem;
-  text-align: center;
-  padding: 4px 2px;
-  background: v-bind('colors.shadow.primaryHover');
-  backdrop-filter: blur(2px);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  color: v-bind('colors.text.primary');
-}
-
-.card-option .checkmark {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.primary');
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s;
-}
-
-.card-option.selected {
-  border-color: v-bind('colors.brand.primary');
-}
-
-.card-option.selected .checkmark {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.finalize-button {
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  font-weight: bold;
-  border: none;
-  margin-top: 1rem;
-  padding: 0.5rem;
-  width: 100%;
-  font-size: 1.2rem;
-  background-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-}
-
-.finalize-button:hover {
-  background-color: v-bind('colors.brand.hover');
-}
-
 .chat-page-container {
   padding: 8px;
   width: 100%;
@@ -1410,132 +1174,5 @@ onUnmounted(() => {
 .agreement-list::-webkit-scrollbar-thumb {
   background-color: v-bind('colors.scrollbar');
   border-radius: 3px;
-}
-
-/* 创建角色按钮的样式 */
-.selection-toolbar {
-  display: flex;
-  justify-content: space-between;
-  /* 修改布局以容纳新按钮 */
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.create-char-btn {
-  background-color: #4CAF50;
-  color: white;
-  border-color: #4CAF50;
-}
-
-.create-char-btn:hover {
-  background-color: #45a049;
-  color: white;
-}
-
-/* 自定义角色卡片上的删除按钮 */
-.delete-custom-char-btn {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: rgba(218, 96, 106, 0.9);
-  color: white;
-  border: 1px solid white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  padding: 0;
-  line-height: 1;
-  opacity: 0;
-  /* 默认隐藏 */
-  transition: opacity 0.2s;
-}
-
-.card-option:hover .delete-custom-char-btn {
-  opacity: 1;
-  /* 悬停时显示 */
-}
-
-/* 自定义角色创建表单的样式 */
-.custom-character-form {
-  background-color: v-bind('colors.background.content');
-  padding: 20px 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 90%;
-  max-width: 400px;
-  border: 1px solid v-bind('colors.border.primary');
-}
-
-.custom-character-form h3 {
-  text-align: center;
-  margin-top: 0;
-  color: v-bind('colors.text.primary');
-}
-
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.form-row label {
-  font-weight: bold;
-  font-size: 0.9em;
-  color: v-bind('colors.text.secondary');
-}
-
-.form-row input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 1em;
-  box-sizing: border-box;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
-}
-
-.avatar-preview-container {
-  text-align: center;
-}
-
-.avatar-preview {
-  max-width: 100px;
-  max-height: 100px;
-  border-radius: 8px;
-  border: 2px solid v-bind('colors.border.primary');
-  margin-top: 5px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.form-actions .action-button {
-  flex-grow: 1;
-}
-
-.form-actions .action-button.cancel {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  color: white;
-}
-
-.form-actions .action-button.cancel:hover {
-  background-color: #5a6268;
-  color: white;
 }
 </style>

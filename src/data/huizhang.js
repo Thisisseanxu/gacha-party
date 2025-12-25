@@ -599,7 +599,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1808.webp',
+    image_url: '/images/qban/1307.webp',
     theme: HUIZHANG_THEMES.elec,
   },
   1401: {
@@ -771,7 +771,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1807.webp',
+    image_url: '/images/qban/1804.webp',
     theme: HUIZHANG_THEMES.water,
   },
   1806: {
@@ -968,6 +968,6 @@ export const CHAR_HUIZHANG_CONFIG = {
 }
 
 // 获取角色的配置
-export const getCharHuizhangSlots = (charId) => {
+export const getCharConfig = (charId) => {
   return CHAR_HUIZHANG_CONFIG[charId] || null
 }

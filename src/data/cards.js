@@ -203,7 +203,7 @@ export const allCards = [
     id: '11003',
     name: '爆米花精灵',
     rarity: RARITY.SP,
-    imageUrl: '/images/cards/11002.webp',
+    imageUrl: '/images/cards/11003.webp',
     realname: '爆爆',
   },
   {

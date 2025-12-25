@@ -1,19 +1,22 @@
 <template>
   <div class="page-container">
-    <div class="strategy-editor">
+    <h1 class="page-title">徽章攻略生成器</h1>
+    <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+    </p>
+
+    <div v-if="isSelectionMode" class="selector-container">
+      <CharacterSelector v-model="selectedCharId" mode="single" :showCustom="false"
+        :characterList="filteredCharacterList" :disabledCharacterIds="disabledCharacterIds" title="选择角色"
+        :subTitle="null" @confirm="isSelectionMode = false" />
+    </div>
+    <div v-else class="strategy-editor">
 
       <div class="controls-panel card">
         <h2>攻略配置</h2>
 
         <div class="control-group">
-          <label>选择角色</label>
-          <select v-model="selectedCharId" class="input-select">
-            <!-- 仅包含纯数字id的角色 -->
-            <option v-for="card in allCards.filter(c => c.id.match(/^\d+$/))" :key="card.id" :value="card.id"
-              :disabled="!isCharAdapted(card.id)">
-              {{ card.name }} {{ isCharAdapted(card.id) ? '' : '(暂未适配)' }}
-            </option>
-          </select>
+          <label>当前角色: {{ selectedCardInfo.name }}</label>
+          <button @click="isSelectionMode = true" class="reselect-btn">重选角色</button>
         </div>
 
         <div class="control-group">
@@ -144,6 +147,34 @@
 
     </div>
   </div>
+
+  <PopUp :display="showAgreementPopUp" title="《织夜工具箱创作条款》" @close="closeAgreementPopUp">
+    <p>欢迎使用织夜工具箱！<br />在使用前，请您仔细阅读以下用户协议：</p>
+    <ol class="agreement-list">
+      <li>
+        <strong>服务描述与接受条款：</strong>
+        织夜工具箱是一个为《盲盒派对》玩家提供增强体验的工具。若您点击“我已阅读并同意”按钮并继续使用本服务，即表示您已同意并接受本协议的所有条款。
+      </li>
+      <li>
+        <strong>版权信息：</strong>
+        工具箱中所使用的所有角色形象、名称及相关内容均为其各自版权所有者所有。织夜工具箱仅用其提供非营利性服务，我们尊重并支持版权保护，任何未经授权的商用均属侵权行为。您可以在非商业用途下自由使用/分享本工具箱生成的内容。
+      </li>
+      <li>
+        <strong>用户责任：</strong> 您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
+      </li>
+      <li>
+        <strong>数据使用与隐私保护：</strong>
+        我们承诺保护您的个人隐私。目前织夜工具箱不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
+      </li>
+      <li>
+        <strong>服务变更、中断或终止：</strong> 本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
+      </li>
+      <li>
+        <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
+      </li>
+    </ol>
+    <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
+  </PopUp>
 </template>
 
 <script setup>
@@ -154,10 +185,12 @@ import {
   HUIZHANG_SHAPES,
   HUIZHANG_RARITY,
   HUIZHANG_TYPES,
-  getCharHuizhangSlots,
+  getCharConfig,
   getHuizhangBgUrl
 } from '@/data/huizhang.js';
 import html2canvas from 'html2canvas';
+import PopUp from '@/components/PopUp.vue';
+import CharacterSelector from '@/components/CharacterSelector.vue';
 
 // 输出allcards的所有id
 console.log('All Cards IDs:', allCards.map(c => c.id));
@@ -172,15 +205,45 @@ const currentSlots = ref([]);
 const iconBase64Map = ref({});
 const previewWrapper = ref(null);
 const previewScale = ref(1);
+const isSelectionMode = ref(true);
+const showAgreementPopUp = ref(false);
+
+const openAgreementPopUp = () => {
+  showAgreementPopUp.value = true;
+};
+const closeAgreementPopUp = () => {
+  showAgreementPopUp.value = false;
+};
+
+const filteredCharacterList = computed(() => {
+  return allCards.filter(c => c.id.match(/^\d+$/)).map(c => ({
+    ...c,
+    // 通过getCharConfig搜索Q版立绘，如果有则优先使用Q版立绘
+    imageUrl: getCharConfig(c.id)?.image_url || c.imageUrl
+  }));
+});
+
+const disabledCharacterIds = computed(() => {
+  return filteredCharacterList.value.filter(c => !isCharAdapted(c.id)).map(c => c.id);
+});
 
 // 检查角色是否适配
 const isCharAdapted = (id) => {
-  return !!getCharHuizhangSlots(id);
+  return !!getCharConfig(id);
 };
+
+watch(isSelectionMode, (newVal) => {
+  if (!newVal) {
+    nextTick(() => {
+      updatePreviewScale();
+    });
+  }
+});
 
 // 初始化
 onMounted(() => {
-  selectedCharId.value = '1111'
+  selectedCharId.value = '1111';
+  isSelectionMode.value = true;
   window.addEventListener('resize', updatePreviewScale);
   updatePreviewScale();
 });
@@ -223,13 +286,13 @@ const selectedCardInfo = computed(() => {
 });
 
 const currentCharConfig = computed(() => {
-  return getCharHuizhangSlots(selectedCharId.value);
+  return getCharConfig(selectedCharId.value);
 });
 
 // 监听角色变化，更新槽位配置
 watch(selectedCharId, (newId) => {
   if (!newId) return;
-  const config = getCharHuizhangSlots(newId);
+  const config = getCharConfig(newId);
   if (config && config.shape) {
     currentSlots.value = config.shape.map(shapeStr => ({
       shape: shapeStr,
@@ -397,7 +460,8 @@ const generateImage = async () => {
   min-height: 100vh;
   background-color: v-bind('colors.background.primary');
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 4px;
   color: v-bind('colors.text.primary');
 }
@@ -410,6 +474,75 @@ const generateImage = async () => {
   width: 100%;
 }
 
+.selector-container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2em;
+  color: v-bind('colors.text.highlight');
+  margin-bottom: 0;
+  margin-top: 10px;
+}
+
+.agreement {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  text-align: center;
+}
+
+.highlight {
+  color: v-bind('colors.text.highlight');
+  cursor: pointer;
+}
+
+.agreement-list {
+  max-height: 20rem;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  padding: 0 0 0 20px;
+  border-radius: 8px;
+  background-color: v-bind('colors.shadow.primaryHover');
+}
+
+.agreement-list li {
+  line-height: 1.6;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.agreement-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agreement-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.agreement-list::-webkit-scrollbar-thumb {
+  background-color: v-bind('colors.scrollbar');
+  border-radius: 3px;
+}
+
+.action-button {
+  padding: 8px 16px;
+  border: 1px solid #344767;
+  background-color: #ccc;
+  color: #344767;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background-color: #344767;
+  color: #ccc;
+}
+
 .controls-panel {
   flex: 1;
   min-width: 280px;
@@ -418,6 +551,17 @@ const generateImage = async () => {
   border-radius: 12px;
   height: fit-content;
   box-sizing: border-box;
+}
+
+.reselect-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  background-color: #555;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .control-group {
@@ -579,6 +723,9 @@ textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .capture-area {
