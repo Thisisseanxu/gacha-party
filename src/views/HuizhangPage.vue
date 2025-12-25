@@ -5,6 +5,13 @@
     </p>
 
     <div v-if="isSelectionMode" class="selector-container">
+      <div class="import-section">
+        <label class="import-btn">
+          导入攻略数据
+          <input type="file" accept=".json" @change="importData" style="display: none">
+        </label>
+        <span class="import-hint">选择之前导出的json文件可直接恢复编辑</span>
+      </div>
       <CharacterSelector v-model="selectedCharId" mode="single" :showCustom="false"
         :characterList="filteredCharacterList" :disabledCharacterIds="disabledCharacterIds" title="选择角色"
         :subTitle="null" @confirm="isSelectionMode = false" />
@@ -57,13 +64,18 @@
         </div>
 
         <div class="control-group">
+          <label>标题配置（留空则不显示）</label>
+          <input v-model="customTitle" class="input-select" placeholder="大标题内容">
+        </div>
+        <div class="control-group">
           <input v-model="recommendTitle" class="input-select" style="margin-bottom: 8px; font-weight: bold;"
             placeholder="小标题">
           <textarea v-model="recommendText" rows="4" placeholder="文本内容"></textarea>
         </div>
 
         <div class="action-buttons">
-          <button @click="generateImage" class="generate-btn">生成并下载攻略图</button>
+          <button @click="exportData" class="export-btn">保存数据</button>
+          <button @click="generateImage" class="generate-btn">导出攻略图</button>
         </div>
       </div>
 
@@ -82,6 +94,10 @@
                 <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star">
               </div>
             </div>
+          </div>
+
+          <div class="custom-title-display">
+            {{ customTitle }}
           </div>
 
           <div class="character-display">
@@ -132,7 +148,7 @@
 
           <div class="info-panel">
             <div class="active-effects">
-              <span class="label">激活效果：</span>
+              <span class="label">套装效果：</span>
               <span class="effect-text">{{ calculatedEffects }}</span>
             </div>
             <div class="recommendation-text">
@@ -164,7 +180,7 @@
       </li>
       <li>
         <strong>数据使用与隐私保护：</strong>
-        我们承诺保护您的个人隐私。目前织夜工具箱不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
+        我们承诺保护您的个人隐私。目前织夜工具箱徽章攻略编辑器不收集任何个人数据，所有数据均存储在您的本地浏览器中。
       </li>
       <li>
         <strong>服务变更、中断或终止：</strong> 本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
@@ -192,12 +208,10 @@ import html2canvas from 'html2canvas';
 import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
 
-// 输出allcards的所有id
-console.log('All Cards IDs:', allCards.map(c => c.id));
-
 // 状态
 const selectedCharId = ref('');
 const recommendedStars = ref([0, 5]);
+const customTitle = ref('');
 const recommendTitle = ref('推荐理由：');
 const recommendText = ref('');
 const captureRef = ref(null);
@@ -365,16 +379,22 @@ const calculatedEffects = computed(() => {
 
   const effects = [];
   for (const [typeId, count] of Object.entries(counts)) {
-    const typeName = HUIZHANG_TYPES[typeId]?.name || typeId;
+    const typeConfig = HUIZHANG_TYPES[typeId];
+    if (!typeConfig) continue;
+
+    const { name, act2, act4, act4extra } = typeConfig;
+
     if (count >= 4) {
-      effects.push(`2&4${typeName}`);
+      const totalVal = (act2 || 0) + (act4 || 0);
+      let str = `${totalVal}%${name}`;
+      if (act4extra) str += `&${act4extra}`;
+      effects.push(str);
     } else if (count >= 2) {
-      effects.push(`2${typeName}`);
-      if (count - 2 >= 2) effects.push(`2${typeName}`);
+      effects.push(`${act2 || 0}%${name}`);
     }
   }
 
-  if (effects.length === 0) return '无激活效果';
+  if (effects.length === 0) return '无套装效果';
   return effects.join(' + ');
 });
 
@@ -402,6 +422,61 @@ const getStarImage = (level, starIndex) => {
   }
 
   return `/images/huizhang/icon_star_${typeIndex}.webp`;
+};
+
+// 导出数据
+const exportData = () => {
+  const data = {
+    charId: selectedCharId.value,
+    stars: recommendedStars.value,
+    customTitle: customTitle.value,
+    recTitle: recommendTitle.value,
+    recText: recommendText.value,
+    slots: currentSlots.value
+  };
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `徽章配置-${selectedCardInfo.value.name || 'data'}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// 导入数据
+const importData = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (json.charId) {
+        selectedCharId.value = json.charId;
+        // 等待 selectedCharId 的 watcher 执行完毕（重置 slots）后再覆盖数据
+        nextTick(() => {
+          if (json.stars) recommendedStars.value = json.stars;
+          if (json.customTitle !== undefined) customTitle.value = json.customTitle;
+          if (json.recTitle !== undefined) recommendTitle.value = json.recTitle;
+          if (json.recText !== undefined) recommendText.value = json.recText;
+          if (json.slots) currentSlots.value = json.slots;
+
+          isSelectionMode.value = false;
+        });
+      } else {
+        throw new Error('Invalid data format');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // 重置 input，允许重复选择同一文件
 };
 
 // 预览区域缩放逻辑
@@ -701,8 +776,38 @@ textarea {
   white-space: nowrap;
 }
 
+.import-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 8px;
+}
+
+.import-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background-color: #444;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 1px solid #666;
+  transition: all 0.2s;
+}
+
+.import-btn:hover {
+  background-color: #555;
+  border-color: #888;
+}
+
+.import-hint {
+  font-size: 0.9rem;
+  color: #888;
+}
+
 .generate-btn {
-  width: 100%;
+  flex: 2;
   padding: 15px;
   background: v-bind('colors.brand.confirm');
   color: white;
@@ -711,6 +816,23 @@ textarea {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
+}
+
+.export-btn {
+  flex: 1;
+  padding: 15px;
+  background: #607d8b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 /* --- 预览区 --- */
@@ -778,6 +900,17 @@ textarea {
   height: 40px;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.custom-title-display {
+  position: absolute;
+  top: 140px;
+  left: 30px;
+  font-size: 2.5rem;
+  color: #ffca28;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 10;
 }
 
 /* 立绘 */
@@ -932,12 +1065,12 @@ textarea {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  width: 380px;
+  min-width: 370px;
   min-height: 180px;
   background: rgba(30, 30, 40, 0.9);
   border: 1px solid #555;
   border-radius: 10px;
-  padding: 15px;
+  padding: 12px;
   text-align: left;
   z-index: 0;
 }
@@ -946,6 +1079,7 @@ textarea {
   margin-bottom: 8px;
   border-bottom: 1px solid #444;
   padding-bottom: 8px;
+  white-space: nowrap;
 }
 
 .label {
