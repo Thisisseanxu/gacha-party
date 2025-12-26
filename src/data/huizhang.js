@@ -39,7 +39,7 @@ export const HUIZHANG_TYPES = {
   hp: { id: 'hp', name: '生命', act2: 6, act4: 15, icon: '/images/huizhang/510030.webp' },
   atk: { id: 'atk', name: '攻击', act2: 6, act4: 15, icon: '/images/huizhang/510020.webp' },
   sup: { id: 'sup', name: '支援', act2: 6, act4: 15, icon: '/images/huizhang/510130.webp' },
-  cri: { id: 'crit', name: '暴击', act2: 6, act4: 15, icon: '/images/huizhang/510010.webp' },
+  cri: { id: 'cri', name: '暴击', act2: 6, act4: 15, icon: '/images/huizhang/510010.webp' },
   cridmg: { id: 'cridmg', name: '暴伤', act2: 12, act4: 30, icon: '/images/huizhang/510050.webp' },
   control: {
     id: 'control',
@@ -970,6 +970,18 @@ export const CHAR_HUIZHANG_CONFIG = {
   1607: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
     image_url: '/images/qban/1607.webp',
+    theme: HUIZHANG_THEMES.fire,
+  },
+  1712: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+    ],
+    image_url: '/images/qban/1712.webp',
     theme: HUIZHANG_THEMES.fire,
   },
 }

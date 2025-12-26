@@ -193,6 +193,13 @@ export const allCards = [
     realname: '茴香',
   },
   {
+    id: '1712',
+    name: '雪花投手',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1712.webp',
+    realname: '柳生薰',
+  },
+  {
     id: '11001',
     name: '次元加农炮',
     rarity: RARITY.SP,
