@@ -74,7 +74,7 @@
                   <div v-if="message.displayName" class="character-name">
                     {{ message.displayName }}
                   </div>
-                  <div class="bubble" :class="{ 'image-bubble': message.type === 'image' }">
+                  <div :class="{ 'image-bubble': message.type === 'image', 'bubble': message.type !== 'image' }">
                     <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
                     <span v-else>{{ message.text }}</span>
                   </div>
@@ -794,12 +794,11 @@ onUnmounted(() => {
 
 .chat-log-container {
   background-color: v-bind('colors.game.backgroundBlack');
-  border-radius: 8px;
+  border-radius: 1rem;
   padding: 10px;
   height: 50vh;
   overflow-y: auto;
   margin-bottom: 0;
-  border: 1px solid #ccc;
   /* 在网页中居中 */
   margin-left: auto;
   margin-right: auto;
@@ -825,6 +824,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  width: 100%;
 }
 
 .chat-message {
@@ -851,6 +851,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 10rem;
 }
 
 .character-name {
@@ -861,7 +862,8 @@ onUnmounted(() => {
 }
 
 /* 聊天气泡样式 */
-.bubble {
+.bubble,
+.image-bubble {
   background-color: v-bind('colors.game.primary');
   color: white;
   border-radius: 15px;
@@ -877,8 +879,9 @@ onUnmounted(() => {
   word-break: break-word;
 }
 
-.bubble.image-bubble {
+.image-bubble {
   padding: 6px;
+  background-color: transparent;
 }
 
 /* 聊天气泡的小尾巴 (左上角) */
@@ -954,7 +957,7 @@ onUnmounted(() => {
   /* 限制图片最大宽度 */
   max-height: 20rem;
   /* 限制图片最大高度 */
-  background-color: #eee;
+  background-color: transparent;
   /* 图片加载前的占位背景色 */
   object-fit: cover;
   /* 保持图片比例 */
