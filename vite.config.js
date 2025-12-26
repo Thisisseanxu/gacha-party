@@ -59,6 +59,21 @@ export default defineConfig({
               },
             },
           },
+          {
+            // 匹配常见的图片格式
+            urlPattern: /\.(?:ttf)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存有效期 365 天
+              },
+              // 允许跨域缓存
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
           // 原有的代码缓存策略
           {
             urlPattern: /\.(?:js|css|html)$/,
