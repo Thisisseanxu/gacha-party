@@ -516,6 +516,8 @@ const generateImage = async () => {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
+      width: captureRef.value.clientWidth,
+      height: captureRef.value.clientHeight,
     });
     const link = document.createElement('a');
     link.download = `徽章攻略-${selectedCardInfo.value.name}.png`;
