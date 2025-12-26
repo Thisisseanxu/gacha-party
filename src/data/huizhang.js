@@ -46,7 +46,7 @@ export const HUIZHANG_TYPES = {
     name: '异常伤害',
     act2: 30,
     act4: 30,
-    act4extra: '30%积蓄速率',
+    act4extra: '30% 积蓄速率',
     icon: '/images/huizhang/510110.webp',
   },
   cd: { id: 'cd', name: '冷却', act2: 4, act4: 10, icon: '/images/huizhang/510140.webp' },

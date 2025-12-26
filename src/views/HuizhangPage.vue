@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <h1 class="page-title">徽章攻略生成器</h1>
+    <h1 class="page-title">徽章攻略编辑器</h1>
     <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
     </p>
 
@@ -386,11 +386,11 @@ const calculatedEffects = computed(() => {
 
     if (count >= 4) {
       const totalVal = (act2 || 0) + (act4 || 0);
-      let str = `${totalVal}%${name}`;
+      let str = `${totalVal}% ${name}`;
       if (act4extra) str += `&${act4extra}`;
       effects.push(str);
     } else if (count >= 2) {
-      effects.push(`${act2 || 0}%${name}`);
+      effects.push(`${act2 || 0}% ${name}`);
     }
   }
 
