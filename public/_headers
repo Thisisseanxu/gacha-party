@@ -1,16 +1,29 @@
-/manifest.webmanifest
-  Content-Type: application/manifest+json
-  Cache-Control: no-cache, must-revalidate, max-age=0
+# HTML 必须每次检查更新，确保用户能拿到最新的 sw.js 和 资源入口
+/
+  Cache-Control: no-cache, no-store, must-revalidate
 
+# Service Worker 绝对不能缓存，否则 PWA 无法自动更新
 /sw.js
-  Service-Worker-Allowed: /
+  Cache-Control: no-cache, no-store, must-revalidate
 
-/*.js
-  Content-Type: application/javascript
-  Cache-Control: no-cache, must-revalidate, max-age=0
+# 字体文件长期缓存
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
 
-/index.html
-  Cache-Control: no-cache, must-revalidate, max-age=0
+# 图片资源缓存90天
+/*.png
+  Cache-Control: public, max-age=7776000
+/*.jpg
+  Cache-Control: public, max-age=7776000
+/*.jpeg
+  Cache-Control: public, max-age=7776000
+/*.svg
+  Cache-Control: public, max-age=7776000
+/*.webp
+  Cache-Control: public, max-age=7776000
+/*.gif
+  Cache-Control: public, max-age=7776000
 
+# Vite 编译后的静态资源因为带哈希，可以长期缓存
 /assets/*
   Cache-Control: public, max-age=31536000, immutable

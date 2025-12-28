@@ -15,7 +15,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       devOptions: {
-        enabled: true, // 在开发环境中也启用 PWA
+        enabled: false, // 在开发环境中禁用PWA
       },
       manifest: {
         name: '织夜工具箱', // 应用全名
@@ -64,7 +64,7 @@ export default defineConfig({
             urlPattern: /\.(?:ttf)$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'images-cache',
+              cacheName: 'fonts-cache',
               expiration: {
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存有效期 365 天
               },
