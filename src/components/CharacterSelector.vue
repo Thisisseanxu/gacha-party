@@ -226,6 +226,8 @@ const deleteCustomCharacter = (characterId) => {
   padding: 1rem 1rem;
   border-radius: 12px;
   margin-bottom: 20px;
+  max-width: 800px;
+  margin: auto;
 }
 
 .selection-title {

@@ -613,7 +613,7 @@ const importChatLog = (event) => {
 const chatContainerRef = ref(null);
 // 是否处于全屏状态
 const isFullscreen = ref(false);
-const chatLogWidth = ref(100); // 聊天记录容器的宽度百分比
+const chatLogWidth = ref(50); // 聊天记录容器的宽度百分比
 
 // 切换全屏状态
 const toggleFullscreen = (forceToggle = null) => {
@@ -723,8 +723,6 @@ onUnmounted(() => {
 .chat-page-container {
   padding: 8px;
   width: 100%;
-  max-width: 800px;
-  font-family: 'Inter', sans-serif;
   color: v-bind('colors.text.primary');
   overflow: visible;
 }
@@ -970,6 +968,8 @@ onUnmounted(() => {
   padding: 15px;
   border-radius: 8px;
   border: 1px solid v-bind('colors.border.primary');
+  max-width: 800px;
+  margin: auto;
 }
 
 .editor-row {
