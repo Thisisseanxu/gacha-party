@@ -57,7 +57,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-          }}<br />
+            }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
@@ -72,7 +72,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-                }}</span>
+              }}</span>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -276,7 +276,6 @@ import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
-import { toDataURL } from '@/utils/imageExportHelper.js';
 
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
@@ -1425,44 +1424,6 @@ const shareAnalysisImage = async () => {
       x: -PADDING, // 从元素左侧 PADDING 像素处开始截图
       width: analysisContentRef.value.offsetWidth + PADDING * 2, // 截图宽度 = 元素宽度 + 左右边距
       height: analysisContentRef.value.offsetHeight, // 截图高度
-      onclone: async (clonedDoc) => {
-        const imagePromises = [];
-
-        // 1. 处理 <img> 标签
-        const images = clonedDoc.querySelectorAll('img');
-        images.forEach((img) => {
-          if (img.src && (img.src.startsWith('http') || img.src.startsWith('/') || img.src.startsWith('.')) && !img.src.startsWith('data:')) {
-            const promise = toDataURL(img.src)
-              .then((dataUrl) => {
-                img.src = dataUrl;
-              })
-              .catch(err => console.error(`转换图片失败: ${img.src}`, err));
-            imagePromises.push(promise);
-          }
-        });
-
-        // 2. 处理 background-image 样式
-        const allElements = clonedDoc.querySelectorAll('*');
-        allElements.forEach((el) => {
-          const win = el.ownerDocument.defaultView || window;
-          const style = win.getComputedStyle(el);
-          const bgImage = style.backgroundImage;
-          if (bgImage && bgImage.startsWith('url(') && !bgImage.includes('data:')) {
-            const match = bgImage.match(/url\(['"]?(.*?)['"]?\)/);
-            if (match && match[1]) {
-              const url = match[1];
-              const promise = toDataURL(url)
-                .then((dataUrl) => {
-                  el.style.backgroundImage = `url(${dataUrl})`;
-                })
-                .catch(err => console.error(`转换背景图失败: ${url}`, err));
-              imagePromises.push(promise);
-            }
-          }
-        });
-
-        await Promise.all(imagePromises);
-      }
     });
 
     canvas.toBlob(async (blob) => {

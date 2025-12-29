@@ -204,7 +204,7 @@ import {
   getCharConfig,
   getHuizhangBgUrl
 } from '@/data/huizhang.js';
-import { exportImage } from '@/utils/imageExportHelper.js';
+import html2canvas from 'html2canvas';
 import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
 
@@ -512,11 +512,17 @@ const generateImage = async () => {
 
   try {
     await nextTick();
-    await exportImage(captureRef.value, `徽章攻略-${selectedCardInfo.value.name}.png`, {
+    const canvas = await html2canvas(captureRef.value, {
       scale: 2,
+      useCORS: true,
+      backgroundColor: null,
       width: captureRef.value.clientWidth,
-      height: captureRef.value.clientHeight
+      height: captureRef.value.clientHeight,
     });
+    const link = document.createElement('a');
+    link.download = `徽章攻略-${selectedCardInfo.value.name}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   } catch (err) {
     console.error('生成图片失败:', err);
     alert('生成失败');
