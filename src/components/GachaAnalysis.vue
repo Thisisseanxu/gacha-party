@@ -276,6 +276,7 @@ import { cardMap } from '@/data/cards.js';
 import * as RARITY from '@/data/rarity.js';
 import { colors } from '@/styles/colors.js';
 import { logger } from '@/utils/logger.js';
+import { toDataURL } from '@/utils/imageExportHelper.js';
 
 import SelectorComponent from '@/components/SelectorComponent.vue';
 import CustomPlayerTitle from '@/components/CustomPlayerTitle.vue';
@@ -1424,6 +1425,44 @@ const shareAnalysisImage = async () => {
       x: -PADDING, // 从元素左侧 PADDING 像素处开始截图
       width: analysisContentRef.value.offsetWidth + PADDING * 2, // 截图宽度 = 元素宽度 + 左右边距
       height: analysisContentRef.value.offsetHeight, // 截图高度
+      onclone: async (clonedDoc) => {
+        const imagePromises = [];
+
+        // 1. 处理 <img> 标签
+        const images = clonedDoc.querySelectorAll('img');
+        images.forEach((img) => {
+          if (img.src && (img.src.startsWith('http') || img.src.startsWith('/') || img.src.startsWith('.')) && !img.src.startsWith('data:')) {
+            const promise = toDataURL(img.src)
+              .then((dataUrl) => {
+                img.src = dataUrl;
+              })
+              .catch(err => console.error(`转换图片失败: ${img.src}`, err));
+            imagePromises.push(promise);
+          }
+        });
+
+        // 2. 处理 background-image 样式
+        const allElements = clonedDoc.querySelectorAll('*');
+        allElements.forEach((el) => {
+          const win = el.ownerDocument.defaultView || window;
+          const style = win.getComputedStyle(el);
+          const bgImage = style.backgroundImage;
+          if (bgImage && bgImage.startsWith('url(') && !bgImage.includes('data:')) {
+            const match = bgImage.match(/url\(['"]?(.*?)['"]?\)/);
+            if (match && match[1]) {
+              const url = match[1];
+              const promise = toDataURL(url)
+                .then((dataUrl) => {
+                  el.style.backgroundImage = `url(${dataUrl})`;
+                })
+                .catch(err => console.error(`转换背景图失败: ${url}`, err));
+              imagePromises.push(promise);
+            }
+          }
+        });
+
+        await Promise.all(imagePromises);
+      }
     });
 
     canvas.toBlob(async (blob) => {

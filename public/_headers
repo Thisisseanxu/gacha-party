@@ -9,6 +9,10 @@
 # 字体文件长期缓存
 /*.ttf
   Cache-Control: public, max-age=31536000, immutable
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
 
 # 图片资源缓存90天
 /*.png
@@ -22,6 +26,8 @@
 /*.webp
   Cache-Control: public, max-age=7776000
 /*.gif
+  Cache-Control: public, max-age=7776000
+/*.ico
   Cache-Control: public, max-age=7776000
 
 # Vite 编译后的静态资源因为带哈希，可以长期缓存

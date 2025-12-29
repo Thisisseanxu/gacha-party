@@ -45,7 +45,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             // 匹配常见的图片格式
-            urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif)$/,
+            urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images-cache',
@@ -61,7 +61,7 @@ export default defineConfig({
           },
           {
             // 匹配常见的图片格式
-            urlPattern: /\.(?:ttf)$/,
+            urlPattern: /\.(?:ttf|otf|woff2|woff)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'fonts-cache',
@@ -74,7 +74,7 @@ export default defineConfig({
               },
             },
           },
-          // 原有的代码缓存策略
+          // JS、CSS 和 HTML 文件在有更新时立即获取最新内容
           {
             urlPattern: /\.(?:js|css|html)$/,
             handler: 'StaleWhileRevalidate',
@@ -82,6 +82,7 @@ export default defineConfig({
               cacheName: 'assets-cache',
             },
           },
+          //
         ],
       },
     }),

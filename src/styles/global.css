@@ -1,21 +1,9 @@
-/* 从CDN加载字体 */
-
-@font-face {
-  font-family: 'Alibaba PuHuiTi';
-  src: url('https://cdn.jsdelivr.net/npm/@tslsmart/font-puhuiti@1.0.0/assets/alibaba-puhuiti-regular.ttf')
-    format('truetype');
-  font-weight: 400; /* Regular */
-  font-style: normal;
-  font-display: swap;
-}
-
 /* 将字体应用到整个应用 */
 body,
 input,
 button,
 textarea {
   font-family:
-    'Alibaba PuHuiTi',
     'Source Han Sans SC VF',
     system-ui,
     -apple-system,
