@@ -1,10 +1,11 @@
 # HTML 必须每次检查更新，确保用户能拿到最新的 sw.js 和 资源入口
-/
-  Cache-Control: no-cache, no-store, must-revalidate
-
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
 # Service Worker 绝对不能缓存，否则 PWA 无法自动更新
 /sw.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate, no-cache
 
 # 字体文件长期缓存
 /*.ttf

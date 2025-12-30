@@ -15,7 +15,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       devOptions: {
-        enabled: false, // 在开发环境中禁用PWA
+        enabled: true, // 在开发环境中也启用PWA
       },
       manifest: {
         name: '织夜工具箱', // 应用全名
@@ -77,7 +77,7 @@ export default defineConfig({
             },
           },
           {
-            // 匹配常见的图片格式
+            // 匹配常见的字体格式
             urlPattern: /\.(?:ttf|otf|woff2|woff)$/,
             handler: 'CacheFirst',
             options: {
