@@ -101,8 +101,7 @@
           </div>
 
           <div class="character-display">
-            <img :src="currentCharConfig?.image_url || selectedCardInfo.imageUrl" class="char-img"
-              crossOrigin="anonymous" />
+            <img :src="currentCharConfig?.image_url || selectedCardInfo.imageUrl" class="char-img" />
           </div>
 
           <div class="badges-container">
@@ -514,7 +513,6 @@ const generateImage = async () => {
     await nextTick();
     const canvas = await html2canvas(captureRef.value, {
       scale: 2,
-      useCORS: true,
       backgroundColor: null,
       width: captureRef.value.clientWidth,
       height: captureRef.value.clientHeight,

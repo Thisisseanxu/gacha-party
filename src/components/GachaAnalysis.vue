@@ -1418,7 +1418,6 @@ const shareAnalysisImage = async () => {
 
   try {
     const canvas = await html2canvas(analysisContentRef.value, {
-      useCORS: true, // 允许加载跨域图片
       backgroundColor: colors.background.content, // 设置背景色，防止透明
       scale: 2, // 提高分辨率
       x: -PADDING, // 从元素左侧 PADDING 像素处开始截图

@@ -43,6 +43,23 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,json}'],
         runtimeCaching: [
+          // 优先匹配 jsdelivr 的 CDN 资源 (字体和样式)
+          {
+            // 匹配所有来自 cdn.jsdelivr.net 的请求
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+            handler: 'CacheFirst', // 强缓存：因为 URL 里带有版本号，内容不会变
+            options: {
+              cacheName: 'jsdelivr-cdn-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存 1 年
+              },
+              cacheableResponse: {
+                // 允许缓存跨域响应
+                statuses: [0, 200],
+              },
+            },
+          },
           {
             // 匹配常见的图片格式
             urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
