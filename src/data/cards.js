@@ -227,6 +227,20 @@ export const allCards = [
     imageUrl: '/images/cards/1411.webp',
     realname: '莱拉',
   },
+  {
+    id: '1112',
+    name: '绯色巧克力',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1112.webp',
+    realname: '红叶',
+  },
+  {
+    id: '1113',
+    name: '糖果轰炸机',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1113.webp',
+    realname: '风魔眬',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',

@@ -143,7 +143,7 @@ const errorMessage = ref('');
 const showAgreementPopUp = ref(false); // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV;
 
-const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "107", "48", "49", "50", "51", "52", "53", "54", "55", "59", "58", "60"]; // 限定卡池ID列表
+const LIMITED_CARD_POOLS_ID = ['29', '40', '41', '42', '43', "44", "46", "107", "48", "49", "50", "51", "52", "53", "54", "55", "59", "58", "60", "61"]; // 限定卡池ID列表
 const EVENT_CARD_POOLS_ID = ['57']; // 联动卡池ID列表
 const FUKE_CARD_POOLS_ID = []; // 复刻卡池ID列表（暂时为空）
 const CARDPOOLS_NAME_MAP = {
@@ -169,6 +169,7 @@ const CARDPOOLS_NAME_MAP = {
   '58': '厨娘来啦！',
   '57': '酷玩爆米花',
   '60': '圣诞邀约',
+  '61': '相约嘉年华',
   '1000': '心愿自选',
   '10000': '高级常驻扭蛋'
 };
