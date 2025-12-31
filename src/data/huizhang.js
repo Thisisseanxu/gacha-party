@@ -984,6 +984,30 @@ export const CHAR_HUIZHANG_CONFIG = {
     image_url: '/images/qban/1712.webp',
     theme: HUIZHANG_THEMES.fire,
   },
+  1112: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+    ],
+    image_url: '/images/qban/1112.webp',
+    theme: HUIZHANG_THEMES.cake,
+  },
+  1113: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+    ],
+    image_url: '/images/qban/1113.webp',
+    theme: HUIZHANG_THEMES.cake,
+  },
 }
 
 // 获取角色的配置
