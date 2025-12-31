@@ -269,7 +269,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import pako from 'pako';
 import ExcelJS from 'exceljs';
 import FileSaver from 'file-saver';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next';
 
 import { cardMap } from '@/data/cards.js';
@@ -1414,38 +1414,55 @@ const startReviewAnimation = () => {
 const shareAnalysisImage = async () => {
   if (!analysisContentRef.value) return;
 
-  const PADDING = 15; // 设置截图的内边距
+  const element = analysisContentRef.value;
+  // 临时隐藏滚动条以修复截图时的布局问题
+  const scrollableElements = element.querySelectorAll('.history-list, .quantity-statistics-list, .character-overview-list');
+  const originalOverflows = [];
+  scrollableElements.forEach(el => {
+    originalOverflows.push({ el, val: el.style.overflow });
+    el.style.overflow = 'hidden';
+  });
 
   try {
-    const canvas = await html2canvas(analysisContentRef.value, {
-      backgroundColor: colors.background.content, // 设置背景色，防止透明
-      scale: 2, // 提高分辨率
-      x: -PADDING, // 从元素左侧 PADDING 像素处开始截图
-      width: analysisContentRef.value.offsetWidth + PADDING * 2, // 截图宽度 = 元素宽度 + 左右边距
-      height: analysisContentRef.value.offsetHeight, // 截图高度
-    });
+    let blob;
+    try {
+      blob = await toBlob(analysisContentRef.value, {
+        backgroundColor: colors.background.content, // 设置背景色，防止透明
+        pixelRatio: 2, // 提高分辨率
+        width: element.clientWidth + 16, // 增加宽度以容纳padding防止裁切
+        height: element.clientHeight + 16,
+        style: {
+          padding: '8px', // 设置截图的内边距
+        },
+        cacheBust: false, // 使用缓存字体
+        skipFonts: true, // 跳过字体缓存
+      });
+    } finally {
+      // 截图完成后立即恢复滚动条
+      originalOverflows.forEach(({ el, val }) => {
+        el.style.overflow = val;
+      });
+    }
 
-    canvas.toBlob(async (blob) => {
-      if (!blob) {
-        alert('生成图片失败！');
-        return;
+    if (!blob) {
+      alert('生成图片失败！');
+      return;
+    }
+
+    const filename = `盲盒派对抽卡分析-${props.playerId}.png`;
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    // 检查浏览器是否支持 Web Share API
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: '我的抽卡分析' });
+      } catch (error) {
+        logger.warn('分享失败，可能是用户取消了操作。回退到下载。', error);
+        FileSaver.saveAs(blob, filename); // 用户取消分享或分享失败时，回退到下载
       }
-
-      const filename = `盲盒派对抽卡分析-${props.playerId}.png`;
-      const file = new File([blob], filename, { type: 'image/png' });
-
-      // 检查浏览器是否支持 Web Share API
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: '我的抽卡分析' });
-        } catch (error) {
-          logger.warn('分享失败，可能是用户取消了操作。回退到下载。', error);
-          FileSaver.saveAs(blob, filename); // 用户取消分享或分享失败时，回退到下载
-        }
-      } else {
-        FileSaver.saveAs(blob, filename); // 不支持分享则直接下载
-      }
-    }, 'image/png');
+    } else {
+      FileSaver.saveAs(blob, filename); // 不支持分享则直接下载
+    }
   } catch (error) {
     alert(`截图失败: ${error}`);
   }
@@ -1530,7 +1547,7 @@ const formatDateTime = (timestamp) => {
 .pool-hint-bubble {
   position: absolute;
   top: 100%;
-  left: 50%;
+  left: 60%;
   transform: translateX(-50%);
   margin-top: 10px;
   background-color: v-bind('colors.shadow.primaryHover');
@@ -1630,6 +1647,7 @@ const formatDateTime = (timestamp) => {
 .stat-box .stat-value {
   font-size: 1.1rem;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .tabs {
