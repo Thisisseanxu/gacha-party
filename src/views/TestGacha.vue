@@ -185,7 +185,7 @@ const runSimulation = async () => {
 .config-item label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: bold;
   color: #555;
   font-size: 0.9rem;
 }

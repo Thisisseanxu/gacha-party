@@ -103,7 +103,7 @@ function confirmUpdate() {
 
 .dialog-title {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: bold;
   margin: 0;
 }
 
@@ -123,7 +123,7 @@ function confirmUpdate() {
   padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1rem;
   width: 100%;
   /* 按钮横跨整个弹窗，操作更方便 */

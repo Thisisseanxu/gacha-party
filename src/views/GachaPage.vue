@@ -784,7 +784,7 @@ h1 {
   font-size: 0.8rem;
   margin-top: 0.5rem;
   color: v-bind('colors.text.secondary');
-  font-weight: 500;
+  font-weight: bold;
   /* 限制名字长度，防止换行 */
   white-space: nowrap;
   overflow: hidden;

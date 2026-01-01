@@ -197,7 +197,7 @@ const colorTextHighlight = colors.text.highlight;
   padding: 0.4rem;
   border-radius: 8px;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: bold;
   transition: all 0.3s ease;
   border: none;
   color: white;
