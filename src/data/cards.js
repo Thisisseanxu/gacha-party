@@ -241,6 +241,13 @@ export const allCards = [
     imageUrl: '/images/cards/1113.webp',
     realname: '风魔眬',
   },
+  {
+    id: '1409',
+    name: '潮音提可',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1409.webp',
+    realname: '提可',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',
