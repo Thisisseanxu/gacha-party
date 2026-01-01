@@ -117,13 +117,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineAsyncComponent } from 'vue';
 import pako from 'pako';
 import { logger } from '@/utils/logger.js';
 import { verifyLicense } from '@/utils/licenseManager.js';
 import { colors } from '@/styles/colors.js';
 
-import GachaAnalysis from '@/components/GachaAnalysis.vue'; // 导入分析结果展示组件
+const GachaAnalysis = defineAsyncComponent(() => import('@/components/GachaAnalysis.vue')); // 异步导入分析结果展示组件
 import PopUp from '@/components/PopUp.vue'; // 导入弹窗组件
 
 const appVersion = __VERSION__;
@@ -607,149 +607,6 @@ const handleGetRecord = async () => {
     isFetchingOnline.value = false;
   }
 };
-
-// ==========（暂时停用）===========
-// 轮询函数
-// const pollTaskStatus = async (playerId, licenseKey) => {
-//   logger.log(`正在轮询玩家 ${playerId} 的任务状态`);
-//   try {
-//     // 注意：这里的路由是 /task-status/:playerId
-//     const response = await fetch(`${WorkerUrl.value}/task-status/${playerId}`);
-//     if (!response.ok) {
-//       throw new Error(`无法获取任务状态: ${response.status}`);
-//     }
-//     const data = await response.json();
-
-//     if (data.success) {
-//       cloudMessage.value = data.progress || '正在处理...';
-
-//       // 任务完成或失败，停止轮询
-//       if (data.status === 'completed' || data.status === 'failed') {
-//         stopPolling();
-//         isFetchingOnline.value = false;
-
-//         if (data.status === 'completed') {
-//           cloudMessage.value = data.progress + "已上传！"; // 显示最终成功信息
-//           // 任务成功后，设置前端冷却锁
-//           const licenseInfo = verifyLicense(licenseKey);
-//           const isAdmin = String(licenseInfo.userId).length === 9 && String(licenseInfo.userId).startsWith('33');
-//           setCooldown('onlineUpdate', isAdmin, licenseInfo.isExpired);
-
-//           // 重新读取一次完整的云端记录来刷新页面
-//           await handleGetRecord();
-//         } else { // status === 'failed'
-//           cloudErrorMessage.value = `任务失败: ${data.error}`;
-//         }
-//       }
-//     } else {
-//       throw new Error(data.message || '获取状态失败');
-//     }
-//   } catch (error) {
-//     logger.error("轮询时出错:", error);
-//     cloudErrorMessage.value = `查询状态时出错: ${error.message}`;
-//     stopPolling();
-//     isFetchingOnline.value = false;
-//   }
-// };
-// 启动轮询
-// const startPolling = (playerId, licenseKey) => {
-//   stopPolling(); // 先确保没有正在运行的轮询
-//   isFetchingOnline.value = true;
-//   cloudMessage.value = "正在获取最新状态...";
-//   // 立即执行一次，然后设置定时器
-//   pollTaskStatus(playerId, licenseKey);
-//   pollingIntervalId.value = setInterval(() => pollTaskStatus(playerId, licenseKey), 7000); // 每7秒轮询一次
-// };
-
-// 停止轮询
-// const stopPolling = () => {
-//   if (pollingIntervalId.value) {
-//     clearInterval(pollingIntervalId.value);
-//     pollingIntervalId.value = null;
-//   }
-// };
-
-// 在线更新主函数
-// const handleOnlineUpdate = async () => {
-//   isFetchingOnline.value = true;
-//   cloudErrorMessage.value = '';
-//   cloudMessage.value = '';
-
-//   const playerId = fetchPlayerIdInput.value.trim();
-//   const licenseKey = fetchLicenseInput.value.trim();
-
-//   if (!licenseKey || !playerId) {
-//     cloudErrorMessage.value = '请输入玩家ID和激活码！';
-//     return;
-//   }
-
-//   try {
-//     // 客户端预验证
-//     const result = verifyLicense(licenseKey);
-//     if (!result.success) {
-//       throw new Error(result.message || '激活码验证失败。');
-//     }
-//     const isAdmin = String(result.userId).length === 9 && String(result.userId).startsWith('33');
-
-//     // 普通用户不可用
-//     if (!isAdmin && result.isExpired) {
-//       cloudErrorMessage.value = '普通会员暂时无法使用在线获取功能。';
-//       isFetchingOnline.value = false;
-//       return;
-//     }
-
-//     // 检查前端冷却锁
-//     const lock = getCooldown('onlineUpdate');
-//     if (lock.locked) {
-//       if (lock.timeLeft > 0) {
-//         cloudErrorMessage.value = `请求过于频繁，请在 ${milisecondsToTime(lock.timeLeft)} 后再试。`;
-//         isFetchingOnline.value = false;
-//         return;
-//       } else if (lock.timeLeft === -1) {
-//         throw new Error('获取本地锁定状态失败，请检查浏览器设置。');
-//       }
-//     }
-
-//     cloudMessage.value = "正在连接服务器以启动更新任务...";
-//     // 解除查询记录的冷却锁，以供后续调用
-//     setCooldown('getRecord', isAdmin, result.isExpired, -1);
-
-
-//     // 调用Worker启动任务
-//     const response = await fetch(`${WorkerUrl.value}/start-update-task`, {
-//       method: 'POST',
-//       headers: {
-//         'X-License-Key': licenseKey,
-//         'X-Player-Id': playerId,
-//       },
-//     });
-
-//     const data = await response.json();
-
-//     // 检查响应是否成功，并且后端返回了成功状态
-//     if (response.ok && data.success) {
-//       // 任务启动成功 (status: 'started') 或已在运行 (status: 'already_running')
-//       // 两种情况都直接开始轮询
-//       logger.log(`Task status: ${data.status}. Starting polling for player ${playerId}.`);
-//       startPolling(playerId, licenseKey);
-//     } else if (response.status === 429) {
-//       // 处理Worker返回的频率限制，使用后端返回的精确剩余时间
-//       setCooldown('onlineUpdate', isAdmin, result.isExpired, data.timeLeft);
-//       cloudErrorMessage.value = `更新过于频繁，请在 ${milisecondsToTime(data.timeLeft)} 后再试。`;
-//       cloudMessage.value = '';
-//       isFetchingOnline.value = false;
-//     } else {
-//       // 处理其他错误
-//       throw new Error(data.message || `启动任务失败 (${response.status})`);
-//     }
-
-//   } catch (error) {
-//     logger.error("在线更新时出错:", error);
-//     cloudErrorMessage.value = error.message;
-//     isFetchingOnline.value = false;
-//   }
-// };
-// ================================
 
 // 处理上传抽卡记录到云端
 const handleUploadRecord = async () => {

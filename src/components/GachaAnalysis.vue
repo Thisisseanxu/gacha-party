@@ -267,7 +267,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import pako from 'pako';
-import ExcelJS from 'exceljs';
 import FileSaver from 'file-saver';
 import { toBlob } from 'html-to-image';
 import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next';
@@ -1283,6 +1282,7 @@ const downloadDecompressedData = () => {
 const exportToExcel = async (filename, historyData) => {
   if (historyData.length === 0) return alert('没有数据可供导出。');
   // 创建工作簿和工作表
+  const ExcelJS = (await import('exceljs')).default;
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('抽卡记录');
   // 设置表头和列宽
