@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+import { logger } from '@/utils/logger';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const customText = ref('雑魚'); // 默认文本
@@ -31,7 +32,7 @@ let textInterval;
 // 播放音效
 const playSound = () => {
   const audio = new Audio(new URL('/assets/zako.ogg', import.meta.url).href);
-  audio.play().catch(error => console.error("音频播放失败:", error));
+  audio.play().catch(error => logger.error("音频播放失败:", error));
 };
 
 // 创建新的文字

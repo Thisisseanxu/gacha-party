@@ -19,23 +19,20 @@ let error_enabled = true
  * setLogLevel('none') // 禁用所有日志输出
  */
 export function setLogLevel(level) {
+  log_enabled = true
+  warn_enabled = true
+  error_enabled = true
   switch (level) {
     case 'debug':
-      log_enabled = true
       break
     case 'warn':
       log_enabled = false
-      warn_enabled = true
       break
     case 'error':
       log_enabled = false
       warn_enabled = false
-      error_enabled = true
       break
     default:
-      log_enabled = false
-      warn_enabled = false
-      error_enabled = false
       break
   }
 }
@@ -83,5 +80,9 @@ export const logger = {
     if (error_enabled) {
       console.error('错误：', ...args)
     }
+  },
+
+  custom(message, ...args) {
+    console.log(message, ...args)
   },
 }

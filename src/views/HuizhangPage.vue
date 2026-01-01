@@ -206,6 +206,7 @@ import {
 import { toPng } from 'html-to-image';
 import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
+import { logger } from '@/utils/logger';
 
 // 状态
 const selectedCharId = ref('');
@@ -345,7 +346,7 @@ watch(() => currentSlots.value, async (newSlots) => {
         const base64 = await urlToBase64(url);
         iconBase64Map.value[typeId] = base64;
       } catch (e) {
-        console.error('Icon to Base64 failed:', url, e);
+        logger.error('无法转换成 Base64:', url, e);
       }
     }
   }
@@ -470,7 +471,7 @@ const importData = (event) => {
         throw new Error('Invalid data format');
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件');
     }
   };
@@ -524,7 +525,7 @@ const generateImage = async () => {
     link.href = dataUrl;
     link.click();
   } catch (err) {
-    console.error('生成图片失败:', err);
+    logger.error('生成图片失败:', err);
     alert('生成失败');
   } finally {
     previewScale.value = originalScale; // 恢复缩放

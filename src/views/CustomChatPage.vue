@@ -139,6 +139,7 @@ import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
+import { logger } from '@/utils/logger';
 
 const showAgreementPopUp = ref(false);
 const openAgreementPopUp = () => {
@@ -664,7 +665,7 @@ onMounted(() => {
     try {
       customCharacters.value = JSON.parse(savedCustomCharacters);
     } catch (e) {
-      console.error("解析自定义角色失败:", e);
+      logger.error("解析自定义角色失败:", e);
     }
   }
   const savedSelection = localStorage.getItem(characterSelectionKey);
@@ -672,7 +673,7 @@ onMounted(() => {
     try {
       selectedCharacterIds.value = JSON.parse(savedSelection);
     } catch (e) {
-      console.error("解析已选角色配置失败:", e);
+      logger.error("解析已选角色配置失败:", e);
       // 解析失败则停留在选择模式
       isSelectionMode.value = true;
     }
@@ -694,7 +695,7 @@ onMounted(() => {
       }, 1000);
     }
   } catch (e) {
-    console.error("解析自动保存的聊天记录失败:", e);
+    logger.error("解析自动保存的聊天记录失败:", e);
   }
 
   document.addEventListener('fullscreenchange', updateFullscreenState);
