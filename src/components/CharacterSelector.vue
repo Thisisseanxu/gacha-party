@@ -9,14 +9,15 @@
     </div>
 
     <div class="card-selector-grid">
-      <div v-for="card in filteredCards" :key="card.id" class="card-option"
-        :class="{ 'selected': isSelected(card.id), 'disabled': isDisabled(card) }"
+      <div v-for="card in filteredCards" :key="card.id"
+        :class="['card-option', card.rarity ? card.rarity : '', { selected: isSelected(card.id), disabled: isDisabled(card) }]"
         @click="toggleCharacterSelection(card)">
         <button v-if="card.isCustom" class="delete-custom-char-btn"
           @click.stop="deleteCustomCharacter(card.id)">×</button>
         <img :src="card.imageUrl" :alt="card.name" class="card-image" />
-        <div class="card-name">{{ isDisabled(card) ? '暂不可用' : (showRealName && card.realname ? card.realname :
-          card.name) }}</div>
+        <div class="card-name">
+          {{ isDisabled(card) ? '暂不可用' : (showRealName && card.realname ? card.realname : card.name) }}
+        </div>
         <div class="checkmark">✔</div>
       </div>
     </div>
@@ -265,6 +266,22 @@ const deleteCustomCharacter = (characterId) => {
   overflow: hidden;
   transition: all 0.2s ease;
   background-color: v-bind('colors.background.light');
+}
+
+.card-option.SP>.card-image {
+  background: linear-gradient(180deg, #FF553D, #FFA628);
+}
+
+.card-option.SSR>.card-image {
+  background-color: #FFA628;
+}
+
+.card-option.SR>.card-image {
+  background-color: #CB2DFF;
+}
+
+.card-option.R>.card-image {
+  background-color: #5692FF;
 }
 
 .card-option:hover {
