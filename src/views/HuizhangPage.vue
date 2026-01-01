@@ -64,13 +64,16 @@
         </div>
 
         <div class="control-group">
-          <label>标题配置（留空则不显示）</label>
+          <label>文本相关设置（留空则不显示）</label>
           <input v-model="customTitle" class="input-select" placeholder="大标题内容">
         </div>
         <div class="control-group">
           <input v-model="recommendTitle" class="input-select" style="margin-bottom: 8px; font-weight: bold;"
             placeholder="小标题">
           <textarea v-model="recommendText" rows="4" placeholder="文本内容"></textarea>
+          <input v-model="authorName" class="input-select" placeholder="作者署名（选填）">
+        </div>
+        <div class="control-group">
         </div>
 
         <div class="action-buttons">
@@ -108,7 +111,8 @@
             <div class="badges-grid" :class="`grid-${currentSlots.length}`">
               <div v-for="(slot, index) in currentSlots" :key="index" class="badge-item">
                 <div class="badge-main-visual">
-                  <img :src="getHuizhangBgUrl(slot.rarityId, slot.shape)" class="badge-bg-img" alt="bg">
+                  <img v-if="slot.rarityId !== '0'" :src="getHuizhangBgUrl(slot.rarityId, slot.shape)"
+                    class="badge-bg-img" alt="bg">
 
                   <div class="badge-icon-container">
                     <svg class="badge-icon-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
@@ -121,9 +125,15 @@
                             points="12,6 88,6 88,70 50,95 12,70" />
                         </clipPath>
                       </defs>
-                      <!-- <rect x="-12.5" y="-12.5" width="125" height="125" fill="rgba(34, 34, 34, 0.8)"
-                        :clip-path="`url(#badge-clip-${index})`" /> -->
-                      <image :xlink:href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon"
+                      <g v-if="slot.rarityId === '0'">
+                        <circle v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE" cx="50" cy="50" r="45"
+                          fill="rgba(200, 200, 200, 0.3)" />
+                        <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.DIAMOND" points="50,5 95,50 50,95 5,50"
+                          fill="rgba(200, 200, 200, 0.3)" />
+                        <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.SHIELD" points="12,6 88,6 88,70 50,95 12,70"
+                          fill="rgba(200, 200, 200, 0.3)" />
+                      </g>
+                      <image v-else :xlink:href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon"
                         :href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon" x="-12.5" y="-12.5"
                         width="125" height="125" preserveAspectRatio="xMidYMid slice"
                         :clip-path="`url(#badge-clip-${index})`" />
@@ -136,7 +146,7 @@
                   </div>
                 </div>
 
-                <div class="badge-stars-container">
+                <div class="badge-stars-container" v-if="slot.rarityId !== '0'">
                   <div class="badge-stars-row">
                     <img v-for="n in 5" :key="n" :src="getStarImage(slot.level, n)" class="level-star-img" alt="★">
                   </div>
@@ -157,6 +167,7 @@
           </div>
 
           <div class="watermark">织夜工具箱 · 盲盒派对</div>
+          <div v-if="authorName" class="author-display">作者：{{ authorName }}</div>
         </div>
       </div>
 
@@ -212,6 +223,7 @@ import { logger } from '@/utils/logger';
 const selectedCharId = ref('');
 const recommendedStars = ref([0, 5]);
 const customTitle = ref('');
+const authorName = ref('');
 const recommendTitle = ref('推荐理由：');
 const recommendText = ref('');
 const captureRef = ref(null);
@@ -432,6 +444,7 @@ const exportData = () => {
     customTitle: customTitle.value,
     recTitle: recommendTitle.value,
     recText: recommendText.value,
+    authorName: authorName.value,
     slots: currentSlots.value
   };
   const jsonStr = JSON.stringify(data, null, 2);
@@ -463,6 +476,7 @@ const importData = (event) => {
           if (json.customTitle !== undefined) customTitle.value = json.customTitle;
           if (json.recTitle !== undefined) recommendTitle.value = json.recTitle;
           if (json.recText !== undefined) recommendText.value = json.recText;
+          if (json.authorName !== undefined) authorName.value = json.authorName;
           if (json.slots) currentSlots.value = json.slots;
 
           isSelectionMode.value = false;
@@ -1118,5 +1132,15 @@ textarea {
   color: #888;
   margin-top: 10px;
   font-size: 0.9rem;
+}
+
+.author-display {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.2);
+  font-weight: regular;
+  z-index: 15;
 }
 </style>
