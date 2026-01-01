@@ -512,7 +512,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1202.webp',
+    image_url: '/images/qban/1209.webp',
     theme: HUIZHANG_THEMES.dream,
   },
   1203: {
@@ -839,7 +839,7 @@ export const CHAR_HUIZHANG_CONFIG = {
   },
   1209: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
-    image_url: '/images/qban/1209.webp',
+    image_url: '/images/qban/1202.webp',
     theme: HUIZHANG_THEMES.dream,
   },
   1205: {
