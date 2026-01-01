@@ -205,5 +205,5 @@
 
 ## 特别鸣谢
 
-[渺软公益CDN](https://cdn.onmicrosoft.cn/) 为本站字体提供cdn加速服务
+[渺软公益CDN](https://cdn.onmicrosoft.cn/) 为本站提供cdn加速服务
 以及所有为本项目提供帮助和支持的朋友们！

@@ -43,29 +43,29 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,json}'],
         runtimeCaching: [
-          // 匹配 elemecdn 的 CDN 资源 (字体和样式)
+          // 匹配 *.onmicrosoft.cn 的 CDN 资源
           {
-            // 优先匹配 CSS，单独存储，防止被大量字体文件挤出缓存
-            urlPattern: /^https:\/\/jsd\.onmicrosoft\.cn\/.*\.css$/i,
+            // 优先匹配 CSS和 js，单独存储，防止被大量字体文件挤出缓存
+            urlPattern: /^https:\/\/(?:[A-Za-z0-9-]+\.)+onmicrosoft\.cn\/.*\.(?:css|js)$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'jsd-onmicrosoft-css-cache',
+              cacheName: 'onmicrosoft-package-cache',
               expiration: {
                 maxEntries: 50, // CSS 文件数量较少，50足够
-                maxAgeSeconds: 60 * 60 * 24 * 365,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存 365 天
               },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
             // 匹配字体切片等其他资源
-            urlPattern: /^https:\/\/jsd\.onmicrosoft\.cn\/.*/i,
+            urlPattern: /^https:\/\/(?:[A-Za-z0-9-]+\.)+onmicrosoft\.cn\/.*/i,
             handler: 'CacheFirst', // 强缓存：因为 URL 里带有版本号，内容不会变
             options: {
-              cacheName: 'jsd-onmicrosoft-font-cache',
+              cacheName: 'onmicrosoft-source-cache',
               expiration: {
                 maxEntries: 2000, // 扩容到 2000 条，足以容纳所有中文字体切片
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存 1 年
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存 365 天
               },
               cacheableResponse: {
                 // 允许缓存跨域响应

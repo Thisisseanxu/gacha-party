@@ -57,7 +57,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-          }}<br />
+            }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
@@ -72,7 +72,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-                }}</span>
+              }}</span>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-          }}卡池记录 (Excel)</button>
+        }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -338,6 +338,8 @@ const emit = defineEmits(['reset-view']);
 // 用于截图的ref
 const analysisContentRef = ref(null);
 
+// 用于存储 ExcelJS 加载状态的 Promise
+let excelJsLoadingPromise = null;
 
 const CARDPOOLS_NAME_MAP = {
   ...props.CARDPOOLS_NAME_MAP,
@@ -1282,7 +1284,26 @@ const downloadDecompressedData = () => {
 const exportToExcel = async (filename, historyData) => {
   if (historyData.length === 0) return alert('没有数据可供导出。');
   // 创建工作簿和工作表
-  const ExcelJS = (await import('exceljs')).default;
+  if (!window.ExcelJS) {
+    if (!excelJsLoadingPromise) {
+      excelJsLoadingPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://jsd.onmicrosoft.cn/npm/exceljs@4.4.0/dist/exceljs.min.js';
+        script.crossOrigin = 'anonymous';
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('ExcelJS CDN load failed'));
+        document.head.appendChild(script);
+      });
+    }
+    try {
+      await excelJsLoadingPromise;
+    } catch (error) {
+      excelJsLoadingPromise = null;
+      logger.error('加载 ExcelJS 失败:', error);
+      return alert('无法加载 Excel 导出组件，请检查网络连接。');
+    }
+  }
+  const ExcelJS = window.ExcelJS;
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('抽卡记录');
   // 设置表头和列宽
