@@ -9,13 +9,20 @@
       <div class="update-dialog">
         <!-- 添加一个标题和图标，让弹窗更醒目 -->
         <div class="dialog-header">
-          <UpdateRotation theme="outline" size="32" fill="#333" />
-          <h3 class="dialog-title">发现新版本！</h3>
+          <UpdateRotation theme="outline" size="32" fill="#333" :class="{ 'icon-spin': isUpdating }" />
+          <h3 class="dialog-title">{{ isUpdating ? '正在更新...' : '发现新版本！' }}</h3>
         </div>
 
-        <p class="dialog-content">网站已更新，点击“立即刷新”以体验最新功能，享受更流畅的浏览体验。</p>
-
-        <button @click="confirmUpdate" class="update-button">立即刷新</button>
+        <div v-if="!isUpdating">
+          <p class="dialog-content">网站已更新，点击“立即刷新”以体验最新功能，享受更流畅的浏览体验。</p>
+          <button @click="confirmUpdate" class="update-button">立即刷新</button>
+        </div>
+        <div v-else class="update-progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: updateProgress + '%' }"></div>
+          </div>
+          <p class="progress-text">更新进度: {{ updateProgress }}%</p>
+        </div>
       </div>
     </div>
   </transition>
@@ -40,14 +47,30 @@ const { needRefresh, updateServiceWorker } = useRegisterSW()
 // 使用 watch 监听是否有新版本
 
 const showUpdateDialog = ref(false)
+const isUpdating = ref(false)
+const updateProgress = ref(0)
 
 watch(needRefresh, (newValue) => {
   if (newValue) {
     showUpdateDialog.value = true
+  } else {
+    showUpdateDialog.value = false
+    isUpdating.value = false
+    updateProgress.value = 0
   }
 })
 
 function confirmUpdate() {
+  isUpdating.value = true
+  const timer = setInterval(() => {
+    if (updateProgress.value < 99) {
+      updateProgress.value += Math.floor(Math.random() * 5) + 1
+      updateProgress.value = Math.min(updateProgress.value, 99)
+    } else {
+      clearInterval(timer)
+    }
+  }, 100)
+
   updateServiceWorker()
 }
 
@@ -138,6 +161,33 @@ function confirmUpdate() {
   transform: scale(0.98);
 }
 
+/* --- 进度条样式 --- */
+.update-progress-container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 8px;
+  background-color: #42b983;
+  transition: width 0.1s linear;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin: 0;
+}
+
 /* --- Vue Transition 动画 --- */
 /* 进入和离开动画的持续时间 */
 .fade-enter-active,
@@ -160,5 +210,20 @@ function confirmUpdate() {
 .fade-enter-from .update-dialog,
 .fade-leave-to .update-dialog {
   transform: scale(0.95);
+}
+
+/* 图标旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-spin {
+  animation: spin 1s linear infinite;
 }
 </style>
