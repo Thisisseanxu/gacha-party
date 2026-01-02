@@ -61,17 +61,18 @@ watch(needRefresh, (newValue) => {
 })
 
 function confirmUpdate() {
+  updateServiceWorker()
   isUpdating.value = true
   const timer = setInterval(() => {
     if (updateProgress.value < 99) {
       updateProgress.value += Math.floor(Math.random() * 5) + 1
       updateProgress.value = Math.min(updateProgress.value, 99)
     } else {
+      // 在进度达到99%时调用浏览器刷新页面功能
       clearInterval(timer)
+      window.location.reload()
     }
-  }, 100)
-
-  updateServiceWorker()
+  }, 300)
 }
 
 </script>
