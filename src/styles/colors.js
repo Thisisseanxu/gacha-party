@@ -12,8 +12,8 @@ const dark = {
     lighter: 'rgba(58, 59, 64, 1)', // 按钮、边框等较浅背景
     hover: 'rgba(74, 75, 80, 1)', // 按钮悬浮状态背景
     avatar: 'rgba(51, 51, 51, 1)', // 头像占位背景
-    darker: '#111111', // 更深的背景（新增，用于预览区等）
-    overlay: 'rgba(0, 0, 0, 0.6)', // 遮罩层背景（新增）
+    darker: '#111111', // 更深的背景（用于预览区等）
+    overlay: 'rgba(0, 0, 0, 0.6)', // 遮罩层背景
   },
   // --- 文本颜色 ---
   text: {
@@ -24,7 +24,7 @@ const dark = {
     disabled: 'rgba(102, 102, 102, 1)', // 禁用状态的文字
     light: 'rgba(221, 221, 221, 1)', // 亮灰色文字
     highlight: 'rgb(235, 201, 80)', // 高亮文字
-    white: '#ffffff', // 纯白文字（新增）
+    white: '#ffffff', // 纯白文字
   },
   // --- 品牌/功能色 ---
   brand: {
@@ -35,15 +35,15 @@ const dark = {
     confirmHover: 'rgba(67, 160, 71, 1)', // 确认悬浮
     cancel: 'rgba(244, 67, 54, 1)', // 取消/删除操作颜色
     cancelHover: 'rgba(229, 57, 53, 1)', // 取消悬浮
-    disabled: '#71717a', // 品牌色禁用状态（新增）
+    disabled: '#71717a', // 品牌色禁用状态
   },
   // --- 游戏内特定颜色 ---
   game: {
     primary: 'rgba(126, 12, 255, 1)', // 主题色
     primaryText: 'rgba(128, 0, 255, 1)', // 白底文字颜色
     backgroundBlack: 'rgba(45, 39, 57, 1)', // 黑色背景
-    narratorBg: '#4B3F66', // 旁白背景（新增）
-    narratorText: '#C0BCC9', // 旁白文字（新增）
+    narratorBg: '#4B3F66', // 旁白背景
+    narratorText: '#C0BCC9', // 旁白文字
   },
   // --- 稀有度颜色 ---
   rarity: {
@@ -59,7 +59,7 @@ const dark = {
     success: 'rgba(82, 196, 26, 1)', // 成功颜色
     successBg: 'rgba(82, 196, 26, 0.1)', // 成功背景
   },
-  // --- 历史记录进度条颜色 (Color of Luck) ---
+  // --- 历史记录进度条颜色 ---
   colorOfLuck: {
     veryLow: 'rgba(40, 167, 69, 1)', // 绿色 (低抽数)
     low: 'rgba(60, 180, 90, 1)', // 较浅的绿色 (较低抽数)
@@ -81,7 +81,8 @@ const dark = {
   border: {
     primary: 'rgba(58, 59, 64, 1)', // 主要边框
     secondary: 'rgba(44, 45, 50, 1)', // 次要边框
-    dashed: '#555555', // 虚线边框（新增）
+    dashed: '#555555', // 虚线边框
+    lighter: 'rgba(58, 59, 64, 1)', // 更浅的边框
   },
   // --- 阴影 ---
   shadow: {
@@ -126,13 +127,16 @@ const dark = {
     shadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', // 预览阴影
     watermark: 'rgba(255, 255, 255, 0.2)', // 水印
     author: 'rgba(0, 0, 0, 0.2)', // 作者署名
+    overlay: 'rgba(0, 0, 0, 0.6)', // 推荐星级遮罩
+    secondary: 'rgba(204, 204, 204, 1)', // 次要文字
+    divideline: 'rgba(58, 59, 64, 1)', // 分隔线
   },
 }
 
 const light = {
   background: {
-    primary: '#f0f2f5',
-    content: '#ffffff',
+    primary: '#e5e6e7',
+    content: '#f0f0f0',
     light: '#f8f9fa',
     lighter: '#e5e7eb',
     hover: '#d1d5db',
@@ -173,9 +177,10 @@ const light = {
   },
   gacha: { ...dark.gacha }, // 抽卡颜色保持一致
   border: {
-    primary: '#e5e7eb',
-    secondary: '#d1d5db',
+    primary: 'rgba(229, 231, 235, 1)',
+    secondary: 'rgba(209, 213, 219, 1)',
     dashed: '#9ca3af',
+    lighter: 'rgba(174, 176, 189, 1)',
   },
   shadow: {
     primary: 'rgba(255, 255, 255, 0.3)',

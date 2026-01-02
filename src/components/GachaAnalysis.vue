@@ -57,7 +57,7 @@
 
           <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">{{ '该卡池抽取' +
             singleLimitAnalysis.SinglePulls + '次'
-            }}<br />
+          }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
@@ -72,7 +72,7 @@
               <span>距上个SSR</span>
               <span class="pity-count">{{
                 CurrentSelectedPoolAnalysis?.SSR ?? 0
-              }}</span>
+                }}</span>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@
       <div
         style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
         <button @click="exportPoolData" class="button">导出{{ CARDPOOLS_NAME_MAP[CurrentSelectedPool]
-        }}卡池记录 (Excel)</button>
+          }}卡池记录 (Excel)</button>
         <button @click="downloadCompressedData" class="button">下载抽卡记录文件</button>
         <button v-if="isDev" @click="downloadDecompressedData" class="button">下载未压缩的文件[DEV]</button>
       </div>
@@ -1534,7 +1534,7 @@ const formatDateTime = (timestamp) => {
 .analysis-section:not(:first-child) {
   margin-top: 8px;
   padding-top: 10px;
-  border-top: 2px solid v-bind('colors.background.light');
+  border-top: 2px solid v-bind('colors.border.secondary');
 }
 
 .gacha-analysis-button-container {
@@ -1691,7 +1691,7 @@ const formatDateTime = (timestamp) => {
   position: relative;
   display: flex;
   justify-content: center;
-  border-bottom: 2px solid v-bind('colors.background.lighter');
+  border-bottom: 2px solid v-bind('colors.border.lighter');
   margin-bottom: 6px;
 }
 
@@ -1856,6 +1856,8 @@ const formatDateTime = (timestamp) => {
 .char-name {
   font-weight: bold;
   text-shadow: 1px 1px 3px v-bind('colors.textShadow');
+  color: v-bind('colors.text.primary');
+  white-space: nowrap;
 }
 
 .pull-info {
