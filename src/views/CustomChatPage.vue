@@ -747,8 +747,8 @@ onUnmounted(() => {
 .action-button {
   padding: 8px 16px;
   border: 1px solid #344767;
-  background-color: #ccc;
-  color: #344767;
+  background-color: v-bind('colors.button.defaultBg');
+  color: v-bind('colors.button.defaultText');
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -756,8 +756,8 @@ onUnmounted(() => {
 }
 
 .action-button:hover {
-  background-color: #344767;
-  color: #ccc;
+  background-color: v-bind('colors.button.hoverBg');
+  color: v-bind('colors.button.hoverText');
 }
 
 /* 滑块容器的样式 */
@@ -767,16 +767,16 @@ onUnmounted(() => {
   gap: 8px;
   color: v-bind('colors.text.secondary');
   padding: 8px 12px;
-  border: 1px solid #344767;
+  border: 1px solid v-bind('colors.button.hoverBg');
   border-radius: 5px;
-  background-color: #ccc;
+  background-color: v-bind('colors.button.defaultBg');
 }
 
 .width-slider-container label {
   white-space: nowrap;
   /* 防止标签换行 */
   font-weight: bold;
-  color: #344767;
+  color: v-bind('colors.button.defaultText');
 }
 
 .width-slider-container input[type="range"] {
@@ -786,7 +786,7 @@ onUnmounted(() => {
 
 .hint {
   text-align: center;
-  color: #888;
+  color: v-bind('colors.text.secondary');
   font-size: 0.9em;
   margin: 5px;
 }
@@ -936,9 +936,9 @@ onUnmounted(() => {
 
 /* 旁白的气泡样式 */
 .bubble.center {
-  background-color: #4B3F66;
+  background-color: v-bind('colors.game.narratorBg');
   /* 浅紫色底 */
-  color: #C0BCC9;
+  color: v-bind('colors.game.narratorText');
   /* 浅灰文字 */
   text-align: left;
   /* 文字对齐 */
@@ -990,7 +990,7 @@ onUnmounted(() => {
   border-radius: 5px;
   font-size: 1em;
   box-sizing: border-box;
-  background-color: v-bind('colors.background.light');
+  background-color: v-bind('colors.input.background');
   border: 1px solid v-bind('colors.border.primary');
   color: v-bind('colors.text.primary');
 }
@@ -1037,8 +1037,8 @@ onUnmounted(() => {
 
 /* 编辑菜单样式 */
 .edit-menu-container {
-  background-color: rgb(153, 153, 153);
-  color: #333;
+  background-color: v-bind('colors.menu.background');
+  color: v-bind('colors.menu.buttonText');
   padding: 20px 30px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -1055,14 +1055,14 @@ onUnmounted(() => {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.2em;
-  color: #111;
+  color: v-bind('colors.text.black');
 }
 
 .edit-menu-button {
   padding: 10px 15px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  color: #333;
+  border: 1px solid v-bind('colors.menu.buttonBorder');
+  background-color: v-bind('colors.menu.buttonBg');
+  color: v-bind('colors.menu.buttonText');
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
@@ -1071,34 +1071,33 @@ onUnmounted(() => {
 }
 
 .edit-menu-button:hover {
-  background-color: #f0f0f0;
-  border-color: #bbb;
+  background-color: v-bind('colors.menu.buttonHoverBg');
 }
 
 .edit-menu-button.delete {
-  background-color: #fff1f0;
-  border-color: #ffa39e;
-  color: #cf1322;
+  background-color: v-bind('colors.button.dangerBg');
+  border-color: v-bind('colors.button.dangerBorder');
+  color: v-bind('colors.button.dangerText');
 }
 
 .edit-menu-button.delete:hover {
-  background-color: #ffccc7;
+  filter: brightness(0.95);
 }
 
 .edit-menu-button.close {
   margin-top: 10px;
   /* 与功能按钮分隔开 */
-  background-color: #e6f7ff;
-  border-color: #91d5ff;
+  background-color: v-bind('colors.background.light');
+  border-color: v-bind('colors.border.primary');
 }
 
 .edit-menu-button.close:hover {
-  background-color: #bae7ff;
+  filter: brightness(0.95);
 }
 
 /* 编辑行高亮样式 */
 .editing-highlight {
-  border: 2px solid #4CAF50;
+  border: 2px solid v-bind('colors.brand.confirm');
   /* 绿色边框 */
   border-radius: 8px;
   padding: 5px;
@@ -1116,7 +1115,7 @@ onUnmounted(() => {
 
 /* 插入行高亮样式 */
 .insert-highlight-after {
-  border-bottom: 2px solid #4CAF50;
+  border-bottom: 2px solid v-bind('colors.brand.confirm');
   /* 绿色横线 */
   padding: 5px;
   margin: -7px -5px;
@@ -1130,13 +1129,12 @@ onUnmounted(() => {
 
 /* 取消按钮的特定样式 */
 .editor-action-row .editor-button.cancel {
-  background-color: #da606a;
-  color: v-bind('colors.text.primary');
+  background-color: v-bind('colors.button.dangerBg');
+  color: v-bind('colors.button.dangerText');
 }
 
 .editor-action-row .editor-button.cancel:hover {
-  background-color: #df9993;
-  color: v-bind('colors.text.primary');
+  filter: brightness(0.95);
 }
 
 .highlight {

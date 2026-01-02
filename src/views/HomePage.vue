@@ -56,12 +56,16 @@
 
       <span class="version">当前版本：v{{ appVersion }}</span>
     </div>
+
+    <button @click="toggleTheme" class="theme-toggle-btn" title="切换主题">
+      {{ currentTheme.value === 'light' ? '🌙' : '☀️' }}
+    </button>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { colors } from '@/styles/colors.js';
+import { colors, toggleTheme, currentTheme } from '@/styles/colors.js';
 import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next';
 import { logger } from '@/utils/logger';
 
@@ -120,17 +124,13 @@ const handleComingSoon = () => {
     isComingSoonClicked.value = false;
   }, 1000);
 };
-
-const colorTextPrimary = colors.text.primary;
-const colorTextTertiary = colors.text.tertiary;
-const colorTextHighlight = colors.text.highlight;
 </script>
 
 <style scoped>
 .background {
   position: relative;
   min-height: 100dvh;
-  background-color: #000;
+  background-color: v-bind('colors.background.primary');
   display: flex;
   justify-content: center;
   align-items: center;
@@ -157,7 +157,7 @@ const colorTextHighlight = colors.text.highlight;
   z-index: 2;
   width: 100%;
   padding: 2rem;
-  background-color: rgba(26, 27, 32, 0.8);
+  background-color: v-bind('colors.background.content');
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -171,14 +171,14 @@ const colorTextHighlight = colors.text.highlight;
 .title {
   font-size: 3rem;
   font-weight: bold;
-  color: v-bind(colorTextPrimary);
+  color: v-bind('colors.text.primary');
   margin-top: 1rem;
   margin-bottom: 2rem;
 }
 
 .version {
   font-size: 1rem;
-  color: v-bind(colorTextTertiary);
+  color: v-bind('colors.text.tertiary');
 }
 
 .button-group {
@@ -270,7 +270,7 @@ const colorTextHighlight = colors.text.highlight;
   text-wrap: nowrap;
   align-items: center;
   gap: 0.8rem;
-  color: v-bind(colorTextHighlight);
+  color: v-bind('colors.text.highlight');
   text-decoration: none;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -278,5 +278,30 @@ const colorTextHighlight = colors.text.highlight;
 
 .footer-link:hover {
   filter: brightness(1.2);
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 </style>

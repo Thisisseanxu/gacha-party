@@ -1230,11 +1230,26 @@ watch(itemsPerPage, () => {
 
 // 将 'rgba(r, g, b, a)' 格式的颜色字符串转换为 'AARRGGBB'
 const getExcelColor = (rgbaColor) => {
-  // 使用正则表达式从 'rgba(r, g, b, a)' 中提取出 r, g, b, a 的值
-  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),\s*(\d+(\.\d+)?)\)/);
+  if (!rgbaColor) return 'FF000000';
+
+  // 处理 Hex 格式 (#RRGGBB 或 #RRGGBBAA)
+  if (rgbaColor.startsWith('#')) {
+    let hex = rgbaColor.slice(1);
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    if (hex.length === 6) return 'FF' + hex.toUpperCase();
+    if (hex.length === 8) {
+      // ExcelJS 使用 AARRGGBB，输入通常是 RRGGBBAA
+      return hex.slice(6, 8).toUpperCase() + hex.slice(0, 6).toUpperCase();
+    }
+    return 'FF' + hex.toUpperCase();
+  }
+
+  // 处理 RGBA 格式
+  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/);
   if (!match) return 'FF000000';
-  const toHex = c => Number(c).toString(16).padStart(2, '0'); // 将数字转换为十六进制
-  return `${toHex(Math.round(parseFloat(match[4]) * 255))}${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`.toUpperCase();
+  const a = match[4] !== undefined ? Math.round(parseFloat(match[4]) * 255) : 255;
+  const toHex = c => Number(c).toString(16).padStart(2, '0');
+  return `${toHex(a)}${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`.toUpperCase();
 };
 
 // 下载压缩后的JSON源数据
@@ -1529,8 +1544,8 @@ const formatDateTime = (timestamp) => {
 }
 
 .button {
-  background-color: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.light');
+  background-color: v-bind('colors.button.defaultBg');
+  color: v-bind('colors.button.defaultText');
   border: none;
   padding: 4px 6px;
   border-radius: 6px;
@@ -1543,13 +1558,14 @@ const formatDateTime = (timestamp) => {
 }
 
 .button:disabled {
-  background-color: v-bind('colors.background.light');
-  color: v-bind('colors.text.disabled');
+  background-color: v-bind('colors.brand.disabled');
+  color: v-bind('colors.text.secondary');
   cursor: not-allowed;
 }
 
 .button:hover {
-  background-color: v-bind('colors.background.hover');
+  background-color: v-bind('colors.button.hoverBg');
+  color: v-bind('colors.button.hoverText');
 }
 
 
@@ -1571,7 +1587,7 @@ const formatDateTime = (timestamp) => {
   left: 60%;
   transform: translateX(-50%);
   margin-top: 10px;
-  background-color: v-bind('colors.shadow.primaryHover');
+  background-color: v-bind('colors.background.lighter');
   color: v-bind('colors.text.primary');
   padding: 6px 12px;
   border-radius: 15px;
@@ -1944,9 +1960,9 @@ const formatDateTime = (timestamp) => {
   width: 50px;
   padding: 4px;
   text-align: center;
-  background-color: v-bind('colors.background.light');
-  color: v-bind('colors.text.primary');
-  border: 1px solid v-bind('colors.background.lighter');
+  background-color: v-bind('colors.input.background');
+  color: v-bind('colors.input.text');
+  border: 1px solid v-bind('colors.input.border');
   border-radius: 4px;
   font-size: inherit;
 }
@@ -1968,8 +1984,8 @@ const formatDateTime = (timestamp) => {
 }
 
 .pagination-controls button {
-  background-color: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.light');
+  background-color: v-bind('colors.button.defaultBg');
+  color: v-bind('colors.button.defaultText');
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -1979,12 +1995,13 @@ const formatDateTime = (timestamp) => {
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: v-bind('colors.background.hover');
+  background-color: v-bind('colors.button.hoverBg');
+  color: v-bind('colors.button.hoverText');
 }
 
 .pagination-controls button:disabled {
-  background-color: v-bind('colors.background.light');
-  color: v-bind('colors.text.disabled');
+  background-color: v-bind('colors.brand.disabled');
+  color: v-bind('colors.text.secondary');
   cursor: not-allowed;
 }
 

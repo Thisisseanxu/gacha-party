@@ -174,10 +174,6 @@ const colorOptionText = colors.text.secondary;
 const colorOptionTextHover = colors.text.primary;
 const colorOptionHoverBg = colors.background.hover;
 
-const colorSelectedText = colors.brand.primary;
-// 派生一个带透明度的背景色
-const colorSelectedBg = colors.brand.primary.replace('1)', '0.15)');
-
 const colorScrollbar = colors.scrollbar;
 </script>
 
@@ -273,8 +269,8 @@ const colorScrollbar = colors.scrollbar;
 
 /* 当前选中的选项高亮 */
 .options-dropdown li.is-selected {
-  color: v-bind(colorSelectedText);
-  background-color: v-bind(colorSelectedBg);
+  color: v-bind('colors.brand.primary');
+  background-color: v-bind('colors.brand.primaryBackground');
   font-weight: bold;
 }
 

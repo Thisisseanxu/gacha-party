@@ -23,7 +23,7 @@
 
         <div class="control-group">
           <label>当前角色: {{ selectedCardInfo.name }}</label>
-          <button @click="isSelectionMode = true" class="reselect-btn">重选角色</button>
+          <button @click="isSelectionMode = true" class="reselect-btn action-button">重选角色</button>
         </div>
 
         <div class="control-group">
@@ -649,8 +649,8 @@ const generateImage = async () => {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  background-color: #555;
-  color: white;
+  background-color: v-bind('colors.button.secondaryBg');
+  color: v-bind('colors.button.secondaryText');
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -672,9 +672,9 @@ textarea {
   width: 100%;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  color: #333;
+  border: 1px solid v-bind('colors.input.border');
+  background: v-bind('colors.input.background');
+  color: v-bind('colors.input.text');
   box-sizing: border-box;
 }
 
@@ -690,28 +690,28 @@ textarea {
 
 .star-btn {
   padding: 5px 10px;
-  border: 1px solid #666;
+  border: 1px solid v-bind('colors.border.secondary');
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
 }
 
 .star-btn.active {
-  background: gold;
-  color: black;
-  border-color: gold;
+  background: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+  border-color: v-bind('colors.brand.primary');
   font-weight: bold;
 }
 
 .badge-editors h3 {
   margin-bottom: 10px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid v-bind('colors.border.primary');
   padding-bottom: 5px;
 }
 
 .badge-hint-text {
   font-size: 0.8rem;
-  color: #888;
+  color: v-bind('colors.text.secondary');
   margin: -5px 0 10px 0;
 }
 
@@ -721,7 +721,7 @@ textarea {
   padding: 0 8px;
   margin-bottom: 5px;
   font-size: 0.8rem;
-  color: #aaa;
+  color: v-bind('colors.text.secondary');
   font-weight: bold;
 }
 
@@ -749,7 +749,7 @@ textarea {
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: v-bind('colors.background.light');
   padding: 8px;
   border-radius: 4px;
 }
@@ -772,9 +772,9 @@ textarea {
   padding: 4px;
   border-radius: 4px;
   text-align: center;
-  background: #fff;
-  color: #333;
-  border: 1px solid #ccc;
+  background: v-bind('colors.input.background');
+  color: v-bind('colors.input.text');
+  border: 1px solid v-bind('colors.input.border');
   box-sizing: border-box;
 }
 
@@ -788,7 +788,7 @@ textarea {
 
 .shape-hint {
   font-size: 0.8rem;
-  color: #888;
+  color: v-bind('colors.text.secondary');
   margin-left: auto;
   white-space: nowrap;
 }
@@ -804,23 +804,23 @@ textarea {
 .import-btn {
   display: inline-block;
   padding: 10px 24px;
-  background-color: #444;
-  color: #fff;
+  background-color: v-bind('colors.button.secondaryBg');
+  color: v-bind('colors.button.secondaryText');
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  border: 1px solid #666;
+  border: 1px solid v-bind('colors.border.secondary');
   transition: all 0.2s;
 }
 
 .import-btn:hover {
-  background-color: #555;
-  border-color: #888;
+  background-color: v-bind('colors.border.secondary');
+  border-color: v-bind('colors.text.secondary');
 }
 
 .import-hint {
   font-size: 0.9rem;
-  color: #888;
+  color: v-bind('colors.text.secondary');
 }
 
 .generate-btn {
@@ -838,7 +838,7 @@ textarea {
 .export-btn {
   flex: 1;
   padding: 15px;
-  background: #607d8b;
+  background: v-bind('colors.button.infoBg');
   color: white;
   border: none;
   border-radius: 8px;
@@ -855,8 +855,8 @@ textarea {
 /* --- 预览区 --- */
 .preview-wrapper {
   overflow: hidden;
-  border: 2px dashed #555;
-  background: #222;
+  border: 2px dashed v-bind('colors.border.dashed');
+  background: v-bind('colors.background.darker');
   padding: 4px;
   display: flex;
   flex-direction: column;
@@ -885,7 +885,7 @@ textarea {
   left: 20px;
   z-index: 10;
   display: flex;
-  background: rgba(0, 0, 0, 0.6);
+  background: v-bind('colors.background.overlay');
   padding: 8px 16px;
   border-radius: 30px;
   align-items: center;
@@ -894,7 +894,7 @@ textarea {
 
 .star-label {
   font-size: 1rem;
-  color: #ddd;
+  color: v-bind('colors.preview.text');
   margin-right: 8px;
   text-align: center;
 }
@@ -923,9 +923,9 @@ textarea {
   top: 140px;
   left: 30px;
   font-size: 2.5rem;
-  color: #ffca28;
+  color: v-bind('colors.preview.highlight');
   font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: v-bind('colors.preview.shadow');
   z-index: 10;
 }
 
@@ -1057,7 +1057,7 @@ textarea {
 /* 徽章底部星星容器 */
 .badge-stars-container {
   margin-top: 4px;
-  background-color: rgba(60, 50, 70, 0.7);
+  background-color: v-bind('colors.preview.panelBg');
   border-radius: 10px;
   padding: 2px 6px;
   border: 1px solid rgba(150, 130, 170, 0.3);
@@ -1083,7 +1083,7 @@ textarea {
   right: 20px;
   min-width: 370px;
   min-height: 180px;
-  background: rgba(30, 30, 40, 0.9);
+  background: v-bind('colors.preview.panelBg');
   border: 1px solid #555;
   border-radius: 10px;
   padding: 12px;
@@ -1093,26 +1093,26 @@ textarea {
 
 .active-effects {
   margin-bottom: 8px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid v-bind('colors.border.primary');
   padding-bottom: 8px;
   white-space: nowrap;
 }
 
 .label {
-  color: #aaa;
+  color: v-bind('colors.text.secondary');
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 .effect-text {
-  color: #ffca28;
+  color: v-bind('colors.preview.highlight');
   font-size: 1.1rem;
   font-weight: bold;
   margin-left: 5px;
 }
 
 .recommendation-text p {
-  color: #ddd;
+  color: v-bind('colors.preview.text');
   font-size: 0.9rem;
   margin: 5px 0 0 0;
   line-height: 1.4;
@@ -1125,11 +1125,11 @@ textarea {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.2);
+  color: v-bind('colors.preview.watermark');
 }
 
 .preview-hint {
-  color: #888;
+  color: v-bind('colors.text.secondary');
   margin-top: 10px;
   font-size: 0.9rem;
 }
@@ -1139,7 +1139,7 @@ textarea {
   bottom: 5px;
   left: 10px;
   font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.2);
+  color: v-bind('colors.preview.author');
   font-weight: regular;
   z-index: 15;
 }
