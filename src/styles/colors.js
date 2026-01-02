@@ -160,16 +160,17 @@ const light = {
     cancelHover: '#dc2626',
     disabled: '#d1d5db',
   },
-  game: {
-    primary: '#9C27B0',
-    primaryText: '#333333',
-    backgroundBlack: '#f3f4f6',
-    narratorBg: '#e5e7eb',
-    narratorText: '#374151',
-  },
+  game: { ...dark.game }, // 游戏内颜色保持一致
   rarity: { ...dark.rarity }, // 稀有度颜色保持一致
   status: { ...dark.status }, // 状态颜色保持一致
-  colorOfLuck: { ...dark.colorOfLuck, background: '#e5e7eb' }, // 调整进度条背景为浅色
+  colorOfLuck: {
+    veryLow: 'rgba(52, 199, 89, 1)', // 更鲜艳的绿色
+    low: 'rgba(100, 210, 120, 1)', // 浅绿色
+    medium: 'rgba(255, 190, 0, 1)', // 明亮的黄色
+    high: 'rgba(255, 149, 0, 1)', // 明亮的橙色
+    veryHigh: 'rgba(255, 59, 48, 1)', // 明亮的红色
+    background: '#e5e7eb', // 进度条背景
+  },
   gacha: { ...dark.gacha }, // 抽卡颜色保持一致
   border: {
     primary: '#e5e7eb',
@@ -177,10 +178,10 @@ const light = {
     dashed: '#9ca3af',
   },
   shadow: {
-    primary: 'rgba(0, 0, 0, 0.1)',
-    primaryHover: 'rgba(0, 0, 0, 0.15)',
-    light: 'rgba(0, 0, 0, 0.1)',
-    lightHover: 'rgba(0, 0, 0, 0.15)',
+    primary: 'rgba(255, 255, 255, 0.3)',
+    primaryHover: 'rgba(255, 255, 255, 0.5)',
+    light: 'rgba(0, 0, 0, 0.3)',
+    lightHover: 'rgba(0, 0, 0, 0.5)',
   },
   scrollbar: '#d1d5db',
   textShadow: 'none',

@@ -308,7 +308,7 @@ const deleteCustomCharacter = (characterId) => {
   font-size: 0.8rem;
   text-align: center;
   padding: 2px;
-  background: v-bind('colors.background.light');
+  background: v-bind('colors.shadow.primaryHover');
   backdrop-filter: blur(2px);
   position: absolute;
   bottom: 0;
