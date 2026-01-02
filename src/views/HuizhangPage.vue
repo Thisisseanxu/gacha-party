@@ -885,7 +885,7 @@ textarea {
   left: 20px;
   z-index: 10;
   display: flex;
-  background: v-bind('colors.background.overlay');
+  background: v-bind('colors.preview.overlay');
   padding: 8px 16px;
   border-radius: 30px;
   align-items: center;
@@ -920,13 +920,14 @@ textarea {
 
 .custom-title-display {
   position: absolute;
-  top: 140px;
+  top: 160px;
   left: 30px;
   font-size: 2.5rem;
   color: v-bind('colors.preview.highlight');
   font-weight: 700;
   text-shadow: v-bind('colors.preview.shadow');
   z-index: 10;
+  font-style: italic;
 }
 
 /* 立绘 */
@@ -1093,13 +1094,13 @@ textarea {
 
 .active-effects {
   margin-bottom: 8px;
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  border-bottom: 1px solid v-bind('colors.preview.divideline');
   padding-bottom: 8px;
   white-space: nowrap;
 }
 
 .label {
-  color: v-bind('colors.text.secondary');
+  color: v-bind('colors.preview.secondary');
   font-size: 0.9rem;
   font-weight: bold;
 }
@@ -1121,10 +1122,9 @@ textarea {
 
 .watermark {
   position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.7rem;
+  bottom: 0px;
+  right: 0px;
+  font-size: 1rem;
   color: v-bind('colors.preview.watermark');
 }
 
