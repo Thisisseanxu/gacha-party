@@ -332,8 +332,6 @@ const addMessage = () => {
 
 // 图片上传功能
 const imageInputRef = ref(null); // 新增：对文件输入框的引用
-// 防止内存泄漏，跟踪所有创建的临时图片URL
-const createdImageUrls = new Set();
 // 当前图片上传模式
 const imageUploadMode = ref('add'); // 'add' 或 'replace'
 
@@ -372,7 +370,6 @@ const addImageMessage = (event) => {
 
   // 生成临时的 blob URL
   const imageUrl = URL.createObjectURL(file);
-  createdImageUrls.add(imageUrl); // 跟踪这个URL以便后续清理
 
   // 创建消息
   const displayName = customName.value || getCardName(newMessage.value.cardId);
@@ -420,11 +417,9 @@ const replaceImageMessage = (event) => {
 
   // 释放旧的URL以回收内存
   URL.revokeObjectURL(oldUrl);
-  createdImageUrls.delete(oldUrl);
 
   // 创建并跟踪新的URL
   const newUrl = URL.createObjectURL(file);
-  createdImageUrls.add(newUrl);
 
   // 更新消息内容
   messageToUpdate.text = newUrl;
@@ -568,6 +563,10 @@ const deleteMessage = () => {
   const index = editMenu.value.index;
   if (index === null) return;
   if (window.confirm('确定要删除这条消息吗？')) {
+    const msg = chatLog.value[index];
+    if (msg.type === 'image' && msg.text) {
+      URL.revokeObjectURL(msg.text);
+    }
     chatLog.value.splice(index, 1);
     // 如果删除的是正在编辑的消息，则取消编辑
     if (editingIndex.value === index) {
@@ -719,8 +718,10 @@ const updateFullscreenState = () => {
   isFullscreen.value = !!document.fullscreenElement;
 };
 
-// 监听聊天记录变化，自动保存到 IndexedDB
+// 监听聊天记录变化，实现自动存档功能
 watch(chatLog, (newVal) => {
+  // 避免在清空记录时保存空数据
+  if (!newVal || newVal.length === 0) return;
   // 使用 toRaw 确保保存的是普通对象，保留 Blob
   saveToDB(DB_KEYS.CHAT_LOG, newVal.map(msg => toRaw(msg)));
   saveToDB(DB_KEYS.AUTO_SAVE_TIME, Date.now());
@@ -769,13 +770,15 @@ const closeSaveLoadMenu = () => {
 };
 
 const restoreChatLog = (logData) => {
-  createdImageUrls.forEach(url => URL.revokeObjectURL(url));
-  createdImageUrls.clear();
+  chatLog.value.forEach(msg => {
+    if (msg.type === 'image' && msg.text) {
+      URL.revokeObjectURL(msg.text);
+    }
+  });
 
   logData.forEach(msg => {
     if (msg.type === 'image' && msg.imageBlob) {
       msg.text = URL.createObjectURL(msg.imageBlob);
-      createdImageUrls.add(msg.text);
     }
   });
   chatLog.value = logData;
@@ -874,8 +877,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  // 组件卸载前清理所有创建的临时图片URL
-  createdImageUrls.forEach(url => URL.revokeObjectURL(url));
   // 组件卸载前移除监听器
   document.removeEventListener('fullscreenchange', updateFullscreenState);
 });
