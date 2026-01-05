@@ -483,7 +483,7 @@ export const allCards = [
   },
   {
     id: '1706',
-    name: '冰池娃娃',
+    name: '冰匙娃娃',
     rarity: RARITY.SSR,
     imageUrl: '/images/cards/1706.webp',
     realname: '摩洛娜',

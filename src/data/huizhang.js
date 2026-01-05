@@ -982,7 +982,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
     image_url: '/images/qban/1712.webp',
-    theme: HUIZHANG_THEMES.fire,
+    theme: HUIZHANG_THEMES.ice,
   },
   1112: {
     shape: [
