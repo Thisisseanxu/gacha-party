@@ -43,12 +43,11 @@
           </div>
           <div class="actions-container">
             <button @click="enterSelectionMode" class="action-button">重选角色</button>
-            <button v-if="chatLog.length > 0" @click="exportChatLog" class="action-button">导出对话</button>
-            <button @click="triggerImport" class="action-button">导入对话</button>
+            <button @click="openSaveLoadMenu" class="action-button">存档/读档</button>
             <button @click="toggleFullscreen" class="action-button">
               {{ isFullscreen ? '退出全屏' : '全屏显示' }}
             </button>
-            <input type="file" ref="fileInput" @change="importChatLog" accept=".json" style="display: none;" />
+            <input type="file" ref="fileInput" @change="handleImportFile" accept=".json" style="display: none;" />
             <div class="width-slider-container">
               <label for="width-slider">宽度：{{ chatLogWidth }}%</label>
               <input type="range" id="width-slider" v-model="chatLogWidth" min="10" max="100" step="1" />
@@ -103,6 +102,42 @@
     </div>
   </div>
 
+  <!-- 存档/读档 菜单 -->
+  <div v-if="showSaveLoadMenu" class="overlay" @click.self="closeSaveLoadMenu">
+    <div class="save-load-menu">
+      <button class="close-menu-top-right" @click="closeSaveLoadMenu">×</button>
+      <h3 class="menu-title">存档管理</h3>
+
+      <div class="slot-section">
+        <div class="slot-header">自动存档 (退出浏览器后可在此恢复)</div>
+        <div class="slot-item">
+          <div class="slot-row-top" style="justify-content: center;">
+            <span class="slot-time-small">{{ autoSaveTime ? formatTime(autoSaveTime) : '暂无记录' }}</span>
+          </div>
+          <div class="slot-row-bottom">
+            <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">读取</button>
+            <button class="action-button" @click="exportSlot('auto')" :disabled="!autoSaveTime">导出</button>
+          </div>
+        </div>
+      </div>
+      <div class="slot-section">
+        <div class="slot-header">手动存档</div>
+        <div v-for="(slot, index) in slotsData" :key="index" class="slot-item">
+          <div class="slot-row-top">
+            <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
+            <span class="slot-time-small">{{ slot.timestamp ? formatTime(slot.timestamp) : '空' }}</span>
+            <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">×</button>
+          </div>
+          <div class="slot-row-bottom">
+            <button class="action-button save-btn" @click="saveToSlot(index + 1)">保存</button>
+            <button class="action-button" @click="loadFromSlot(index + 1)">读取</button>
+            <button class="action-button" @click="exportSlot(index + 1)" :disabled="!slot.timestamp">导出文件</button>
+            <button class="action-button" @click="triggerImportToSlot(index + 1)">导入文件</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <PopUp :display="showAgreementPopUp" title="《织夜工具箱创作条款》" @close="closeAgreementPopUp">
     <p>欢迎使用织夜工具箱！<br />在使用前，请您仔细阅读以下用户协议：</p>
@@ -134,12 +169,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, toRaw } from 'vue';
 import { allCards } from '@/data/cards.js';
 import { colors } from '@/styles/colors.js';
 import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
 import { logger } from '@/utils/logger';
+import { saveToDB, loadFromDB, deleteFromDB, DB_KEYS } from '@/utils/chatStorage.js';
 
 const showAgreementPopUp = ref(false);
 const openAgreementPopUp = () => {
@@ -155,11 +191,9 @@ const isSelectionMode = ref(true);
 const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
 const characterSelectionKey = 'chatCharacterSelection';
-const autoSaveKey = 'chatAutoSaveLog';
 
 // 自定义角色相关状态
 const customCharacters = ref([]);
-const customCharactersKey = 'chatCustomCharacters';
 
 const displayableCharacterList = computed(() => {
   const formattedCustom = customCharacters.value.map(c => ({
@@ -173,7 +207,8 @@ const displayableCharacterList = computed(() => {
 
 // 监听自定义角色数组的变化，并自动保存到localStorage
 watch(customCharacters, (newValue) => {
-  localStorage.setItem(customCharactersKey, JSON.stringify(newValue));
+  // 使用 toRaw 确保保存的是普通对象
+  saveToDB(DB_KEYS.CUSTOM_CHARS, newValue.map(c => toRaw(c)));
 }, { deep: true });
 
 // 确认选择，进入聊天编辑器
@@ -352,6 +387,7 @@ const addImageMessage = (event) => {
       cardId: newMessage.value.cardId,
       text: imageUrl, // text 字段现在存储URL
       type: 'image', // 类型为 image
+      imageBlob: file, // 存储 Blob 对象以便保存到 IndexedDB
       displayName: displayName,
       customName: customName.value,
       position: position,
@@ -364,6 +400,7 @@ const addImageMessage = (event) => {
       cardId: newMessage.value.cardId,
       text: imageUrl, // text 字段现在存储URL
       type: 'image', // 类型为 image
+      imageBlob: file, // 存储 Blob 对象以便保存到 IndexedDB
       displayName: displayName,
       customName: customName.value,
       position: position,
@@ -391,6 +428,7 @@ const replaceImageMessage = (event) => {
 
   // 更新消息内容
   messageToUpdate.text = newUrl;
+  messageToUpdate.imageBlob = file; // 更新 Blob 对象
 
   // 清空文件输入框
   event.target.value = '';
@@ -523,7 +561,6 @@ const handleFormSubmit = () => {
   } else {
     addMessage();
   }
-  saveChatLogToLocalStorage();
 };
 
 // 删除消息
@@ -550,60 +587,90 @@ const closeEditMenu = () => {
   editMenu.value.visible = false;
 };
 
-// 导出聊天记录为 JSON 文件
-const exportChatLog = () => {
-  if (chatLog.value.length === 0) {
-    alert('没有聊天记录可以导出。');
-    return;
+// 导出指定存档
+const exportSlot = async (slotIndex) => {
+  let dataToExport = null;
+  let fileName = '';
+
+  if (slotIndex === 'auto') {
+    dataToExport = await loadFromDB(DB_KEYS.CHAT_LOG);
+    if (!dataToExport || dataToExport.length === 0) {
+      alert('自动存档为空');
+      return;
+    }
+    fileName = `织夜工具箱-自动存档-${new Date().toISOString().slice(0, 10)}.json`;
+  } else {
+    const key = DB_KEYS[`SLOT_${slotIndex}`];
+    const data = await loadFromDB(key);
+    if (!data || !data.chatLog) {
+      alert('该存档为空');
+      return;
+    }
+    dataToExport = data.chatLog;
+    const name = data.name || `存档${slotIndex}`;
+    fileName = `织夜工具箱-${name}-${new Date().toISOString().slice(0, 10)}.json`;
   }
 
-  // 将聊天记录数组转换为格式化的 JSON 字符串
-  const dataStr = JSON.stringify(chatLog.value, null, 2);
-  // 创建一个 Blob 对象
+  const dataStr = JSON.stringify(dataToExport, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
-  // 创建一个下载链接
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `织夜工具箱-导演模式-${new Date().toISOString().slice(0, 10)}.json`;
-  // 触发点击事件以下载文件
+  link.download = fileName;
   link.click();
-  // 释放 URL 对象
   URL.revokeObjectURL(url);
 };
 
 // 导入聊天记录的相关逻辑
 const fileInput = ref(null);
+const targetImportSlot = ref(null);
 
-// 点击“导入”按钮触发隐藏的文件输入框
-const triggerImport = () => {
+const triggerImportToSlot = (slotIndex) => {
+  targetImportSlot.value = slotIndex;
   fileInput.value.click();
 };
 
-// 选择文件后，读取并解析文件
-const importChatLog = (event) => {
+const handleImportFile = (event) => {
   const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
+  if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const importedData = JSON.parse(e.target.result);
-      // 验证导入的数据格式是否正确
-      if (Array.isArray(importedData)) {
-        if (window.confirm('导入新的聊天记录会覆盖当前内容，确定要继续吗？')) {
-          chatLog.value = importedData;
-        }
-      } else {
+      if (!Array.isArray(importedData)) {
         throw new Error('文件格式不正确，需要是数组格式。');
+      }
+
+      if (targetImportSlot.value !== null) {
+        const index = targetImportSlot.value;
+        const key = DB_KEYS[`SLOT_${index}`];
+
+        // 尝试保留原有名称
+        const existing = await loadFromDB(key);
+        const name = existing?.name || `存档 ${index}`;
+
+        const newData = {
+          name,
+          timestamp: Date.now(),
+          chatLog: importedData
+        };
+
+        await saveToDB(key, newData);
+
+        // 更新UI
+        slotsData.value[index - 1] = {
+          name: newData.name,
+          timestamp: newData.timestamp
+        };
+        alert(`成功导入到存档 ${index}`);
       }
     } catch (error) {
       alert(`导入失败：${error.message}`);
     } finally {
       // 清空文件输入
       event.target.value = '';
+      targetImportSlot.value = null;
     }
   };
   reader.readAsText(file);
@@ -652,21 +719,142 @@ const updateFullscreenState = () => {
   isFullscreen.value = !!document.fullscreenElement;
 };
 
-// 自动保存聊天记录到本地存储
-const saveChatLogToLocalStorage = () => {
-  localStorage.setItem(autoSaveKey, JSON.stringify(chatLog.value));
-  localStorage.setItem(characterSelectionKey, JSON.stringify(selectedCharacterIds.value));
+// 监听聊天记录变化，自动保存到 IndexedDB
+watch(chatLog, (newVal) => {
+  // 使用 toRaw 确保保存的是普通对象，保留 Blob
+  saveToDB(DB_KEYS.CHAT_LOG, newVal.map(msg => toRaw(msg)));
+  saveToDB(DB_KEYS.AUTO_SAVE_TIME, Date.now());
+}, { deep: true });
+
+// 监听选择的角色ID，保存到 localStorage (ID列表较小，保持使用 localStorage)
+watch(selectedCharacterIds, (newVal) => {
+  localStorage.setItem(characterSelectionKey, JSON.stringify(newVal));
+}, { deep: true });
+
+// --- 存档/读档 逻辑 ---
+const showSaveLoadMenu = ref(false);
+const autoSaveTime = ref(null);
+const slotsData = ref([
+  { name: '', timestamp: null },
+  { name: '', timestamp: null },
+  { name: '', timestamp: null }
+]);
+
+const formatTime = (ts) => {
+  if (!ts) return '';
+  return new Date(ts).toLocaleString();
+};
+
+const openSaveLoadMenu = async () => {
+  const t = await loadFromDB(DB_KEYS.AUTO_SAVE_TIME);
+  autoSaveTime.value = t;
+
+  for (let i = 1; i <= 3; i++) {
+    const key = DB_KEYS[`SLOT_${i}`];
+    const data = await loadFromDB(key);
+    if (data) {
+      slotsData.value[i - 1] = {
+        name: data.name || '',
+        timestamp: data.timestamp
+      };
+    } else {
+      slotsData.value[i - 1] = { name: '', timestamp: null };
+    }
+  }
+  showSaveLoadMenu.value = true;
+};
+
+const closeSaveLoadMenu = () => {
+  showSaveLoadMenu.value = false;
+};
+
+const restoreChatLog = (logData) => {
+  createdImageUrls.forEach(url => URL.revokeObjectURL(url));
+  createdImageUrls.clear();
+
+  logData.forEach(msg => {
+    if (msg.type === 'image' && msg.imageBlob) {
+      msg.text = URL.createObjectURL(msg.imageBlob);
+      createdImageUrls.add(msg.text);
+    }
+  });
+  chatLog.value = logData;
+};
+
+const loadAutoSave = async () => {
+  if (chatLog.value.length > 0) {
+    if (!confirm('当前编辑内容将被覆盖，确定读取自动存档吗？')) return;
+  }
+  const log = await loadFromDB(DB_KEYS.CHAT_LOG);
+  if (log && log.length > 0) {
+    restoreChatLog(log);
+    closeSaveLoadMenu();
+    isSelectionMode.value = false;
+  } else {
+    alert('读取失败或无记录');
+  }
+};
+
+const saveToSlot = async (index) => {
+  const slotKey = DB_KEYS[`SLOT_${index}`];
+  if (slotsData.value[index - 1].timestamp) {
+    if (!confirm(`存档 "${slotsData.value[index - 1].name || `存档 ${index}`}" 已有内容，确定要覆盖吗？`)) {
+      return;
+    }
+  }
+  const name = slotsData.value[index - 1].name || `存档 ${index}`;
+  const data = {
+    name,
+    timestamp: Date.now(),
+    chatLog: chatLog.value.map(msg => toRaw(msg))
+  };
+  await saveToDB(slotKey, data);
+  slotsData.value[index - 1].timestamp = data.timestamp;
+};
+
+const loadFromSlot = async (index) => {
+  const isSlotEmpty = !slotsData.value[index - 1].timestamp;
+  if (chatLog.value.length > 0) {
+    const msg = isSlotEmpty
+      ? '该存档为空，读取将清空当前对话，确定吗？'
+      : '当前编辑内容将被覆盖，确定读取该存档吗？';
+    if (!confirm(msg)) return;
+  }
+
+  if (isSlotEmpty) {
+    restoreChatLog([]);
+    closeSaveLoadMenu();
+    return;
+  }
+
+  const slotKey = DB_KEYS[`SLOT_${index}`];
+  const data = await loadFromDB(slotKey);
+  if (data && data.chatLog) {
+    restoreChatLog(data.chatLog);
+    closeSaveLoadMenu();
+    isSelectionMode.value = false;
+  } else {
+    restoreChatLog([]);
+    closeSaveLoadMenu();
+  }
+};
+
+const clearSlot = async (index) => {
+  if (!slotsData.value[index - 1].timestamp) return;
+
+  if (!confirm(`确定要删除存档 ${index} 吗？此操作无法撤销。`)) return;
+
+  const slotKey = DB_KEYS[`SLOT_${index}`];
+  await deleteFromDB(slotKey);
+
+  slotsData.value[index - 1] = { name: '', timestamp: null };
 };
 
 // 在组件挂载时加载已保存的角色选择以及自定义角色
-onMounted(() => {
-  const savedCustomCharacters = localStorage.getItem(customCharactersKey);
+onMounted(async () => {
+  const savedCustomCharacters = await loadFromDB(DB_KEYS.CUSTOM_CHARS);
   if (savedCustomCharacters) {
-    try {
-      customCharacters.value = JSON.parse(savedCustomCharacters);
-    } catch (e) {
-      logger.error("解析自定义角色失败:", e);
-    }
+    customCharacters.value = savedCustomCharacters;
   }
   const savedSelection = localStorage.getItem(characterSelectionKey);
   if (savedSelection) {
@@ -680,22 +868,6 @@ onMounted(() => {
   } else {
     // 首次访问，停留在选择模式
     isSelectionMode.value = true;
-  }
-  // 如果有保存的聊天记录，加载它们
-  const savedLog = localStorage.getItem(autoSaveKey);
-  try {
-    let savedChatLog = JSON.parse(savedLog);
-    if (savedChatLog && savedChatLog.length > 0) {
-      // 等待1秒后提示用户加载
-      setTimeout(() => {
-        if (window.confirm('检测到自动保存的聊天记录，是否加载？这将覆盖当前内容。')) {
-          chatLog.value = savedChatLog;
-          isSelectionMode.value = false;
-        }
-      }, 1000);
-    }
-  } catch (e) {
-    logger.error("解析自动保存的聊天记录失败:", e);
   }
 
   document.addEventListener('fullscreenchange', updateFullscreenState);
@@ -1093,6 +1265,127 @@ onUnmounted(() => {
 
 .edit-menu-button.close:hover {
   filter: brightness(0.95);
+}
+
+/* 存档菜单样式 */
+.save-load-menu {
+  position: relative;
+  background-color: v-bind('colors.background.content');
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  color: v-bind('colors.text.primary');
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.menu-title {
+  text-align: center;
+  margin: 0;
+  color: v-bind('colors.text.highlight');
+}
+
+.slot-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot-header {
+  font-weight: bold;
+  color: v-bind('colors.text.secondary');
+  font-size: 0.9em;
+}
+
+.slot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: v-bind('colors.background.light');
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.slot-info {
+  flex: 1;
+}
+
+.slot-row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slot-row-bottom {
+  display: flex;
+  gap: 5px;
+}
+
+.slot-name-input {
+  flex: 1;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid v-bind('colors.border.primary');
+  background: v-bind('colors.input.background');
+  color: v-bind('colors.input.text');
+  min-width: 0;
+}
+
+.slot-time-small {
+  font-size: 0.75em;
+  color: v-bind('colors.text.secondary');
+  white-space: nowrap;
+}
+
+.slot-row-bottom {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+
+.slot-row-bottom .action-button {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 0.9em;
+}
+
+.delete-slot-btn {
+  background: v-bind('colors.button.dangerBg');
+  color: v-bind('colors.button.dangerText');
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  margin-left: 5px;
+}
+
+.save-btn {
+  background-color: v-bind('colors.brand.confirm');
+  color: white;
+  border: none;
+}
+
+.close-menu-top-right {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: v-bind('colors.text.secondary');
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px;
 }
 
 /* 编辑行高亮样式 */
