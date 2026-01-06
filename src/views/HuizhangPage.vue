@@ -1,9 +1,6 @@
 <template>
   <div class="page-container">
     <h1 class="page-title">徽章攻略编辑器</h1>
-    <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
-    </p>
-
     <div v-if="isSelectionMode" class="selector-container">
       <div class="import-section">
         <label class="import-btn">
@@ -12,9 +9,8 @@
         </label>
         <span class="import-hint">选择之前导出的json文件可直接恢复编辑</span>
       </div>
-      <CharacterSelector v-model="selectedCharId" mode="single" :showCustom="false"
-        :characterList="filteredCharacterList" :disabledCharacterIds="disabledCharacterIds" title="选择角色"
-        :subTitle="null" @confirm="isSelectionMode = false" />
+      <CharacterSelector v-model="selectedCharId" mode="single" :characterList="filteredCharacterList"
+        :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" @confirm="isSelectionMode = false" />
     </div>
     <div v-else class="strategy-editor">
 
@@ -172,6 +168,8 @@
       </div>
 
     </div>
+    <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+    </p>
   </div>
 
   <PopUp :display="showAgreementPopUp" title="《织夜工具箱创作条款》" @close="closeAgreementPopUp">

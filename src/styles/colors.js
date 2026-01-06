@@ -113,13 +113,6 @@ const dark = {
     dangerText: '#cf1322', // 危险按钮文字
     dangerBorder: '#ffa39e', // 危险按钮边框
   },
-  menu: {
-    background: '#999999', // 菜单背景
-    buttonBg: '#f9f9f9', // 菜单按钮背景
-    buttonText: '#333333', // 菜单按钮文字
-    buttonBorder: '#cccccc', // 菜单按钮边框
-    buttonHoverBg: '#f0f0f0', // 菜单按钮悬浮背景
-  },
   preview: {
     panelBg: 'rgba(30, 30, 40, 0.9)', // 预览面板背景
     text: '#ddd', // 预览文字
@@ -207,13 +200,6 @@ const light = {
     dangerBg: '#fef2f2',
     dangerText: '#dc2626',
     dangerBorder: '#fecaca',
-  },
-  menu: {
-    background: '#ffffff',
-    buttonBg: '#f3f4f6',
-    buttonText: '#1f2937',
-    buttonBorder: '#e5e7eb',
-    buttonHoverBg: '#e5e7eb',
   },
   preview: { ...dark.preview }, // 预览区域保持深色风格
 }

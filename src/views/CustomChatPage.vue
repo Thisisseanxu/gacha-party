@@ -3,9 +3,17 @@
     <div class="chat-page-container">
       <h1 class="page-title">导演模式</h1>
 
-      <CharacterSelector v-if="isSelectionMode" v-model="selectedCharacterIds"
-        v-model:customCharacters="customCharacters" :characterList="displayableCharacterList"
-        :allowRealNameToggle="true" mode="multiple" @confirm="confirmSelection" />
+      <div v-if="isSelectionMode" class="selection-mode-container">
+        <div class="selection-toolbar">
+          <button @click="openCreateCharModal" class="action-button create-char-btn">创建新角色</button>
+          <SwitchComponent v-model="showRealName" label="显示角色真名" />
+        </div>
+        <CharacterSelector v-model="selectedCharacterIds" v-model:customCharacters="customCharacters"
+          :characterList="displayableCharacterList" :showRealName="showRealName" mode="multiple" />
+        <button @click="confirmSelection" class="finalize-button" :disabled="selectedCharacterIds.length === 0">
+          开始创作 →
+        </button>
+      </div>
 
       <div v-else class="strategy-editor">
         <div class="controls-panel card" ref="chatEditorRef">
@@ -18,8 +26,8 @@
                 {{ card.name }}
               </option>
             </select>
-            <SwitchComponent v-if="newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'" v-model="isRightSide"
-              label="右侧" style="margin-left: 10px;" />
+            <SwitchComponent v-if="newMessage?.cardId && newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'"
+              v-model="isRightSide" label="右侧" style="margin-left: 10px;" />
           </div>
           <div class="editor-row">
             <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
@@ -85,38 +93,41 @@
                   </template>
 
                   <template v-else>
-                    <img v-if="message.position === 'left' && message.cardId !== '_班长'"
-                      :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
+                    <div v-if="message.position === 'left' && message.cardId !== '_班长' && isCardMissing(message.cardId)"
+                      class="avatar missing-avatar"
+                      @click.stop="openRepairCharModal(message.cardId, message.displayName)">
+                      丢失<br><span style="font-size: 0.8em">点击修复</span>
+                    </div>
+                    <img v-else-if="message.position === 'left' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'" class="avatar" />
                     <div class="message-content">
                       <div v-if="message.displayName" class="character-name">
                         {{ message.displayName }}
                       </div>
                       <div :class="{ 'image-bubble': message.type === 'image', 'bubble': message.type !== 'image' }">
-                        <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
+                        <template v-if="message.type === 'image'">
+                          <img v-if="message.text" :src="message.text" class="message-image" alt="图片消息" />
+                          <div v-else class="image-placeholder">
+                            图片数据丢失<br>点击编辑重新上传
+                          </div>
+                        </template>
                         <span v-else>{{ message.text }}</span>
                       </div>
                     </div>
-                    <img v-if="message.position === 'right' && message.cardId !== '_班长'"
-                      :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar right-avatar" />
+                    <div
+                      v-if="message.position === 'right' && message.cardId !== '_班长' && isCardMissing(message.cardId)"
+                      class="avatar right-avatar missing-avatar"
+                      @click.stop="openRepairCharModal(message.cardId, message.displayName)">
+                      丢失<br><span style="font-size: 0.8em">点击修复</span>
+                    </div>
+                    <img v-else-if="message.position === 'right' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'"
+                      class="avatar right-avatar" />
                   </template>
 
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div v-if="editMenu.visible" class="overlay" @click="closeEditMenu">
-          <div class="edit-menu-container">
-            <h3 class="edit-menu-title">编辑消息</h3>
-            <button class="edit-menu-button" @click="startEditing">编辑这条消息</button>
-            <button v-if="chatLog[editMenu.index].type === 'image'" class="edit-menu-button"
-              @click="triggerImageReplace">
-              重新上传图片
-            </button>
-            <button class="edit-menu-button" @click="startInserting">在此后插入消息</button>
-            <button class="edit-menu-button delete" @click="deleteMessage">删除消息</button>
-            <button class="edit-menu-button close" @click="closeEditMenu">关闭</button>
           </div>
         </div>
       </div>
@@ -125,8 +136,20 @@
       </p>
     </div>
   </div>
-
-  <!-- 存档/读档 菜单 -->
+  <!-- 编辑菜单 -->
+  <div v-if="editMenu.visible" class="overlay" @click="closeEditMenu">
+    <div class="edit-menu-container">
+      <button class="close-menu-top-right" @click="closeEditMenu">×</button>
+      <h3 class="edit-menu-title">编辑消息</h3>
+      <button class="edit-menu-button" @click="startEditing">编辑这条消息</button>
+      <button v-if="chatLog[editMenu.index].type === 'image'" class="edit-menu-button" @click="triggerImageReplace">
+        重新上传图片
+      </button>
+      <button class="edit-menu-button" @click="startInserting">在此后插入消息</button>
+      <button class="edit-menu-button delete" @click="deleteMessage">删除消息</button>
+    </div>
+  </div>
+  <!-- 存档/读档菜单 -->
   <div v-if="showSaveLoadMenu" class="overlay" @click.self="closeSaveLoadMenu">
     <div class="save-load-menu">
       <button class="close-menu-top-right" @click="closeSaveLoadMenu">×</button>
@@ -159,6 +182,31 @@
             <button class="action-button" @click="triggerImportToSlot(index + 1)">导入文件</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统一的角色编辑/修复弹窗 -->
+  <div v-if="charForm.visible" class="overlay" @click="closeCharForm">
+    <div class="custom-character-form" @click.stop>
+      <h3>{{ charForm.mode === 'create' ? '创建自定义角色' : '修复丢失角色' }}</h3>
+      <div class="form-row">
+        <label>角色名称</label>
+        <input type="text" v-model="charForm.name" placeholder="输入角色名字" />
+      </div>
+      <div class="form-row">
+        <label>角色头像</label>
+        <button @click="triggerCharAvatarUpload" class="action-button">{{ charForm.avatar ? '更换图片' : '上传图片' }}</button>
+        <input type="file" ref="charFormAvatarInputRef" @change="handleCharAvatarSelected" accept="image/*"
+          style="display: none;" />
+      </div>
+      <div v-if="charForm.avatar" class="avatar-preview-container">
+        <p>头像预览：</p>
+        <img :src="charForm.avatar" alt="头像预览" class="avatar-preview" />
+      </div>
+      <div class="form-actions">
+        <button @click="saveCharForm" class="action-button">{{ charForm.mode === 'create' ? '保存角色' : '保存并修复' }}</button>
+        <button @click="closeCharForm" class="action-button cancel">取消</button>
       </div>
     </div>
   </div>
@@ -213,6 +261,7 @@ const closeAgreementPopUp = () => {
 
 // true: 显示角色选择界面, false: 显示聊天编辑器
 const isSelectionMode = ref(true);
+const showRealName = ref(false);
 // 存储用户选择的角色ID
 const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
@@ -233,6 +282,70 @@ watch(previewConfig, () => {
 
 // 自定义角色相关状态
 const customCharacters = ref([]);
+
+// 统一的角色表单状态 (创建/修复)
+const charForm = ref({
+  visible: false,
+  mode: 'create', // 'create' | 'repair'
+  id: null,
+  name: '',
+  avatar: null
+});
+const charFormAvatarInputRef = ref(null);
+
+const openCreateCharModal = () => {
+  charForm.value = {
+    visible: true,
+    mode: 'create',
+    id: `custom_${Date.now()}`,
+    name: '',
+    avatar: null
+  };
+};
+
+const openRepairCharModal = (cardId, currentDisplayName) => {
+  charForm.value = {
+    visible: true,
+    mode: 'repair',
+    id: cardId,
+    name: currentDisplayName || '',
+    avatar: null
+  };
+};
+
+const closeCharForm = () => {
+  charForm.value.visible = false;
+};
+
+const triggerCharAvatarUpload = () => {
+  charFormAvatarInputRef.value?.click();
+};
+
+const handleCharAvatarSelected = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    charForm.value.avatar = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const saveCharForm = () => {
+  if (!charForm.value.name.trim() || !charForm.value.avatar) {
+    alert('请填写名称并上传头像');
+    return;
+  }
+  const newChar = {
+    id: charForm.value.id,
+    name: charForm.value.name.trim(),
+    imageUrl: charForm.value.avatar,
+    isCustom: true
+  };
+  customCharacters.value.push(newChar);
+  closeCharForm();
+};
 
 const displayableCharacterList = computed(() => {
   const formattedCustom = customCharacters.value.map(c => ({
@@ -356,6 +469,21 @@ const getCardName = (cardId) => {
     return customCard.name;
   }
   return '未知角色';
+};
+
+const isCardMissing = (cardId) => {
+  if (!cardId || cardId === '_旁白' || cardId === '_班长') return false;
+  const exists = allCards.some(c => c.id === cardId) || customCharacters.value.some(c => c.id === cardId);
+  return !exists;
+};
+
+const blobToBase64 = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 };
 
 // 添加新消息到聊天记录
@@ -516,9 +644,11 @@ const startEditing = () => {
   newMessage.value.cardId = message.cardId;
 
   // 恢复开关状态
-  if (message.cardId !== '_旁白') {
-    isRightSide.value = message.position === 'right';
-  }
+  nextTick(() => {
+    if (message.cardId !== '_旁白') {
+      isRightSide.value = message.position === 'right';
+    }
+  });
 
   // 加载消息数据到编辑器
   // 使用 nextTick 确保添加角色而更新的选项已渲染
@@ -665,6 +795,24 @@ const exportSlot = async (slotIndex) => {
     fileName = `织夜工具箱-${name}-${new Date().toISOString().slice(0, 10)}.json`;
   }
 
+  // 将图片转换为Base64以便导出
+  if (dataToExport) {
+    dataToExport = await Promise.all(dataToExport.map(async (msg) => {
+      const newMsg = { ...msg };
+      if (newMsg.type === 'image' && newMsg.imageBlob) {
+        try {
+          newMsg.imageBase64 = await blobToBase64(newMsg.imageBlob);
+          // 导出时不保留 blob 对象和临时 URL，减小体积并避免混淆
+          delete newMsg.imageBlob;
+          delete newMsg.text;
+        } catch (e) {
+          logger.error('图片导出转换失败', e);
+        }
+      }
+      return newMsg;
+    }));
+  }
+
   const dataStr = JSON.stringify(dataToExport, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -696,6 +844,22 @@ const handleImportFile = (event) => {
         throw new Error('文件格式不正确，需要是数组格式。');
       }
 
+      // 处理导入的数据，将 Base64 还原为 Blob
+      const processedData = await Promise.all(importedData.map(async (msg) => {
+        if (msg.type === 'image' && msg.imageBase64) {
+          try {
+            const res = await fetch(msg.imageBase64);
+            const blob = await res.blob();
+            msg.imageBlob = blob;
+            // 移除 base64 字符串以节省内存
+            delete msg.imageBase64;
+          } catch (err) {
+            logger.error('图片导入还原失败', err);
+          }
+        }
+        return msg;
+      }));
+
       if (targetImportSlot.value !== null) {
         const index = targetImportSlot.value;
         const key = DB_KEYS[`SLOT_${index}`];
@@ -707,7 +871,7 @@ const handleImportFile = (event) => {
         const newData = {
           name,
           timestamp: Date.now(),
-          chatLog: importedData
+          chatLog: processedData
         };
 
         await saveToDB(key, newData);
@@ -845,9 +1009,25 @@ const restoreChatLog = (logData) => {
 
   logData.forEach(msg => {
     if (msg.type === 'image' && msg.imageBlob) {
-      msg.text = URL.createObjectURL(msg.imageBlob);
+      try {
+        // 重新创建临时 URL
+        msg.text = URL.createObjectURL(msg.imageBlob);
+      } catch (e) {
+        logger.error('恢复图片消息失败', e);
+        msg.text = '';
+      }
     }
   });
+  // 将存档中出现的有效角色添加到已选列表
+  const validIds = new Set(selectedCharacterIds.value);
+  logData.forEach(msg => {
+    if (msg.cardId && msg.cardId !== '_旁白' && msg.cardId !== '_班长') {
+      if (!isCardMissing(msg.cardId)) {
+        validIds.add(msg.cardId);
+      }
+    }
+  });
+  selectedCharacterIds.value = Array.from(validIds);
   chatLog.value = logData;
 };
 
@@ -1034,7 +1214,7 @@ onUnmounted(() => {
 /* 按钮样式 */
 .action-button {
   padding: 0.5rem;
-  border: 1px solid #344767;
+  border: none;
   background-color: v-bind('colors.button.defaultBg');
   color: v-bind('colors.button.defaultText');
   border-radius: 5px;
@@ -1150,6 +1330,20 @@ onUnmounted(() => {
   border-radius: 50%;
   margin-right: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.avatar.missing-avatar {
+  background-color: v-bind('colors.status.errorBg');
+  border: 2px dashed v-bind('colors.status.error');
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: v-bind('colors.status.error');
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .avatar.right-avatar {
@@ -1274,6 +1468,21 @@ onUnmounted(() => {
   border-radius: 8px;
 }
 
+.image-placeholder {
+  width: 200px;
+  height: 150px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-size: 0.9rem;
+  padding: 10px;
+}
+
 .editor-row {
   margin-bottom: 10px;
   display: flex;
@@ -1336,10 +1545,87 @@ onUnmounted(() => {
   z-index: 1000;
 }
 
+/* 修复角色弹窗样式 (复用 CharacterSelector 的样式) */
+.custom-character-form {
+  background-color: v-bind('colors.background.content');
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.custom-character-form h3 {
+  text-align: center;
+  margin-top: 0;
+  color: v-bind('colors.text.primary');
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: v-bind('colors.text.secondary');
+}
+
+.form-row input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+}
+
+.avatar-preview-container {
+  text-align: center;
+}
+
+.avatar-preview {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 8px;
+  border: 2px solid v-bind('colors.border.primary');
+  margin-top: 5px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-actions .action-button {
+  flex-grow: 1;
+}
+
+.form-actions .action-button.cancel {
+  background-color: v-bind('colors.button.secondaryBg');
+  border-color: v-bind('colors.button.secondaryBg');
+  color: v-bind('colors.button.secondaryText');
+}
+
+.form-actions .action-button.cancel:hover {
+  filter: brightness(0.9);
+}
+
 /* 编辑菜单样式 */
 .edit-menu-container {
-  background-color: v-bind('colors.menu.background');
-  color: v-bind('colors.menu.buttonText');
+  position: relative;
+  background-color: v-bind('colors.background.content');
+  color: v-bind('colors.text.primary');
   padding: 20px 30px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -1356,23 +1642,25 @@ onUnmounted(() => {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.2em;
-  color: v-bind('colors.text.black');
+  color: v-bind('colors.text.highlight');
 }
 
 .edit-menu-button {
   padding: 10px 15px;
-  border: 1px solid v-bind('colors.menu.buttonBorder');
-  background-color: v-bind('colors.menu.buttonBg');
-  color: v-bind('colors.menu.buttonText');
+  border: none;
+  background-color: v-bind('colors.button.defaultBg');
+  color: v-bind('colors.button.defaultText');
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
   transition: background-color 0.2s, border-color 0.2s;
   text-align: center;
+  font-weight: bold;
 }
 
 .edit-menu-button:hover {
-  background-color: v-bind('colors.menu.buttonHoverBg');
+  background-color: v-bind('colors.button.hoverBg');
+  color: v-bind('colors.button.hoverText');
 }
 
 .edit-menu-button.delete {
@@ -1400,11 +1688,11 @@ onUnmounted(() => {
 .save-load-menu {
   position: relative;
   background-color: v-bind('colors.background.content');
+  color: v-bind('colors.text.primary');
   padding: 20px;
   border-radius: 10px;
   width: 90%;
   max-width: 500px;
-  color: v-bind('colors.text.primary');
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1566,11 +1854,9 @@ onUnmounted(() => {
 /* 为协议列表添加样式 */
 .agreement-list {
   max-height: 20rem;
-
   overflow-y: auto;
-
   /* 美化列表，增加一些内边距和边框 */
-  border: 1px solid #e0e0e0;
+  border: 2px solid v-bind('colors.border.primary');
   /* 左侧留出空间给数字序号 */
   padding: 0 0 0 20px;
   border-radius: 8px;
@@ -1606,5 +1892,51 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.3);
   margin-top: 20px;
   padding-bottom: 10px;
+}
+
+.selection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  max-width: 800px;
+  margin: 0 auto 10px auto;
+}
+
+.finalize-button {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  border: none;
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  padding: 15px 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  font-size: 1.2rem;
+  background-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+}
+
+.finalize-button:hover {
+  background-color: v-bind('colors.brand.hover');
+}
+
+.finalize-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-char-btn {
+  background-color: v-bind('colors.brand.confirm');
+  color: white;
+  border-color: v-bind('colors.brand.confirm');
+}
+
+.create-char-btn:hover {
+  background-color: v-bind('colors.brand.confirmHover');
+  color: white;
 }
 </style>
