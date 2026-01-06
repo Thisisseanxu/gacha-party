@@ -1,23 +1,25 @@
 <template>
   <div class="background">
     <div class="chat-page-container">
-      <h1 class="page-title">盲盒派对聊天生成器</h1>
-      <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
-      </p>
+      <h1 class="page-title">导演模式</h1>
 
       <CharacterSelector v-if="isSelectionMode" v-model="selectedCharacterIds"
         v-model:customCharacters="customCharacters" :characterList="displayableCharacterList"
         :allowRealNameToggle="true" mode="multiple" @confirm="confirmSelection" />
 
-      <template v-else>
-        <div class="chat-editor" ref="chatEditorRef">
+      <div v-else class="strategy-editor">
+        <div class="controls-panel card" ref="chatEditorRef">
+          <h2>聊天配置</h2>
+
           <div class="editor-row">
-            <select v-model="newMessage.cardId" class="editor-select">
+            <select v-model="newMessage.cardId" class="editor-select" style="flex: 1">
               <option :value="null" disabled>选择聊天角色</option>
-              <option v-for="card in cardOptions" :key="card.id" :value="card.id">
+              <option v-for="card in cardOptions" :key="card.id" :value="card.id" class="option-text">
                 {{ card.name }}
               </option>
             </select>
+            <SwitchComponent v-if="newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'" v-model="isRightSide"
+              label="右侧" style="margin-left: 10px;" />
           </div>
           <div class="editor-row">
             <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
@@ -41,45 +43,65 @@
               取消插入
             </button>
           </div>
+
+          <div class="control-group">
+            <label>导出图片设置</label>
+            <div class="config-row">
+              <div class="config-item">
+                <span>宽度</span>
+                <input type="number" v-model="previewConfig.width" class="mini-input">
+              </div>
+              <div class="config-item">
+                <span>高度</span>
+                <input type="number" v-model="previewConfig.height" class="mini-input">
+              </div>
+              <div class="config-item">
+                <span>圆角</span>
+                <input type="number" v-model="previewConfig.radius" class="mini-input">
+              </div>
+            </div>
+          </div>
+
           <div class="actions-container">
+            <button @click="generateImage" class="action-button export-btn">导出图片</button>
             <button @click="enterSelectionMode" class="action-button">重选角色</button>
             <button @click="openSaveLoadMenu" class="action-button">存档/读档</button>
-            <button @click="toggleFullscreen" class="action-button">
-              {{ isFullscreen ? '退出全屏' : '全屏显示' }}
-            </button>
             <input type="file" ref="fileInput" @change="handleImportFile" accept=".json" style="display: none;" />
-            <div class="width-slider-container">
-              <label for="width-slider">宽度：{{ chatLogWidth }}%</label>
-              <input type="range" id="width-slider" v-model="chatLogWidth" min="10" max="100" step="1" />
-            </div>
           </div>
         </div>
 
-        <p class="hint">提示：点击对话即可进行编辑、插入、删除等操作。</p>
-        <div class="chat-log-container" ref="chatContainerRef" :style="{ width: chatLogWidth + 'vw' }">
-          <div class="chat-log">
-            <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
-              :class="{ 'editing-highlight': index === editingIndex, 'insert-highlight-after': index === insertingIndex, [message.position]: true }"
-              @click="openEditMenu(index)">
+        <div class="preview-wrapper" ref="previewWrapper">
+          <p class="preview-hint">↓ 预览区域 (可滚动) ↓</p>
+          <div class="capture-area-wrapper" :style="previewStyle">
+            <div class="chat-log-container" ref="captureRef"
+              :style="{ width: previewConfig.width + 'px', height: previewConfig.height + 'px', borderRadius: previewConfig.radius + 'px' }">
+              <div class="chat-log">
+                <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
+                  :class="{ 'editing-highlight': index === editingIndex, 'insert-highlight-after': index === insertingIndex, [message.position]: true }"
+                  @click="openEditMenu(index)">
 
-              <template v-if="message.position === 'center'">
-                <div class="bubble center">{{ message.text }}</div>
-              </template>
+                  <template v-if="message.position === 'center'">
+                    <div class="bubble center">{{ message.text }}</div>
+                  </template>
 
-              <template v-else>
-                <img v-if="message.position === 'left'" :src="getCardAvatar(message.cardId)" alt="avatar"
-                  class="avatar" />
-                <div class="message-content">
-                  <div v-if="message.displayName" class="character-name">
-                    {{ message.displayName }}
-                  </div>
-                  <div :class="{ 'image-bubble': message.type === 'image', 'bubble': message.type !== 'image' }">
-                    <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
-                    <span v-else>{{ message.text }}</span>
-                  </div>
+                  <template v-else>
+                    <img v-if="message.position === 'left' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar" />
+                    <div class="message-content">
+                      <div v-if="message.displayName" class="character-name">
+                        {{ message.displayName }}
+                      </div>
+                      <div :class="{ 'image-bubble': message.type === 'image', 'bubble': message.type !== 'image' }">
+                        <img v-if="message.type === 'image'" :src="message.text" class="message-image" alt="用户图片" />
+                        <span v-else>{{ message.text }}</span>
+                      </div>
+                    </div>
+                    <img v-if="message.position === 'right' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)" alt="avatar" class="avatar right-avatar" />
+                  </template>
+
                 </div>
-              </template>
-
+              </div>
             </div>
           </div>
         </div>
@@ -97,8 +119,10 @@
             <button class="edit-menu-button close" @click="closeEditMenu">关闭</button>
           </div>
         </div>
-      </template>
+      </div>
 
+      <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+      </p>
     </div>
   </div>
 
@@ -176,6 +200,8 @@ import PopUp from '@/components/PopUp.vue';
 import CharacterSelector from '@/components/CharacterSelector.vue';
 import { logger } from '@/utils/logger';
 import { saveToDB, loadFromDB, deleteFromDB, DB_KEYS } from '@/utils/chatStorage.js';
+import { toPng } from 'html-to-image';
+import SwitchComponent from '@/components/SwitchComponent.vue';
 
 const showAgreementPopUp = ref(false);
 const openAgreementPopUp = () => {
@@ -191,6 +217,19 @@ const isSelectionMode = ref(true);
 const selectedCharacterIds = ref([]);
 // 用于本地存储的键名
 const characterSelectionKey = 'chatCharacterSelection';
+
+// 预览配置
+const previewConfig = ref({
+  width: 800,
+  height: 600,
+  radius: 0
+});
+const captureRef = ref(null);
+
+// 修复预览区设置修改后不立即生效的问题
+watch(previewConfig, () => {
+  nextTick(updatePreviewScale);
+}, { deep: true });
 
 // 自定义角色相关状态
 const customCharacters = ref([]);
@@ -214,6 +253,9 @@ watch(customCharacters, (newValue) => {
 // 确认选择，进入聊天编辑器
 const confirmSelection = () => {
   isSelectionMode.value = false;
+  nextTick(() => {
+    updatePreviewScale();
+  });
 };
 
 // 返回角色选择界面
@@ -235,18 +277,26 @@ const newMessage = ref({
 
 // 自定义名称
 const customName = ref('');
+// 控制消息是否显示在右侧
+const isRightSide = ref(false);
 
 // 监听 cardId 的变化，自动设置 position 属性
 watch(() => newMessage.value.cardId, (newCardId) => {
   if (newCardId === "_旁白") {
     newMessage.value.position = 'center';
   } else if (newCardId === '_班长') {
-    newMessage.value.position = 'right';
+    isRightSide.value = true;
   } else {
-    newMessage.value.position = 'left';
+    isRightSide.value = false;
   }
   // 清空自定义名称
   customName.value = '';
+});
+
+// 监听开关变化，更新 position
+watch(isRightSide, (val) => {
+  if (newMessage.value.cardId === '_旁白') return;
+  newMessage.value.position = val ? 'right' : 'left';
 });
 
 // 生成下拉选择器的选项
@@ -318,9 +368,10 @@ const addMessage = () => {
   // 如果自定义名称不为空，则优先使用自定义名称
   if (customName.value.trim()) {
     displayName = customName.value;
+  } else {
+    // 否则使用角色的默认名称
+    displayName = getCardName(newMessage.value.cardId);
   }
-  // 否则使用角色的默认名称
-  displayName = getCardName(newMessage.value.cardId);
   chatLog.value.push({
     ...newMessage.value,
     displayName: displayName, // 将最终要显示的名字存入消息对象
@@ -376,7 +427,7 @@ const addImageMessage = (event) => {
 
   let position = 'left';
   if (newMessage.value.cardId === '_旁白') position = 'center';
-  else if (newMessage.value.cardId === '_班长') position = 'right';
+  else position = isRightSide.value ? 'right' : 'left';
 
   // 在插入模式下，插入到指定位置后
   if (insertingIndex.value !== null) {
@@ -463,6 +514,12 @@ const startEditing = () => {
     selectedCharacterIds.value.push(message.cardId);
   }
   newMessage.value.cardId = message.cardId;
+
+  // 恢复开关状态
+  if (message.cardId !== '_旁白') {
+    isRightSide.value = message.position === 'right';
+  }
+
   // 加载消息数据到编辑器
   // 使用 nextTick 确保添加角色而更新的选项已渲染
   nextTick(() => {
@@ -495,8 +552,7 @@ const updateMessage = () => {
   // 根据新角色更新消息位置
   const newCardId = newMessage.value.cardId;
   if (newCardId === "_旁白") messageToUpdate.position = 'center';
-  else if (newCardId === '_班长') messageToUpdate.position = 'right';
-  else messageToUpdate.position = 'left';
+  else messageToUpdate.position = isRightSide.value ? 'right' : 'left';
 
   exitEditing();
 };
@@ -580,7 +636,6 @@ const deleteMessage = () => {
 const openEditMenu = (index) => {
   editMenu.value.index = index;
   editMenu.value.visible = true;
-  toggleFullscreen(false); // 退出全屏以便操作
 };
 const closeEditMenu = () => {
   editMenu.value.visible = false;
@@ -674,48 +729,60 @@ const handleImportFile = (event) => {
   };
   reader.readAsText(file);
 };
+// 预览区域缩放逻辑
+const previewWrapper = ref(null);
+const previewScale = ref(1);
 
-// 全屏功能
-// 引用聊天容器元素实现全屏
-const chatContainerRef = ref(null);
-// 是否处于全屏状态
-const isFullscreen = ref(false);
-const chatLogWidth = ref(50); // 聊天记录容器的宽度百分比
+const updatePreviewScale = () => {
+  if (!previewWrapper.value) return;
+  const wrapperWidth = previewWrapper.value.clientWidth;
+  // 目标宽度为配置宽度 + 左右留白
+  const targetWidth = previewConfig.value.width + 40;
 
-// 切换全屏状态
-const toggleFullscreen = (forceToggle = null) => {
-  // 检查浏览器是否支持全屏 API
-  if (!document.fullscreenEnabled) {
-    alert('您的浏览器不支持全屏功能。');
-    return;
-  }
-  // 强制退出全屏
-  if (forceToggle === false) {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-    return;
-  }
-  // 强制进入全屏
-  if (forceToggle === true) {
-    if (!document.fullscreenElement) {
-      chatContainerRef.value.requestFullscreen();
-    }
-    return;
-  }
-  // 如果当前不是全屏状态，则请求进入全屏
-  if (!document.fullscreenElement) {
-    chatContainerRef.value.requestFullscreen();
-  }
-  // 如果当前是全屏状态，则退出全屏
-  else {
-    document.exitFullscreen();
+  if (wrapperWidth < targetWidth) {
+    previewScale.value = wrapperWidth / targetWidth;
+  } else {
+    previewScale.value = 1;
   }
 };
 
-// 监听全屏变化事件，更新 isFullscreen 状态
-const updateFullscreenState = () => {
-  isFullscreen.value = !!document.fullscreenElement;
+const previewStyle = computed(() => {
+  if (previewScale.value >= 1) return {};
+  return {
+    transform: `scale(${previewScale.value})`,
+    transformOrigin: 'top center',
+    marginBottom: `${-(previewConfig.value.height * (1 - previewScale.value))}px`
+  };
+});
+
+// 生成图片
+const generateImage = async () => {
+  if (!captureRef.value) return;
+
+  // 临时重置缩放以保证生成图片的清晰度和尺寸
+  const originalScale = previewScale.value;
+  previewScale.value = 1;
+
+  try {
+    await nextTick();
+    const dataUrl = await toPng(captureRef.value, {
+      pixelRatio: 2,
+      backgroundColor: null, // 保持透明背景，以便圆角生效
+      width: previewConfig.value.width,
+      height: previewConfig.value.height,
+      skipFonts: false,
+      cacheBust: false
+    });
+    const link = document.createElement('a');
+    link.download = `聊天记录-${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = dataUrl;
+    link.click();
+  } catch (err) {
+    logger.error('生成图片失败:', err);
+    alert('生成失败');
+  } finally {
+    previewScale.value = originalScale; // 恢复缩放
+  }
 };
 
 // 监听聊天记录变化，实现自动存档功能
@@ -873,12 +940,12 @@ onMounted(async () => {
     isSelectionMode.value = true;
   }
 
-  document.addEventListener('fullscreenchange', updateFullscreenState);
+  window.addEventListener('resize', updatePreviewScale);
+  updatePreviewScale();
 });
 
 onUnmounted(() => {
-  // 组件卸载前移除监听器
-  document.removeEventListener('fullscreenchange', updateFullscreenState);
+  window.removeEventListener('resize', updatePreviewScale);
 });
 </script>
 
@@ -898,27 +965,75 @@ onUnmounted(() => {
   padding: 8px;
   width: 100%;
   color: v-bind('colors.text.primary');
-  overflow: visible;
+  box-sizing: border-box;
 }
 
 .page-title {
   text-align: center;
   font-size: 2em;
   color: v-bind('colors.text.highlight');
-  margin-bottom: 0;
+  margin: 10px 0;
+}
+
+/* 布局容器 */
+.strategy-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.controls-panel {
+  flex: 1;
+  min-width: 300px;
+  background: v-bind('colors.background.content');
+  padding: 15px;
+  border-radius: 12px;
+  height: fit-content;
+  box-sizing: border-box;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.controls-panel h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+  color: v-bind('colors.text.highlight');
+  border-bottom: 1px solid v-bind('colors.border.primary');
+  padding-bottom: 10px;
+}
+
+.control-group {
+  margin-bottom: 15px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: v-bind('colors.text.highlight');
 }
 
 /* 小按钮样式 */
 .actions-container {
   display: flex;
-  justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid v-bind('colors.border.primary');
+}
+
+.actions-container .action-button {
+  flex: 1;
 }
 
 /* 按钮样式 */
 .action-button {
-  padding: 8px 16px;
+  padding: 0.5rem;
   border: 1px solid #344767;
   background-color: v-bind('colors.button.defaultBg');
   color: v-bind('colors.button.defaultText');
@@ -933,63 +1048,80 @@ onUnmounted(() => {
   color: v-bind('colors.button.hoverText');
 }
 
-/* 滑块容器的样式 */
-.width-slider-container {
+.export-btn {
+  background-color: v-bind('colors.brand.confirm');
+  color: white;
+  border: none;
+}
+
+.config-row {
   display: flex;
+  gap: 10px;
+}
+
+.config-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.config-item span {
+  font-size: 0.8rem;
+  color: v-bind('colors.text.secondary');
+}
+
+.mini-input {
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid v-bind('colors.border.primary');
+  background: v-bind('colors.input.background');
+  color: v-bind('colors.input.text');
+  box-sizing: border-box;
+}
+
+/* 预览区样式 */
+.preview-wrapper {
+  flex: 2;
+  min-width: 350px;
+  overflow: hidden;
+  border: 2px dashed v-bind('colors.border.dashed');
+  background: v-bind('colors.background.darker');
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  min-height: 600px;
+}
+
+.preview-hint {
   color: v-bind('colors.text.secondary');
-  padding: 8px 12px;
-  border: 1px solid v-bind('colors.button.hoverBg');
-  border-radius: 5px;
-  background-color: v-bind('colors.button.defaultBg');
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
 }
 
-.width-slider-container label {
-  white-space: nowrap;
-  /* 防止标签换行 */
-  font-weight: bold;
-  color: v-bind('colors.button.defaultText');
-}
-
-.width-slider-container input[type="range"] {
-  cursor: pointer;
-  width: 100px;
-}
-
-.hint {
-  text-align: center;
-  color: v-bind('colors.text.secondary');
-  font-size: 0.9em;
-  margin: 5px;
+.capture-area-wrapper {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .chat-log-container {
   background-color: v-bind('colors.game.backgroundBlack');
-  border-radius: 1rem;
-  padding: 10px;
-  height: 50vh;
   overflow-y: auto;
-  margin-bottom: 0;
-  /* 在网页中居中 */
-  margin-left: auto;
-  margin-right: auto;
-  /* 隐藏滚动条的样式 */
+  overflow-x: hidden;
+  /* 隐藏滚动条 */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  position: relative;
   box-sizing: border-box;
+  padding: 20px;
 }
 
 .chat-log-container::-webkit-scrollbar {
   display: none;
-}
-
-/* 全屏状态下的样式 */
-.chat-log-container:fullscreen {
-  border-radius: 0;
 }
 
 .chat-log {
@@ -997,6 +1129,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 15px;
   width: 100%;
+  min-height: 100%;
 }
 
 .chat-message {
@@ -1017,6 +1150,11 @@ onUnmounted(() => {
   border-radius: 50%;
   margin-right: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.avatar.right-avatar {
+  margin-right: 0;
+  margin-left: 10px;
 }
 
 .message-content {
@@ -1134,16 +1272,6 @@ onUnmounted(() => {
   object-fit: cover;
   /* 保持图片比例 */
   border-radius: 8px;
-}
-
-/* 编辑器样式 */
-.chat-editor {
-  background-color: v-bind('colors.background.content');
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid v-bind('colors.border.primary');
-  max-width: 800px;
-  margin: auto;
 }
 
 .editor-row {
@@ -1470,5 +1598,13 @@ onUnmounted(() => {
 .agreement-list::-webkit-scrollbar-thumb {
   background-color: v-bind('colors.scrollbar');
   border-radius: 3px;
+}
+
+.watermark {
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 20px;
+  padding-bottom: 10px;
 }
 </style>
