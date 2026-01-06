@@ -269,11 +269,16 @@ const characterSelectionKey = 'chatCharacterSelection';
 
 // 预览配置
 const previewConfig = ref({
-  width: 800,
-  height: 600,
+  width: 540,
+  height: 450,
   radius: 0
 });
 const captureRef = ref(null);
+
+// 保存预览配置
+watch(previewConfig, (newConfig) => {
+  localStorage.setItem('customChatPreviewConfig', JSON.stringify(newConfig));
+});
 
 // 修复预览区设置修改后不立即生效的问题
 watch(previewConfig, () => {
@@ -399,8 +404,10 @@ watch(() => newMessage.value.cardId, (newCardId) => {
     newMessage.value.position = 'center';
   } else if (newCardId === '_班长') {
     isRightSide.value = true;
+    newMessage.value.position = 'right';
   } else {
     isRightSide.value = false;
+    newMessage.value.position = 'left';
   }
   // 清空自定义名称
   customName.value = '';
@@ -1118,6 +1125,20 @@ onMounted(async () => {
   } else {
     // 首次访问，停留在选择模式
     isSelectionMode.value = true;
+  }
+
+  // 进入页面时应用保存的预览配置
+  const savedPreviewConfig = localStorage.getItem('customChatPreviewConfig');
+  if (savedPreviewConfig) {
+    try {
+      const parsedConfig = JSON.parse(savedPreviewConfig);
+      previewConfig.value = {
+        ...previewConfig.value,
+        ...parsedConfig
+      };
+    } catch (e) {
+      logger.error("解析预览配置失败:", e);
+    }
   }
 
   window.addEventListener('resize', updatePreviewScale);

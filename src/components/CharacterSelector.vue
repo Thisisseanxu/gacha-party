@@ -195,9 +195,8 @@ const deleteCustomCharacter = (characterId) => {
 }
 
 .card-option .card-name {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-align: center;
-  padding: 2px;
   background: v-bind('colors.shadow.primaryHover');
   backdrop-filter: blur(2px);
   position: absolute;
