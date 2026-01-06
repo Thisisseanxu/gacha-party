@@ -3,13 +3,15 @@
     <h1 class="page-title">徽章攻略编辑器</h1>
     <div v-if="isSelectionMode" class="selector-container">
       <div class="import-section">
-        <label class="import-btn">
+        <button @click="openCustomCharModal" class="action-button">
+          上传自定义角色
+        </button>
+        <label class="action-button" title="选择之前导出的json文件可直接恢复编辑">
           导入攻略数据
           <input type="file" accept=".json" @change="importData" style="display: none">
         </label>
-        <span class="import-hint">选择之前导出的json文件可直接恢复编辑</span>
       </div>
-      <CharacterSelector v-model="selectedCharId" mode="single" :characterList="filteredCharacterList"
+      <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
         :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" @confirm="isSelectionMode = false" />
     </div>
     <div v-else class="strategy-editor">
@@ -199,6 +201,62 @@
     </ol>
     <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
   </PopUp>
+
+  <!-- 自定义角色弹窗 -->
+  <div v-if="showCustomCharForm" class="overlay" @click="showCustomCharForm = false">
+    <div class="custom-character-form" @click.stop>
+      <h3>上传自定义角色</h3>
+
+      <div class="compact-row">
+        <div class="form-row compact-col">
+          <label>角色图片</label>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button @click="triggerCustomCharUpload" class="action-button" style="flex: 1;">{{ customCharForm.image ?
+              '更换' : '上传' }}</button>
+            <img v-if="customCharForm.image" :src="customCharForm.image" class="avatar-preview-small" />
+          </div>
+          <input type="file" ref="customCharInputRef" @change="handleCustomCharImage" accept="image/*"
+            style="display: none;" />
+        </div>
+        <div class="form-row compact-col">
+          <label>所属系列</label>
+          <select v-model="customCharForm.theme" class="input-select">
+            <option :value="null">无</option>
+            <option v-for="theme in availableThemes" :key="theme.name" :value="theme">{{ theme.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compact-row">
+        <div class="form-row compact-col">
+          <label>徽章数量</label>
+          <select v-model="customCharForm.count" class="input-select" @change="updateCustomCharShapes">
+            <option :value="2">2个</option>
+            <option :value="4">4个</option>
+            <option :value="6">6个</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>徽章形状配置</label>
+        <div class="shape-grid">
+          <div v-for="(s, i) in customCharForm.shapes" :key="i" class="shape-item">
+            <select v-model="customCharForm.shapes[i]" class="input-select mini-shape-select">
+              <option :value="HUIZHANG_SHAPES.CIRCLE">圆形</option>
+              <option :value="HUIZHANG_SHAPES.DIAMOND">菱形</option>
+              <option :value="HUIZHANG_SHAPES.SHIELD">盾形</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button @click="saveCustomChar" class="action-button">确认使用</button>
+        <button @click="showCustomCharForm = false" class="action-button cancel">取消</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -232,6 +290,17 @@ const previewScale = ref(1);
 const isSelectionMode = ref(true);
 const showAgreementPopUp = ref(false);
 
+// 自定义角色相关
+const tempCustomChar = ref(null);
+const showCustomCharForm = ref(false);
+const customCharForm = ref({
+  image: null,
+  theme: null,
+  count: 6,
+  shapes: []
+});
+const customCharInputRef = ref(null);
+
 const openAgreementPopUp = () => {
   showAgreementPopUp.value = true;
 };
@@ -247,14 +316,35 @@ const filteredCharacterList = computed(() => {
   }));
 });
 
+const displayCharacterList = computed(() => {
+  const list = [...filteredCharacterList.value];
+  if (tempCustomChar.value) {
+    list.unshift(tempCustomChar.value);
+  }
+  return list;
+});
+
 const disabledCharacterIds = computed(() => {
   return filteredCharacterList.value.filter(c => !isCharAdapted(c.id)).map(c => c.id);
 });
 
 // 检查角色是否适配
 const isCharAdapted = (id) => {
-  return !!getCharConfig(id);
+  return !!getCharConfig(id) || (tempCustomChar.value && id === tempCustomChar.value.id);
 };
+
+const availableThemes = computed(() => {
+  const themes = new Map();
+  allCards.forEach(c => {
+    const cfg = getCharConfig(c.id);
+    if (cfg?.theme?.name && cfg?.theme?.icon) {
+      if (!themes.has(cfg.theme.name)) {
+        themes.set(cfg.theme.name, cfg.theme);
+      }
+    }
+  });
+  return Array.from(themes.values());
+});
 
 watch(isSelectionMode, (newVal) => {
   if (!newVal) {
@@ -306,16 +396,40 @@ const handleLevelCancel = () => {
 };
 
 const selectedCardInfo = computed(() => {
+  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
+    return tempCustomChar.value;
+  }
   return allCards.find(c => c.id === selectedCharId.value) || {};
 });
 
 const currentCharConfig = computed(() => {
+  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
+    return {
+      image_url: tempCustomChar.value.imageUrl,
+      theme: tempCustomChar.value.theme
+    };
+  }
   return getCharConfig(selectedCharId.value);
 });
 
 // 监听角色变化，更新槽位配置
 watch(selectedCharId, (newId) => {
   if (!newId) return;
+
+  if (tempCustomChar.value && newId === tempCustomChar.value.id) {
+    const { count, shape, shapes } = tempCustomChar.value.config;
+    // 兼容旧数据：如果 shapes 不存在，则使用 shape 填充
+    const finalShapes = shapes || Array(Number(count)).fill(shape || HUIZHANG_SHAPES.CIRCLE);
+
+    currentSlots.value = finalShapes.map(s => ({
+      shape: s,
+      rarityId: HUIZHANG_RARITY.GOLD.id,
+      typeId: 'none',
+      level: 10
+    }));
+    return;
+  }
+
   const config = getCharConfig(newId);
   if (config && config.shape) {
     currentSlots.value = config.shape.map(shapeStr => ({
@@ -445,6 +559,9 @@ const exportData = () => {
     authorName: authorName.value,
     slots: currentSlots.value
   };
+  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
+    data.customChar = tempCustomChar.value;
+  }
   const jsonStr = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -467,6 +584,9 @@ const importData = (event) => {
     try {
       const json = JSON.parse(e.target.result);
       if (json.charId) {
+        if (json.customChar) {
+          tempCustomChar.value = json.customChar;
+        }
         selectedCharId.value = json.charId;
         // 等待 selectedCharId 的 watcher 执行完毕（重置 slots）后再覆盖数据
         nextTick(() => {
@@ -543,6 +663,67 @@ const generateImage = async () => {
     previewScale.value = originalScale; // 恢复缩放
   }
 };
+
+// 自定义角色逻辑
+const openCustomCharModal = () => {
+  customCharForm.value = {
+    image: null,
+    theme: availableThemes.value[0] || null,
+    count: 6,
+    shapes: Array(6).fill(HUIZHANG_SHAPES.CIRCLE)
+  };
+  showCustomCharForm.value = true;
+};
+
+const triggerCustomCharUpload = () => {
+  customCharInputRef.value?.click();
+};
+
+const handleCustomCharImage = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    customCharForm.value.image = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const updateCustomCharShapes = () => {
+  const count = Number(customCharForm.value.count);
+  const currentShapes = customCharForm.value.shapes;
+  if (count > currentShapes.length) {
+    const diff = count - currentShapes.length;
+    for (let i = 0; i < diff; i++) {
+      currentShapes.push(HUIZHANG_SHAPES.CIRCLE);
+    }
+  } else if (count < currentShapes.length) {
+    customCharForm.value.shapes = currentShapes.slice(0, count);
+  }
+};
+
+const saveCustomChar = () => {
+  if (!customCharForm.value.image) {
+    alert('请上传图片');
+    return;
+  }
+  tempCustomChar.value = {
+    id: `custom_temp_${Date.now()}`,
+    name: '自定义角色',
+    imageUrl: customCharForm.value.image,
+    theme: customCharForm.value.theme,
+    rarity: null, // 无稀有度背景
+    isCustom: false, // 不显示删除按钮
+    config: {
+      count: Number(customCharForm.value.count),
+      shapes: [...customCharForm.value.shapes]
+    }
+  };
+  showCustomCharForm.value = false;
+  selectedCharId.value = tempCustomChar.value.id;
+  isSelectionMode.value = false; // 自动进入编辑
+};
 </script>
 
 <style scoped>
@@ -618,7 +799,7 @@ const generateImage = async () => {
 }
 
 .action-button {
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   border: 1px solid #344767;
   background-color: #ccc;
   color: #344767;
@@ -626,6 +807,7 @@ const generateImage = async () => {
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s;
+  font-size: 0.8rem;
 }
 
 .action-button:hover {
@@ -793,32 +975,9 @@ textarea {
 
 .import-section {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  gap: 8px;
-}
-
-.import-btn {
-  display: inline-block;
-  padding: 10px 24px;
-  background-color: v-bind('colors.button.secondaryBg');
-  color: v-bind('colors.button.secondaryText');
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  border: 1px solid v-bind('colors.border.secondary');
-  transition: all 0.2s;
-}
-
-.import-btn:hover {
-  background-color: v-bind('colors.border.secondary');
-  border-color: v-bind('colors.text.secondary');
-}
-
-.import-hint {
-  font-size: 0.9rem;
-  color: v-bind('colors.text.secondary');
 }
 
 .generate-btn {
@@ -933,8 +1092,6 @@ textarea {
   position: absolute;
   bottom: 80px;
   left: 70px;
-  width: 350px;
-  height: 400px;
   display: flex;
   align-items: flex-end;
 }
@@ -942,6 +1099,8 @@ textarea {
 .char-img {
   max-width: 100%;
   max-height: 100%;
+  width: 256px;
+  height: auto;
   object-fit: contain;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
 }
@@ -1140,5 +1299,129 @@ textarea {
   color: v-bind('colors.preview.author');
   font-weight: regular;
   z-index: 15;
+}
+
+/* 弹窗样式 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-character-form {
+  background-color: v-bind('colors.background.content');
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid v-bind('colors.border.primary');
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.custom-character-form h3 {
+  text-align: center;
+  margin-top: 0;
+  color: v-bind('colors.text.primary');
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: v-bind('colors.text.secondary');
+}
+
+.form-row input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-actions .action-button {
+  flex-grow: 1;
+}
+
+.form-actions .action-button.cancel {
+  background-color: v-bind('colors.button.secondaryBg');
+  border-color: v-bind('colors.button.secondaryBg');
+  color: v-bind('colors.button.secondaryText');
+}
+
+.form-actions .action-button.cancel:hover {
+  filter: brightness(0.9);
+}
+
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.shape-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.shape-label {
+  font-size: 0.8em;
+  color: v-bind('colors.text.secondary');
+  white-space: nowrap;
+}
+
+.mini-shape-select {
+  padding: 5px;
+  font-size: 0.9em;
+  min-width: 0;
+  padding: 2px;
+  text-align: center;
+}
+
+.compact-row {
+  display: flex;
+  gap: 10px;
+}
+
+.compact-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-preview-small {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid v-bind('colors.border.primary');
+  flex-shrink: 0;
 }
 </style>

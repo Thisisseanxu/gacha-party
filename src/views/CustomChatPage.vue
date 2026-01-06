@@ -1213,7 +1213,7 @@ onUnmounted(() => {
 
 /* 按钮样式 */
 .action-button {
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   border: none;
   background-color: v-bind('colors.button.defaultBg');
   color: v-bind('colors.button.defaultText');
@@ -1264,11 +1264,11 @@ onUnmounted(() => {
 /* 预览区样式 */
 .preview-wrapper {
   flex: 2;
-  min-width: 350px;
+  min-width: 300px;
   overflow: hidden;
   border: 2px dashed v-bind('colors.border.dashed');
   background: v-bind('colors.background.darker');
-  padding: 20px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1371,12 +1371,13 @@ onUnmounted(() => {
   background-color: v-bind('colors.game.primary');
   color: white;
   border-radius: 15px;
-  padding: 4px 8px 6px 8px;
+  padding: 0.25rem 0.5rem 0.375rem 0.5rem;
   position: relative;
   text-align: left;
   font-family: 'Source Han Sans SC VF';
   font-weight: 500;
   font-size: 1.4rem;
+  line-height: 1.2;
   display: flex;
   align-items: center;
   white-space: pre-wrap;
