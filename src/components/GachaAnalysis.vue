@@ -45,16 +45,16 @@
 
             <CustomPlayerTitle v-if="analysisForTitle" :titleMap="CurrentSelectedPool === 'Normal' ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP
               " :value="CurrentSelectedPool === 'Normal'
-                  ? analysisForTitle.avgPullsForSSR
-                  : analysisForTitle.avgPullsForSP
+                ? analysisForTitle.avgPullsForSSR
+                : analysisForTitle.avgPullsForSP
                 " />
           </div>
           <div :class="{ 'total-pulls': true, highlight: isSinglePool }">
             {{ CurrentSelectedPoolAnalysis?.totalPulls ?? 0 }} <span class="pulls-text">抽</span>
           </div>
 
-          <div v-if="singleLimitAnalysis.SinglePulls > 0" class="tertiary-text">
-            {{ '该卡池抽取' + singleLimitAnalysis.SinglePulls + '次' }}<br />
+          <div v-if="SinglePoolPulls" class="tertiary-text">
+            {{ '该卡池抽取' + SinglePoolPulls + '次' }}<br />
             抽数会计算到最终抽出限定的卡池中
           </div>
           <div class="pity-counters" v-if="!isSinglePool && CurrentSelectedPool !== 'AllLimited'">
@@ -202,8 +202,8 @@
             <div v-for="(item, index) in CurrentSelectedPool === 'Normal'
               ? normalAnalysis?.SSRHistory
               : CurrentSelectedPoolAnalysis?.SPHistory" :key="index" class="overview-item" :style="{
-                  backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal'),
-                }">
+                backgroundColor: getAlphaBgWithCount(item.count, CurrentSelectedPool === 'Normal'),
+              }">
               <img :src="item.imageUrl" :alt="item.name" class="overview-avatar" />
               <span class="overview-name">{{ item.name }}</span>
               <span class="overview-pull-count">{{ item.count }}</span>
@@ -832,6 +832,21 @@ const singleFukeAnalysis = computed(() => {
     }
   }
   return { ...fukeAnalysis.value }
+})
+
+const SinglePoolPulls = computed(() => {
+  if (isSinglePool.value) {
+    if (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+      return singleLimitAnalysis.value.SinglePulls
+    }
+    if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+      return singleEventAnalysis.value.SinglePulls
+    }
+    if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+      return singleFukeAnalysis.value.SinglePulls
+    }
+  }
+  return null
 })
 
 // 高级常驻卡池分析逻辑
