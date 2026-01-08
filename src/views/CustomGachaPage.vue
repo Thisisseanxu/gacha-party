@@ -22,7 +22,7 @@
           <h3 :class="`text-rarity-${rarity.toLowerCase()}`">{{ rarity }} 卡池</h3>
           <div class="card-selector-grid">
             <div v-for="card in groupedCards[rarity]" :key="card.id" class="card-option"
-              :class="{ 'selected': selectedCardIds[rarity].includes(card.id) }"
+              :class="{ selected: selectedCardIds[rarity].includes(card.id) }"
               @click="toggleCardSelection(rarity, card.id)">
               <img :src="card.imageUrl" :alt="card.name" class="card-image" />
               <div class="card-name">{{ card.name }}</div>
@@ -54,7 +54,7 @@
             <h3 class="subsection-title">SP角色UP候选 (可多选，将在抽卡页进行N选1)</h3>
             <div class="card-selector-grid-small">
               <div v-for="cardId in selectedCardIds.SP" :key="cardId" class="card-option-small"
-                :class="{ 'selected': upCandidateIds.includes(cardId) }" @click="toggleUpCandidate(cardId)">
+                :class="{ selected: upCandidateIds.includes(cardId) }" @click="toggleUpCandidate(cardId)">
                 <img :src="cardMap.get(cardId)?.imageUrl" :alt="cardMap.get(cardId)?.name" class="card-image" />
                 <div class="checkmark">✔</div>
               </div>
@@ -65,7 +65,7 @@
             <h3 class="subsection-title">SSR角色双倍概率 (可多选)</h3>
             <div class="card-selector-grid-small">
               <div v-for="cardId in selectedCardIds.SSR" :key="cardId" class="card-option-small"
-                :class="{ 'selected': doubleRateSSRIds.includes(cardId) }" @click="toggleDoubleRateSSR(cardId)">
+                :class="{ selected: doubleRateSSRIds.includes(cardId) }" @click="toggleDoubleRateSSR(cardId)">
                 <img :src="cardMap.get(cardId)?.imageUrl" :alt="cardMap.get(cardId)?.name" class="card-image" />
                 <div class="checkmark">✔</div>
               </div>
@@ -80,18 +80,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import * as RARITY from '@/data/rarity.js';
-import { cardMap, allCards } from '@/data/cards.js';
-import { colors } from '@/styles/colors.js';
-import pako from 'pako';
-import { logger } from '@/utils/logger';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import * as RARITY from '@/data/rarity.js'
+import { cardMap, allCards } from '@/data/cards.js'
+import { colors } from '@/styles/colors.js'
+import pako from 'pako'
+import { logger } from '@/utils/logger'
 
-const router = useRouter();
+const router = useRouter()
 
 // 定义用于localStorage的key
-const storageKey = 'customGachaPoolConfig';
+const storageKey = 'customGachaPoolConfig'
 
 // 默认配置的函数
 const getDefaultConfig = () => ({
@@ -100,43 +100,42 @@ const getDefaultConfig = () => ({
   selectedCardIds: { SP: [], SSR: [], SR: [], R: [] },
   upCandidateIds: [],
   doubleRateSSRIds: [],
-});
-
+})
 
 // 配置状态
 // 使用默认配置函数进行初始化
 const customPool = ref({
   name: getDefaultConfig().name,
   rates: { ...getDefaultConfig().rates },
-});
-const selectedCardIds = ref(getDefaultConfig().selectedCardIds);
-const upCandidateIds = ref(getDefaultConfig().upCandidateIds);
-const doubleRateSSRIds = ref(getDefaultConfig().doubleRateSSRIds);
+})
+const selectedCardIds = ref(getDefaultConfig().selectedCardIds)
+const upCandidateIds = ref(getDefaultConfig().upCandidateIds)
+const doubleRateSSRIds = ref(getDefaultConfig().doubleRateSSRIds)
 
-const rarities = [RARITY.SP, RARITY.SSR, RARITY.SR, RARITY.R];
+const rarities = [RARITY.SP, RARITY.SSR, RARITY.SR, RARITY.R]
 const groupedCards = rarities.reduce((acc, rarity) => {
-  acc[rarity] = allCards.filter(card => card.rarity === rarity);
-  return acc;
-}, {});
+  acc[rarity] = allCards.filter((card) => card.rarity === rarity)
+  return acc
+}, {})
 
 // 页面挂载时加载配置
 onMounted(() => {
-  const savedConfig = localStorage.getItem(storageKey);
+  const savedConfig = localStorage.getItem(storageKey)
   if (savedConfig) {
     try {
-      const parsedConfig = JSON.parse(savedConfig);
-      customPool.value.name = parsedConfig.name;
-      customPool.value.rates = parsedConfig.rates;
-      selectedCardIds.value = parsedConfig.selectedCardIds;
-      upCandidateIds.value = parsedConfig.upCandidateIds;
-      doubleRateSSRIds.value = parsedConfig.doubleRateSSRIds;
+      const parsedConfig = JSON.parse(savedConfig)
+      customPool.value.name = parsedConfig.name
+      customPool.value.rates = parsedConfig.rates
+      selectedCardIds.value = parsedConfig.selectedCardIds
+      upCandidateIds.value = parsedConfig.upCandidateIds
+      doubleRateSSRIds.value = parsedConfig.doubleRateSSRIds
     } catch (e) {
-      logger.error("解析自定义卡池配置失败:", e);
+      logger.error('解析自定义卡池配置失败:', e)
       // 如果解析失败，重置为默认值
-      resetConfiguration();
+      resetConfiguration()
     }
   }
-});
+})
 
 // 保存配置到localStorage的函数
 const saveConfiguration = () => {
@@ -146,59 +145,60 @@ const saveConfiguration = () => {
     selectedCardIds: selectedCardIds.value,
     upCandidateIds: upCandidateIds.value,
     doubleRateSSRIds: doubleRateSSRIds.value,
-  };
-  localStorage.setItem(storageKey, JSON.stringify(configToSave));
-};
+  }
+  localStorage.setItem(storageKey, JSON.stringify(configToSave))
+}
 
 // 重置配置的函数
 const resetConfiguration = () => {
-  const defaultConfig = getDefaultConfig();
-  customPool.value.name = defaultConfig.name;
-  customPool.value.rates = { ...defaultConfig.rates };
-  selectedCardIds.value = defaultConfig.selectedCardIds;
-  upCandidateIds.value = defaultConfig.upCandidateIds;
-  doubleRateSSRIds.value = defaultConfig.doubleRateSSRIds;
-  localStorage.removeItem(storageKey);
-  alert('配置已重置为默认值！');
-};
-
+  const defaultConfig = getDefaultConfig()
+  customPool.value.name = defaultConfig.name
+  customPool.value.rates = { ...defaultConfig.rates }
+  selectedCardIds.value = defaultConfig.selectedCardIds
+  upCandidateIds.value = defaultConfig.upCandidateIds
+  doubleRateSSRIds.value = defaultConfig.doubleRateSSRIds
+  localStorage.removeItem(storageKey)
+  alert('配置已重置为默认值！')
+}
 
 const toggleCardSelection = (rarity, cardId) => {
-  const set = selectedCardIds.value[rarity];
-  const index = set.indexOf(cardId);
+  const set = selectedCardIds.value[rarity]
+  const index = set.indexOf(cardId)
   if (index > -1) {
-    set.splice(index, 1);
-    if (rarity === RARITY.SP) toggleUpCandidate(cardId, true);
-    if (rarity === RARITY.SSR) toggleDoubleRateSSR(cardId, true);
+    set.splice(index, 1)
+    if (rarity === RARITY.SP) toggleUpCandidate(cardId, true)
+    if (rarity === RARITY.SSR) toggleDoubleRateSSR(cardId, true)
   } else {
-    set.push(cardId);
+    set.push(cardId)
   }
-};
+}
 
 const toggleUpCandidate = (cardId, forceRemove = false) => {
-  const index = upCandidateIds.value.indexOf(cardId);
+  const index = upCandidateIds.value.indexOf(cardId)
   if (forceRemove) {
-    if (index > -1) upCandidateIds.value.splice(index, 1);
-    return;
+    if (index > -1) upCandidateIds.value.splice(index, 1)
+    return
   }
-  if (index > -1) upCandidateIds.value.splice(index, 1); else upCandidateIds.value.push(cardId);
-};
+  if (index > -1) upCandidateIds.value.splice(index, 1)
+  else upCandidateIds.value.push(cardId)
+}
 
 const toggleDoubleRateSSR = (cardId, forceRemove = false) => {
-  const index = doubleRateSSRIds.value.indexOf(cardId);
+  const index = doubleRateSSRIds.value.indexOf(cardId)
   if (forceRemove) {
-    if (index > -1) doubleRateSSRIds.value.splice(index, 1);
-    return;
+    if (index > -1) doubleRateSSRIds.value.splice(index, 1)
+    return
   }
-  if (index > -1) doubleRateSSRIds.value.splice(index, 1); else doubleRateSSRIds.value.push(cardId);
-};
+  if (index > -1) doubleRateSSRIds.value.splice(index, 1)
+  else doubleRateSSRIds.value.push(cardId)
+}
 
 const navigateToGachaPage = () => {
-  saveConfiguration(); // 保存配置到localStorage
-  const allSelectedIds = Object.values(selectedCardIds.value).flat();
+  saveConfiguration() // 保存配置到localStorage
+  const allSelectedIds = Object.values(selectedCardIds.value).flat()
   if (allSelectedIds.length === 0) {
-    alert('请至少向卡池中添加一张卡牌！');
-    return;
+    alert('请至少向卡池中添加一张卡牌！')
+    return
   }
 
   // 构建最小化的配置对象
@@ -217,50 +217,49 @@ const navigateToGachaPage = () => {
     },
     // rules -> u
     u: {},
-  };
+  }
 
   // 最小化 SP 规则 (upCandidateIds -> d, SelectUpCards -> l)
   if (selectedCardIds.value.SP.length > 0 && upCandidateIds.value.length > 0) {
     minifiedConfig.u.s = {
       d: upCandidateIds.value,
       l: 1,
-    };
+    }
   }
 
   // 最小化 SSR 规则 (doubleRateSSRIds -> b)
   if (selectedCardIds.value.SSR.length > 0 && doubleRateSSRIds.value.length > 0) {
     minifiedConfig.u.x = {
       b: doubleRateSSRIds.value,
-    };
+    }
   }
 
   // 如果没有R卡，则重新计算并覆盖概率
   if (selectedCardIds.value.R.length === 0) {
-    const totalRate = minifiedConfig.r.s + minifiedConfig.r.x + minifiedConfig.r.r;
+    const totalRate = minifiedConfig.r.s + minifiedConfig.r.x + minifiedConfig.r.r
     if (totalRate > 0) {
-      minifiedConfig.r.s = minifiedConfig.r.s / totalRate;
-      minifiedConfig.r.x = minifiedConfig.r.x / totalRate;
-      minifiedConfig.r.r = minifiedConfig.r.r / totalRate;
+      minifiedConfig.r.s = minifiedConfig.r.s / totalRate
+      minifiedConfig.r.x = minifiedConfig.r.x / totalRate
+      minifiedConfig.r.r = minifiedConfig.r.r / totalRate
     }
   }
 
-
   // 压缩并编码
-  const jsonString = JSON.stringify(minifiedConfig);
-  const compressed = pako.deflate(jsonString);
-  let binaryString = '';
+  const jsonString = JSON.stringify(minifiedConfig)
+  const compressed = pako.deflate(jsonString)
+  let binaryString = ''
   for (let i = 0; i < compressed.length; i++) {
-    binaryString += String.fromCharCode(compressed[i]);
+    binaryString += String.fromCharCode(compressed[i])
   }
-  const encodedData = btoa(binaryString);
+  const encodedData = btoa(binaryString)
 
   // 跳转
   router.push({
     name: '抽卡模拟器',
     params: { poolId: 'custom' },
     query: { data: encodedData },
-  });
-};
+  })
+}
 </script>
 
 <style scoped>

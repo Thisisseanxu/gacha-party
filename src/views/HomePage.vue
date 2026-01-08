@@ -64,66 +64,66 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { colors, toggleTheme, currentTheme } from '@/styles/colors.js';
-import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next';
-import { logger } from '@/utils/logger';
+import { ref, onMounted, onUnmounted } from 'vue'
+import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
+import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next'
+import { logger } from '@/utils/logger'
 
-const appVersion = __VERSION__;
+const appVersion = __VERSION__
 
 // 创建一个 ref 保存 'beforeinstallprompt' 事件
-const deferredPrompt = ref(null);
+const deferredPrompt = ref(null)
 const captureInstallPrompt = (e) => {
   // 阻止浏览器默认的、自动弹出的安装提示
-  e.preventDefault();
+  e.preventDefault()
   // 保存事件对象，以便后续手动触发
-  deferredPrompt.value = e;
-  logger.log('PWA 安装提示已被捕获，等待用户手动触发。');
-};
+  deferredPrompt.value = e
+  logger.log('PWA 安装提示已被捕获，等待用户手动触发。')
+}
 
 // 设置一个监听器来捕获 'beforeinstallprompt' 事件
 onMounted(() => {
-  window.addEventListener('beforeinstallprompt', captureInstallPrompt);
-});
+  window.addEventListener('beforeinstallprompt', captureInstallPrompt)
+})
 onUnmounted(() => {
-  window.removeEventListener('beforeinstallprompt', captureInstallPrompt);
-});
+  window.removeEventListener('beforeinstallprompt', captureInstallPrompt)
+})
 
 const handleInstallClick = async () => {
   if (!deferredPrompt.value) {
-    return;
+    return
   }
   // 调用保存的事件对象的 prompt() 方法，会弹出浏览器标准的安装窗口
-  deferredPrompt.value.prompt();
+  deferredPrompt.value.prompt()
 
   // 等待用户做出选择
-  const { outcome } = await deferredPrompt.value.userChoice;
-  logger.log(`PWA 安装提示的用户选择: ${outcome}`);
+  const { outcome } = await deferredPrompt.value.userChoice
+  logger.log(`PWA 安装提示的用户选择: ${outcome}`)
 
   // 无论用户选择什么，这个事件都已经用过，无法再次使用。
   // 清空 ref，安装按钮也会因此被 v-if 隐藏。
-  deferredPrompt.value = null;
-};
+  deferredPrompt.value = null
+}
 
 // --- 开发中按钮控制逻辑 ---
-const originalComingSoonText = '更多功能即将上线';
-const comingSoonText = ref(originalComingSoonText);
-const isComingSoonClicked = ref(false);
+const originalComingSoonText = '更多功能即将上线'
+const comingSoonText = ref(originalComingSoonText)
+const isComingSoonClicked = ref(false)
 
 const handleComingSoon = () => {
   // 如果按钮已经被点击，则不执行任何操作
-  if (isComingSoonClicked.value) return;
+  if (isComingSoonClicked.value) return
 
   // 更新文本并禁用按钮
-  comingSoonText.value = '正在努力更新，不要戳我了！';
-  isComingSoonClicked.value = true;
+  comingSoonText.value = '正在努力更新，不要戳我了！'
+  isComingSoonClicked.value = true
 
   // 3秒后恢复按钮
   setTimeout(() => {
-    comingSoonText.value = originalComingSoonText;
-    isComingSoonClicked.value = false;
-  }, 1000);
-};
+    comingSoonText.value = originalComingSoonText
+    isComingSoonClicked.value = false
+  }, 1000)
+}
 </script>
 
 <style scoped>
@@ -218,33 +218,33 @@ const handleComingSoon = () => {
 }
 
 .chouka {
-  background: linear-gradient(145deg, #8B5CF6, #6D28D9);
+  background: linear-gradient(145deg, #8b5cf6, #6d28d9);
 }
 
 .fenxi {
-  background: linear-gradient(145deg, #F9A8D4, #EC4899);
+  background: linear-gradient(145deg, #f9a8d4, #ec4899);
 }
 
 .daoyan {
-  background: linear-gradient(145deg, #10B981, #059669);
+  background: linear-gradient(145deg, #10b981, #059669);
 }
 
 .huizhang {
-  background: linear-gradient(145deg, #3B82F6, #2563EB);
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
 }
 
 /* --- 开发中功能的按钮 --- */
 .coming-soon {
-  background: linear-gradient(145deg, #6B7280, #4B5563);
-  color: #D1D5DB;
+  background: linear-gradient(145deg, #6b7280, #4b5563);
+  color: #d1d5db;
   grid-column: 1 / -1;
   justify-content: center;
 }
 
 /* 按钮被禁用时的样式 */
 .coming-soon:disabled {
-  background: linear-gradient(145deg, #4B5563, #374151);
-  color: #9CA3AF;
+  background: linear-gradient(145deg, #4b5563, #374151);
+  color: #9ca3af;
   cursor: not-allowed;
   /* 禁用时显示“不可用”光标 */
   transform: none;

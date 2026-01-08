@@ -3,25 +3,24 @@
     <h1 class="page-title">徽章攻略编辑器</h1>
     <div v-if="isSelectionMode" class="selector-container">
       <div class="import-section">
-        <button @click="openCustomCharModal" class="action-button">
-          上传自定义角色
-        </button>
+        <button @click="openCustomCharModal" class="action-button">上传自定义角色</button>
         <label class="action-button" title="选择之前导出的json文件可直接恢复编辑">
           导入攻略数据
-          <input type="file" accept=".json" @change="importData" style="display: none">
+          <input type="file" accept=".json" @change="importData" style="display: none" />
         </label>
       </div>
       <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
         :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" @confirm="isSelectionMode = false" />
     </div>
     <div v-else class="strategy-editor">
-
       <div class="controls-panel card">
         <h2>攻略配置</h2>
 
         <div class="control-group">
           <label>当前角色: {{ selectedCardInfo.name }}</label>
-          <button @click="isSelectionMode = true" class="reselect-btn action-button">重选角色</button>
+          <button @click="isSelectionMode = true" class="reselect-btn action-button">
+            重选角色
+          </button>
         </div>
 
         <div class="control-group">
@@ -47,7 +46,9 @@
           <div v-for="(slot, index) in currentSlots" :key="index" class="badge-row">
             <span class="badge-index">#{{ index + 1 }}</span>
             <select v-model="slot.rarityId" class="mini-select">
-              <option v-for="r in Object.values(HUIZHANG_RARITY)" :key="r.id" :value="r.id">{{ r.name }}</option>
+              <option v-for="r in Object.values(HUIZHANG_RARITY)" :key="r.id" :value="r.id">
+                {{ r.name }}
+              </option>
             </select>
             <div class="mini-input level-btn" @mousedown="handleLevelStart(slot)"
               @touchstart.prevent="handleLevelStart(slot)" @mouseup="handleLevelEnd(slot)"
@@ -55,7 +56,9 @@
               {{ slot.level }}
             </div>
             <select v-model="slot.typeId" class="mini-select">
-              <option v-for="t in Object.values(HUIZHANG_TYPES)" :key="t.id" :value="t.id">{{ t.name }}</option>
+              <option v-for="t in Object.values(HUIZHANG_TYPES)" :key="t.id" :value="t.id">
+                {{ t.name }}
+              </option>
             </select>
             <span class="shape-hint">({{ getShapeName(slot.shape) }})</span>
           </div>
@@ -63,16 +66,15 @@
 
         <div class="control-group">
           <label>文本相关设置（留空则不显示）</label>
-          <input v-model="customTitle" class="input-select" placeholder="大标题内容">
+          <input v-model="customTitle" class="input-select" placeholder="大标题内容" />
         </div>
         <div class="control-group">
-          <input v-model="recommendTitle" class="input-select" style="margin-bottom: 8px; font-weight: bold;"
-            placeholder="小标题">
+          <input v-model="recommendTitle" class="input-select" style="margin-bottom: 8px; font-weight: bold"
+            placeholder="小标题" />
           <textarea v-model="recommendText" rows="4" placeholder="文本内容"></textarea>
-          <input v-model="authorName" class="input-select" placeholder="作者署名（选填）">
+          <input v-model="authorName" class="input-select" placeholder="作者署名（选填）" />
         </div>
-        <div class="control-group">
-        </div>
+        <div class="control-group"></div>
 
         <div class="action-buttons">
           <button @click="exportData" class="export-btn">保存数据</button>
@@ -83,7 +85,6 @@
       <div class="preview-wrapper" ref="previewWrapper">
         <p class="preview-hint">↓ 预览区域 ↓</p>
         <div class="capture-area" ref="captureRef" :style="previewStyle">
-
           <div class="bg-decoration">
             <div class="stars-bg"></div>
           </div>
@@ -92,7 +93,7 @@
             <div class="star-label">适配星级</div>
             <div class="stars-row">
               <div v-for="star in sortedStars" :key="star" class="star-item-img-wrapper">
-                <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star">
+                <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star" />
               </div>
             </div>
           </div>
@@ -110,7 +111,7 @@
               <div v-for="(slot, index) in currentSlots" :key="index" class="badge-item">
                 <div class="badge-main-visual">
                   <img v-if="slot.rarityId !== '0'" :src="getHuizhangBgUrl(slot.rarityId, slot.shape)"
-                    class="badge-bg-img" alt="bg">
+                    class="badge-bg-img" alt="bg" />
 
                   <div class="badge-icon-container">
                     <svg class="badge-icon-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
@@ -140,13 +141,13 @@
 
                   <div class="badge-sub-icon">
                     <img v-if="currentCharConfig?.theme?.icon" :src="currentCharConfig.theme.icon" class="sub-icon-img"
-                      alt="theme">
+                      alt="theme" />
                   </div>
                 </div>
 
                 <div class="badge-stars-container" v-if="slot.rarityId !== '0'">
                   <div class="badge-stars-row">
-                    <img v-for="n in 5" :key="n" :src="getStarImage(slot.level, n)" class="level-star-img" alt="★">
+                    <img v-for="n in 5" :key="n" :src="getStarImage(slot.level, n)" class="level-star-img" alt="★" />
                   </div>
                 </div>
               </div>
@@ -168,9 +169,9 @@
           <div v-if="authorName" class="author-display">作者：{{ authorName }}</div>
         </div>
       </div>
-
     </div>
-    <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+    <p class="agreement">
+      使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
     </p>
   </div>
 
@@ -186,17 +187,20 @@
         工具箱中所使用的所有角色形象、名称及相关内容均为其各自版权所有者所有。织夜工具箱仅用其提供非营利性服务，我们尊重并支持版权保护，任何未经授权的商用均属侵权行为。您可以在非商业用途下自由使用/分享本工具箱生成的内容。
       </li>
       <li>
-        <strong>用户责任：</strong> 您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
+        <strong>用户责任：</strong>
+        您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
       </li>
       <li>
         <strong>数据使用与隐私保护：</strong>
         我们承诺保护您的个人隐私。目前织夜工具箱徽章攻略编辑器不收集任何个人数据，所有数据均存储在您的本地浏览器中。
       </li>
       <li>
-        <strong>服务变更、中断或终止：</strong> 本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
+        <strong>服务变更、中断或终止：</strong>
+        本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
       </li>
       <li>
-        <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
+        <strong>协议修改：</strong>
+        我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
       </li>
     </ol>
     <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
@@ -210,19 +214,22 @@
       <div class="compact-row">
         <div class="form-row compact-col">
           <label>角色图片</label>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button @click="triggerCustomCharUpload" class="action-button" style="flex: 1;">{{ customCharForm.image ?
-              '更换' : '上传' }}</button>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <button @click="triggerCustomCharUpload" class="action-button" style="flex: 1">
+              {{ customCharForm.image ? '更换' : '上传' }}
+            </button>
             <img v-if="customCharForm.image" :src="customCharForm.image" class="avatar-preview-small" />
           </div>
           <input type="file" ref="customCharInputRef" @change="handleCustomCharImage" accept="image/*"
-            style="display: none;" />
+            style="display: none" />
         </div>
         <div class="form-row compact-col">
           <label>所属系列</label>
           <select v-model="customCharForm.theme" class="input-select">
             <option :value="null">无</option>
-            <option v-for="theme in availableThemes" :key="theme.name" :value="theme">{{ theme.name }}</option>
+            <option v-for="theme in availableThemes" :key="theme.name" :value="theme">
+              {{ theme.name }}
+            </option>
           </select>
         </div>
       </div>
@@ -260,267 +267,273 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
-import { allCards } from '@/data/cards.js';
-import { colors } from '@/styles/colors.js';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { allCards } from '@/data/cards.js'
+import { colors } from '@/styles/colors.js'
 import {
   HUIZHANG_SHAPES,
   HUIZHANG_RARITY,
   HUIZHANG_TYPES,
   getCharConfig,
-  getHuizhangBgUrl
-} from '@/data/huizhang.js';
-import { toPng } from 'html-to-image';
-import PopUp from '@/components/PopUp.vue';
-import CharacterSelector from '@/components/CharacterSelector.vue';
-import { logger } from '@/utils/logger';
+  getHuizhangBgUrl,
+} from '@/data/huizhang.js'
+import { toPng } from 'html-to-image'
+import PopUp from '@/components/PopUp.vue'
+import CharacterSelector from '@/components/CharacterSelector.vue'
+import { logger } from '@/utils/logger'
 
 // 状态
-const selectedCharId = ref('');
-const recommendedStars = ref([0, 5]);
-const customTitle = ref('');
-const authorName = ref('');
-const recommendTitle = ref('推荐理由：');
-const recommendText = ref('');
-const captureRef = ref(null);
-const currentSlots = ref([]);
-const iconBase64Map = ref({});
-const previewWrapper = ref(null);
-const previewScale = ref(1);
-const isSelectionMode = ref(true);
-const showAgreementPopUp = ref(false);
+const selectedCharId = ref('')
+const recommendedStars = ref([0, 5])
+const customTitle = ref('')
+const authorName = ref('')
+const recommendTitle = ref('推荐理由：')
+const recommendText = ref('')
+const captureRef = ref(null)
+const currentSlots = ref([])
+const iconBase64Map = ref({})
+const previewWrapper = ref(null)
+const previewScale = ref(1)
+const isSelectionMode = ref(true)
+const showAgreementPopUp = ref(false)
 
 // 自定义角色相关
-const tempCustomChar = ref(null);
-const showCustomCharForm = ref(false);
+const tempCustomChar = ref(null)
+const showCustomCharForm = ref(false)
 const customCharForm = ref({
   image: null,
   theme: null,
   count: 6,
-  shapes: []
-});
-const customCharInputRef = ref(null);
+  shapes: [],
+})
+const customCharInputRef = ref(null)
 
 const openAgreementPopUp = () => {
-  showAgreementPopUp.value = true;
-};
+  showAgreementPopUp.value = true
+}
 const closeAgreementPopUp = () => {
-  showAgreementPopUp.value = false;
-};
+  showAgreementPopUp.value = false
+}
 
 const filteredCharacterList = computed(() => {
-  return allCards.filter(c => c.id.match(/^\d+$/)).map(c => ({
-    ...c,
-    // 通过getCharConfig搜索Q版立绘，如果有则优先使用Q版立绘
-    imageUrl: getCharConfig(c.id)?.image_url || c.imageUrl
-  }));
-});
+  return allCards
+    .filter((c) => c.id.match(/^\d+$/))
+    .map((c) => ({
+      ...c,
+      // 通过getCharConfig搜索Q版立绘，如果有则优先使用Q版立绘
+      imageUrl: getCharConfig(c.id)?.image_url || c.imageUrl,
+    }))
+})
 
 const displayCharacterList = computed(() => {
-  const list = [...filteredCharacterList.value];
+  const list = [...filteredCharacterList.value]
   if (tempCustomChar.value) {
-    list.unshift(tempCustomChar.value);
+    list.unshift(tempCustomChar.value)
   }
-  return list;
-});
+  return list
+})
 
 const disabledCharacterIds = computed(() => {
-  return filteredCharacterList.value.filter(c => !isCharAdapted(c.id)).map(c => c.id);
-});
+  return filteredCharacterList.value.filter((c) => !isCharAdapted(c.id)).map((c) => c.id)
+})
 
 // 检查角色是否适配
 const isCharAdapted = (id) => {
-  return !!getCharConfig(id) || (tempCustomChar.value && id === tempCustomChar.value.id);
-};
+  return !!getCharConfig(id) || (tempCustomChar.value && id === tempCustomChar.value.id)
+}
 
 const availableThemes = computed(() => {
-  const themes = new Map();
-  allCards.forEach(c => {
-    const cfg = getCharConfig(c.id);
+  const themes = new Map()
+  allCards.forEach((c) => {
+    const cfg = getCharConfig(c.id)
     if (cfg?.theme?.name && cfg?.theme?.icon) {
       if (!themes.has(cfg.theme.name)) {
-        themes.set(cfg.theme.name, cfg.theme);
+        themes.set(cfg.theme.name, cfg.theme)
       }
     }
-  });
-  return Array.from(themes.values());
-});
+  })
+  return Array.from(themes.values())
+})
 
 watch(isSelectionMode, (newVal) => {
   if (!newVal) {
     nextTick(() => {
-      updatePreviewScale();
-    });
+      updatePreviewScale()
+    })
   }
-});
+})
 
 // 初始化
 onMounted(() => {
-  selectedCharId.value = '1111';
-  isSelectionMode.value = true;
-  window.addEventListener('resize', updatePreviewScale);
-  updatePreviewScale();
-});
+  selectedCharId.value = '1111'
+  isSelectionMode.value = true
+  window.addEventListener('resize', updatePreviewScale)
+  updatePreviewScale()
+})
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updatePreviewScale);
-});
+  window.removeEventListener('resize', updatePreviewScale)
+})
 
 // 等级输入交互逻辑
-const pressTimer = ref(null);
-const isLongPress = ref(false);
+const pressTimer = ref(null)
+const isLongPress = ref(false)
 
 const handleLevelStart = (slot) => {
-  isLongPress.value = false;
+  isLongPress.value = false
   pressTimer.value = setTimeout(() => {
-    slot.level = 0;
-    isLongPress.value = true;
-  }, 500);
-};
+    slot.level = 0
+    isLongPress.value = true
+  }, 500)
+}
 
 const handleLevelEnd = (slot) => {
   if (pressTimer.value) {
-    clearTimeout(pressTimer.value);
-    pressTimer.value = null;
+    clearTimeout(pressTimer.value)
+    pressTimer.value = null
   }
   if (!isLongPress.value) {
-    slot.level = (slot.level + 1) % 16;
+    slot.level = (slot.level + 1) % 16
   }
-};
+}
 
 const handleLevelCancel = () => {
   if (pressTimer.value) {
-    clearTimeout(pressTimer.value);
-    pressTimer.value = null;
+    clearTimeout(pressTimer.value)
+    pressTimer.value = null
   }
-};
+}
 
 const selectedCardInfo = computed(() => {
   if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
-    return tempCustomChar.value;
+    return tempCustomChar.value
   }
-  return allCards.find(c => c.id === selectedCharId.value) || {};
-});
+  return allCards.find((c) => c.id === selectedCharId.value) || {}
+})
 
 const currentCharConfig = computed(() => {
   if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
     return {
       image_url: tempCustomChar.value.imageUrl,
-      theme: tempCustomChar.value.theme
-    };
+      theme: tempCustomChar.value.theme,
+    }
   }
-  return getCharConfig(selectedCharId.value);
-});
+  return getCharConfig(selectedCharId.value)
+})
 
 // 监听角色变化，更新槽位配置
 watch(selectedCharId, (newId) => {
-  if (!newId) return;
+  if (!newId) return
 
   if (tempCustomChar.value && newId === tempCustomChar.value.id) {
-    const { count, shape, shapes } = tempCustomChar.value.config;
+    const { count, shape, shapes } = tempCustomChar.value.config
     // 兼容旧数据：如果 shapes 不存在，则使用 shape 填充
-    const finalShapes = shapes || Array(Number(count)).fill(shape || HUIZHANG_SHAPES.CIRCLE);
+    const finalShapes = shapes || Array(Number(count)).fill(shape || HUIZHANG_SHAPES.CIRCLE)
 
-    currentSlots.value = finalShapes.map(s => ({
+    currentSlots.value = finalShapes.map((s) => ({
       shape: s,
       rarityId: HUIZHANG_RARITY.GOLD.id,
       typeId: 'none',
-      level: 10
-    }));
-    return;
+      level: 10,
+    }))
+    return
   }
 
-  const config = getCharConfig(newId);
+  const config = getCharConfig(newId)
   if (config && config.shape) {
-    currentSlots.value = config.shape.map(shapeStr => ({
+    currentSlots.value = config.shape.map((shapeStr) => ({
       shape: shapeStr,
       rarityId: HUIZHANG_RARITY.GOLD.id,
       typeId: 'none',
-      level: 10
-    }));
+      level: 10,
+    }))
   } else {
-    currentSlots.value = [];
+    currentSlots.value = []
   }
-});
+})
 
 // 将图片转换为 Base64 以解决 html2canvas 在 SVG 中无法渲染外部图片的问题
 const urlToBase64 = (url) => {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
+    const img = new Image()
+    img.crossOrigin = 'Anonymous'
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL('image/png'));
-    };
-    img.onerror = (e) => reject(e);
-    img.src = url;
-  });
-};
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.onerror = (e) => reject(e)
+    img.src = url
+  })
+}
 
-watch(() => currentSlots.value, async (newSlots) => {
-  for (const slot of newSlots) {
-    const typeId = slot.typeId;
-    const url = HUIZHANG_TYPES[typeId]?.icon;
-    if (url && !iconBase64Map.value[typeId]) {
-      try {
-        const base64 = await urlToBase64(url);
-        iconBase64Map.value[typeId] = base64;
-      } catch (e) {
-        logger.error('无法转换成 Base64:', url, e);
+watch(
+  () => currentSlots.value,
+  async (newSlots) => {
+    for (const slot of newSlots) {
+      const typeId = slot.typeId
+      const url = HUIZHANG_TYPES[typeId]?.icon
+      if (url && !iconBase64Map.value[typeId]) {
+        try {
+          const base64 = await urlToBase64(url)
+          iconBase64Map.value[typeId] = base64
+        } catch (e) {
+          logger.error('无法转换成 Base64:', url, e)
+        }
       }
     }
-  }
-}, { deep: true, immediate: true });
+  },
+  { deep: true, immediate: true },
+)
 
 const getShapeName = (shape) => {
-  if (shape === HUIZHANG_SHAPES.CIRCLE) return '圆';
-  if (shape === HUIZHANG_SHAPES.DIAMOND) return '菱';
-  if (shape === HUIZHANG_SHAPES.SHIELD) return '盾';
-  return shape;
-};
+  if (shape === HUIZHANG_SHAPES.CIRCLE) return '圆'
+  if (shape === HUIZHANG_SHAPES.DIAMOND) return '菱'
+  if (shape === HUIZHANG_SHAPES.SHIELD) return '盾'
+  return shape
+}
 
 const sortedStars = computed(() => {
-  return [...recommendedStars.value].sort((a, b) => a - b);
-});
+  return [...recommendedStars.value].sort((a, b) => a - b)
+})
 
 const toggleStar = (star) => {
-  const index = recommendedStars.value.indexOf(star);
-  if (index > -1) recommendedStars.value.splice(index, 1);
-  else recommendedStars.value.push(star);
-};
+  const index = recommendedStars.value.indexOf(star)
+  if (index > -1) recommendedStars.value.splice(index, 1)
+  else recommendedStars.value.push(star)
+}
 
 const calculatedEffects = computed(() => {
-  const counts = {};
-  currentSlots.value.forEach(slot => {
-    counts[slot.typeId] = (counts[slot.typeId] || 0) + 1;
-  });
+  const counts = {}
+  currentSlots.value.forEach((slot) => {
+    counts[slot.typeId] = (counts[slot.typeId] || 0) + 1
+  })
   // 忽略无类型
-  delete counts['none'];
+  delete counts['none']
 
-  const effects = [];
+  const effects = []
   for (const [typeId, count] of Object.entries(counts)) {
-    const typeConfig = HUIZHANG_TYPES[typeId];
-    if (!typeConfig) continue;
+    const typeConfig = HUIZHANG_TYPES[typeId]
+    if (!typeConfig) continue
 
-    const { name, act2, act4, act4extra } = typeConfig;
+    const { name, act2, act4, act4extra } = typeConfig
 
     if (count >= 4) {
-      const totalVal = (act2 || 0) + (act4 || 0);
-      let str = `${totalVal}% ${name}`;
-      if (act4extra) str += `&${act4extra}`;
-      effects.push(str);
+      const totalVal = (act2 || 0) + (act4 || 0)
+      let str = `${totalVal}% ${name}`
+      if (act4extra) str += `&${act4extra}`
+      effects.push(str)
     } else if (count >= 2) {
-      effects.push(`${act2 || 0}% ${name}`);
+      effects.push(`${act2 || 0}% ${name}`)
     }
   }
 
-  if (effects.length === 0) return '无套装效果';
-  return effects.join(' + ');
-});
+  if (effects.length === 0) return '无套装效果'
+  return effects.join(' + ')
+})
 
 // 获取徽章等级对应的星星图片路径
 const getStarImage = (level, starIndex) => {
@@ -530,23 +543,23 @@ const getStarImage = (level, starIndex) => {
   // 2: 紫/彩 (icon_star_2)
   // 3: 红 (icon_star_3)
 
-  let typeIndex = 0; // 默认为灰
+  let typeIndex = 0 // 默认为灰
 
   if (level === 0) {
-    typeIndex = 0;
+    typeIndex = 0
   } else if (level <= 5) {
     // 1-5级：starIndex <= level 为金，否则灰
-    typeIndex = starIndex <= level ? 1 : 0;
+    typeIndex = starIndex <= level ? 1 : 0
   } else if (level <= 10) {
     // 6-10级：starIndex <= (level - 5) 为紫，否则金
-    typeIndex = starIndex <= (level - 5) ? 2 : 1;
+    typeIndex = starIndex <= level - 5 ? 2 : 1
   } else {
     // 11-15级：starIndex <= (level - 10) 为红，否则紫
-    typeIndex = starIndex <= (level - 10) ? 3 : 2;
+    typeIndex = starIndex <= level - 10 ? 3 : 2
   }
 
-  return `/images/huizhang/icon_star_${typeIndex}.webp`;
-};
+  return `/images/huizhang/icon_star_${typeIndex}.webp`
+}
 
 // 导出数据
 const exportData = () => {
@@ -557,112 +570,112 @@ const exportData = () => {
     recTitle: recommendTitle.value,
     recText: recommendText.value,
     authorName: authorName.value,
-    slots: currentSlots.value
-  };
-  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
-    data.customChar = tempCustomChar.value;
+    slots: currentSlots.value,
   }
-  const jsonStr = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `徽章配置-${selectedCardInfo.value.name || 'data'}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
+  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
+    data.customChar = tempCustomChar.value
+  }
+  const jsonStr = JSON.stringify(data, null, 2)
+  const blob = new Blob([jsonStr], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `徽章配置-${selectedCardInfo.value.name || 'data'}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
 
 // 导入数据
 const importData = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]
+  if (!file) return
 
-  const reader = new FileReader();
+  const reader = new FileReader()
   reader.onload = (e) => {
     try {
-      const json = JSON.parse(e.target.result);
+      const json = JSON.parse(e.target.result)
       if (json.charId) {
         if (json.customChar) {
-          tempCustomChar.value = json.customChar;
+          tempCustomChar.value = json.customChar
         }
-        selectedCharId.value = json.charId;
+        selectedCharId.value = json.charId
         // 等待 selectedCharId 的 watcher 执行完毕（重置 slots）后再覆盖数据
         nextTick(() => {
-          if (json.stars) recommendedStars.value = json.stars;
-          if (json.customTitle !== undefined) customTitle.value = json.customTitle;
-          if (json.recTitle !== undefined) recommendTitle.value = json.recTitle;
-          if (json.recText !== undefined) recommendText.value = json.recText;
-          if (json.authorName !== undefined) authorName.value = json.authorName;
-          if (json.slots) currentSlots.value = json.slots;
+          if (json.stars) recommendedStars.value = json.stars
+          if (json.customTitle !== undefined) customTitle.value = json.customTitle
+          if (json.recTitle !== undefined) recommendTitle.value = json.recTitle
+          if (json.recText !== undefined) recommendText.value = json.recText
+          if (json.authorName !== undefined) authorName.value = json.authorName
+          if (json.slots) currentSlots.value = json.slots
 
-          isSelectionMode.value = false;
-        });
+          isSelectionMode.value = false
+        })
       } else {
-        throw new Error('Invalid data format');
+        throw new Error('Invalid data format')
       }
     } catch (err) {
-      logger.error(err);
-      alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件');
+      logger.error(err)
+      alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件')
     }
-  };
-  reader.readAsText(file);
-  event.target.value = ''; // 重置 input，允许重复选择同一文件
-};
+  }
+  reader.readAsText(file)
+  event.target.value = '' // 重置 input，允许重复选择同一文件
+}
 
 // 预览区域缩放逻辑
 const updatePreviewScale = () => {
-  if (!previewWrapper.value) return;
-  const wrapperWidth = previewWrapper.value.clientWidth;
-  const targetWidth = 820; // 800px + 左右留白
+  if (!previewWrapper.value) return
+  const wrapperWidth = previewWrapper.value.clientWidth
+  const targetWidth = 820 // 800px + 左右留白
 
   if (wrapperWidth < targetWidth) {
-    previewScale.value = wrapperWidth / targetWidth;
+    previewScale.value = wrapperWidth / targetWidth
   } else {
-    previewScale.value = 1;
+    previewScale.value = 1
   }
-};
+}
 
 const previewStyle = computed(() => {
-  if (previewScale.value >= 1) return {};
+  if (previewScale.value >= 1) return {}
   return {
     transform: `scale(${previewScale.value})`,
     transformOrigin: 'top center',
     // 缩放后，元素原本占据的空间不会变，需要通过负 margin 抵消底部的空白
-    marginBottom: `${-(550 * (1 - previewScale.value))}px`
-  };
-});
+    marginBottom: `${-(550 * (1 - previewScale.value))}px`,
+  }
+})
 
 // 生成图片
 const generateImage = async () => {
-  if (!captureRef.value) return;
+  if (!captureRef.value) return
 
   // 临时重置缩放以保证生成图片的清晰度和尺寸
-  const originalScale = previewScale.value;
-  previewScale.value = 1;
+  const originalScale = previewScale.value
+  previewScale.value = 1
 
   try {
-    await nextTick();
+    await nextTick()
     const dataUrl = await toPng(captureRef.value, {
       pixelRatio: 2,
       backgroundColor: null,
       width: captureRef.value.clientWidth,
       height: captureRef.value.clientHeight,
       skipFonts: false,
-      cacheBust: false
-    });
-    const link = document.createElement('a');
-    link.download = `徽章攻略-${selectedCardInfo.value.name}.png`;
-    link.href = dataUrl;
-    link.click();
+      cacheBust: false,
+    })
+    const link = document.createElement('a')
+    link.download = `徽章攻略-${selectedCardInfo.value.name}.png`
+    link.href = dataUrl
+    link.click()
   } catch (err) {
-    logger.error('生成图片失败:', err);
-    alert('生成失败');
+    logger.error('生成图片失败:', err)
+    alert('生成失败')
   } finally {
-    previewScale.value = originalScale; // 恢复缩放
+    previewScale.value = originalScale // 恢复缩放
   }
-};
+}
 
 // 自定义角色逻辑
 const openCustomCharModal = () => {
@@ -670,43 +683,43 @@ const openCustomCharModal = () => {
     image: null,
     theme: availableThemes.value[0] || null,
     count: 6,
-    shapes: Array(6).fill(HUIZHANG_SHAPES.CIRCLE)
-  };
-  showCustomCharForm.value = true;
-};
+    shapes: Array(6).fill(HUIZHANG_SHAPES.CIRCLE),
+  }
+  showCustomCharForm.value = true
+}
 
 const triggerCustomCharUpload = () => {
-  customCharInputRef.value?.click();
-};
+  customCharInputRef.value?.click()
+}
 
 const handleCustomCharImage = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
+  const file = event.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
   reader.onload = (e) => {
-    customCharForm.value.image = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-};
+    customCharForm.value.image = e.target.result
+  }
+  reader.readAsDataURL(file)
+  event.target.value = ''
+}
 
 const updateCustomCharShapes = () => {
-  const count = Number(customCharForm.value.count);
-  const currentShapes = customCharForm.value.shapes;
+  const count = Number(customCharForm.value.count)
+  const currentShapes = customCharForm.value.shapes
   if (count > currentShapes.length) {
-    const diff = count - currentShapes.length;
+    const diff = count - currentShapes.length
     for (let i = 0; i < diff; i++) {
-      currentShapes.push(HUIZHANG_SHAPES.CIRCLE);
+      currentShapes.push(HUIZHANG_SHAPES.CIRCLE)
     }
   } else if (count < currentShapes.length) {
-    customCharForm.value.shapes = currentShapes.slice(0, count);
+    customCharForm.value.shapes = currentShapes.slice(0, count)
   }
-};
+}
 
 const saveCustomChar = () => {
   if (!customCharForm.value.image) {
-    alert('请上传图片');
-    return;
+    alert('请上传图片')
+    return
   }
   tempCustomChar.value = {
     id: `custom_temp_${Date.now()}`,
@@ -717,13 +730,13 @@ const saveCustomChar = () => {
     isCustom: false, // 不显示删除按钮
     config: {
       count: Number(customCharForm.value.count),
-      shapes: [...customCharForm.value.shapes]
-    }
-  };
-  showCustomCharForm.value = false;
-  selectedCharId.value = tempCustomChar.value.id;
-  isSelectionMode.value = false; // 自动进入编辑
-};
+      shapes: [...customCharForm.value.shapes],
+    },
+  }
+  showCustomCharForm.value = false
+  selectedCharId.value = tempCustomChar.value.id
+  isSelectionMode.value = false // 自动进入编辑
+}
 </script>
 
 <style scoped>
@@ -1348,7 +1361,7 @@ textarea {
   color: v-bind('colors.text.secondary');
 }
 
-.form-row input[type="text"] {
+.form-row input[type='text'] {
   width: 100%;
   padding: 10px;
   border-radius: 5px;
@@ -1390,12 +1403,6 @@ textarea {
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.shape-label {
-  font-size: 0.8em;
-  color: v-bind('colors.text.secondary');
-  white-space: nowrap;
 }
 
 .mini-shape-select {

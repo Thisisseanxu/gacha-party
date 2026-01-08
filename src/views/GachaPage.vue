@@ -5,7 +5,9 @@
         <div class="header-container">
           <div class="title-with-share">
             <h1>{{ currentPool ? currentPool.name : '未知卡池' }}</h1>
-            <button v-if="isCustomPool" @click="shareCustomPool" class="share-button">分享卡池</button>
+            <button v-if="isCustomPool" @click="shareCustomPool" class="share-button">
+              分享卡池
+            </button>
           </div>
           <router-link v-if="!isCustomPool" to="/chouka" class="back-home-button">返回</router-link>
           <button v-else @click="goBackToEdit" class="back-home-button">重新编辑</button>
@@ -25,12 +27,16 @@
           </div>
 
           <div v-if="isSelectableUpPool" class="select-up-container">
-            <h3 class="select-up-title">{{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}</h3>
+            <h3 class="select-up-title">
+              {{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}
+            </h3>
             <div class="up-cards-selection">
-              <div v-for="card in upCardDetails" :key="card.id"
-                :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
-                @click="selectUpCard(card.id)">
-                <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+              <div v-for="card in upCardDetails" :key="card.id" :class="[
+                'up-card-option',
+                `rarity-border-${card.rarity.toLowerCase()}`,
+                { selected: selectedUpCard === card.id },
+              ]" @click="selectUpCard(card.id)">
+                <img :src="card.imageUrl" :alt="card.name" class="up-card-image" />
                 <span :style="{ color: colors.text.primary }">{{ card.name }}</span>
               </div>
             </div>
@@ -43,10 +49,9 @@
 
             <div class="wish-cards-grid">
               <div v-for="card in selectableWishCards" :key="card.id" class="wish-card-option"
-                :class="{ 'selected': selectedWishCards.includes(card.id) }" @click="toggleWishCard(card.id)">
-
+                :class="{ selected: selectedWishCards.includes(card.id) }" @click="toggleWishCard(card.id)">
                 <div class="image-wrapper">
-                  <img :src="card.imageUrl" :alt="card.name" class="wish-card-image">
+                  <img :src="card.imageUrl" :alt="card.name" class="wish-card-image" />
                   <div v-if="selectedWishCards.includes(card.id)" class="wish-badge">
                     {{ selectedWishCards.indexOf(card.id) + 1 }}
                   </div>
@@ -65,9 +70,9 @@
             <transition name="collapse-transition">
               <div v-if="isUpGroupExpanded" class="up-group-list">
                 <div v-for="group in selectableUpGroup" :key="group.id"
-                  :class="['up-group-item', { 'selected': group.id === selectedUpGroup?.id }]"
+                  :class="['up-group-item', { selected: group.id === selectedUpGroup?.id }]"
                   @click="setSelectedUpGroup(group)">
-                  <img v-if="group.image_url" :src="group.image_url" :alt="group.name + '组封面'" class="up-group-image">
+                  <img v-if="group.image_url" :src="group.image_url" :alt="group.name + '组封面'" class="up-group-image" />
                   <h4 v-else>{{ group.name }}</h4>
                 </div>
               </div>
@@ -81,7 +86,7 @@
             <transition name="collapse-transition">
               <div v-if="isSsrListExpanded" class="ssr-list-grid">
                 <div v-for="card in poolSsrCards" :key="card.id" class="ssr-list-item">
-                  <img :src="card.imageUrl" :alt="card.name" class="ssr-list-card-image">
+                  <img :src="card.imageUrl" :alt="card.name" class="ssr-list-card-image" />
                   <span v-if="upSsrIds.has(card.id)" class="up-marker">UP</span>
                   <p class="ssr-list-card-name">{{ card.name }}</p>
                 </div>
@@ -90,16 +95,22 @@
           </div>
         </div>
 
-
-
         <div class="gacha-stats card">
           <h2>抽卡统计</h2>
           <p>总抽卡次数: {{ totalPulls }}</p>
           <ul class="rarity-counts-list">
-            <li v-if="rarityCounts[RARITY.SP] > 0" class="text-rarity-sp">限定: {{ rarityCounts[RARITY.SP] }}</li>
-            <li v-if="rarityCounts[RARITY.SSR] > 0" class="text-rarity-ssr">SSR: {{ rarityCounts[RARITY.SSR] }}</li>
-            <li v-if="rarityCounts[RARITY.SR] > 0" class="text-rarity-sr">SR: {{ rarityCounts[RARITY.SR] }}</li>
-            <li v-if="rarityCounts[RARITY.R] > 0" class="text-rarity-r">R: {{ rarityCounts[RARITY.R] }}</li>
+            <li v-if="rarityCounts[RARITY.SP] > 0" class="text-rarity-sp">
+              限定: {{ rarityCounts[RARITY.SP] }}
+            </li>
+            <li v-if="rarityCounts[RARITY.SSR] > 0" class="text-rarity-ssr">
+              SSR: {{ rarityCounts[RARITY.SSR] }}
+            </li>
+            <li v-if="rarityCounts[RARITY.SR] > 0" class="text-rarity-sr">
+              SR: {{ rarityCounts[RARITY.SR] }}
+            </li>
+            <li v-if="rarityCounts[RARITY.R] > 0" class="text-rarity-r">
+              R: {{ rarityCounts[RARITY.R] }}
+            </li>
           </ul>
 
           <h3>完整抽卡历史</h3>
@@ -127,9 +138,12 @@
             <transition-group name="card-reveal" tag="div" class="pulled-cards-grid">
               <div v-for="(card, index) in displayedCards" :key="card.id + '_' + index"
                 :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]">
-                <div
-                  :class="['card-image-wrapper', `rarity-border-${card.rarity.toLowerCase()}`, { 'highlight-rarity': isHighlightRarity(card.rarity) }]">
-                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image">
+                <div :class="[
+                  'card-image-wrapper',
+                  `rarity-border-${card.rarity.toLowerCase()}`,
+                  { 'highlight-rarity': isHighlightRarity(card.rarity) },
+                ]">
+                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image" />
                 </div>
                 <p class="card-name">{{ card.name }}</p>
               </div>
@@ -145,7 +159,7 @@
       <p class="share-modal-text-info">长按二维码保存或点击下方链接复制分享</p>
 
       <div class="qr-code-container">
-        <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code">
+        <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code" />
         <p v-else>二维码生成中...</p>
       </div>
 
@@ -157,118 +171,121 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useGacha } from '@/utils/useGacha';
+import { ref, computed, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useGacha } from '@/utils/useGacha'
 import * as RARITY from '@/data/rarity.js'
-import { cardMap } from '@/data/cards';
-import { colors } from '@/styles/colors.js';
-import { getGachaSource } from '@/utils/getGachaSource.js';
-import QRCode from 'qrcode';
+import { cardMap } from '@/data/cards'
+import { colors } from '@/styles/colors.js'
+import { getGachaSource } from '@/utils/getGachaSource.js'
+import QRCode from 'qrcode'
 
-import PopUp from '@/components/PopUp.vue';
-import { logger } from '@/utils/logger';
+import PopUp from '@/components/PopUp.vue'
+import { logger } from '@/utils/logger'
 
 // 动画相关的ref
-const showGachaResultOverlay = ref(false);
-const displayedCards = ref([]);
-const isAnimating = ref(false);
-let animationTimeout = null;
-const cardsContainerRef = ref(null); // 卡片容器引用
+const showGachaResultOverlay = ref(false)
+const displayedCards = ref([])
+const isAnimating = ref(false)
+let animationTimeout = null
+const cardsContainerRef = ref(null) // 卡片容器引用
 
 // 控制分享弹窗的ref
-const showSharePopUp = ref(false);
-const shareText = ref('');
-const qrCodeDataUrl = ref('');
-const copyStatusMessage = ref('');
+const showSharePopUp = ref(false)
+const shareText = ref('')
+const qrCodeDataUrl = ref('')
+const copyStatusMessage = ref('')
 
 // 组件逻辑
-const route = useRoute();
-const router = useRouter(); // 获取路由实例
+const route = useRoute()
+const router = useRouter() // 获取路由实例
 
 // 动态获取卡池数据
-const isCustomPool = computed(() => route.params.poolId === 'custom');
-const gachaSource = computed(() => getGachaSource(route));
+const isCustomPool = computed(() => route.params.poolId === 'custom')
+const gachaSource = computed(() => getGachaSource(route))
 
 // 判断卡池类型
-const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
-const isSelectableUpGroupPool = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true);
+const isSelectableUpPool = computed(
+  () => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true,
+)
+const isSelectableUpGroupPool = computed(
+  () => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true,
+)
 const isWishPool = computed(() => {
-  return currentPool.value?.rules?.[RARITY.SP]?.WishSelection === true;
-});
+  return currentPool.value?.rules?.[RARITY.SP]?.WishSelection === true
+})
 
 // UP卡片选择
-const selectedUpCard = ref(null);
-const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || []);
+const selectedUpCard = ref(null)
+const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || [])
 
 // 自选池选择
 const selectableWishCards = computed(() => {
-  if (!isWishPool.value) return [];
-  return currentPool.value.cardIds?.[RARITY.SP]?.map(id => cardMap.get(id))
-});
-const selectedWishCards = ref([]);
+  if (!isWishPool.value) return []
+  return currentPool.value.cardIds?.[RARITY.SP]?.map((id) => cardMap.get(id))
+})
+const selectedWishCards = ref([])
 
 const isHighlightRarity = (rarity) => {
-  return rarity === RARITY.SP || rarity === RARITY.SSR;
-};
+  return rarity === RARITY.SP || rarity === RARITY.SSR
+}
 
 const getDelayTime = (rarity) => {
   switch (rarity) {
     case RARITY.SP:
-      return 1000; // 限定卡片
+      return 1000 // 限定卡片
     case RARITY.SSR:
-      return 500; // SSR卡片
+      return 500 // SSR卡片
     case RARITY.SR:
-      return 100; // SR卡片
+      return 100 // SR卡片
     case RARITY.R:
-      return 100; // R卡片
+      return 100 // R卡片
     default:
-      return 100; // 默认延迟
+      return 100 // 默认延迟
   }
-};
+}
 
 const startPullAnimation = () => {
-  displayedCards.value = [];
-  isAnimating.value = true;
+  displayedCards.value = []
+  isAnimating.value = true
 
-  const cardsToAnimate = lastPulledCards.value;
-  let index = 0;
+  const cardsToAnimate = lastPulledCards.value
+  let index = 0
 
   // 逐个显示卡片的递归函数
   function revealNextCard() {
     if (index < cardsToAnimate.length) {
-      const card = cardsToAnimate[index];
-      const delay = getDelayTime(card.rarity);
-      displayedCards.value.push(card);
+      const card = cardsToAnimate[index]
+      const delay = getDelayTime(card.rarity)
+      displayedCards.value.push(card)
       // 当显示新卡片时，确保容器滚动到底部
       nextTick(() => {
         if (cardsContainerRef.value) {
-          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
         }
-      });
+      })
 
-      index++;
-      animationTimeout = setTimeout(revealNextCard, delay);
+      index++
+      animationTimeout = setTimeout(revealNextCard, delay)
     } else {
-      isAnimating.value = false;
+      isAnimating.value = false
     }
   }
-  revealNextCard();
-};
+  revealNextCard()
+}
 
 const stopAnimation = () => {
   if (animationTimeout) {
-    clearTimeout(animationTimeout);
+    clearTimeout(animationTimeout)
   }
-  isAnimating.value = false;
-  displayedCards.value = lastPulledCards.value;
+  isAnimating.value = false
+  displayedCards.value = lastPulledCards.value
   nextTick(() => {
     if (cardsContainerRef.value) {
-      cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+      cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
     }
-  });
-};
-
+  })
+}
 
 const {
   currentPool,
@@ -280,110 +297,122 @@ const {
   performTenPulls,
   setSelectedUpGroup,
   selectedUpGroup,
-} = useGacha(gachaSource, selectedUpCard, selectedWishCards);
+} = useGacha(gachaSource, selectedUpCard, selectedWishCards)
 
-const isSsrListExpanded = ref(false);
+const isSsrListExpanded = ref(false)
 
 const upCardDetails = computed(() => {
-  if (!isSelectableUpPool.value) return [];
-  const upCardIds = currentPool.value.rules.SP.UpCards || [];
-  return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
-});
+  if (!isSelectableUpPool.value) return []
+  const upCardIds = currentPool.value.rules.SP.UpCards || []
+  return upCardIds.map((id) => cardMap.get(id)).filter(Boolean)
+})
 
 // 计算当前UP的SSR角色ID
 const upSsrIds = computed(() => {
-  const ids = new Set();
-  const ssrRules = currentPool.value?.rules?.[RARITY.SSR];
-  if (!ssrRules) return ids;
+  const ids = new Set()
+  const ssrRules = currentPool.value?.rules?.[RARITY.SSR]
+  if (!ssrRules) return ids
 
   // 优先处理分组UP的情况
   if (ssrRules.SelectUpCardsGroup && selectedUpGroup.value?.cards) {
-    selectedUpGroup.value.cards.forEach(id => ids.add(id));
+    selectedUpGroup.value.cards.forEach((id) => ids.add(id))
   }
   // 再处理固定的UP卡
   if (ssrRules.doubleRateCards) {
-    ssrRules.doubleRateCards.forEach(id => ids.add(id));
+    ssrRules.doubleRateCards.forEach((id) => ids.add(id))
   }
-  return ids;
-});
+  return ids
+})
 
 // 获取卡池内所有的SSR角色详情
 const poolSsrCards = computed(() => {
-  if (!currentPool.value?.cards) return [];
+  if (!currentPool.value?.cards) return []
 
   return currentPool.value.cards
-    .filter(card => card && card.rarity === RARITY.SSR)
+    .filter((card) => card && card.rarity === RARITY.SSR)
     .sort((a, b) => {
-      const aIsUp = upSsrIds.value.has(a.id);
-      const bIsUp = upSsrIds.value.has(b.id);
-      if (aIsUp && !bIsUp) return -1;
-      if (!aIsUp && bIsUp) return 1;
-      return a.id - b.id; // 按ID排序
-    });
-});
+      const aIsUp = upSsrIds.value.has(a.id)
+      const bIsUp = upSsrIds.value.has(b.id)
+      if (aIsUp && !bIsUp) return -1
+      if (!aIsUp && bIsUp) return 1
+      return a.id - b.id // 按ID排序
+    })
+})
 
 // 切换SSR列表展开/折叠状态的方法
 const toggleSsrListExpansion = () => {
-  isSsrListExpanded.value = !isSsrListExpanded.value;
-};
+  isSsrListExpanded.value = !isSsrListExpanded.value
+}
 
-watch(currentPool, (newPool) => {
-  document.title = newPool?.name ? `${newPool.name} - 织夜工具箱` : '抽卡模拟器';
-}, { immediate: true, deep: true });
+watch(
+  currentPool,
+  (newPool) => {
+    document.title = newPool?.name ? `${newPool.name} - 织夜工具箱` : '抽卡模拟器'
+  },
+  { immediate: true, deep: true },
+)
 
 // UP卡选择方法
 const selectUpCard = (cardId) => {
-  selectedUpCard.value = cardId;
-};
+  selectedUpCard.value = cardId
+}
 
 // 自选卡选择方法
 const toggleWishCard = (cardId) => {
-  const index = selectedWishCards.value.indexOf(cardId);
+  const index = selectedWishCards.value.indexOf(cardId)
   if (index > -1) {
     // 已存在，取消选择
-    selectedWishCards.value.splice(index, 1);
+    selectedWishCards.value.splice(index, 1)
   } else {
     // 不存在，尝试添加
     if (selectedWishCards.value.length >= 4) {
-      alert('只能选择 4 个心愿角色！请先取消一个已选角色。');
-      return;
+      alert('只能选择 4 个心愿角色！请先取消一个已选角色。')
+      return
     }
-    selectedWishCards.value.push(cardId);
+    selectedWishCards.value.push(cardId)
   }
-};
+}
 
-const itemsPerPage = 10;
-const currentPage = ref(1);
+const itemsPerPage = 10
+const currentPage = ref(1)
 
 const totalPages = computed(() => {
-  if (!Array.isArray(gachaHistory.value)) return 0;
-  return Math.ceil(gachaHistory.value.length / itemsPerPage);
-});
+  if (!Array.isArray(gachaHistory.value)) return 0
+  return Math.ceil(gachaHistory.value.length / itemsPerPage)
+})
 
 const paginatedGachaHistory = computed(() => {
-  const reversedHistory = [...gachaHistory.value].reverse();
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return reversedHistory.slice(start, end);
-});
+  const reversedHistory = [...gachaHistory.value].reverse()
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return reversedHistory.slice(start, end)
+})
 
-const isUpGroupExpanded = ref(true);
+const isUpGroupExpanded = ref(true)
 // 切换UP角色组列表的展开/折叠状态
 const toggleUpGroupExpansion = () => {
-  isUpGroupExpanded.value = !isUpGroupExpanded.value;
-};
+  isUpGroupExpanded.value = !isUpGroupExpanded.value
+}
 
 // 历史记录分页控制
-const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
 
-watch(totalPulls, () => {
-  if (currentPage.value > totalPages.value && totalPages.value > 0) {
-    currentPage.value = totalPages.value;
-  } else if (totalPages.value === 0) {
-    currentPage.value = 1;
-  }
-}, { immediate: true });
+watch(
+  totalPulls,
+  () => {
+    if (currentPage.value > totalPages.value && totalPages.value > 0) {
+      currentPage.value = totalPages.value
+    } else if (totalPages.value === 0) {
+      currentPage.value = 1
+    }
+  },
+  { immediate: true },
+)
 
 // 将当前所有的param传递给挑战赛页面
 // 假设当前为/chouka/zaodaoji，则跳转到/choukatiaozhansai/zaodaoji
@@ -399,89 +428,89 @@ watch(totalPulls, () => {
 const checkAndPull = (count) => {
   // 如果是心愿卡池且未选满4个
   if (isWishPool.value && selectedWishCards.value.length !== 4) {
-    alert('必须选择 4 个心愿角色才能开始抽卡！');
-    return;
+    alert('必须选择 4 个心愿角色才能开始抽卡！')
+    return
   }
 
   // 执行抽卡
   if (count === 1) {
-    performSinglePull();
-    showGachaResultOverlay.value = true;
-    nextTick(startPullAnimation);
-  } else { // 目前只有单抽和十连抽两种，其他情况默认十连抽
-    performTenPulls();
-    showGachaResultOverlay.value = true;
-    nextTick(startPullAnimation);
+    performSinglePull()
+    showGachaResultOverlay.value = true
+    nextTick(startPullAnimation)
+  } else {
+    // 目前只有单抽和十连抽两种，其他情况默认十连抽
+    performTenPulls()
+    showGachaResultOverlay.value = true
+    nextTick(startPullAnimation)
   }
-};
+}
 
 const confirmGachaResult = () => {
   if (isAnimating.value) {
-    stopAnimation();
+    stopAnimation()
   } else {
-    showGachaResultOverlay.value = false;
+    showGachaResultOverlay.value = false
   }
-};
+}
 
 const goBackToEdit = () => {
-  router.back();
-};
+  router.back()
+}
 
 // 分享自定义卡池
 const shareCustomPool = async () => {
-  if (!isCustomPool.value || !currentPool.value) return;
+  if (!isCustomPool.value || !currentPool.value) return
   // 重置状态
-  qrCodeDataUrl.value = ''; // 先清空，显示“生成中”
-  copyStatusMessage.value = '';
+  qrCodeDataUrl.value = '' // 先清空，显示“生成中”
+  copyStatusMessage.value = ''
 
-  const poolName = currentPool.value.name;
-  const data = encodeURIComponent(route.query.data);
-  const shareUrl = `${window.location.origin}${route.path}?data=${data}`;
-  const textToShare = `这是我在织夜工具箱创建的【${poolName}】卡池，快来试试吧！\n${shareUrl}`;
+  const poolName = currentPool.value.name
+  const data = encodeURIComponent(route.query.data)
+  const shareUrl = `${window.location.origin}${route.path}?data=${data}`
+  const textToShare = `这是我在织夜工具箱创建的【${poolName}】卡池，快来试试吧！\n${shareUrl}`
 
-  shareText.value = textToShare;
+  shareText.value = textToShare
 
   // 确保弹窗和canvas元素已渲染到DOM中
-  await nextTick();
+  await nextTick()
 
   try {
     // 使用 toDataURL 方法直接生成 Base64 格式的图片数据
     const dataUrl = await QRCode.toDataURL(shareUrl, {
       width: 220,
       margin: 1,
-      errorCorrectionLevel: 'H'
-    });
+      errorCorrectionLevel: 'H',
+    })
     // 将生成的数据URL赋值给ref，<img>标签会自动显示图片
-    qrCodeDataUrl.value = dataUrl;
+    qrCodeDataUrl.value = dataUrl
   } catch (err) {
-    logger.error('二维码生成失败:', err);
+    logger.error('二维码生成失败:', err)
     // 可以在这里设置一个错误提示
-    qrCodeDataUrl.value = ''; // 清空以显示错误或提示
+    qrCodeDataUrl.value = '' // 清空以显示错误或提示
   }
-  showSharePopUp.value = true;
-};
+  showSharePopUp.value = true
+}
 
 // 关闭弹窗
 const closeSharePopUp = () => {
-  showSharePopUp.value = false;
-};
+  showSharePopUp.value = false
+}
 
 // 复制分享文本到剪贴板
 const copyShareText = async (event) => {
   try {
-    await navigator.clipboard.writeText(shareText.value);
-    copyStatusMessage.value = '已复制到剪贴板！';
-    event.target.select(); // 选中textarea中的所有文本以提供视觉反馈
+    await navigator.clipboard.writeText(shareText.value)
+    copyStatusMessage.value = '已复制到剪贴板！'
+    event.target.select() // 选中textarea中的所有文本以提供视觉反馈
   } catch (err) {
-    copyStatusMessage.value = '复制失败，请手动复制。';
-    logger.error('复制失败: ', err);
+    copyStatusMessage.value = '复制失败，请手动复制。'
+    logger.error('复制失败: ', err)
   }
   // 2秒后清除提示信息
   setTimeout(() => {
-    copyStatusMessage.value = '';
-  }, 2000);
-};
-
+    copyStatusMessage.value = ''
+  }, 2000)
+}
 </script>
 
 <style scoped>
@@ -541,7 +570,6 @@ const copyShareText = async (event) => {
 .share-button:hover {
   background-color: v-bind('colors.brand.confirmHover');
 }
-
 
 .gacha-page-background {
   background-color: v-bind('colors.background.primary');
@@ -702,7 +730,10 @@ h1 {
   padding: 4px;
   border-radius: 12px;
   border: 4px solid transparent;
-  transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .up-card-option:hover {
@@ -998,7 +1029,6 @@ h1 {
   cursor: wait;
 }
 
-
 /* --- 稀有度颜色 --- */
 .text-rarity-sp,
 .rarity-border-sp {
@@ -1025,15 +1055,21 @@ h1 {
 }
 
 .rarity-bg-sp {
-  background: radial-gradient(ellipse at center, rgba(222, 33, 30, 0.3) 0%, rgba(222, 33, 30, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(222, 33, 30, 0.3) 0%,
+      rgba(222, 33, 30, 0) 70%);
 }
 
 .rarity-bg-ssr {
-  background: radial-gradient(ellipse at center, rgba(232, 119, 33, 0.3) 0%, rgba(232, 119, 33, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(232, 119, 33, 0.3) 0%,
+      rgba(232, 119, 33, 0) 70%);
 }
 
 .rarity-bg-sr {
-  background: radial-gradient(ellipse at center, rgba(178, 30, 251, 0.25) 0%, rgba(178, 30, 251, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(178, 30, 251, 0.25) 0%,
+      rgba(178, 30, 251, 0) 70%);
 }
 
 .up-card-option.selected.rarity-border-sp {
@@ -1081,7 +1117,6 @@ h1 {
 .highlight-rarity.rarity-border-ssr {
   animation: highlight-flash-ssr 0.5s ease-in-out;
 }
-
 
 /* 角色弹出动画 */
 .card-reveal-enter-active {

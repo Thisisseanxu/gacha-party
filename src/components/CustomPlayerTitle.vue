@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 // 定义组件接收的 props
 const props = defineProps({
@@ -18,44 +18,46 @@ const props = defineProps({
   value: {
     type: Number,
     required: true,
-  }
-});
+  },
+})
 
 // 计算当前应显示的成就对象
 const achievement = computed(() => {
   // 如果传入的数值无效，则不显示任何内容
   if (props.value === null || props.value === undefined || props.value <= 0) {
-    return null;
+    return null
   }
 
   // 将映射表的键转换为数字并升序排列
-  const sortedKeys = Object.keys(props.titleMap).map(Number).sort((a, b) => a - b);
+  const sortedKeys = Object.keys(props.titleMap)
+    .map(Number)
+    .sort((a, b) => a - b)
 
   // 遍历查找第一个大于等于当前数值的阈值
   for (const key of sortedKeys) {
     if (props.value <= key) {
       // 返回对应的成就信息
-      return props.titleMap[key];
+      return props.titleMap[key]
     }
   }
 
   // 如果数值超过所有阈值，则不显示
-  return null;
-});
+  return null
+})
 
 // 计算要显示的标题文本
-const title = computed(() => achievement.value?.title);
+const title = computed(() => achievement.value?.title)
 
 // 计算组件的动态样式（背景和文字颜色）
 const titleStyle = computed(() => {
   if (!achievement.value) {
-    return {};
+    return {}
   }
   return {
     backgroundColor: achievement.value.background,
     color: achievement.value.text_color || 'white', // 如果没有提供文字颜色，默认为白色
-  };
-});
+  }
+})
 </script>
 
 <style scoped>

@@ -248,6 +248,13 @@ export const allCards = [
     imageUrl: '/images/cards/1409.webp',
     realname: '提可',
   },
+  {
+    id: '11010',
+    name: '企鹅少女',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/11010.webp',
+    realname: '安晴',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',

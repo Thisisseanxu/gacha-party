@@ -5,7 +5,9 @@
 
       <div v-if="isSelectionMode" class="selection-mode-container">
         <div class="selection-toolbar">
-          <button @click="openCreateCharModal" class="action-button create-char-btn">创建新角色</button>
+          <button @click="openCreateCharModal" class="action-button create-char-btn">
+            创建新角色
+          </button>
           <SwitchComponent v-model="showRealName" label="显示角色真名" />
         </div>
         <CharacterSelector v-model="selectedCharacterIds" v-model:customCharacters="customCharacters"
@@ -26,8 +28,9 @@
                 {{ card.name }}
               </option>
             </select>
-            <SwitchComponent v-if="newMessage?.cardId && newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'"
-              v-model="isRightSide" label="右侧" style="margin-left: 10px;" />
+            <SwitchComponent v-if="
+              newMessage?.cardId && newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'
+            " v-model="isRightSide" label="右侧" style="margin-left: 10px" />
           </div>
           <div class="editor-row">
             <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
@@ -38,11 +41,17 @@
             <button v-if="editingIndex === null" @click="triggerImageUpload" class="editor-button image-button">
               添加图片
             </button>
-            <input type="file" ref="imageInputRef" @change="onImageSelected" accept="image/*" style="display: none;" />
+            <input type="file" ref="imageInputRef" @change="onImageSelected" accept="image/*" style="display: none" />
           </div>
           <div class="editor-row editor-action-row">
             <button @click="handleFormSubmit" class="editor-button">
-              {{ editingIndex !== null ? '修改这条消息' : insertingIndex !== null ? '在此后插入消息' : '添加对话' }}
+              {{
+                editingIndex !== null
+                  ? '修改这条消息'
+                  : insertingIndex !== null
+                    ? '在此后插入消息'
+                    : '添加对话'
+              }}
             </button>
             <button v-if="editingIndex !== null" @click="exitEditing" class="editor-button cancel">
               取消修改
@@ -57,15 +66,15 @@
             <div class="config-row">
               <div class="config-item">
                 <span>宽度</span>
-                <input type="number" v-model="previewConfig.width" class="mini-input">
+                <input type="number" v-model="previewConfig.width" class="mini-input" />
               </div>
               <div class="config-item">
                 <span>高度</span>
-                <input type="number" v-model="previewConfig.height" class="mini-input">
+                <input type="number" v-model="previewConfig.height" class="mini-input" />
               </div>
               <div class="config-item">
                 <span>圆角</span>
-                <input type="number" v-model="previewConfig.radius" class="mini-input">
+                <input type="number" v-model="previewConfig.radius" class="mini-input" />
               </div>
             </div>
           </div>
@@ -74,29 +83,36 @@
             <button @click="generateImage" class="action-button export-btn">导出图片</button>
             <button @click="enterSelectionMode" class="action-button">重选角色</button>
             <button @click="openSaveLoadMenu" class="action-button">存档/读档</button>
-            <input type="file" ref="fileInput" @change="handleImportFile" accept=".json" style="display: none;" />
+            <input type="file" ref="fileInput" @change="handleImportFile" accept=".json" style="display: none" />
           </div>
         </div>
 
         <div class="preview-wrapper" ref="previewWrapper">
           <p class="preview-hint">↓ 预览区域 (可滚动) ↓</p>
           <div class="capture-area-wrapper" :style="previewStyle">
-            <div class="chat-log-container" ref="captureRef"
-              :style="{ width: previewConfig.width + 'px', height: previewConfig.height + 'px', borderRadius: previewConfig.radius + 'px' }">
+            <div class="chat-log-container" ref="captureRef" :style="{
+              width: previewConfig.width + 'px',
+              height: previewConfig.height + 'px',
+              borderRadius: previewConfig.radius + 'px',
+            }">
               <div class="chat-log">
-                <div v-for="(message, index) in chatLog" :key="index" class="chat-message"
-                  :class="{ 'editing-highlight': index === editingIndex, 'insert-highlight-after': index === insertingIndex, [message.position]: true }"
-                  @click="openEditMenu(index)">
-
+                <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="{
+                  'editing-highlight': index === editingIndex,
+                  'insert-highlight-after': index === insertingIndex,
+                  [message.position]: true,
+                }" @click="openEditMenu(index)">
                   <template v-if="message.position === 'center'">
                     <div class="bubble center">{{ message.text }}</div>
                   </template>
 
                   <template v-else>
-                    <div v-if="message.position === 'left' && message.cardId !== '_班长' && isCardMissing(message.cardId)"
-                      class="avatar missing-avatar"
+                    <div v-if="
+                      message.position === 'left' &&
+                      message.cardId !== '_班长' &&
+                      isCardMissing(message.cardId)
+                    " class="avatar missing-avatar"
                       @click.stop="openRepairCharModal(message.cardId, message.displayName)">
-                      丢失<br><span style="font-size: 0.8em">点击修复</span>
+                      丢失<br /><span style="font-size: 0.8em">点击修复</span>
                     </div>
                     <img v-else-if="message.position === 'left' && message.cardId !== '_班长'"
                       :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'" class="avatar" />
@@ -104,27 +120,31 @@
                       <div v-if="message.displayName" class="character-name">
                         {{ message.displayName }}
                       </div>
-                      <div :class="{ 'image-bubble': message.type === 'image', 'bubble': message.type !== 'image' }">
+                      <div :class="{
+                        'image-bubble': message.type === 'image',
+                        bubble: message.type !== 'image',
+                      }">
                         <template v-if="message.type === 'image'">
                           <img v-if="message.text" :src="message.text" class="message-image" alt="图片消息" />
                           <div v-else class="image-placeholder">
-                            图片数据丢失<br>点击编辑重新上传
+                            图片数据丢失<br />点击编辑重新上传
                           </div>
                         </template>
                         <span v-else>{{ message.text }}</span>
                       </div>
                     </div>
-                    <div
-                      v-if="message.position === 'right' && message.cardId !== '_班长' && isCardMissing(message.cardId)"
-                      class="avatar right-avatar missing-avatar"
+                    <div v-if="
+                      message.position === 'right' &&
+                      message.cardId !== '_班长' &&
+                      isCardMissing(message.cardId)
+                    " class="avatar right-avatar missing-avatar"
                       @click.stop="openRepairCharModal(message.cardId, message.displayName)">
-                      丢失<br><span style="font-size: 0.8em">点击修复</span>
+                      丢失<br /><span style="font-size: 0.8em">点击修复</span>
                     </div>
                     <img v-else-if="message.position === 'right' && message.cardId !== '_班长'"
                       :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'"
                       class="avatar right-avatar" />
                   </template>
-
                 </div>
               </div>
             </div>
@@ -132,7 +152,8 @@
         </div>
       </div>
 
-      <p class="agreement">使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+      <p class="agreement">
+        使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
       </p>
     </div>
   </div>
@@ -158,12 +179,18 @@
       <div class="slot-section">
         <div class="slot-header">自动存档 (退出浏览器后可在此恢复)</div>
         <div class="slot-item">
-          <div class="slot-row-top" style="justify-content: center;">
-            <span class="slot-time-small">{{ autoSaveTime ? formatTime(autoSaveTime) : '暂无记录' }}</span>
+          <div class="slot-row-top" style="justify-content: center">
+            <span class="slot-time-small">{{
+              autoSaveTime ? formatTime(autoSaveTime) : '暂无记录'
+            }}</span>
           </div>
           <div class="slot-row-bottom">
-            <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">读取</button>
-            <button class="action-button" @click="exportSlot('auto')" :disabled="!autoSaveTime">导出</button>
+            <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">
+              读取
+            </button>
+            <button class="action-button" @click="exportSlot('auto')" :disabled="!autoSaveTime">
+              导出
+            </button>
           </div>
         </div>
       </div>
@@ -172,13 +199,19 @@
         <div v-for="(slot, index) in slotsData" :key="index" class="slot-item">
           <div class="slot-row-top">
             <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
-            <span class="slot-time-small">{{ slot.timestamp ? formatTime(slot.timestamp) : '空' }}</span>
-            <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">×</button>
+            <span class="slot-time-small">{{
+              slot.timestamp ? formatTime(slot.timestamp) : '空'
+            }}</span>
+            <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
+              ×
+            </button>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button save-btn" @click="saveToSlot(index + 1)">保存</button>
             <button class="action-button" @click="loadFromSlot(index + 1)">读取</button>
-            <button class="action-button" @click="exportSlot(index + 1)" :disabled="!slot.timestamp">导出文件</button>
+            <button class="action-button" @click="exportSlot(index + 1)" :disabled="!slot.timestamp">
+              导出文件
+            </button>
             <button class="action-button" @click="triggerImportToSlot(index + 1)">导入文件</button>
           </div>
         </div>
@@ -196,16 +229,20 @@
       </div>
       <div class="form-row">
         <label>角色头像</label>
-        <button @click="triggerCharAvatarUpload" class="action-button">{{ charForm.avatar ? '更换图片' : '上传图片' }}</button>
+        <button @click="triggerCharAvatarUpload" class="action-button">
+          {{ charForm.avatar ? '更换图片' : '上传图片' }}
+        </button>
         <input type="file" ref="charFormAvatarInputRef" @change="handleCharAvatarSelected" accept="image/*"
-          style="display: none;" />
+          style="display: none" />
       </div>
       <div v-if="charForm.avatar" class="avatar-preview-container">
         <p>头像预览：</p>
         <img :src="charForm.avatar" alt="头像预览" class="avatar-preview" />
       </div>
       <div class="form-actions">
-        <button @click="saveCharForm" class="action-button">{{ charForm.mode === 'create' ? '保存角色' : '保存并修复' }}</button>
+        <button @click="saveCharForm" class="action-button">
+          {{ charForm.mode === 'create' ? '保存角色' : '保存并修复' }}
+        </button>
         <button @click="closeCharForm" class="action-button cancel">取消</button>
       </div>
     </div>
@@ -223,17 +260,20 @@
         工具箱中所使用的所有角色形象、名称及相关内容均为其各自版权所有者所有。织夜工具箱仅用其提供非营利性服务，我们尊重并支持版权保护，任何未经授权的商用均属侵权行为。您可以在非商业用途下自由使用/分享本工具箱生成的内容。
       </li>
       <li>
-        <strong>用户责任：</strong> 您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
+        <strong>用户责任：</strong>
+        您使用织夜工具箱时，需确保遵守相关法律法规及游戏运营商的规定。若您使用本服务进行任何违法或违规行为，您将承担全部责任，织夜工具箱对此不承担任何责任。
       </li>
       <li>
         <strong>数据使用与隐私保护：</strong>
         我们承诺保护您的个人隐私。目前织夜工具箱不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
       </li>
       <li>
-        <strong>服务变更、中断或终止：</strong> 本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
+        <strong>服务变更、中断或终止：</strong>
+        本服务免费提供。我们保留随时修改、中断或终止服务的权利，恕不另行通知。
       </li>
       <li>
-        <strong>协议修改：</strong> 我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
+        <strong>协议修改：</strong>
+        我们有权根据需要不时地修改本协议。协议修改后，如果您继续使用本服务，即视为您已接受修改后的协议。
       </li>
     </ol>
     <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
@@ -241,52 +281,56 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick, toRaw } from 'vue';
-import { allCards } from '@/data/cards.js';
-import { colors } from '@/styles/colors.js';
-import PopUp from '@/components/PopUp.vue';
-import CharacterSelector from '@/components/CharacterSelector.vue';
-import { logger } from '@/utils/logger';
-import { saveToDB, loadFromDB, deleteFromDB, DB_KEYS } from '@/utils/chatStorage.js';
-import { toPng } from 'html-to-image';
-import SwitchComponent from '@/components/SwitchComponent.vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, toRaw } from 'vue'
+import { allCards } from '@/data/cards.js'
+import { colors } from '@/styles/colors.js'
+import PopUp from '@/components/PopUp.vue'
+import CharacterSelector from '@/components/CharacterSelector.vue'
+import { logger } from '@/utils/logger'
+import { saveToDB, loadFromDB, deleteFromDB, DB_KEYS } from '@/utils/chatStorage.js'
+import { toPng } from 'html-to-image'
+import SwitchComponent from '@/components/SwitchComponent.vue'
 
-const showAgreementPopUp = ref(false);
+const showAgreementPopUp = ref(false)
 const openAgreementPopUp = () => {
-  showAgreementPopUp.value = true;
-};
+  showAgreementPopUp.value = true
+}
 const closeAgreementPopUp = () => {
-  showAgreementPopUp.value = false;
-};
+  showAgreementPopUp.value = false
+}
 
 // true: 显示角色选择界面, false: 显示聊天编辑器
-const isSelectionMode = ref(true);
-const showRealName = ref(false);
+const isSelectionMode = ref(true)
+const showRealName = ref(false)
 // 存储用户选择的角色ID
-const selectedCharacterIds = ref([]);
+const selectedCharacterIds = ref([])
 // 用于本地存储的键名
-const characterSelectionKey = 'chatCharacterSelection';
+const characterSelectionKey = 'chatCharacterSelection'
 
 // 预览配置
 const previewConfig = ref({
   width: 540,
   height: 450,
-  radius: 0
-});
-const captureRef = ref(null);
+  radius: 0,
+})
+const captureRef = ref(null)
 
 // 保存预览配置
 watch(previewConfig, (newConfig) => {
-  localStorage.setItem('customChatPreviewConfig', JSON.stringify(newConfig));
-});
+  localStorage.setItem('customChatPreviewConfig', JSON.stringify(newConfig))
+})
 
 // 修复预览区设置修改后不立即生效的问题
-watch(previewConfig, () => {
-  nextTick(updatePreviewScale);
-}, { deep: true });
+watch(
+  previewConfig,
+  () => {
+    nextTick(updatePreviewScale)
+  },
+  { deep: true },
+)
 
 // 自定义角色相关状态
-const customCharacters = ref([]);
+const customCharacters = ref([])
 
 // 统一的角色表单状态 (创建/修复)
 const charForm = ref({
@@ -294,9 +338,9 @@ const charForm = ref({
   mode: 'create', // 'create' | 'repair'
   id: null,
   name: '',
-  avatar: null
-});
-const charFormAvatarInputRef = ref(null);
+  avatar: null,
+})
+const charFormAvatarInputRef = ref(null)
 
 const openCreateCharModal = () => {
   charForm.value = {
@@ -304,9 +348,9 @@ const openCreateCharModal = () => {
     mode: 'create',
     id: `custom_${Date.now()}`,
     name: '',
-    avatar: null
-  };
-};
+    avatar: null,
+  }
+}
 
 const openRepairCharModal = (cardId, currentDisplayName) => {
   charForm.value = {
@@ -314,75 +358,82 @@ const openRepairCharModal = (cardId, currentDisplayName) => {
     mode: 'repair',
     id: cardId,
     name: currentDisplayName || '',
-    avatar: null
-  };
-};
+    avatar: null,
+  }
+}
 
 const closeCharForm = () => {
-  charForm.value.visible = false;
-};
+  charForm.value.visible = false
+}
 
 const triggerCharAvatarUpload = () => {
-  charFormAvatarInputRef.value?.click();
-};
+  charFormAvatarInputRef.value?.click()
+}
 
 const handleCharAvatarSelected = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
+  const file = event.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
   reader.onload = (e) => {
-    charForm.value.avatar = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-};
+    charForm.value.avatar = e.target.result
+  }
+  reader.readAsDataURL(file)
+  event.target.value = ''
+}
 
 const saveCharForm = () => {
   if (!charForm.value.name.trim() || !charForm.value.avatar) {
-    alert('请填写名称并上传头像');
-    return;
+    alert('请填写名称并上传头像')
+    return
   }
   const newChar = {
     id: charForm.value.id,
     name: charForm.value.name.trim(),
     imageUrl: charForm.value.avatar,
-    isCustom: true
-  };
-  customCharacters.value.push(newChar);
-  closeCharForm();
-};
+    isCustom: true,
+  }
+  customCharacters.value.push(newChar)
+  closeCharForm()
+}
 
 const displayableCharacterList = computed(() => {
-  const formattedCustom = customCharacters.value.map(c => ({
+  const formattedCustom = customCharacters.value.map((c) => ({
     ...c,
     realname: c.name,
     isCustom: true,
-  }));
+  }))
   // 仅包含纯数字id的预设角色
-  return [...allCards.filter(card => /^\d+$/.test(card.id)), ...formattedCustom];
-});
+  return [...allCards.filter((card) => /^\d+$/.test(card.id)), ...formattedCustom]
+})
 
 // 监听自定义角色数组的变化，并自动保存到localStorage
-watch(customCharacters, (newValue) => {
-  // 使用 toRaw 确保保存的是普通对象
-  saveToDB(DB_KEYS.CUSTOM_CHARS, newValue.map(c => toRaw(c)));
-}, { deep: true });
+watch(
+  customCharacters,
+  (newValue) => {
+    // 使用 toRaw 确保保存的是普通对象
+    saveToDB(
+      DB_KEYS.CUSTOM_CHARS,
+      newValue.map((c) => toRaw(c)),
+    )
+  },
+  { deep: true },
+)
 
 // 确认选择，进入聊天编辑器
 const confirmSelection = () => {
-  isSelectionMode.value = false;
+  isSelectionMode.value = false
   nextTick(() => {
-    updatePreviewScale();
-  });
-};
+    updatePreviewScale()
+  })
+}
 
 // 返回角色选择界面
 const enterSelectionMode = () => {
-  isSelectionMode.value = true;
-};
+  isSelectionMode.value = true
+}
 
 // 存储所有聊天记录
-const chatLog = ref([]);
+const chatLog = ref([])
 
 // 每个聊天记录的格式
 const newMessage = ref({
@@ -391,178 +442,182 @@ const newMessage = ref({
   text: '',
   type: 'text',
   position: 'left',
-});
+})
 
 // 自定义名称
-const customName = ref('');
+const customName = ref('')
 // 控制消息是否显示在右侧
-const isRightSide = ref(false);
+const isRightSide = ref(false)
 
 // 监听 cardId 的变化，自动设置 position 属性
-watch(() => newMessage.value.cardId, (newCardId) => {
-  if (newCardId === "_旁白") {
-    newMessage.value.position = 'center';
-  } else if (newCardId === '_班长') {
-    isRightSide.value = true;
-    newMessage.value.position = 'right';
-  } else {
-    isRightSide.value = false;
-    newMessage.value.position = 'left';
-  }
-  // 清空自定义名称
-  customName.value = '';
-});
+watch(
+  () => newMessage.value.cardId,
+  (newCardId) => {
+    if (newCardId === '_旁白') {
+      newMessage.value.position = 'center'
+    } else if (newCardId === '_班长') {
+      isRightSide.value = true
+      newMessage.value.position = 'right'
+    } else {
+      isRightSide.value = false
+      newMessage.value.position = 'left'
+    }
+    // 清空自定义名称
+    customName.value = ''
+  },
+)
 
 // 监听开关变化，更新 position
 watch(isRightSide, (val) => {
-  if (newMessage.value.cardId === '_旁白') return;
-  newMessage.value.position = val ? 'right' : 'left';
-});
+  if (newMessage.value.cardId === '_旁白') return
+  newMessage.value.position = val ? 'right' : 'left'
+})
 
 // 生成下拉选择器的选项
 const cardOptions = computed(() => {
   // 从 allCards 中过滤出完整的角色对象
   const selectedPredefined = allCards
-    .filter(card => selectedCharacterIds.value.includes(card.id))
-    .map(card => ({
+    .filter((card) => selectedCharacterIds.value.includes(card.id))
+    .map((card) => ({
       id: card.id,
-      name: card.realname ? `${card.name} (${card.realname})` : card.name
+      name: card.realname ? `${card.name} (${card.realname})` : card.name,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'))
 
   // 从 customCharacters 中过滤
   const selectedCustom = customCharacters.value
-    .filter(card => selectedCharacterIds.value.includes(card.id))
-    .map(card => ({
+    .filter((card) => selectedCharacterIds.value.includes(card.id))
+    .map((card) => ({
       id: card.id,
-      name: `${card.name} (自定义)`
-    }));
+      name: `${card.name} (自定义)`,
+    }))
 
   return [
     { id: '_班长', name: '班长' },
     { id: '_旁白', name: '旁白' },
     ...selectedPredefined,
-    ...selectedCustom // 添加到列表
-  ];
-});
+    ...selectedCustom, // 添加到列表
+  ]
+})
 
 const getCardAvatar = (cardId) => {
   // 优先在预设角色中查找
-  const predefinedCard = allCards.find(c => c.id === cardId);
+  const predefinedCard = allCards.find((c) => c.id === cardId)
   if (predefinedCard) {
-    return predefinedCard.imageUrl;
+    return predefinedCard.imageUrl
   }
   // 如果找不到，则在自定义角色中查找
-  const customCard = customCharacters.value.find(c => c.id === cardId);
+  const customCard = customCharacters.value.find((c) => c.id === cardId)
   if (customCard) {
-    return customCard.imageUrl;
+    return customCard.imageUrl
   }
   // 都找不到则返回占位图
-  return '/images/cards/placeholder.jpg';
-};
+  return '/images/cards/placeholder.jpg'
+}
 
 const getCardName = (cardId) => {
   if (cardId === '_班长' || cardId === '_旁白') {
-    return null;
+    return null
   }
   // 优先在预设角色中查找
-  const predefinedCard = allCards.find(c => c.id === cardId);
+  const predefinedCard = allCards.find((c) => c.id === cardId)
   if (predefinedCard) {
-    return predefinedCard.realname || predefinedCard.name;
+    return predefinedCard.realname || predefinedCard.name
   }
   // 如果找不到，则在自定义角色中查找
-  const customCard = customCharacters.value.find(c => c.id === cardId);
+  const customCard = customCharacters.value.find((c) => c.id === cardId)
   if (customCard) {
-    return customCard.name;
+    return customCard.name
   }
-  return '未知角色';
-};
+  return '未知角色'
+}
 
 const isCardMissing = (cardId) => {
-  if (!cardId || cardId === '_旁白' || cardId === '_班长') return false;
-  const exists = allCards.some(c => c.id === cardId) || customCharacters.value.some(c => c.id === cardId);
-  return !exists;
-};
+  if (!cardId || cardId === '_旁白' || cardId === '_班长') return false
+  const exists =
+    allCards.some((c) => c.id === cardId) || customCharacters.value.some((c) => c.id === cardId)
+  return !exists
+}
 
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
 
 // 添加新消息到聊天记录
 const addMessage = () => {
   if (!newMessage.value.cardId || !newMessage.value.text) {
-    alert('请选择一个角色并输入对话内容。');
-    return;
+    alert('请选择一个角色并输入对话内容。')
+    return
   }
-  let displayName = null;
+  let displayName = null
   // 如果自定义名称不为空，则优先使用自定义名称
   if (customName.value.trim()) {
-    displayName = customName.value;
+    displayName = customName.value
   } else {
     // 否则使用角色的默认名称
-    displayName = getCardName(newMessage.value.cardId);
+    displayName = getCardName(newMessage.value.cardId)
   }
   chatLog.value.push({
     ...newMessage.value,
     displayName: displayName, // 将最终要显示的名字存入消息对象
-  });
+  })
 
   // 清空文本框和自定义名称框
-  newMessage.value.text = '';
-};
+  newMessage.value.text = ''
+}
 
 // 图片上传功能
-const imageInputRef = ref(null); // 新增：对文件输入框的引用
+const imageInputRef = ref(null) // 新增：对文件输入框的引用
 // 当前图片上传模式
-const imageUploadMode = ref('add'); // 'add' 或 'replace'
+const imageUploadMode = ref('add') // 'add' 或 'replace'
 
 // 点击“添加图片”按钮时，触发隐藏的文件选择框
 const triggerImageUpload = () => {
-  imageUploadMode.value = 'add';
+  imageUploadMode.value = 'add'
   if (!newMessage.value.cardId) {
-    alert('请先选择一个角色，再添加图片。');
-    return;
+    alert('请先选择一个角色，再添加图片。')
+    return
   }
   if (newMessage.value.cardId === '_旁白') {
-    alert('旁白不允许发送图片。');
-    return;
+    alert('旁白不允许发送图片。')
+    return
   }
-  imageInputRef.value?.click();
-};
+  imageInputRef.value?.click()
+}
 
 // 触发“重新上传图片”
 const triggerImageReplace = () => {
-  imageUploadMode.value = 'replace';
-  imageInputRef.value?.click();
-  closeEditMenu();
-};
+  imageUploadMode.value = 'replace'
+  imageInputRef.value?.click()
+  closeEditMenu()
+}
 const onImageSelected = (event) => {
   if (imageUploadMode.value === 'add') {
-    addImageMessage(event);
+    addImageMessage(event)
   } else {
-    replaceImageMessage(event);
+    replaceImageMessage(event)
   }
-};
+}
 
 // 当用户选择了图片文件后
 const addImageMessage = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]
+  if (!file) return
 
   // 生成临时的 blob URL
-  const imageUrl = URL.createObjectURL(file);
+  const imageUrl = URL.createObjectURL(file)
 
   // 创建消息
-  const displayName = customName.value || getCardName(newMessage.value.cardId);
+  const displayName = customName.value || getCardName(newMessage.value.cardId)
 
-  let position = 'left';
-  if (newMessage.value.cardId === '_旁白') position = 'center';
-  else position = isRightSide.value ? 'right' : 'left';
+  let position = 'left'
+  if (newMessage.value.cardId === '_旁白') position = 'center'
+  else position = isRightSide.value ? 'right' : 'left'
 
   // 在插入模式下，插入到指定位置后
   if (insertingIndex.value !== null) {
@@ -574,9 +629,9 @@ const addImageMessage = (event) => {
       displayName: displayName,
       customName: customName.value,
       position: position,
-    });
-    exitInserting();
-    event.target.value = ''; // 清空文件输入框
+    })
+    exitInserting()
+    event.target.value = '' // 清空文件输入框
   } else {
     // 添加新消息到末尾
     chatLog.value.push({
@@ -587,567 +642,590 @@ const addImageMessage = (event) => {
       displayName: displayName,
       customName: customName.value,
       position: position,
-    });
+    })
   }
   // 清空文件输入框的值，以便连续选择同一张图片
-  event.target.value = '';
-};
+  event.target.value = ''
+}
 
 const replaceImageMessage = (event) => {
-  const file = event.target.files[0];
-  const index = editMenu.value.index;
-  if (!file || index === null) return;
+  const file = event.target.files[0]
+  const index = editMenu.value.index
+  if (!file || index === null) return
 
-  const messageToUpdate = chatLog.value[index];
-  const oldUrl = messageToUpdate.text;
+  const messageToUpdate = chatLog.value[index]
+  const oldUrl = messageToUpdate.text
 
   // 释放旧的URL以回收内存
-  URL.revokeObjectURL(oldUrl);
+  URL.revokeObjectURL(oldUrl)
 
   // 创建并跟踪新的URL
-  const newUrl = URL.createObjectURL(file);
+  const newUrl = URL.createObjectURL(file)
 
   // 更新消息内容
-  messageToUpdate.text = newUrl;
-  messageToUpdate.imageBlob = file; // 更新 Blob 对象
+  messageToUpdate.text = newUrl
+  messageToUpdate.imageBlob = file // 更新 Blob 对象
 
   // 清空文件输入框
-  event.target.value = '';
-};
+  event.target.value = ''
+}
 
 // 编辑菜单
 const editMenu = ref({
   visible: false,
   index: null,
-});
+})
 
 // 编辑模式
-const editingIndex = ref(null); // null 表示不在编辑模式, 数字表示正在编辑的消息索引
-const chatEditorRef = ref(null); // 用于滚动到编辑区
-const insertingIndex = ref(null); // null 表示不在插入模式, 数字表示要插入消息的目标索引
+const editingIndex = ref(null) // null 表示不在编辑模式, 数字表示正在编辑的消息索引
+const chatEditorRef = ref(null) // 用于滚动到编辑区
+const insertingIndex = ref(null) // null 表示不在插入模式, 数字表示要插入消息的目标索引
 
 // 重置编辑器状态
 const resetEditor = () => {
-  newMessage.value.cardId = null;
-  newMessage.value.text = '';
-  customName.value = '';
-};
+  newMessage.value.cardId = null
+  newMessage.value.text = ''
+  customName.value = ''
+}
 
 // 触发编辑消息
 const startEditing = () => {
-  const index = editMenu.value.index;
-  if (index === null) return;
+  const index = editMenu.value.index
+  if (index === null) return
 
   // 进入编辑模式
-  exitInserting(); // 取消插入模式
-  editingIndex.value = index;
-  const message = chatLog.value[index];
+  exitInserting() // 取消插入模式
+  editingIndex.value = index
+  const message = chatLog.value[index]
 
   // 检查并添加当前编辑的角色ID (如果该角色已被移除)
-  const isSpecialId = message.cardId === '_班长' || message.cardId === '_旁白';
+  const isSpecialId = message.cardId === '_班长' || message.cardId === '_旁白'
   if (!isSpecialId && !selectedCharacterIds.value.includes(message.cardId)) {
-    selectedCharacterIds.value.push(message.cardId);
+    selectedCharacterIds.value.push(message.cardId)
   }
-  newMessage.value.cardId = message.cardId;
+  newMessage.value.cardId = message.cardId
 
   // 恢复开关状态
   nextTick(() => {
     if (message.cardId !== '_旁白') {
-      isRightSide.value = message.position === 'right';
+      isRightSide.value = message.position === 'right'
     }
-  });
+  })
 
   // 加载消息数据到编辑器
   // 使用 nextTick 确保添加角色而更新的选项已渲染
   nextTick(() => {
-    customName.value = message.displayName;
+    customName.value = message.displayName
     if (message.type === 'image') {
-      newMessage.value.text = '【图片消息】'; // 图片消息不加载文本
+      newMessage.value.text = '【图片消息】' // 图片消息不加载文本
     } else {
-      newMessage.value.text = message.text; // 其他情况加载文本
+      newMessage.value.text = message.text // 其他情况加载文本
     }
-  });
+  })
 
-  closeEditMenu();
+  closeEditMenu()
   // 滚动到编辑器
-  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' });
-};
+  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' })
+}
 
 // 修改完成
 const updateMessage = () => {
   if (editingIndex.value === null || !newMessage.value.cardId || !newMessage.value.text) {
-    alert('请确保已选择角色并填写内容。');
-    return;
+    alert('请确保已选择角色并填写内容。')
+    return
   }
 
-  const messageToUpdate = chatLog.value[editingIndex.value];
+  const messageToUpdate = chatLog.value[editingIndex.value]
   // 从编辑器读取数据并更新
-  messageToUpdate.cardId = newMessage.value.cardId;
-  messageToUpdate.text = newMessage.value.text;
-  messageToUpdate.displayName = customName.value ? customName.value : getCardName(newMessage.value.cardId);
+  messageToUpdate.cardId = newMessage.value.cardId
+  messageToUpdate.text = newMessage.value.text
+  messageToUpdate.displayName = customName.value
+    ? customName.value
+    : getCardName(newMessage.value.cardId)
 
   // 根据新角色更新消息位置
-  const newCardId = newMessage.value.cardId;
-  if (newCardId === "_旁白") messageToUpdate.position = 'center';
-  else messageToUpdate.position = isRightSide.value ? 'right' : 'left';
+  const newCardId = newMessage.value.cardId
+  if (newCardId === '_旁白') messageToUpdate.position = 'center'
+  else messageToUpdate.position = isRightSide.value ? 'right' : 'left'
 
-  exitEditing();
-};
+  exitEditing()
+}
 
 // 退出编辑模式并重置编辑器
 const exitEditing = () => {
-  editingIndex.value = null;
-  resetEditor();
-};
+  editingIndex.value = null
+  resetEditor()
+}
 
 // 进入插入消息模式
 const startInserting = () => {
-  const index = editMenu.value.index;
-  if (index === null) return;
+  const index = editMenu.value.index
+  if (index === null) return
 
   // 如果当前在编辑模式，先取消
-  exitEditing();
+  exitEditing()
 
-  insertingIndex.value = index;
-  closeEditMenu();
-  resetEditor(); // 清空编辑器以便输入新内容
-  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' });
-};
+  insertingIndex.value = index
+  closeEditMenu()
+  resetEditor() // 清空编辑器以便输入新内容
+  chatEditorRef.value?.scrollIntoView({ behavior: 'smooth' })
+}
 
 // 执行插入操作
 const insertMessage = () => {
   if (insertingIndex.value === null || !newMessage.value.cardId || !newMessage.value.text) {
-    alert('请选择一个角色并输入对话内容。');
-    return;
+    alert('请选择一个角色并输入对话内容。')
+    return
   }
 
-  let displayName = customName.value.trim() ? customName.value.trim() : getCardName(newMessage.value.cardId);
+  let displayName = customName.value.trim()
+    ? customName.value.trim()
+    : getCardName(newMessage.value.cardId)
 
   const messageToInsert = {
     ...newMessage.value,
     displayName: displayName,
-  };
+  }
 
   // 使用 splice 在指定位置后插入新消息
-  chatLog.value.splice(insertingIndex.value + 1, 0, messageToInsert);
+  chatLog.value.splice(insertingIndex.value + 1, 0, messageToInsert)
 
-  exitInserting(); // 退出插入模式并重置
-};
+  exitInserting() // 退出插入模式并重置
+}
 
 // 退出插入模式
 const exitInserting = () => {
-  insertingIndex.value = null;
-  resetEditor();
-};
+  insertingIndex.value = null
+  resetEditor()
+}
 
 // 根据模式决定添加/修改/插入消息
 const handleFormSubmit = () => {
   if (editingIndex.value !== null) {
-    updateMessage();
+    updateMessage()
   } else if (insertingIndex.value !== null) {
-    insertMessage();
+    insertMessage()
   } else {
-    addMessage();
+    addMessage()
   }
-};
+}
 
 // 删除消息
 const deleteMessage = () => {
-  const index = editMenu.value.index;
-  if (index === null) return;
+  const index = editMenu.value.index
+  if (index === null) return
   if (window.confirm('确定要删除这条消息吗？')) {
-    const msg = chatLog.value[index];
+    const msg = chatLog.value[index]
     if (msg.type === 'image' && msg.text) {
-      URL.revokeObjectURL(msg.text);
+      URL.revokeObjectURL(msg.text)
     }
-    chatLog.value.splice(index, 1);
+    chatLog.value.splice(index, 1)
     // 如果删除的是正在编辑的消息，则取消编辑
     if (editingIndex.value === index) {
-      exitEditing();
+      exitEditing()
     }
   }
-  closeEditMenu();
-};
+  closeEditMenu()
+}
 
 // 开关菜单
 const openEditMenu = (index) => {
-  editMenu.value.index = index;
-  editMenu.value.visible = true;
-};
+  editMenu.value.index = index
+  editMenu.value.visible = true
+}
 const closeEditMenu = () => {
-  editMenu.value.visible = false;
-};
+  editMenu.value.visible = false
+}
 
 // 导出指定存档
 const exportSlot = async (slotIndex) => {
-  let dataToExport = null;
-  let fileName = '';
+  let dataToExport = null
+  let fileName = ''
 
   if (slotIndex === 'auto') {
-    dataToExport = await loadFromDB(DB_KEYS.CHAT_LOG);
+    dataToExport = await loadFromDB(DB_KEYS.CHAT_LOG)
     if (!dataToExport || dataToExport.length === 0) {
-      alert('自动存档为空');
-      return;
+      alert('自动存档为空')
+      return
     }
-    fileName = `织夜工具箱-自动存档-${new Date().toISOString().slice(0, 10)}.json`;
+    fileName = `织夜工具箱-自动存档-${new Date().toISOString().slice(0, 10)}.json`
   } else {
-    const key = DB_KEYS[`SLOT_${slotIndex}`];
-    const data = await loadFromDB(key);
+    const key = DB_KEYS[`SLOT_${slotIndex}`]
+    const data = await loadFromDB(key)
     if (!data || !data.chatLog) {
-      alert('该存档为空');
-      return;
+      alert('该存档为空')
+      return
     }
-    dataToExport = data.chatLog;
-    const name = data.name || `存档${slotIndex}`;
-    fileName = `织夜工具箱-${name}-${new Date().toISOString().slice(0, 10)}.json`;
+    dataToExport = data.chatLog
+    const name = data.name || `存档${slotIndex}`
+    fileName = `织夜工具箱-${name}-${new Date().toISOString().slice(0, 10)}.json`
   }
 
   // 将图片转换为Base64以便导出
   if (dataToExport) {
-    dataToExport = await Promise.all(dataToExport.map(async (msg) => {
-      const newMsg = { ...msg };
-      if (newMsg.type === 'image' && newMsg.imageBlob) {
-        try {
-          newMsg.imageBase64 = await blobToBase64(newMsg.imageBlob);
-          // 导出时不保留 blob 对象和临时 URL，减小体积并避免混淆
-          delete newMsg.imageBlob;
-          delete newMsg.text;
-        } catch (e) {
-          logger.error('图片导出转换失败', e);
+    dataToExport = await Promise.all(
+      dataToExport.map(async (msg) => {
+        const newMsg = { ...msg }
+        if (newMsg.type === 'image' && newMsg.imageBlob) {
+          try {
+            newMsg.imageBase64 = await blobToBase64(newMsg.imageBlob)
+            // 导出时不保留 blob 对象和临时 URL，减小体积并避免混淆
+            delete newMsg.imageBlob
+            delete newMsg.text
+          } catch (e) {
+            logger.error('图片导出转换失败', e)
+          }
         }
-      }
-      return newMsg;
-    }));
+        return newMsg
+      }),
+    )
   }
 
-  const dataStr = JSON.stringify(dataToExport, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
-};
+  const dataStr = JSON.stringify(dataToExport, null, 2)
+  const blob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 // 导入聊天记录的相关逻辑
-const fileInput = ref(null);
-const targetImportSlot = ref(null);
+const fileInput = ref(null)
+const targetImportSlot = ref(null)
 
 const triggerImportToSlot = (slotIndex) => {
-  targetImportSlot.value = slotIndex;
-  fileInput.value.click();
-};
+  targetImportSlot.value = slotIndex
+  fileInput.value.click()
+}
 
 const handleImportFile = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]
+  if (!file) return
 
-  const reader = new FileReader();
+  const reader = new FileReader()
   reader.onload = async (e) => {
     try {
-      const importedData = JSON.parse(e.target.result);
+      const importedData = JSON.parse(e.target.result)
       if (!Array.isArray(importedData)) {
-        throw new Error('文件格式不正确，需要是数组格式。');
+        throw new Error('文件格式不正确，需要是数组格式。')
       }
 
       // 处理导入的数据，将 Base64 还原为 Blob
-      const processedData = await Promise.all(importedData.map(async (msg) => {
-        if (msg.type === 'image' && msg.imageBase64) {
-          try {
-            const res = await fetch(msg.imageBase64);
-            const blob = await res.blob();
-            msg.imageBlob = blob;
-            // 移除 base64 字符串以节省内存
-            delete msg.imageBase64;
-          } catch (err) {
-            logger.error('图片导入还原失败', err);
+      const processedData = await Promise.all(
+        importedData.map(async (msg) => {
+          if (msg.type === 'image' && msg.imageBase64) {
+            try {
+              const res = await fetch(msg.imageBase64)
+              const blob = await res.blob()
+              msg.imageBlob = blob
+              // 移除 base64 字符串以节省内存
+              delete msg.imageBase64
+            } catch (err) {
+              logger.error('图片导入还原失败', err)
+            }
           }
-        }
-        return msg;
-      }));
+          return msg
+        }),
+      )
 
       if (targetImportSlot.value !== null) {
-        const index = targetImportSlot.value;
-        const key = DB_KEYS[`SLOT_${index}`];
+        const index = targetImportSlot.value
+        const key = DB_KEYS[`SLOT_${index}`]
 
         // 尝试保留原有名称
-        const existing = await loadFromDB(key);
-        const name = existing?.name || `存档 ${index}`;
+        const existing = await loadFromDB(key)
+        const name = existing?.name || `存档 ${index}`
 
         const newData = {
           name,
           timestamp: Date.now(),
-          chatLog: processedData
-        };
+          chatLog: processedData,
+        }
 
-        await saveToDB(key, newData);
+        await saveToDB(key, newData)
 
         // 更新UI
         slotsData.value[index - 1] = {
           name: newData.name,
-          timestamp: newData.timestamp
-        };
-        alert(`成功导入到存档 ${index}`);
+          timestamp: newData.timestamp,
+        }
+        alert(`成功导入到存档 ${index}`)
       }
     } catch (error) {
-      alert(`导入失败：${error.message}`);
+      alert(`导入失败：${error.message}`)
     } finally {
       // 清空文件输入
-      event.target.value = '';
-      targetImportSlot.value = null;
+      event.target.value = ''
+      targetImportSlot.value = null
     }
-  };
-  reader.readAsText(file);
-};
+  }
+  reader.readAsText(file)
+}
 // 预览区域缩放逻辑
-const previewWrapper = ref(null);
-const previewScale = ref(1);
+const previewWrapper = ref(null)
+const previewScale = ref(1)
 
 const updatePreviewScale = () => {
-  if (!previewWrapper.value) return;
-  const wrapperWidth = previewWrapper.value.clientWidth;
+  if (!previewWrapper.value) return
+  const wrapperWidth = previewWrapper.value.clientWidth
   // 目标宽度为配置宽度 + 左右留白
-  const targetWidth = previewConfig.value.width + 40;
+  const targetWidth = previewConfig.value.width + 40
 
   if (wrapperWidth < targetWidth) {
-    previewScale.value = wrapperWidth / targetWidth;
+    previewScale.value = wrapperWidth / targetWidth
   } else {
-    previewScale.value = 1;
+    previewScale.value = 1
   }
-};
+}
 
 const previewStyle = computed(() => {
-  if (previewScale.value >= 1) return {};
+  if (previewScale.value >= 1) return {}
   return {
     transform: `scale(${previewScale.value})`,
     transformOrigin: 'top center',
-    marginBottom: `${-(previewConfig.value.height * (1 - previewScale.value))}px`
-  };
-});
+    marginBottom: `${-(previewConfig.value.height * (1 - previewScale.value))}px`,
+  }
+})
 
 // 生成图片
 const generateImage = async () => {
-  if (!captureRef.value) return;
+  if (!captureRef.value) return
 
   // 临时重置缩放以保证生成图片的清晰度和尺寸
-  const originalScale = previewScale.value;
-  previewScale.value = 1;
+  const originalScale = previewScale.value
+  previewScale.value = 1
 
   try {
-    await nextTick();
+    await nextTick()
     const dataUrl = await toPng(captureRef.value, {
       pixelRatio: 2,
       backgroundColor: null, // 保持透明背景，以便圆角生效
       width: previewConfig.value.width,
       height: previewConfig.value.height,
       skipFonts: false,
-      cacheBust: false
-    });
-    const link = document.createElement('a');
-    link.download = `聊天记录-${new Date().toISOString().slice(0, 10)}.png`;
-    link.href = dataUrl;
-    link.click();
+      cacheBust: false,
+    })
+    const link = document.createElement('a')
+    link.download = `聊天记录-${new Date().toISOString().slice(0, 10)}.png`
+    link.href = dataUrl
+    link.click()
   } catch (err) {
-    logger.error('生成图片失败:', err);
-    alert('生成失败');
+    logger.error('生成图片失败:', err)
+    alert('生成失败')
   } finally {
-    previewScale.value = originalScale; // 恢复缩放
+    previewScale.value = originalScale // 恢复缩放
   }
-};
+}
 
 // 监听聊天记录变化，实现自动存档功能
-watch(chatLog, (newVal) => {
-  // 避免在清空记录时保存空数据
-  if (!newVal || newVal.length === 0) return;
-  // 使用 toRaw 确保保存的是普通对象，保留 Blob
-  saveToDB(DB_KEYS.CHAT_LOG, newVal.map(msg => toRaw(msg)));
-  saveToDB(DB_KEYS.AUTO_SAVE_TIME, Date.now());
-}, { deep: true });
+watch(
+  chatLog,
+  (newVal) => {
+    // 避免在清空记录时保存空数据
+    if (!newVal || newVal.length === 0) return
+    // 使用 toRaw 确保保存的是普通对象，保留 Blob
+    saveToDB(
+      DB_KEYS.CHAT_LOG,
+      newVal.map((msg) => toRaw(msg)),
+    )
+    saveToDB(DB_KEYS.AUTO_SAVE_TIME, Date.now())
+  },
+  { deep: true },
+)
 
 // 监听选择的角色ID，保存到 localStorage (ID列表较小，保持使用 localStorage)
-watch(selectedCharacterIds, (newVal) => {
-  localStorage.setItem(characterSelectionKey, JSON.stringify(newVal));
-}, { deep: true });
+watch(
+  selectedCharacterIds,
+  (newVal) => {
+    localStorage.setItem(characterSelectionKey, JSON.stringify(newVal))
+  },
+  { deep: true },
+)
 
 // --- 存档/读档 逻辑 ---
-const showSaveLoadMenu = ref(false);
-const autoSaveTime = ref(null);
+const showSaveLoadMenu = ref(false)
+const autoSaveTime = ref(null)
 const slotsData = ref([
   { name: '', timestamp: null },
   { name: '', timestamp: null },
-  { name: '', timestamp: null }
-]);
+  { name: '', timestamp: null },
+])
 
 const formatTime = (ts) => {
-  if (!ts) return '';
-  return new Date(ts).toLocaleString();
-};
+  if (!ts) return ''
+  return new Date(ts).toLocaleString()
+}
 
 const openSaveLoadMenu = async () => {
-  const t = await loadFromDB(DB_KEYS.AUTO_SAVE_TIME);
-  autoSaveTime.value = t;
+  const t = await loadFromDB(DB_KEYS.AUTO_SAVE_TIME)
+  autoSaveTime.value = t
 
   for (let i = 1; i <= 3; i++) {
-    const key = DB_KEYS[`SLOT_${i}`];
-    const data = await loadFromDB(key);
+    const key = DB_KEYS[`SLOT_${i}`]
+    const data = await loadFromDB(key)
     if (data) {
       slotsData.value[i - 1] = {
         name: data.name || '',
-        timestamp: data.timestamp
-      };
+        timestamp: data.timestamp,
+      }
     } else {
-      slotsData.value[i - 1] = { name: '', timestamp: null };
+      slotsData.value[i - 1] = { name: '', timestamp: null }
     }
   }
-  showSaveLoadMenu.value = true;
-};
+  showSaveLoadMenu.value = true
+}
 
 const closeSaveLoadMenu = () => {
-  showSaveLoadMenu.value = false;
-};
+  showSaveLoadMenu.value = false
+}
 
 const restoreChatLog = (logData) => {
-  chatLog.value.forEach(msg => {
+  chatLog.value.forEach((msg) => {
     if (msg.type === 'image' && msg.text) {
-      URL.revokeObjectURL(msg.text);
+      URL.revokeObjectURL(msg.text)
     }
-  });
+  })
 
-  logData.forEach(msg => {
+  logData.forEach((msg) => {
     if (msg.type === 'image' && msg.imageBlob) {
       try {
         // 重新创建临时 URL
-        msg.text = URL.createObjectURL(msg.imageBlob);
+        msg.text = URL.createObjectURL(msg.imageBlob)
       } catch (e) {
-        logger.error('恢复图片消息失败', e);
-        msg.text = '';
+        logger.error('恢复图片消息失败', e)
+        msg.text = ''
       }
     }
-  });
+  })
   // 将存档中出现的有效角色添加到已选列表
-  const validIds = new Set(selectedCharacterIds.value);
-  logData.forEach(msg => {
+  const validIds = new Set(selectedCharacterIds.value)
+  logData.forEach((msg) => {
     if (msg.cardId && msg.cardId !== '_旁白' && msg.cardId !== '_班长') {
       if (!isCardMissing(msg.cardId)) {
-        validIds.add(msg.cardId);
+        validIds.add(msg.cardId)
       }
     }
-  });
-  selectedCharacterIds.value = Array.from(validIds);
-  chatLog.value = logData;
-};
+  })
+  selectedCharacterIds.value = Array.from(validIds)
+  chatLog.value = logData
+}
 
 const loadAutoSave = async () => {
   if (chatLog.value.length > 0) {
-    if (!confirm('当前编辑内容将被覆盖，确定读取自动存档吗？')) return;
+    if (!confirm('当前编辑内容将被覆盖，确定读取自动存档吗？')) return
   }
-  const log = await loadFromDB(DB_KEYS.CHAT_LOG);
+  const log = await loadFromDB(DB_KEYS.CHAT_LOG)
   if (log && log.length > 0) {
-    restoreChatLog(log);
-    closeSaveLoadMenu();
-    isSelectionMode.value = false;
+    restoreChatLog(log)
+    closeSaveLoadMenu()
+    isSelectionMode.value = false
   } else {
-    alert('读取失败或无记录');
+    alert('读取失败或无记录')
   }
-};
+}
 
 const saveToSlot = async (index) => {
-  const slotKey = DB_KEYS[`SLOT_${index}`];
+  const slotKey = DB_KEYS[`SLOT_${index}`]
   if (slotsData.value[index - 1].timestamp) {
-    if (!confirm(`存档 "${slotsData.value[index - 1].name || `存档 ${index}`}" 已有内容，确定要覆盖吗？`)) {
-      return;
+    if (
+      !confirm(
+        `存档 "${slotsData.value[index - 1].name || `存档 ${index}`}" 已有内容，确定要覆盖吗？`,
+      )
+    ) {
+      return
     }
   }
-  const name = slotsData.value[index - 1].name || `存档 ${index}`;
+  const name = slotsData.value[index - 1].name || `存档 ${index}`
   const data = {
     name,
     timestamp: Date.now(),
-    chatLog: chatLog.value.map(msg => toRaw(msg))
-  };
-  await saveToDB(slotKey, data);
-  slotsData.value[index - 1].timestamp = data.timestamp;
-};
+    chatLog: chatLog.value.map((msg) => toRaw(msg)),
+  }
+  await saveToDB(slotKey, data)
+  slotsData.value[index - 1].timestamp = data.timestamp
+}
 
 const loadFromSlot = async (index) => {
-  const isSlotEmpty = !slotsData.value[index - 1].timestamp;
+  const isSlotEmpty = !slotsData.value[index - 1].timestamp
   if (chatLog.value.length > 0) {
     const msg = isSlotEmpty
       ? '该存档为空，读取将清空当前对话，确定吗？'
-      : '当前编辑内容将被覆盖，确定读取该存档吗？';
-    if (!confirm(msg)) return;
+      : '当前编辑内容将被覆盖，确定读取该存档吗？'
+    if (!confirm(msg)) return
   }
 
   if (isSlotEmpty) {
-    restoreChatLog([]);
-    closeSaveLoadMenu();
-    return;
+    restoreChatLog([])
+    closeSaveLoadMenu()
+    return
   }
 
-  const slotKey = DB_KEYS[`SLOT_${index}`];
-  const data = await loadFromDB(slotKey);
+  const slotKey = DB_KEYS[`SLOT_${index}`]
+  const data = await loadFromDB(slotKey)
   if (data && data.chatLog) {
-    restoreChatLog(data.chatLog);
-    closeSaveLoadMenu();
-    isSelectionMode.value = false;
+    restoreChatLog(data.chatLog)
+    closeSaveLoadMenu()
+    isSelectionMode.value = false
   } else {
-    restoreChatLog([]);
-    closeSaveLoadMenu();
+    restoreChatLog([])
+    closeSaveLoadMenu()
   }
-};
+}
 
 const clearSlot = async (index) => {
-  if (!slotsData.value[index - 1].timestamp) return;
+  if (!slotsData.value[index - 1].timestamp) return
 
-  if (!confirm(`确定要删除存档 ${index} 吗？此操作无法撤销。`)) return;
+  if (!confirm(`确定要删除存档 ${index} 吗？此操作无法撤销。`)) return
 
-  const slotKey = DB_KEYS[`SLOT_${index}`];
-  await deleteFromDB(slotKey);
+  const slotKey = DB_KEYS[`SLOT_${index}`]
+  await deleteFromDB(slotKey)
 
-  slotsData.value[index - 1] = { name: '', timestamp: null };
-};
+  slotsData.value[index - 1] = { name: '', timestamp: null }
+}
 
 // 在组件挂载时加载已保存的角色选择以及自定义角色
 onMounted(async () => {
-  const savedCustomCharacters = await loadFromDB(DB_KEYS.CUSTOM_CHARS);
+  const savedCustomCharacters = await loadFromDB(DB_KEYS.CUSTOM_CHARS)
   if (savedCustomCharacters) {
-    customCharacters.value = savedCustomCharacters;
+    customCharacters.value = savedCustomCharacters
   }
-  const savedSelection = localStorage.getItem(characterSelectionKey);
+  const savedSelection = localStorage.getItem(characterSelectionKey)
   if (savedSelection) {
     try {
-      selectedCharacterIds.value = JSON.parse(savedSelection);
+      selectedCharacterIds.value = JSON.parse(savedSelection)
     } catch (e) {
-      logger.error("解析已选角色配置失败:", e);
+      logger.error('解析已选角色配置失败:', e)
       // 解析失败则停留在选择模式
-      isSelectionMode.value = true;
+      isSelectionMode.value = true
     }
   } else {
     // 首次访问，停留在选择模式
-    isSelectionMode.value = true;
+    isSelectionMode.value = true
   }
 
   // 进入页面时应用保存的预览配置
-  const savedPreviewConfig = localStorage.getItem('customChatPreviewConfig');
+  const savedPreviewConfig = localStorage.getItem('customChatPreviewConfig')
   if (savedPreviewConfig) {
     try {
-      const parsedConfig = JSON.parse(savedPreviewConfig);
+      const parsedConfig = JSON.parse(savedPreviewConfig)
       previewConfig.value = {
         ...previewConfig.value,
-        ...parsedConfig
-      };
+        ...parsedConfig,
+      }
     } catch (e) {
-      logger.error("解析预览配置失败:", e);
+      logger.error('解析预览配置失败:', e)
     }
   }
 
-  window.addEventListener('resize', updatePreviewScale);
-  updatePreviewScale();
-});
+  window.addEventListener('resize', updatePreviewScale)
+  updatePreviewScale()
+})
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updatePreviewScale);
-});
+  window.removeEventListener('resize', updatePreviewScale)
+})
 </script>
 
 <style scoped>
@@ -1599,7 +1677,7 @@ onUnmounted(() => {
   color: v-bind('colors.text.secondary');
 }
 
-.form-row input[type="text"] {
+.form-row input[type='text'] {
   width: 100%;
   padding: 10px;
   border-radius: 5px;
@@ -1675,7 +1753,9 @@ onUnmounted(() => {
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
   text-align: center;
   font-weight: bold;
 }

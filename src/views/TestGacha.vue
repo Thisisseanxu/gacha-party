@@ -10,9 +10,7 @@
 
       <div class="advanced-config">
         <h2 class="config-title">高级配置</h2>
-        <p class="config-description">
-          请根据卡池规则手动输入ID。留空则表示不启用该项配置。
-        </p>
+        <p class="config-description">请根据卡池规则手动输入ID。留空则表示不启用该项配置。</p>
         <div class="config-grid">
           <div class="config-item">
             <label for="pool-id">卡池ID:</label>
@@ -54,102 +52,101 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
-import { useGacha } from '@/utils/useGacha';
-import { logger, setLogLevel } from '@/utils/logger.js';
+import { ref, computed, nextTick } from 'vue'
+import { useGacha } from '@/utils/useGacha'
+import { logger, setLogLevel } from '@/utils/logger.js'
 
 // --- 输入框状态定义 ---
-const pullCount = ref(1000);
-const poolIdInput = ref('standard'); // 默认卡池ID
-const upCardIdInput = ref('');      // 自选UP卡ID输入
-const upGroupIdInput = ref('');     // UP组ID输入
+const pullCount = ref(1000)
+const poolIdInput = ref('standard') // 默认卡池ID
+const upCardIdInput = ref('') // 自选UP卡ID输入
+const upGroupIdInput = ref('') // UP组ID输入
 
 // --- 模拟过程状态 ---
-const isSimulating = ref(false);
-const simulationResult = ref(null);
-const activePoolIdForDisplay = ref(''); // 用于在结果中显示本次模拟实际使用的卡池ID
+const isSimulating = ref(false)
+const simulationResult = ref(null)
+const activePoolIdForDisplay = ref('') // 用于在结果中显示本次模拟实际使用的卡池ID
 
 // --- 为 useGacha 准备响应式参数 ---
 // 这些 ref 会被传入 useGacha，当它们变化时，useGacha 内部会自动响应
-const reactivePoolId = ref(poolIdInput.value);
+const reactivePoolId = ref(poolIdInput.value)
 const reactiveUpCardId = computed(() => {
   // 将输入的字符串转为数字，如果输入为空则为 undefined
-  const id = parseInt(upCardIdInput.value, 10);
-  return isNaN(id) ? undefined : id;
-});
+  const id = parseInt(upCardIdInput.value, 10)
+  return isNaN(id) ? undefined : id
+})
 
 // --- 初始化 Gacha Logic ---
 // 传入响应式的卡池ID和UP卡ID
-const {
-  currentPool,
-  setSelectedUpGroup,
-  performMultiPulls,
-} = useGacha(reactivePoolId, reactiveUpCardId);
+const { currentPool, setSelectedUpGroup, performMultiPulls } = useGacha(
+  reactivePoolId,
+  reactiveUpCardId,
+)
 
 // --- 计算属性 ---
 const totalPullsInResult = computed(() => {
-  if (!simulationResult.value) return 0;
-  return Object.values(simulationResult.value).reduce((sum, count) => sum + count, 0);
-});
+  if (!simulationResult.value) return 0
+  return Object.values(simulationResult.value).reduce((sum, count) => sum + count, 0)
+})
 
 const totalResultPulls = computed(() => {
-  return totalPullsInResult.value.toLocaleString();
-});
+  return totalPullsInResult.value.toLocaleString()
+})
 
 const calculatePercentage = (count) => {
-  if (!totalPullsInResult.value) return '0%';
-  const percentage = (count / totalPullsInResult.value) * 100;
-  return `${percentage.toFixed(2)}%`;
-};
+  if (!totalPullsInResult.value) return '0%'
+  const percentage = (count / totalPullsInResult.value) * 100
+  return `${percentage.toFixed(2)}%`
+}
 
 // --- 核心方法 ---
 const runSimulation = async () => {
   if (!pullCount.value || pullCount.value <= 0) {
-    alert('请输入有效的抽卡次数！');
-    return;
+    alert('请输入有效的抽卡次数！')
+    return
   }
   if (!poolIdInput.value) {
-    alert('请输入卡池ID！');
-    return;
+    alert('请输入卡池ID！')
+    return
   }
 
-  isSimulating.value = true;
-  simulationResult.value = null;
+  isSimulating.value = true
+  simulationResult.value = null
 
   // 更新将要传递给 useGacha 的状态
-  reactivePoolId.value = poolIdInput.value;
+  reactivePoolId.value = poolIdInput.value
 
   // 确保 reactivePoolId 在 useGacha 内部生效
-  await nextTick();
+  await nextTick()
 
   // 设置UP组（如果输入了ID且有这个规则）
   if (upGroupIdInput.value && upGroupIdInput.value.trim() !== '') {
-    const availableGroups = currentPool.value?.rules?.SSR?.SelectUpCardsGroup || [];
-    const groupToSet = availableGroups.find(g => g.id === upGroupIdInput.value);
+    const availableGroups = currentPool.value?.rules?.SSR?.SelectUpCardsGroup || []
+    const groupToSet = availableGroups.find((g) => g.id === upGroupIdInput.value)
     if (groupToSet) {
-      setSelectedUpGroup(groupToSet);
-      logger.log('模拟器: 已设置UP组 ->', groupToSet.name);
+      setSelectedUpGroup(groupToSet)
+      logger.log('模拟器: 已设置UP组 ->', groupToSet.name)
     } else {
-      logger.warn(`模拟器: 在当前卡池中未找到ID为 "${upGroupIdInput.value}" 的UP组。`);
+      logger.warn(`模拟器: 在当前卡池中未找到ID为 "${upGroupIdInput.value}" 的UP组。`)
       // 如果找不到，则设置为第一个可用的UP组
-      setSelectedUpGroup(currentPool.value?.rules?.SSR?.SelectUpCardsGroup[0] || null);
+      setSelectedUpGroup(currentPool.value?.rules?.SSR?.SelectUpCardsGroup[0] || null)
     }
   }
 
   // 确保 setSelectedUpGroup 的效果已在 useGacha 内部生效
-  await nextTick();
+  await nextTick()
 
   // 执行模拟
   // 使用 setTimeout 将耗时操作推迟到下一个事件循环，以确保UI能立即渲染
   setTimeout(() => {
-    setLogLevel('warn'); // 设置日志级别避免日志输出影响性能
-    activePoolIdForDisplay.value = reactivePoolId.value; // 记录本次模拟的卡池ID
-    const results = performMultiPulls(pullCount.value);
+    setLogLevel('warn') // 设置日志级别避免日志输出影响性能
+    activePoolIdForDisplay.value = reactivePoolId.value // 记录本次模拟的卡池ID
+    const results = performMultiPulls(pullCount.value)
 
-    simulationResult.value = results;
-    isSimulating.value = false;
-  }, 50);
-};
+    simulationResult.value = results
+    isSimulating.value = false
+  }, 50)
+}
 </script>
 
 <style scoped>
@@ -197,7 +194,9 @@ const runSimulation = async () => {
   border-radius: 6px;
   font-size: 1rem;
   box-sizing: border-box;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .config-item input:focus {
@@ -242,7 +241,9 @@ const runSimulation = async () => {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s, opacity 0.3s;
+  transition:
+    background-color 0.3s,
+    opacity 0.3s;
 }
 
 .simulate-button:hover:not(:disabled) {

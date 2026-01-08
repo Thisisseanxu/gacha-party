@@ -44,53 +44,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { colors } from '@/styles/colors.js';
+import { ref } from 'vue'
+import { colors } from '@/styles/colors.js'
 
 // --- 输入绑定 ---
-const price = ref(null);
-const premiumCurrency = ref(null);
-const standardCurrency = ref(null);
-const gachaTokens = ref(null);
-const tokenValue = ref(100);
-const premiumToStandardRate = ref(1.2);
+const price = ref(null)
+const premiumCurrency = ref(null)
+const standardCurrency = ref(null)
+const gachaTokens = ref(null)
+const tokenValue = ref(100)
+const premiumToStandardRate = ref(1.2)
 
 // --- 结果 ---
-const result = ref(null);
+const result = ref(null)
 
 // --- 计算逻辑 ---
 const calculateValue = () => {
   if (!price.value || price.value <= 0) {
-    alert('请输入有效的礼包价格！');
-    result.value = null;
-    return;
-  }
-
-  const premiumValueInStandard = (premiumCurrency.value || 0) * premiumToStandardRate.value;
-  const tokensValueInStandard = (gachaTokens.value || 0) * tokenValue.value;
-  const totalStandardCurrency = premiumValueInStandard + (standardCurrency.value || 0) + tokensValueInStandard;
-
-  const baseValue = price.value * 20 * premiumToStandardRate.value;
-
-  if (baseValue === 0) {
-    result.value = 0;
+    alert('请输入有效的礼包价格！')
+    result.value = null
     return
   }
 
-  result.value = (totalStandardCurrency / baseValue) * 100;
-};
+  const premiumValueInStandard = (premiumCurrency.value || 0) * premiumToStandardRate.value
+  const tokensValueInStandard = (gachaTokens.value || 0) * tokenValue.value
+  const totalStandardCurrency =
+    premiumValueInStandard + (standardCurrency.value || 0) + tokensValueInStandard
+
+  const baseValue = price.value * 20 * premiumToStandardRate.value
+
+  if (baseValue === 0) {
+    result.value = 0
+    return
+  }
+
+  result.value = (totalStandardCurrency / baseValue) * 100
+}
 
 // CSS颜色常量
-const colorBgPrimary = colors.background.primary;
-const colorBgContent = colors.background.content;
-const colorBgLight = colors.background.light;
-const colorTextPrimary = colors.text.primary;
-const colorTextSecondary = colors.text.secondary;
-const colorBrandPrimary = colors.brand.primary;
-const colorBrandHover = colors.brand.hover;
-const colorTextHighlight = colors.text.highlight;
-const colorBorderPrimary = colors.border.primary;
-
+const colorBgPrimary = colors.background.primary
+const colorBgContent = colors.background.content
+const colorBgLight = colors.background.light
+const colorTextPrimary = colors.text.primary
+const colorTextSecondary = colors.text.secondary
+const colorBrandPrimary = colors.brand.primary
+const colorBrandHover = colors.brand.hover
+const colorTextHighlight = colors.text.highlight
+const colorBorderPrimary = colors.border.primary
 </script>
 
 <style scoped>
@@ -182,7 +182,7 @@ const colorBorderPrimary = colors.border.primary;
 
 .result-section p {
   font-size: 1.2rem;
-  color: v-bind(colorTextSecondary)
+  color: v-bind(colorTextSecondary);
 }
 
 .result-value {

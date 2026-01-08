@@ -1,7 +1,6 @@
 <template>
   <div id="app">
-    <router-view>
-    </router-view>
+    <router-view> </router-view>
     <FloatingHomeButton v-if="$route.path !== '/'" />
   </div>
   <transition name="fade">
@@ -14,7 +13,9 @@
         </div>
 
         <div v-if="!isUpdating">
-          <p class="dialog-content">网站已更新，点击“立即刷新”以体验最新功能，享受更流畅的浏览体验。</p>
+          <p class="dialog-content">
+            网站已更新，点击“立即刷新”以体验最新功能，享受更流畅的浏览体验。
+          </p>
           <button @click="confirmUpdate" class="update-button">立即刷新</button>
         </div>
         <div v-else class="update-progress-container">
@@ -36,9 +37,9 @@ export default {
 
 <script setup>
 import { watch } from 'vue'
-import { UpdateRotation } from '@icon-park/vue-next';
-import FloatingHomeButton from './components/FloatingHomeButton.vue';
-import './styles/global.css';
+import { UpdateRotation } from '@icon-park/vue-next'
+import FloatingHomeButton from './components/FloatingHomeButton.vue'
+import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { ref } from 'vue'
 import { colors } from '@/styles/colors.js'
@@ -74,7 +75,6 @@ function confirmUpdate() {
     }
   }, 300)
 }
-
 </script>
 
 <style scoped>
@@ -151,7 +151,9 @@ function confirmUpdate() {
   font-size: 1rem;
   width: 100%;
   /* 按钮横跨整个弹窗，操作更方便 */
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
 }
 
 .update-button:hover {

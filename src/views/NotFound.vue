@@ -13,7 +13,7 @@
 
 <script setup>
 // !重要: 请确保这个路径是正确的
-import { colors } from '../styles/colors.js';
+import { colors } from '../styles/colors.js'
 </script>
 
 <style scoped>
@@ -65,7 +65,9 @@ import { colors } from '../styles/colors.js';
   border-radius: 8px;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 

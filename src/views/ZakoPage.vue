@@ -17,23 +17,23 @@
 </template>
 
 <script setup>
-import { logger } from '@/utils/logger';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { logger } from '@/utils/logger'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const customText = ref('雑魚'); // 默认文本
-const customFont = ref(''); // 默认字体
+const customText = ref('雑魚') // 默认文本
+const customFont = ref('') // 默认字体
 
 // 音频和文字动画的响应式数据
-const floatingTexts = ref([]);
-let textId = 0;
-let audioInterval;
-let textInterval;
+const floatingTexts = ref([])
+let textId = 0
+let audioInterval
+let textInterval
 
 // 播放音效
 const playSound = () => {
-  const audio = new Audio(new URL('/assets/zako.ogg', import.meta.url).href);
-  audio.play().catch(error => logger.error("音频播放失败:", error));
-};
+  const audio = new Audio(new URL('/assets/zako.ogg', import.meta.url).href)
+  audio.play().catch((error) => logger.error('音频播放失败:', error))
+}
 
 // 创建新的文字
 const createFloatingText = () => {
@@ -42,47 +42,47 @@ const createFloatingText = () => {
     text: customText.value,
     left: Math.random() * 90,
     duration: Math.random() * 5 + 3,
-  };
-  floatingTexts.value.push(newText);
+  }
+  floatingTexts.value.push(newText)
 
   setTimeout(() => {
-    floatingTexts.value.shift();
-  }, newText.duration * 1000);
-};
+    floatingTexts.value.shift()
+  }, newText.duration * 1000)
+}
 
 onMounted(() => {
   // 从URL参数获取自定义文本和字体
-  const urlParams = new URLSearchParams(window.location.search);
-  const textFromUrl = urlParams.get('text');
-  const fontFromUrl = urlParams.get('font');
+  const urlParams = new URLSearchParams(window.location.search)
+  const textFromUrl = urlParams.get('text')
+  const fontFromUrl = urlParams.get('font')
 
   if (textFromUrl) {
-    customText.value = textFromUrl;
+    customText.value = textFromUrl
   }
   if (fontFromUrl) {
-    customFont.value = fontFromUrl;
+    customFont.value = fontFromUrl
   }
-  audioInterval = setInterval(playSound, 1200);
-  textInterval = setInterval(createFloatingText, 1200);
-});
+  audioInterval = setInterval(playSound, 1200)
+  textInterval = setInterval(createFloatingText, 1200)
+})
 // 组件卸载时清除定时器
 onUnmounted(() => {
-  clearInterval(audioInterval);
-  clearInterval(textInterval);
-});
+  clearInterval(audioInterval)
+  clearInterval(textInterval)
+})
 
 // 计算文字样式，如果没有定义字体则使用系统默认字体
 function getFloatingTextStyle(textItem) {
   const style = {
     left: textItem.left + '%',
     animationDuration: textItem.duration + 's',
-  };
-  if (customFont.value.trim() !== '') {
-    style.fontFamily = customFont.value;
-  } else {
-    style.fontFamily = 'system-ui'; // 默认字体
   }
-  return style;
+  if (customFont.value.trim() !== '') {
+    style.fontFamily = customFont.value
+  } else {
+    style.fontFamily = 'system-ui' // 默认字体
+  }
+  return style
 }
 </script>
 

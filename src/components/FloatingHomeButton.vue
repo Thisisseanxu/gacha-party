@@ -1,36 +1,33 @@
 <template>
   <div class="floating-wrapper">
-    <div class="floating-home-button" @click="goToHome">
-    </div>
+    <div class="floating-home-button" @click="goToHome"></div>
 
     <Transition name="fade">
-      <div v-if="showHint" class="hint-bubble">
-        点我返回主页喵~
-      </div>
+      <div v-if="showHint" class="hint-bubble">点我返回主页喵~</div>
     </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { colors } from '@/styles/colors.js';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { colors } from '@/styles/colors.js'
 
-const router = useRouter();
+const router = useRouter()
 
-const showHint = ref(true);
+const showHint = ref(true)
 
 onMounted(() => {
   // 启动一个3秒的定时器
   setTimeout(() => {
     // 3秒后，隐藏提示语
-    showHint.value = false;
-  }, 3000);
-});
+    showHint.value = false
+  }, 3000)
+})
 
 const goToHome = () => {
-  router.push('/');
-};
+  router.push('/')
+}
 </script>
 
 <style scoped>
@@ -56,7 +53,9 @@ const goToHome = () => {
   cursor: pointer;
   border: 2px solid v-bind('colors.shadow.lightHover');
   box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .floating-home-button:hover {

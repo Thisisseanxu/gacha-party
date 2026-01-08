@@ -13,7 +13,8 @@
             {{ option[optionTextKey] }}
           </div>
           <div v-else class="option-divider">
-            <hr /><span>{{ option[optionTextKey] }}</span>
+            <hr />
+            <span>{{ option[optionTextKey] }}</span>
             <hr />
           </div>
         </li>
@@ -44,12 +45,11 @@
       </ul>
     </div>
   </div>
-
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { colors } from '@/styles/colors.js'; // 引入颜色常量
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { colors } from '@/styles/colors.js' // 引入颜色常量
 
 const props = defineProps({
   // 用于 v-model 绑定，存储当前选中的值
@@ -77,104 +77,104 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue'])
 
-const isOpen = ref(false); // 控制下拉框是否显示
-const selectRef = ref(null); // 获取组件根元素的引用
-const expandedGroups = ref({}); // 追踪折叠分组的展开状态
+const isOpen = ref(false) // 控制下拉框是否显示
+const selectRef = ref(null) // 获取组件根元素的引用
+const expandedGroups = ref({}) // 追踪折叠分组的展开状态
 
 // 如果开启了折叠功能，则对选项进行分组
 const groupedOptions = computed(() => {
-  if (!props.collapsible) return [];
+  if (!props.collapsible) return []
 
-  const firstSeparatorIndex = props.options.findIndex(opt => opt[props.optionValueKey] === '---');
+  const firstSeparatorIndex = props.options.findIndex((opt) => opt[props.optionValueKey] === '---')
 
   // 如果没有分隔符，所有选项都在一个默认展开的组里
   if (firstSeparatorIndex === -1) {
-    return [{ name: 'ungrouped', options: props.options, isUngrouped: true }];
+    return [{ name: 'ungrouped', options: props.options, isUngrouped: true }]
   }
 
-  const groups = [];
-  let currentGroup = null;
+  const groups = []
+  let currentGroup = null
 
   // 第一个分隔符之前的内容作为顶级分组
-  const topLevelOptions = props.options.slice(0, firstSeparatorIndex);
+  const topLevelOptions = props.options.slice(0, firstSeparatorIndex)
   if (topLevelOptions.length > 0) {
-    groups.push({ name: 'ungrouped', options: topLevelOptions, isUngrouped: true });
+    groups.push({ name: 'ungrouped', options: topLevelOptions, isUngrouped: true })
   }
 
   // 后续内容按分隔符分组
-  props.options.forEach(option => {
+  props.options.forEach((option) => {
     if (option[props.optionValueKey] === '---') {
-      currentGroup = { name: option[props.optionTextKey], options: [] };
-      groups.push(currentGroup);
-    } else if (currentGroup && !groups.find(g => g.isUngrouped && g.options.includes(option))) {
-      currentGroup.options.push(option);
+      currentGroup = { name: option[props.optionTextKey], options: [] }
+      groups.push(currentGroup)
+    } else if (currentGroup && !groups.find((g) => g.isUngrouped && g.options.includes(option))) {
+      currentGroup.options.push(option)
     }
-  });
+  })
 
-  return groups;
-});
+  return groups
+})
 
 // 将第一个可以展开的分组默认展开
 if (props.collapsible) {
-  const firstGroup = groupedOptions.value.find(g => !g.isUngrouped);
+  const firstGroup = groupedOptions.value.find((g) => !g.isUngrouped)
   if (firstGroup) {
-    expandedGroups.value[firstGroup.name] = true;
+    expandedGroups.value[firstGroup.name] = true
   }
 }
 
 // 切换分组的展开/收起状态
 const toggleGroup = (groupName) => {
-  expandedGroups.value[groupName] = !expandedGroups.value[groupName];
-};
+  expandedGroups.value[groupName] = !expandedGroups.value[groupName]
+}
 
 // 控制下拉是否显示
 const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
+  isOpen.value = !isOpen.value
+}
 
 const closeDropdown = () => {
-  isOpen.value = false;
-};
+  isOpen.value = false
+}
 
 const selectOption = (option) => {
   // 使用 emit 更新 v-model 的值
-  emit('update:modelValue', option[props.optionValueKey]);
+  emit('update:modelValue', option[props.optionValueKey])
   // 选择后关闭下拉框
-  closeDropdown();
-};
+  closeDropdown()
+}
 
 // 处理点击组件外部时自动关闭下拉框的逻辑
 const handleClickOutside = (event) => {
   if (selectRef.value && !selectRef.value.contains(event.target)) {
-    closeDropdown();
+    closeDropdown()
   }
-};
+}
 
 onMounted(() => {
   // 组件挂载后，添加全局点击事件监听
-  document.addEventListener('click', handleClickOutside);
-});
+  document.addEventListener('click', handleClickOutside)
+})
 
 onBeforeUnmount(() => {
   // 组件卸载前，移除事件监听
-  document.removeEventListener('click', handleClickOutside);
-});
+  document.removeEventListener('click', handleClickOutside)
+})
 
-const colorTriggerHover = colors.background.lighter;
-const colorArrow = colors.text.secondary;
+const colorTriggerHover = colors.background.lighter
+const colorArrow = colors.text.secondary
 
-const colorDropdownBg = colors.background.light;
-const colorDropdownBorder = colors.background.lighter;
+const colorDropdownBg = colors.background.light
+const colorDropdownBorder = colors.background.lighter
 
-const colorOptionText = colors.text.secondary;
-const colorOptionTextHover = colors.text.primary;
-const colorOptionHoverBg = colors.background.hover;
+const colorOptionText = colors.text.secondary
+const colorOptionTextHover = colors.text.primary
+const colorOptionHoverBg = colors.background.hover
 
-const colorScrollbar = colors.scrollbar;
+const colorScrollbar = colors.scrollbar
 </script>
 
 <style scoped>

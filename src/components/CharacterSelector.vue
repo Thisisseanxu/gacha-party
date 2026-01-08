@@ -4,14 +4,23 @@
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
     <div class="card-selector-grid">
-      <div v-for="card in filteredCards" :key="card.id"
-        :class="['card-option', card.rarity ? card.rarity : '', { selected: isSelected(card.id), disabled: isDisabled(card) }]"
-        @click="toggleCharacterSelection(card)">
-        <button v-if="card.isCustom" class="delete-custom-char-btn"
-          @click.stop="deleteCustomCharacter(card.id)">×</button>
+      <div v-for="card in filteredCards" :key="card.id" :class="[
+        'card-option',
+        card.rarity ? card.rarity : '',
+        { selected: isSelected(card.id), disabled: isDisabled(card) },
+      ]" @click="toggleCharacterSelection(card)">
+        <button v-if="card.isCustom" class="delete-custom-char-btn" @click.stop="deleteCustomCharacter(card.id)">
+          ×
+        </button>
         <img :src="card.imageUrl" :alt="card.name" class="card-image" />
         <div class="card-name">
-          {{ isDisabled(card) ? '暂不可用' : (showRealName && card.realname ? card.realname : card.name) }}
+          {{
+            isDisabled(card)
+              ? '暂不可用'
+              : showRealName && card.realname
+                ? card.realname
+                : card.name
+          }}
         </div>
         <div class="checkmark">✔</div>
       </div>
@@ -20,100 +29,100 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { colors } from '@/styles/colors.js';
+import { computed } from 'vue'
+import { colors } from '@/styles/colors.js'
 
 const props = defineProps({
   modelValue: {
     type: [Array, String, Number],
-    default: () => []
+    default: () => [],
   },
   characterList: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   customCharacters: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   mode: {
     type: String,
     default: 'multiple', // single 为单选模式 multiple 为多选模式
-    validator: (value) => ['single', 'multiple'].includes(value)
+    validator: (value) => ['single', 'multiple'].includes(value),
   },
   disabledCharacterIds: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   showRealName: {
     type: Boolean,
-    default: false
+    default: false,
   },
   title: {
     type: String,
-    default: '选择出场的角色'
+    default: '选择出场的角色',
   },
   subTitle: {
     type: String,
-    default: '放心，你可以随时回来重选！'
-  }
-});
+    default: '放心，你可以随时回来重选！',
+  },
+})
 
-const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm']);
+const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm'])
 
 const filteredCards = computed(() => {
-  return props.characterList;
-});
+  return props.characterList
+})
 
 const isSelected = (id) => {
   if (props.mode === 'single') {
-    return props.modelValue === id;
+    return props.modelValue === id
   }
-  return Array.isArray(props.modelValue) && props.modelValue.includes(id);
-};
+  return Array.isArray(props.modelValue) && props.modelValue.includes(id)
+}
 
 const isDisabled = (card) => {
-  return props.disabledCharacterIds.includes(card.id);
-};
+  return props.disabledCharacterIds.includes(card.id)
+}
 
 const toggleCharacterSelection = (card) => {
-  if (isDisabled(card)) return;
+  if (isDisabled(card)) return
 
   if (props.mode === 'single') {
-    emit('update:modelValue', card.id);
-    emit('confirm');
+    emit('update:modelValue', card.id)
+    emit('confirm')
   } else {
-    const currentSelection = Array.isArray(props.modelValue) ? [...props.modelValue] : [];
-    const index = currentSelection.indexOf(card.id);
+    const currentSelection = Array.isArray(props.modelValue) ? [...props.modelValue] : []
+    const index = currentSelection.indexOf(card.id)
     if (index > -1) {
-      currentSelection.splice(index, 1);
+      currentSelection.splice(index, 1)
     } else {
-      currentSelection.push(card.id);
+      currentSelection.push(card.id)
     }
-    emit('update:modelValue', currentSelection);
+    emit('update:modelValue', currentSelection)
   }
-};
+}
 
 const deleteCustomCharacter = (characterId) => {
   if (window.confirm('确定要删除这个自定义角色吗？')) {
-    const index = props.customCharacters.findIndex(c => c.id === characterId);
+    const index = props.customCharacters.findIndex((c) => c.id === characterId)
     if (index > -1) {
-      const newCustoms = [...props.customCharacters];
-      newCustoms.splice(index, 1);
-      emit('update:customCharacters', newCustoms);
+      const newCustoms = [...props.customCharacters]
+      newCustoms.splice(index, 1)
+      emit('update:customCharacters', newCustoms)
 
       // Remove from selection if present
       if (isSelected(characterId)) {
         if (props.mode === 'single') {
-          emit('update:modelValue', null);
+          emit('update:modelValue', null)
         } else {
-          const newSelection = props.modelValue.filter(id => id !== characterId);
-          emit('update:modelValue', newSelection);
+          const newSelection = props.modelValue.filter((id) => id !== characterId)
+          emit('update:modelValue', newSelection)
         }
       }
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -137,7 +146,7 @@ const deleteCustomCharacter = (characterId) => {
 .selection-description {
   text-align: center;
   color: v-bind('colors.text.secondary');
-  margin: 0rem
+  margin: 0rem;
 }
 
 .card-selector-grid {

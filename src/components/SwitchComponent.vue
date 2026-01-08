@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { colors } from '@/styles/colors.js';
+import { colors } from '@/styles/colors.js'
 
 const props = defineProps({
   // 控制开关状态
@@ -22,18 +22,17 @@ const props = defineProps({
     type: String,
     default: '', // 默认为空
   },
-});
+})
 
 // 声明状态变化事件
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue'])
 
 // 点击时反转状态
 function toggle() {
-  emit('update:modelValue', !props.modelValue);
+  emit('update:modelValue', !props.modelValue)
 }
 
-const colorTextSecondary = colors.text.secondary;
-
+const colorTextSecondary = colors.text.secondary
 </script>
 
 <style scoped>

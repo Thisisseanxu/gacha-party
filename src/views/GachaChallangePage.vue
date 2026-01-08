@@ -12,7 +12,9 @@
         <div class="challenge-stats-overview card">
           <div class="stat-item">
             <span class="stat-label">目标卡池</span>
-            <span class="stat-value pool-name">{{ currentPool ? currentPool.name : '加载中...' }}</span>
+            <span class="stat-value pool-name">{{
+              currentPool ? currentPool.name : '加载中...'
+              }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">总得分</span>
@@ -37,12 +39,16 @@
           </div>
 
           <div v-if="isSelectableUpPool" class="select-up-container">
-            <h3 class="select-up-title">{{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}</h3>
+            <h3 class="select-up-title">
+              {{ upCardDetails.length > 1 ? '请选择UP的限定角色：' : '当前卡池限定角色为：' }}
+            </h3>
             <div class="up-cards-selection">
-              <div v-for="card in upCardDetails" :key="card.id"
-                :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { 'selected': selectedUpCard === card.id }]"
-                @click="selectUpCard(card.id)">
-                <img :src="card.imageUrl" :alt="card.name" class="up-card-image">
+              <div v-for="card in upCardDetails" :key="card.id" :class="[
+                'up-card-option',
+                `rarity-border-${card.rarity.toLowerCase()}`,
+                { selected: selectedUpCard === card.id },
+              ]" @click="selectUpCard(card.id)">
+                <img :src="card.imageUrl" :alt="card.name" class="up-card-image" />
               </div>
             </div>
           </div>
@@ -77,15 +83,20 @@
       <div v-if="showGachaResultOverlay" class="gacha-result-overlay">
         <div class="overlay-content">
           <h2 class="overlay-title">恭喜获得</h2>
-          <h3 v-if="currentPullScore > 0" class="overlay-score good-score">本次得分: +{{ currentPullScore }}</h3>
+          <h3 v-if="currentPullScore > 0" class="overlay-score good-score">
+            本次得分: +{{ currentPullScore }}
+          </h3>
           <h3 v-else class="overlay-score">本次得分: 0</h3>
           <div class="pulled-cards-container" ref="cardsContainerRef">
             <transition-group name="card-reveal" tag="div" class="pulled-cards-grid">
               <div v-for="(card, index) in displayedCards" :key="card.id + '_' + index"
                 :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]">
-                <div
-                  :class="['card-image-wrapper', `rarity-border-${card.rarity.toLowerCase()}`, { 'highlight-rarity': isHighlightRarity(card.rarity) }]">
-                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image">
+                <div :class="[
+                  'card-image-wrapper',
+                  `rarity-border-${card.rarity.toLowerCase()}`,
+                  { 'highlight-rarity': isHighlightRarity(card.rarity) },
+                ]">
+                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image" />
                 </div>
                 <p class="card-name">{{ card.name }}</p>
               </div>
@@ -101,191 +112,194 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
-import { useGacha } from '@/utils/useGacha';
+import { ref, computed, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+import { useGacha } from '@/utils/useGacha'
 import * as RARITY from '@/data/rarity.js'
-import { cardMap } from '@/data/cards';
-import { colors } from '@/styles/colors.js';
-import { getGachaSource } from '@/utils/getGachaSource.js';
+import { cardMap } from '@/data/cards'
+import { colors } from '@/styles/colors.js'
+import { getGachaSource } from '@/utils/getGachaSource.js'
 
 // 挑战赛配置
-const CHALLENGE_PULL_LIMIT = 200; // 规定总抽数
+const CHALLENGE_PULL_LIMIT = 200 // 规定总抽数
 
 // 挑战赛状态
-const totalScore = ref(0);
-const remainingPulls = ref(CHALLENGE_PULL_LIMIT);
-const challengeInProgress = ref(true);
-const currentPullScore = ref(0);
-const challengeHistory = ref([]); // 存储每次十连的结果和得分
+const totalScore = ref(0)
+const remainingPulls = ref(CHALLENGE_PULL_LIMIT)
+const challengeInProgress = ref(true)
+const currentPullScore = ref(0)
+const challengeHistory = ref([]) // 存储每次十连的结果和得分
 
 // 动画相关 ref
-const showGachaResultOverlay = ref(false);
-const displayedCards = ref([]);
-const isAnimating = ref(false);
-let animationTimeout = null;
-const cardsContainerRef = ref(null);
+const showGachaResultOverlay = ref(false)
+const displayedCards = ref([])
+const isAnimating = ref(false)
+let animationTimeout = null
+const cardsContainerRef = ref(null)
 
 const isHighlightRarity = (rarity) => {
-  return rarity === RARITY.SP || rarity === RARITY.SSR;
-};
+  return rarity === RARITY.SP || rarity === RARITY.SSR
+}
 
 const getDelayTime = (rarity) => {
   switch (rarity) {
     case RARITY.SP:
-      return 1000; // 限定卡片
+      return 1000 // 限定卡片
     case RARITY.SSR:
-      return 500; // SSR卡片
+      return 500 // SSR卡片
     case RARITY.SR:
-      return 100; // SR卡片
+      return 100 // SR卡片
     case RARITY.R:
-      return 100; // R卡片
+      return 100 // R卡片
     default:
-      return 100; // 默认延迟
+      return 100 // 默认延迟
   }
-};
+}
 
 // 组件逻辑
-const route = useRoute();
-const selectedUpCard = ref(null);
+const route = useRoute()
+const selectedUpCard = ref(null)
 
 // 动态获取卡池数据
-const gachaSource = computed(() => getGachaSource(route));
+const gachaSource = computed(() => getGachaSource(route))
 
-const {
-  currentPool,
-  lastPulledCards,
-  performTenPulls,
-  resetGachaHistory,
-} = useGacha(gachaSource, selectedUpCard, ref(false)); // 挑战模式不使用旧概率
+const { currentPool, lastPulledCards, performTenPulls, resetGachaHistory } = useGacha(
+  gachaSource,
+  selectedUpCard,
+  ref(false),
+) // 挑战模式不使用旧概率
 
 // --- 核心计分逻辑 ---
 const calculateScore = (cards) => {
-  const spCount = cards.filter(c => c.rarity === RARITY.SP).length;
-  const ssrCount = cards.filter(c => c.rarity === RARITY.SSR).length;
-  let score = 0;
+  const spCount = cards.filter((c) => c.rarity === RARITY.SP).length
+  const ssrCount = cards.filter((c) => c.rarity === RARITY.SSR).length
+  let score = 0
 
   // 计算SP得分
   if (spCount === 1) {
-    score += 10;
+    score += 10
   } else if (spCount === 2) {
-    score += 40; // 双SP翻倍分数
+    score += 40 // 双SP翻倍分数
   } else if (spCount >= 3) {
-    score += spCount * 30; // 三个及以上每个SP得30分
+    score += spCount * 30 // 三个及以上每个SP得30分
   }
 
   // 计算SSR得分
   if (ssrCount === 1) {
-    score += 5;
+    score += 5
   } else if (ssrCount === 2) {
-    score += 15; // 5 + 5 + 5 额外分数
+    score += 15 // 5 + 5 + 5 额外分数
   } else if (ssrCount === 3) {
-    score += 25; // 5 + 5 + 5 + 10 额外分数
+    score += 25 // 5 + 5 + 5 + 10 额外分数
   } else if (ssrCount >= 4) {
-    score += ssrCount * 10; // 四个及以上SSR每个得10分
+    score += ssrCount * 10 // 四个及以上SSR每个得10分
   }
 
-  return score;
-};
+  return score
+}
 
 const handleChallengePull = () => {
-  if (remainingPulls.value <= 0) return;
+  if (remainingPulls.value <= 0) return
 
-  performTenPulls();
-  remainingPulls.value -= 10;
+  performTenPulls()
+  remainingPulls.value -= 10
 
-  const score = calculateScore(lastPulledCards.value);
-  currentPullScore.value = score;
-  totalScore.value += score;
+  const score = calculateScore(lastPulledCards.value)
+  currentPullScore.value = score
+  totalScore.value += score
 
   // 记录到挑战历史
-  challengeHistory.value.unshift({ cards: [...lastPulledCards.value], score: score });
+  challengeHistory.value.unshift({ cards: [...lastPulledCards.value], score: score })
 
   if (remainingPulls.value <= 0) {
-    challengeInProgress.value = false;
+    challengeInProgress.value = false
   }
 
-  showGachaResultOverlay.value = true;
-  nextTick(startPullAnimation);
-};
+  showGachaResultOverlay.value = true
+  nextTick(startPullAnimation)
+}
 
 const resetChallenge = () => {
-  totalScore.value = 0;
-  remainingPulls.value = CHALLENGE_PULL_LIMIT;
-  challengeInProgress.value = true;
-  currentPullScore.value = 0;
-  challengeHistory.value = [];
-  resetGachaHistory(); // 重置 useGacha 内部的历史记录
-  showGachaResultOverlay.value = false;
-};
-
+  totalScore.value = 0
+  remainingPulls.value = CHALLENGE_PULL_LIMIT
+  challengeInProgress.value = true
+  currentPullScore.value = 0
+  challengeHistory.value = []
+  resetGachaHistory() // 重置 useGacha 内部的历史记录
+  showGachaResultOverlay.value = false
+}
 
 // --- 动画 & 结果确认 ---
 const startPullAnimation = () => {
-  displayedCards.value = [];
-  isAnimating.value = true;
-  const cardsToAnimate = lastPulledCards.value;
-  let index = 0;
+  displayedCards.value = []
+  isAnimating.value = true
+  const cardsToAnimate = lastPulledCards.value
+  let index = 0
 
   function revealNextCard() {
     if (index < cardsToAnimate.length) {
-      const card = cardsToAnimate[index];
-      const delay = getDelayTime(card.rarity);
-      displayedCards.value.push(card);
+      const card = cardsToAnimate[index]
+      const delay = getDelayTime(card.rarity)
+      displayedCards.value.push(card)
       nextTick(() => {
         if (cardsContainerRef.value) {
-          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
         }
-      });
-      index++;
-      animationTimeout = setTimeout(revealNextCard, delay);
+      })
+      index++
+      animationTimeout = setTimeout(revealNextCard, delay)
     } else {
-      isAnimating.value = false;
+      isAnimating.value = false
     }
   }
-  revealNextCard();
-};
+  revealNextCard()
+}
 
 const stopAnimation = () => {
-  if (animationTimeout) clearTimeout(animationTimeout);
-  isAnimating.value = false;
-  displayedCards.value = lastPulledCards.value;
+  if (animationTimeout) clearTimeout(animationTimeout)
+  isAnimating.value = false
+  displayedCards.value = lastPulledCards.value
   nextTick(() => {
     if (cardsContainerRef.value) {
-      cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight;
+      cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
     }
-  });
-};
+  })
+}
 
 const confirmGachaResult = () => {
   if (isAnimating.value) {
-    stopAnimation();
+    stopAnimation()
   } else {
-    showGachaResultOverlay.value = false;
+    showGachaResultOverlay.value = false
   }
-};
+}
 
 // UP卡选择逻辑
-const isSelectableUpPool = computed(() => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true);
+const isSelectableUpPool = computed(
+  () => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true,
+)
 const upCardDetails = computed(() => {
-  if (!isSelectableUpPool.value) return [];
-  const upCardIds = currentPool.value.rules.SP.UpCards || [];
-  return upCardIds.map(id => cardMap.get(id)).filter(Boolean);
-});
+  if (!isSelectableUpPool.value) return []
+  const upCardIds = currentPool.value.rules.SP.UpCards || []
+  return upCardIds.map((id) => cardMap.get(id)).filter(Boolean)
+})
 
-watch(currentPool, (newPool) => {
-  if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
-    selectedUpCard.value = newPool.rules.SP.UpCards[0];
-  } else {
-    selectedUpCard.value = null;
-  }
-  document.title = newPool?.name ? `挑战: ${newPool.name} - 织夜工具箱` : '抽卡挑战赛';
-}, { immediate: true, deep: true });
+watch(
+  currentPool,
+  (newPool) => {
+    if (newPool?.rules?.SP?.SelectUpCards && newPool.rules.SP.UpCards?.length > 0) {
+      selectedUpCard.value = newPool.rules.SP.UpCards[0]
+    } else {
+      selectedUpCard.value = null
+    }
+    document.title = newPool?.name ? `挑战: ${newPool.name} - 织夜工具箱` : '抽卡挑战赛'
+  },
+  { immediate: true, deep: true },
+)
 
 const selectUpCard = (cardId) => {
-  selectedUpCard.value = cardId;
-};
-
+  selectedUpCard.value = cardId
+}
 </script>
 
 <style scoped>
@@ -480,7 +494,6 @@ h2 {
   transform: none;
 }
 
-
 .back-home-button {
   background-color: v-bind('colors.rarity.ssr');
   text-decoration: none;
@@ -518,7 +531,10 @@ h2 {
   padding: 4px;
   border-radius: 12px;
   border: 4px solid transparent;
-  transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .up-card-option:hover {
@@ -688,15 +704,21 @@ h2 {
 }
 
 .rarity-bg-sp {
-  background: radial-gradient(ellipse at center, rgba(222, 33, 30, 0.3) 0%, rgba(222, 33, 30, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(222, 33, 30, 0.3) 0%,
+      rgba(222, 33, 30, 0) 70%);
 }
 
 .rarity-bg-ssr {
-  background: radial-gradient(ellipse at center, rgba(232, 119, 33, 0.3) 0%, rgba(232, 119, 33, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(232, 119, 33, 0.3) 0%,
+      rgba(232, 119, 33, 0) 70%);
 }
 
 .rarity-bg-sr {
-  background: radial-gradient(ellipse at center, rgba(178, 30, 251, 0.25) 0%, rgba(178, 30, 251, 0) 70%);
+  background: radial-gradient(ellipse at center,
+      rgba(178, 30, 251, 0.25) 0%,
+      rgba(178, 30, 251, 0) 70%);
 }
 
 .up-card-option.selected.rarity-border-sp {
@@ -743,7 +765,6 @@ h2 {
 .highlight-rarity.rarity-border-ssr {
   animation: highlight-flash-ssr 0.5s ease-in-out;
 }
-
 
 .card-reveal-enter-active {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);

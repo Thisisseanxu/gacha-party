@@ -7,31 +7,30 @@
         <h2 v-if="title">{{ title }}</h2>
 
         <slot></slot>
-
       </div>
     </div>
   </transition>
 </template>
 
 <script setup>
-import { colors } from '@/styles/colors.js';
+import { colors } from '@/styles/colors.js'
 defineProps({
   display: {
     type: Boolean,
-    required: true
+    required: true,
   },
   title: {
     type: String,
-    default: ''
-  }
-});
+    default: '',
+  },
+})
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close'])
 
 const close = () => {
   // 通知父组件关闭弹窗
-  emit('close');
-};
+  emit('close')
+}
 </script>
 
 <style scoped>

@@ -9,7 +9,7 @@
       <div class="card-pool-list">
         <router-link v-for="(pool, id) in cardPools" :key="id" :to="{ name: '抽卡模拟器', params: { poolId: id } }"
           class="card-pool-item">
-          <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image">
+          <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name + '封面'" class="pool-cover-image" />
           <div v-else class="pool-name-text-wrapper">
             <h2 class="pool-name-text">{{ pool.name }}</h2>
           </div>
@@ -24,11 +24,16 @@
       <div class="info-section card">
         <h3>概率公示</h3>
         <p>本模拟器使用1.25%的基础概率来拟合游戏内的2%的综合概率</p>
-        <p><strong>常驻卡池：</strong>SSR的概率为8%，SR为20%，R为72%。连续59次未出UP组SSR，第60抽必为UP组SSR。获取SSR时，有50%概率为UP角色，若“歪”，则下次SSR必为UP角色。
+        <p>
+          <strong>常驻卡池：</strong>SSR的概率为8%，SR为20%，R为72%。连续59次未出UP组SSR，第60抽必为UP组SSR。获取SSR时，有50%概率为UP角色，若“歪”，则下次SSR必为UP角色。
         </p>
-        <p><strong>限定卡池：</strong>限定角色综合概率为2%，40抽后概率提升，60抽必出。SSR概率为6%，SR为20%，R为72%。UP机制与常驻池类似。</p>
-        <p class="footer-link">本项目完全开源，欢迎前往 <a href="https://github.com/Thisisseanxu/gacha-party"
-            target="_blank">Github</a> 参与开发，或加入Q群 1049576192 交流。
+        <p>
+          <strong>限定卡池：</strong>限定角色综合概率为2%，40抽后概率提升，60抽必出。SSR概率为6%，SR为20%，R为72%。UP机制与常驻池类似。
+        </p>
+        <p class="footer-link">
+          本项目完全开源，欢迎前往
+          <a href="https://github.com/Thisisseanxu/gacha-party" target="_blank">Github</a>
+          参与开发，或加入Q群 1049576192 交流。
         </p>
       </div>
     </div>
@@ -36,8 +41,8 @@
 </template>
 
 <script setup>
-import { cardPools } from '@/data/cardPools';
-import { colors } from '@/styles/colors.js';
+import { cardPools } from '@/data/cardPools'
+import { colors } from '@/styles/colors.js'
 </script>
 
 <style scoped>
@@ -87,7 +92,9 @@ import { colors } from '@/styles/colors.js';
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   background-color: v-bind('colors.background.content');
   border: 1px solid v-bind('colors.border.primary');
   display: flex;
