@@ -1020,6 +1020,18 @@ export const CHAR_HUIZHANG_CONFIG = {
     image_url: '/images/qban/1409.webp',
     theme: HUIZHANG_THEMES.music,
   },
+  11010: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+    ],
+    image_url: '/images/qban/11010.webp',
+    theme: HUIZHANG_THEMES.eiji,
+  },
 }
 
 // 获取角色的配置
