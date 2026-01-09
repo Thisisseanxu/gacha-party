@@ -164,57 +164,47 @@ const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示
 const isDev = import.meta.env.DEV
 
-const LIMITED_CARD_POOLS_ID = [
-  '29',
-  '40',
-  '41',
-  '42',
-  '43',
-  '44',
-  '46',
-  '107',
-  '48',
-  '49',
-  '50',
-  '51',
-  '52',
-  '53',
-  '54',
-  '55',
-  '59',
-  '58',
-  '60',
-  '61',
-] // 限定卡池ID列表
-const EVENT_CARD_POOLS_ID = ['57', '62'] // 联动卡池ID列表
-const FUKE_CARD_POOLS_ID = [] // 复刻卡池ID列表（暂时为空）
-const CARDPOOLS_NAME_MAP = {
-  9: '常驻扭蛋',
-  29: '车手盲盒机',
-  40: '塔菲扭蛋',
-  41: '童话国盲盒机',
-  42: '扭蛋大作战-海军',
-  43: '早稻叽',
-  44: '仲夏扭蛋',
-  46: '车手盲盒机-复刻1',
-  47: '祈愿盲盒',
-  107: '地下车手招募',
-  48: '童话国盲盒机-复刻1',
-  49: '游园邀请',
-  50: '暮色邀请函',
-  51: '塔菲扭蛋-复刻1',
-  52: '车手盲盒机-复刻2',
-  53: '萌鬼认可证',
-  54: '早稻叽-复刻1',
-  55: '超频扭蛋机',
-  59: '仲夏扭蛋-复刻1',
-  58: '厨娘来啦！',
-  57: '酷玩爆米花',
-  60: '圣诞邀约',
-  61: '相约嘉年华',
-  62: '鹅崽召唤器',
-  1000: '心愿自选',
-  10000: '高级常驻扭蛋',
+const LIMITED_CARD_POOLS_ID = ref([]) // 限定卡池ID列表
+const EVENT_CARD_POOLS_ID = ref([]) // 联动卡池ID列表
+const FUKE_CARD_POOLS_ID = ref([]) // 复刻卡池ID列表
+const CARDPOOLS_NAME_MAP = ref({}) // 卡池名称映射
+
+// 默认卡池配置（作为兜底初始值，防止首次加载失败）
+const DEFAULT_POOLS_DATA = {
+  limited: [
+    '29', '40', '41', '42', '43', '44', '46', '107', '48', '49', '50', '51',
+    '52', '53', '54', '55', '59', '58', '60', '61',
+  ],
+  event: ['57', '62'],
+  fuke: [],
+  names: {
+    9: '常驻扭蛋',
+    29: '车手盲盒机',
+    40: '塔菲扭蛋',
+    41: '童话国盲盒机',
+    42: '扭蛋大作战-海军',
+    43: '早稻叽',
+    44: '仲夏扭蛋',
+    46: '车手盲盒机-复刻1',
+    47: '祈愿盲盒',
+    107: '地下车手招募',
+    48: '童话国盲盒机-复刻1',
+    49: '游园邀请',
+    50: '暮色邀请函',
+    51: '塔菲扭蛋-复刻1',
+    52: '车手盲盒机-复刻2',
+    53: '萌鬼认可证',
+    54: '早稻叽-复刻1',
+    55: '超频扭蛋机',
+    59: '仲夏扭蛋-复刻1',
+    58: '厨娘来啦！',
+    57: '酷玩爆米花',
+    60: '圣诞邀约',
+    61: '相约嘉年华',
+    62: '鹅崽召唤器',
+    1000: '心愿自选',
+    10000: '高级常驻扭蛋',
+  },
 }
 
 // 本地保存激活码
@@ -271,9 +261,45 @@ const saveInputData = (key = null, playerId = null) => {
   loadInputData()
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 页面加载时，尝试从localStorage加载已保存的激活码
   loadInputData()
+
+  const applyPoolConfig = (data) => {
+    LIMITED_CARD_POOLS_ID.value = data.limited || []
+    EVENT_CARD_POOLS_ID.value = data.event || []
+    FUKE_CARD_POOLS_ID.value = data.fuke || []
+    CARDPOOLS_NAME_MAP.value = data.names || {}
+  }
+
+  // 加载卡池配置文件
+  try {
+    // 添加时间戳参数以避免缓存，确保获取最新配置
+    const response = await fetch(`/data/gacha_pools.json?t=${Date.now()}`)
+    if (response.ok) {
+      const data = await response.json()
+      applyPoolConfig(data)
+      // 缓存最新配置
+      localStorage.setItem('gachaPoolConfig', JSON.stringify(data))
+    } else {
+      throw new Error('Network response was not ok')
+    }
+  } catch (error) {
+    logger.warn('加载在线卡池配置失败，尝试使用本地缓存或默认配置:', error)
+    // 尝试读取缓存
+    const cached = localStorage.getItem('gachaPoolConfig')
+    if (cached) {
+      try {
+        applyPoolConfig(JSON.parse(cached))
+      } catch (e) {
+        logger.error('解析本地缓存配置失败:', e)
+        applyPoolConfig(DEFAULT_POOLS_DATA)
+      }
+    } else {
+      // 无缓存时使用默认配置
+      applyPoolConfig(DEFAULT_POOLS_DATA)
+    }
+  }
 })
 
 // 云端获取抽卡记录相关的变量
@@ -377,9 +403,9 @@ const handleJsonAnalysis = () => {
       QiYuanGachaRecords.push(...records) // 目前祈愿盲盒卡池ID固定为47
     else if (gachaId === '1000')
       WishGachaRecords.push(...records) // 心愿自选卡池ID固定为1000
-    else if (LIMITED_CARD_POOLS_ID.includes(gachaId)) LimitGachaRecords.push(...records)
-    else if (EVENT_CARD_POOLS_ID.includes(gachaId)) EventGachaRecords.push(...records)
-    else if (FUKE_CARD_POOLS_ID.includes(gachaId)) FukeGachaRecords.push(...records)
+    else if (LIMITED_CARD_POOLS_ID.value.includes(gachaId)) LimitGachaRecords.push(...records)
+    else if (EVENT_CARD_POOLS_ID.value.includes(gachaId)) EventGachaRecords.push(...records)
+    else if (FUKE_CARD_POOLS_ID.value.includes(gachaId)) FukeGachaRecords.push(...records)
     else logger.warn(`检测到未知的卡池ID ${gachaId}，已跳过该卡池的数据。`)
   }
 

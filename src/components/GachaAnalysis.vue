@@ -403,7 +403,6 @@ const cardPoolOptions = ref([
   { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
   { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
   { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
-  { id: 'Wish', name: CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
   // 可折叠的分组
   { id: '---', name: '限定扭蛋机' }, // 分隔符
   ...props.LIMITED_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
@@ -413,6 +412,7 @@ const cardPoolOptions = ref([
   ...props.FUKE_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
   { id: '---', name: '其他扭蛋机' }, // 分隔符
   { id: 'QiYuan', name: CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
+  { id: 'Wish', name: CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
 ])
 
 // 删除抽数为0的卡池
