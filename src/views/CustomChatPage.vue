@@ -89,6 +89,9 @@
 
         <div class="preview-wrapper" ref="previewWrapper">
           <p class="preview-hint">↓ 预览区域 (可滚动) ↓</p>
+          <button v-if="!isFullscreen" class="fullscreen-btn" @click="toggleFullScreen" title="全屏预览">
+            <full-screen-one theme="outline" size="20" fill="#fff" />
+          </button>
           <div class="capture-area-wrapper" :style="previewStyle">
             <div class="chat-log-container" ref="captureRef" :style="{
               width: previewConfig.width + 'px',
@@ -290,6 +293,7 @@ import { logger } from '@/utils/logger'
 import { saveToDB, loadFromDB, deleteFromDB, DB_KEYS } from '@/utils/chatStorage.js'
 import { toPng } from 'html-to-image'
 import SwitchComponent from '@/components/SwitchComponent.vue'
+import { FullScreenOne } from '@icon-park/vue-next'
 
 const showAgreementPopUp = ref(false)
 const openAgreementPopUp = () => {
@@ -314,9 +318,42 @@ const previewConfig = ref({
   radius: 0,
 })
 const captureRef = ref(null)
+const previewWrapper = ref(null)
+const isFullscreen = ref(false)
+const originalPreviewConfig = ref(null)
+
+const toggleFullScreen = async () => {
+  if (!previewWrapper.value) return
+  if (!document.fullscreenElement) {
+    try {
+      await previewWrapper.value.requestFullscreen()
+    } catch (e) {
+      logger.error('进入全屏失败', e)
+    }
+  } else {
+    document.exitFullscreen()
+  }
+}
+
+const handleFullscreenChange = () => {
+  if (document.fullscreenElement) {
+    isFullscreen.value = true
+    originalPreviewConfig.value = { ...previewConfig.value }
+    previewConfig.value.width = window.innerWidth
+    previewConfig.value.height = window.innerHeight
+    previewConfig.value.radius = 0
+  } else {
+    isFullscreen.value = false
+    if (originalPreviewConfig.value) {
+      previewConfig.value = { ...originalPreviewConfig.value }
+      originalPreviewConfig.value = null
+    }
+  }
+}
 
 // 保存预览配置
 watch(previewConfig, (newConfig) => {
+  if (isFullscreen.value) return
   localStorage.setItem('customChatPreviewConfig', JSON.stringify(newConfig))
 })
 
@@ -963,12 +1000,14 @@ const handleImportFile = (event) => {
   }
   reader.readAsText(file)
 }
-// 预览区域缩放逻辑
-const previewWrapper = ref(null)
 const previewScale = ref(1)
 
 const updatePreviewScale = () => {
   if (!previewWrapper.value) return
+  if (isFullscreen.value) {
+    previewScale.value = 1
+    return
+  }
   const wrapperWidth = previewWrapper.value.clientWidth
   // 目标宽度为配置宽度 + 左右留白
   const targetWidth = previewConfig.value.width + 40
@@ -997,6 +1036,14 @@ const generateImage = async () => {
   const originalScale = previewScale.value
   previewScale.value = 1
 
+  const scrollTop = captureRef.value.scrollTop
+  const chatLogEl = captureRef.value.querySelector('.chat-log')
+  const originalTransform = chatLogEl.style.transform
+
+  // 临时调整DOM以模拟滚动位置，解决html-to-image不支持scrolled element的问题
+  captureRef.value.scrollTop = 0
+  chatLogEl.style.transform = `translateY(-${scrollTop}px)`
+
   try {
     await nextTick()
     const dataUrl = await toPng(captureRef.value, {
@@ -1015,6 +1062,8 @@ const generateImage = async () => {
     logger.error('生成图片失败:', err)
     alert('生成失败')
   } finally {
+    chatLogEl.style.transform = originalTransform
+    captureRef.value.scrollTop = scrollTop
     previewScale.value = originalScale // 恢复缩放
   }
 }
@@ -1220,11 +1269,13 @@ onMounted(async () => {
   }
 
   window.addEventListener('resize', updatePreviewScale)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
   updatePreviewScale()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updatePreviewScale)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
 })
 </script>
 
@@ -1374,6 +1425,7 @@ onUnmounted(() => {
   justify-content: flex-start;
   box-sizing: border-box;
   min-height: 600px;
+  position: relative;
 }
 
 .preview-hint {
@@ -1381,6 +1433,46 @@ onUnmounted(() => {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 0.9rem;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background-color 0.2s;
+}
+
+.fullscreen-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.preview-wrapper:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-wrapper:fullscreen .preview-hint {
+  display: none;
+}
+
+.preview-wrapper:fullscreen .capture-area-wrapper {
+  box-shadow: none;
 }
 
 .capture-area-wrapper {
