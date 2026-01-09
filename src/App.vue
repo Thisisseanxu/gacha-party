@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view> </router-view>
-    <FloatingHomeButton v-if="$route.path !== '/'" />
+    <FloatingHomeButton :is-updating="isDownloading" />
   </div>
   <transition name="fade">
     <div v-if="showUpdateDialog" class="update-overlay">
@@ -44,7 +44,29 @@ import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { ref } from 'vue'
 import { colors } from '@/styles/colors.js'
 
-const { needRefresh, updateServiceWorker } = useRegisterSW()
+const isDownloading = ref(false)
+
+const { needRefresh, updateServiceWorker } = useRegisterSW({
+  onRegistered(r) {
+    if (r) {
+      const handleInstalling = (worker) => {
+        isDownloading.value = true
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed' || worker.state === 'redundant') {
+            isDownloading.value = false
+          }
+        })
+      }
+
+      if (r.installing) handleInstalling(r.installing)
+
+      r.onupdatefound = () => {
+        const newWorker = r.installing
+        if (newWorker) handleInstalling(newWorker)
+      }
+    }
+  },
+})
 // 使用 watch 监听是否有新版本
 
 const showUpdateDialog = ref(false)

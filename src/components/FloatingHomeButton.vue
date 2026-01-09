@@ -5,24 +5,45 @@
     <Transition name="fade">
       <div v-if="showHint" class="hint-bubble">点我返回主页喵~</div>
     </Transition>
+
+    <Transition name="fade">
+      <div v-if="props.isUpdating" class="update-hint">
+        <div class="spinner"></div>
+        <span>正在更新中，请稍等...</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { colors } from '@/styles/colors.js'
 
-const router = useRouter()
+const props = defineProps({
+  isUpdating: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-const showHint = ref(true)
+const router = useRouter()
+const route = useRoute()
+
+const showHint = ref(false)
 
 onMounted(() => {
-  // 启动一个3秒的定时器
-  setTimeout(() => {
-    // 3秒后，隐藏提示语
-    showHint.value = false
-  }, 3000)
+  if (route.path === '/') return
+
+  const lastTime = Number(localStorage.getItem('home_btn_hint_last_time') || 0)
+  const now = Date.now()
+  if (now - lastTime > 60000) {
+    showHint.value = true
+    localStorage.setItem('home_btn_hint_last_time', String(now))
+    setTimeout(() => {
+      showHint.value = false
+    }, 3000)
+  }
 })
 
 const goToHome = () => {
@@ -96,5 +117,30 @@ const goToHome = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 更新提示样式 */
+.update-hint {
+  position: absolute;
+  top: 100%;
+  margin-top: 10px;
+  background-color: v-bind('colors.shadow.primaryHover');
+  color: v-bind('colors.text.primary');
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 </style>
