@@ -185,7 +185,7 @@
           <div class="slot-row-top" style="justify-content: center">
             <span class="slot-time-small">{{
               autoSaveTime ? formatTime(autoSaveTime) : '暂无记录'
-            }}</span>
+              }}</span>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">
@@ -204,7 +204,7 @@
             <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
             <span class="slot-time-small">{{
               slot.timestamp ? formatTime(slot.timestamp) : '空'
-            }}</span>
+              }}</span>
             <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
               ×
             </button>
@@ -1005,6 +1005,14 @@ const previewScale = ref(1)
 const updatePreviewScale = () => {
   if (!previewWrapper.value) return
   if (isFullscreen.value) {
+    // 修复移动端全屏旋转后尺寸不对的问题
+    if (
+      previewConfig.value.width !== window.innerWidth ||
+      previewConfig.value.height !== window.innerHeight
+    ) {
+      previewConfig.value.width = window.innerWidth
+      previewConfig.value.height = window.innerHeight
+    }
     previewScale.value = 1
     return
   }
