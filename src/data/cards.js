@@ -255,6 +255,20 @@ export const allCards = [
     imageUrl: '/images/cards/11010.webp',
     realname: '安晴',
   },
+  {
+    id: '1902',
+    name: '小阳伞',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1902.webp',
+    realname: '小幽灵',
+  },
+  {
+    id: '1904',
+    name: '约定天使',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1904.webp',
+    realname: '光月',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',
