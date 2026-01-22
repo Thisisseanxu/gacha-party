@@ -1,6 +1,6 @@
 {
   "name": "gacha-party",
-  "version": "4.1.3",
+  "version": "4.1.4",
   "private": true,
   "type": "module",
   "scripts": {
