@@ -272,32 +272,45 @@ onMounted(async () => {
     CARDPOOLS_NAME_MAP.value = data.names || {}
   }
 
-  // 加载卡池配置文件
-  try {
-    // 添加时间戳参数以避免缓存，确保获取最新配置
-    const response = await fetch(`/data/gacha_pools.json?t=${Date.now()}`)
-    if (response.ok) {
-      const data = await response.json()
-      applyPoolConfig(data)
-      // 缓存最新配置
-      localStorage.setItem('gachaPoolConfig', JSON.stringify(data))
-    } else {
-      throw new Error('Network response was not ok')
+  if (localStorage.getItem('gachaPoolConfig') && localStorage.getItem('gachaPoolConfigTimestamp') > Date.now() - 2 * 60 * 60 * 1000) {
+    // 使用2小时内的缓存
+    try {
+      const cached = localStorage.getItem('gachaPoolConfig')
+      logger.log('2小时内获取过卡池配置，使用本地缓存的卡池配置')
+      applyPoolConfig(JSON.parse(cached))
+    } catch (e) {
+      logger.error('解析本地缓存配置失败:', e)
+      applyPoolConfig(DEFAULT_POOLS_DATA)
     }
-  } catch (error) {
-    logger.warn('加载在线卡池配置失败，尝试使用本地缓存或默认配置:', error)
-    // 尝试读取缓存
-    const cached = localStorage.getItem('gachaPoolConfig')
-    if (cached) {
-      try {
-        applyPoolConfig(JSON.parse(cached))
-      } catch (e) {
-        logger.error('解析本地缓存配置失败:', e)
+  } else {
+    // 加载在线的卡池配置文件
+    try {
+      // 添加时间戳参数以避免缓存，确保获取最新配置
+      const response = await fetch(`/data/gacha_pools.json?t=${Date.now()}`)
+      if (response.ok) {
+        const data = await response.json()
+        applyPoolConfig(data)
+        // 缓存最新配置
+        localStorage.setItem('gachaPoolConfig', JSON.stringify(data))
+        localStorage.setItem('gachaPoolConfigTimestamp', Date.now().toString())
+      } else {
+        throw new Error('Network response was not ok')
+      }
+    } catch (error) {
+      logger.warn('加载在线卡池配置失败，尝试使用本地缓存或默认配置:', error)
+      // 尝试读取缓存
+      const cached = localStorage.getItem('gachaPoolConfig')
+      if (cached) {
+        try {
+          applyPoolConfig(JSON.parse(cached))
+        } catch (e) {
+          logger.error('解析本地缓存配置失败:', e)
+          applyPoolConfig(DEFAULT_POOLS_DATA)
+        }
+      } else {
+        // 无缓存时使用默认配置
         applyPoolConfig(DEFAULT_POOLS_DATA)
       }
-    } else {
-      // 无缓存时使用默认配置
-      applyPoolConfig(DEFAULT_POOLS_DATA)
     }
   }
 })
