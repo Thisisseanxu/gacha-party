@@ -1,115 +1,122 @@
 <template>
-  <div class="background">
-    <div class="info-page">
+  <div class="background" :class="{ 'smooth-transition': isReady }">
+    <router-link to="/" class="back-btn">
+      <return theme="outline" size="24" />
+      <span>返回首页</span>
+    </router-link>
+
+    <div class="about-container" :class="{ 'smooth-transition': isReady }">
       <header class="page-header">
-        <h1>关于 织夜工具箱</h1>
-        <p>一个为各位班长量身打造的开源、高效的盲盒派对工具集。</p>
-        <p><strong>我们的愿景是:</strong> 构建一个互助、分享、共同进步的盲盒派对玩家社区</p>
+        <h1 class="title">关于 织夜工具箱</h1>
+        <p class="subtitle">一个为各位班长量身打造的开源、高效的盲盒派对工具集。</p>
+        <p class="vision"><strong>我们的愿景是：</strong> 构建一个互助、分享、共同进步的玩家社区</p>
       </header>
 
-      <section class="content-section runtime-section">
-        <h2>运行时长</h2>
-        <p class="runtime-display">
-          <span class="brand-name">织夜工具箱</span> 已经服务各位班长
-          <span class="time">{{ runtime.days }}</span> 天
-          <span class="time">{{ runtime.hours }}</span> 小时
-          <span class="time">{{ runtime.minutes }}</span> 分
-          <span class="time">{{ runtime.seconds }}</span> 秒
-        </p>
-      </section>
-
-      <section class="content-section" v-if="false">
-        <!-- 暂时没有内容所以禁用渲染 -->
-        <h2>核心贡献者</h2>
-        <p>本项目的成长离不开每一位贡献者的努力。以下是部分核心贡献者（排名不分先后）：</p>
-        <div class="contributors-list">
-          <div v-for="contributor in coreContributors" :key="contributor.name" class="contributor-card">
-            <img :src="contributor.avatar" :alt="contributor.name" class="avatar" />
-            <div class="contributor-info">
-              <h3 class="contributor-name">{{ contributor.name }}</h3>
-              <p class="contributor-role">{{ contributor.role }}</p>
-              <a :href="contributor.github" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <div class="content-scroll">
+        <section class="card-section">
+          <div class="runtime-display">
+            <span class="brand-name">织夜工具箱</span> 已经服务各位班长
+            <div class="time-group">
+              <div class="time-block">
+                <span class="num">{{ runtime.days }}</span>
+                <span class="unit">天</span>
+              </div>
+              <div class="time-block">
+                <span class="num">{{ runtime.hours }}</span>
+                <span class="unit">小时</span>
+              </div>
+              <div class="time-block">
+                <span class="num">{{ runtime.minutes }}</span>
+                <span class="unit">分钟</span>
+              </div>
+              <div class="time-block">
+                <span class="num">{{ runtime.seconds }}</span>
+                <span class="unit">秒</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="content-section">
-        <h2>特别鸣谢</h2>
-        <p>感谢以下个人或组织对本项目的大力支持（排名不分先后）：</p>
-        <ul class="thanks-list">
-          <li v-for="(item, index) in specialThanks" :key="index">
-            感谢
-            <a :href="item.link" target="_blank" rel="noopener noreferrer" v-if="item.link"><strong>{{ item.supporter
-                }}</strong></a>
-            <strong v-else>{{ item.supporter }}</strong> {{ item.contribution }}
-          </li>
-        </ul>
-      </section>
+        <section class="card-section">
+          <h2 class="section-title">
+            <thumbs-up theme="outline" size="22" />
+            <span>特别鸣谢</span>
+          </h2>
+          <div class="thanks-grid">
+            <component :is="item.link ? 'a' : 'div'" v-for="(item, index) in specialThanks" :key="index"
+              class="thank-card" :class="{ 'has-link': !!item.link }" :href="item.link"
+              :target="item.link ? '_blank' : undefined" :rel="item.link ? 'noopener noreferrer' : undefined">
+              <div class="thank-content">
+                <span class="supporter">{{ item.supporter }}</span>
+                <span class="contribution">{{ item.contribution }}</span>
+              </div>
+            </component>
+          </div>
+        </section>
 
-      <section class="content-section">
-        <h2>联系我们与反馈</h2>
-        <p>
-          我们非常期待听到你的声音！<br />如果有任何建议、想法，或者在使用过程中遇到了问题，欢迎通过以下方式联系我们：
-        </p>
-        <ul class="contact-list">
-          <li>
-            <strong>问题反馈与建议: </strong><a href="https://github.com/Thisisseanxu/gacha-party/issues" target="_blank"
-              rel="noopener noreferrer">创建Github Issue</a>
-          </li>
-          <li>
-            <strong>交流 QQ 群: </strong><a
-              href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
-              target="_blank" rel="noopener noreferrer">1049576192</a>
-          </li>
-          <li>
-            <strong>联系邮箱: </strong><a :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
-          </li>
-        </ul>
-      </section>
+        <section class="card-section">
+          <h2 class="section-title">
+            <comment theme="outline" size="22" />
+            <span>联系与反馈</span>
+          </h2>
+          <div class="contact-group">
+            <a href="https://github.com/Thisisseanxu/gacha-party/issues" target="_blank" class="contact-btn github">
+              <github-one theme="outline" size="24" />
+              <span>Github Issue</span>
+            </a>
+            <a href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
+              target="_blank" class="contact-btn qq">
+              <tencent-qq theme="outline" size="24" />
+              <span>加入QQ群</span>
+            </a>
+            <a :href="`mailto:${contactEmail}`" class="contact-btn mail">
+              <mail theme="outline" size="24" />
+              <span>邮件联系</span>
+            </a>
+          </div>
+        </section>
+      </div>
     </div>
+
+    <button @click="toggleTheme" class="theme-toggle-btn" title="切换主题">
+      <moon v-if="currentTheme.value === 'dark'" />
+      <sun-one v-else />
+    </button>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { colors } from '@/styles/colors.js'
+import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
+import { Return, ThumbsUp, Comment, GithubOne, TencentQq, Mail, Moon, SunOne } from '@icon-park/vue-next'
 
 const startDate = new Date('2025-07-02T16:00:00') // 项目运行时间计算
 const contactEmail = ref('thisisseanxu@qq.com') // 邮箱地址
+const isReady = ref(false)
 
 const runtime = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 let timer
+
 const updateRuntime = () => {
   const diff = new Date() - startDate
+  if (diff < 0) return // 防止时间倒流显示负数
   runtime.value = {
     days: Math.floor(diff / 86400000),
-    hours: Math.floor((diff % 86400000) / 3600000),
-    minutes: Math.floor((diff % 3600000) / 60000),
-    seconds: Math.floor((diff % 60000) / 1000),
+    hours: String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0'),
+    minutes: String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0'),
+    seconds: String(Math.floor((diff % 60000) / 1000)).padStart(2, '0'),
   }
 }
+
 onMounted(() => {
   updateRuntime()
   timer = setInterval(updateRuntime, 1000)
+  setTimeout(() => {
+    isReady.value = true
+  }, 100)
 })
-onUnmounted(() => clearInterval(timer))
 
-// 核心开发人员介绍，预留位置
-// const coreContributors = ref([
-//   {
-//     name: '[贡献者姓名]',
-//     role: '[主要贡献，如：项目发起人]',
-//     avatar: '[贡献者头像URL链接]',
-//     github: '[贡献者的GitHub主页链接]'
-//   },
-//   {
-//     name: '[另一位贡献者]',
-//     role: '[UI/UX 设计]',
-//     avatar: '[头像URL]',
-//     github: '[GitHub链接]'
-//   },
-// ]);
+onUnmounted(() => clearInterval(timer))
 
 // 特别鸣谢区域
 const specialThanks = ref([
@@ -131,165 +138,311 @@ const specialThanks = ref([
 <style scoped>
 .background {
   position: relative;
-  min-height: 100vh;
-  background-color: #000;
-  display: flex;
-  overflow: hidden;
-  justify-items: center;
-}
-
-.info-page {
+  min-height: 100dvh;
   background-color: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-/* 在手机上减小info-page的内边距 */
-@media (max-width: 768px) {
-  .info-page {
-    padding: 20px 20px;
-  }
+.background.smooth-transition {
+  transition: background-color 1s ease;
+}
+
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/homepage_bg.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.about-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: min(100vw, 800px);
+  max-height: 100vh;
+  background-color: v-bind('colors.background.content');
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  box-sizing: border-box;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.about-container.smooth-transition {
+  transition: background-color 1s ease;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: v-bind('colors.text.primary');
+  text-decoration: none;
+  font-weight: bold;
+  background: v-bind('colors.background.content');
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.back-btn:hover {
+  transform: translateX(-2px);
+  background: v-bind('colors.background.light');
 }
 
 .page-header {
   text-align: center;
-  border-bottom: 1px solid v-bind('colors.border.secondary');
-  padding-bottom: 20px;
-  margin-bottom: 30px;
+  flex-shrink: 0;
 }
 
-.page-header h1 {
-  font-size: 2.5em;
+.title {
+  font-size: 2rem;
+  font-weight: bold;
   color: v-bind('colors.text.primary');
-  margin-bottom: 10px;
+  margin: 0 0 0.5rem 0;
 }
 
-.page-header p {
-  font-size: 1.1em;
-  color: v-bind('colors.text.secondary');
+.subtitle {
+  font-size: 1rem;
+  color: v-bind('colors.text.tertiary');
+  margin: 0 0 0.5rem 0;
 }
 
-.content-section {
-  margin-bottom: 40px;
-}
-
-.content-section h2 {
-  font-size: 1.8em;
-  color: v-bind('colors.text.primary');
-  border-bottom: 2px solid v-bind('colors.brand.primary');
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.content-section p,
-.content-section li {
-  line-height: 1.8;
-  font-size: 1.1em;
-  color: v-bind('colors.text.light');
-}
-
-a {
-  color: v-bind('colors.brand.primary');
-  text-decoration: none;
-  font-weight: bold;
-}
-
-a:hover {
-  color: v-bind('colors.brand.hover');
-  text-decoration: underline;
-}
-
-.runtime-section .runtime-display {
-  background-color: v-bind('colors.background.content');
-  border-left: 5px solid v-bind('colors.brand.primary');
-  padding: 20px;
-  font-size: 1.2em;
-  text-align: center;
-  border-radius: 5px;
-}
-
-.runtime-display .brand-name {
-  font-weight: bold;
-  color: v-bind('colors.brand.primary');
-}
-
-.runtime-display .time {
-  font-weight: bold;
-  font-size: 1.5em;
+.vision {
+  font-size: 0.9rem;
   color: v-bind('colors.text.highlight');
-  padding: 0 5px;
-  min-width: 40px;
-  display: inline-block;
+  opacity: 0.9;
+  margin: 0 0 0.5rem 0;
 }
 
-/* 核心贡献者样式 */
-.contributors-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+.content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  /* Custom Scrollbar styling could go here */
 }
 
-.contributor-card {
+.content-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content-scroll::-webkit-scrollbar-thumb {
+  background-color: v-bind('colors.border.primary');
+  border-radius: 3px;
+}
+
+.card-section {
+  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 0.5rem;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.section-title {
+  font-size: 1.2rem;
+  color: v-bind('colors.text.primary');
+  margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
-  background: v-bind('colors.background.light');
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid v-bind('colors.border.primary');
-  flex-basis: 280px;
-  flex-grow: 1;
+  gap: 0.5rem;
 }
 
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-right: 15px;
-  background-color: v-bind('colors.background.avatar');
-  border: 2px solid v-bind('colors.border.secondary');
-}
-
-.contributor-name {
-  margin: 0 0 5px 0;
-  color: v-bind('colors.text.primary');
-}
-
-.contributor-role {
-  margin: 0;
-  font-size: 0.9em;
+/* Runtime Display */
+.runtime-display {
+  text-align: center;
   color: v-bind('colors.text.tertiary');
 }
 
-/* 鸣谢与联系方式列表 */
-.thanks-list,
-.contact-list {
-  list-style: none;
-  text-align: left;
-  padding-left: 0;
-}
-
-.thanks-list li,
-.contact-list li {
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-}
-
-.thanks-list li:hover,
-.contact-list li:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px v-bind('colors.shadow.primaryHover');
-  border-color: v-bind('colors.background.lighter');
-}
-
-.thanks-list strong {
+.brand-name {
   color: v-bind('colors.text.highlight');
+  font-weight: bold;
+}
+
+.time-group {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: v-bind('colors.background.primary');
+  padding: 0.5rem;
+  border-radius: 8px;
+  min-width: 60px;
+  border: 1px solid v-bind('colors.border.primary');
+}
+
+.time-block .num {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: v-bind('colors.text.primary');
+  font-family: monospace;
+}
+
+.time-block .unit {
+  font-size: 0.8rem;
+  color: v-bind('colors.text.tertiary');
+}
+
+/* Thanks Grid */
+.thanks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.thank-card {
+  background: v-bind('colors.background.primary');
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid v-bind('colors.border.primary');
+  transition: transform 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.thank-card.has-link:hover {
+  transform: translateY(-2px);
+  border-color: v-bind('colors.text.highlight');
+  cursor: pointer;
+}
+
+.thank-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.supporter {
+  font-weight: bold;
+  color: v-bind('colors.text.primary');
+}
+
+.thank-card.has-link .supporter {
+  color: v-bind('colors.text.highlight');
+}
+
+.contribution {
+  font-size: 0.85rem;
+  color: v-bind('colors.text.tertiary');
+}
+
+/* Contact Group */
+.contact-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.contact-btn.github {
+  background: #333;
+}
+
+.contact-btn.qq {
+  background: #12b7f5;
+}
+
+.contact-btn.mail {
+  background: #ea4335;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    height: 100dvh;
+    border-radius: 0;
+    padding: 1rem;
+  }
+
+  .back-btn {
+    top: 10px;
+    left: 10px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .page-header {
+    margin-top: 2rem;
+  }
+
+  .time-group {
+    gap: 0.5rem;
+  }
+
+  .time-block {
+    min-width: 50px;
+    padding: 0.4rem;
+  }
+
+  .time-block .num {
+    font-size: 1.2rem;
+  }
 }
 </style>
