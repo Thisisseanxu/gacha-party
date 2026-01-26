@@ -1483,10 +1483,6 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-.capture-area-wrapper {
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
 .chat-log-container {
   background-color: v-bind('colors.game.backgroundBlack');
   overflow-y: auto;

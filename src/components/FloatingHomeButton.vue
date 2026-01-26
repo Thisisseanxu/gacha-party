@@ -2,21 +2,23 @@
   <div class="floating-wrapper">
     <div class="floating-home-button" @click="goToHome"></div>
 
-    <Transition name="fade">
-      <div v-if="showHint" class="hint-bubble">点我返回主页喵~</div>
-    </Transition>
+    <div class="hints-container">
+      <Transition name="fade">
+        <div v-if="showHint" class="hint-bubble">点我返回主页喵~</div>
+      </Transition>
 
-    <Transition name="fade">
-      <div v-if="props.isUpdating" class="update-hint">
-        <div class="spinner"></div>
-        <span>正在更新中，请稍等...</span>
-      </div>
-    </Transition>
+      <Transition name="fade">
+        <div class="hint-bubble" v-if="props.isUpdating">
+          <div class="spinner"></div>
+          <span>发现新版本，在下载喵~</span>
+        </div>
+      </Transition>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { colors } from '@/styles/colors.js'
 
@@ -29,22 +31,28 @@ const props = defineProps({
 
 const router = useRouter()
 const route = useRoute()
-
 const showHint = ref(false)
 
-onMounted(() => {
-  if (route.path === '/') return
+watch(() => route.path, (newPath) => {
+  if (newPath === '/') {
+    showHint.value = false
+    return
+  }
 
+  showHint.value = true
   const lastTime = Number(localStorage.getItem('home_btn_hint_last_time') || 0)
   const now = Date.now()
-  if (now - lastTime > 60000) {
-    showHint.value = true
+  if (now - lastTime > 180000) {
     localStorage.setItem('home_btn_hint_last_time', String(now))
     setTimeout(() => {
       showHint.value = false
     }, 3000)
+  } else {
+    setTimeout(() => {
+      showHint.value = false
+    }, 1000)
   }
-})
+}, { immediate: true })
 
 const goToHome = () => {
   router.push('/')
@@ -72,7 +80,7 @@ const goToHome = () => {
   background-size: cover;
   background-position: center;
   cursor: pointer;
-  border: 2px solid v-bind('colors.shadow.lightHover');
+  border: 2px solid v-bind('colors.shadow.whiteHover');
   box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
   transition:
     transform 0.3s ease,
@@ -84,19 +92,32 @@ const goToHome = () => {
   box-shadow: 0 6px 16px v-bind('colors.shadow.primaryHover');
 }
 
+/* 提示气泡容器 */
+.hints-container {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  padding-right: 10px;
+  pointer-events: none;
+}
+
 /* 提示气泡样式 */
 .hint-bubble {
-  /* 绝对定位，相对于 .floating-wrapper */
-  position: absolute;
-  /* 放在悬浮球左侧，留出一点空隙 */
-  right: 100%;
-  margin-right: 10px;
+  pointer-events: auto;
   background-color: v-bind('colors.shadow.primaryHover');
   color: v-bind('colors.text.primary');
   padding: 6px 12px;
   border-radius: 15px;
   font-size: 14px;
   white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 }
 
 /* 在大屏幕上离屏幕中心更近一点，方便按到 */
@@ -119,22 +140,6 @@ const goToHome = () => {
   opacity: 0;
 }
 
-/* 更新提示样式 */
-.update-hint {
-  position: absolute;
-  top: 100%;
-  margin-top: 10px;
-  background-color: v-bind('colors.shadow.primaryHover');
-  color: v-bind('colors.text.primary');
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .spinner {
   width: 12px;
   height: 12px;
@@ -142,5 +147,15 @@ const goToHome = () => {
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

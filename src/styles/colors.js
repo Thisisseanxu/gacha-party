@@ -88,8 +88,8 @@ const dark = {
   shadow: {
     primary: 'rgba(0, 0, 0, 0.3)', // 用于卡片、列表项的常规阴影
     primaryHover: 'rgba(0, 0, 0, 0.5)', // 用于悬浮时更明显的阴影
-    light: 'rgba(255, 255, 255, 0.3)', // 用于深色背景上的阴影
-    lightHover: 'rgba(255, 255, 255, 0.5)', // 用于深色背景上的悬浮阴影
+    white: 'rgba(255, 255, 255, 0.3)', // 用于深色背景上的阴影
+    whiteHover: 'rgba(255, 255, 255, 0.5)', // 用于深色背景上的悬浮阴影
   },
   // --- 其他 ---
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色
@@ -176,10 +176,10 @@ const light = {
     lighter: 'rgba(174, 176, 189, 1)',
   },
   shadow: {
-    primary: 'rgba(255, 255, 255, 0.3)',
-    primaryHover: 'rgba(255, 255, 255, 0.5)',
-    light: 'rgba(0, 0, 0, 0.3)',
-    lightHover: 'rgba(0, 0, 0, 0.5)',
+    primary: 'rgba(128, 128, 128, 0.3)',
+    primaryHover: 'rgba(128, 128, 128, 0.5)',
+    white: 'rgba(255, 255, 255, 0.3)',
+    whiteHover: 'rgba(255, 255, 255, 0.5)',
   },
   scrollbar: '#d1d5db',
   textShadow: 'none',

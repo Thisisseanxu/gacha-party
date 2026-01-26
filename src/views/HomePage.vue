@@ -1,7 +1,7 @@
 <template>
-  <div class="background">
-    <div class="home-container">
-      <h1 class="title">织夜工具箱</h1>
+  <div class="background" :class="{ 'smooth-transition': isReady }">
+    <div class="home-container" :class="{ 'smooth-transition': isReady }">
+      <h1 class="title" :class="{ 'smooth-transition': isReady }">织夜工具箱</h1>
 
       <div class="button-group">
         <router-link to="chouka" class="btn chouka">
@@ -72,6 +72,14 @@ import { logger } from '@/utils/logger'
 
 const appVersion = __VERSION__
 
+const isReady = ref(false)
+
+onMounted(() => {
+  setTimeout(() => {
+    isReady.value = true
+  }, 100)
+})
+
 // 创建一个 ref 保存 'beforeinstallprompt' 事件
 const deferredPrompt = ref(null)
 const captureInstallPrompt = (e) => {
@@ -136,6 +144,9 @@ const handleComingSoon = () => {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+}
+
+.background.smooth-transition {
   transition: background-color 1s ease;
 }
 
@@ -168,6 +179,9 @@ const handleComingSoon = () => {
   box-sizing: border-box;
   max-width: min(100vw, 800px);
   min-width: 0;
+}
+
+.home-container.smooth-transition {
   transition: background-color 1s ease;
 }
 
@@ -177,6 +191,9 @@ const handleComingSoon = () => {
   color: v-bind('colors.text.primary');
   margin-top: 1rem;
   margin-bottom: 2rem;
+}
+
+.title.smooth-transition {
   transition: color 1s ease;
 }
 
