@@ -58,7 +58,8 @@
     </div>
 
     <button @click="toggleTheme" class="theme-toggle-btn" title="切换主题">
-      {{ currentTheme.value === 'light' ? '🌙' : '☀️' }}
+      <Moon v-if="currentTheme.value === 'dark'" />
+      <SunOne v-else />
     </button>
   </div>
 </template>
@@ -66,7 +67,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
-import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next'
+import { GithubOne, TencentQq, Install, Info, Moon, SunOne } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 
 const appVersion = __VERSION__
@@ -135,6 +136,7 @@ const handleComingSoon = () => {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  transition: background-color 1s ease;
 }
 
 .background::before {
@@ -148,7 +150,7 @@ const handleComingSoon = () => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.2;
+  opacity: 0.3;
   z-index: 1;
 }
 
@@ -166,6 +168,7 @@ const handleComingSoon = () => {
   box-sizing: border-box;
   max-width: min(100vw, 800px);
   min-width: 0;
+  transition: background-color 1s ease;
 }
 
 .title {
@@ -174,11 +177,13 @@ const handleComingSoon = () => {
   color: v-bind('colors.text.primary');
   margin-top: 1rem;
   margin-bottom: 2rem;
+  transition: color 1s ease;
 }
 
 .version {
   font-size: 1rem;
   color: v-bind('colors.text.tertiary');
+  transition: color 0.3s ease;
 }
 
 .button-group {

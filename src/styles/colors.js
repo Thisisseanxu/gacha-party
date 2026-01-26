@@ -128,7 +128,7 @@ const dark = {
 
 const light = {
   background: {
-    primary: '#e5e6e7',
+    primary: '#e6e5e3',
     content: '#f0f0f0',
     light: '#f8f9fa',
     lighter: '#e5e7eb',
