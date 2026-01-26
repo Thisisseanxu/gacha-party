@@ -82,6 +82,14 @@ const routes = [
     },
   },
   {
+    path: '/talk',
+    name: '创作模式',
+    component: () => import('./views/TalkPage.vue'), // 创作模式页面组件
+    meta: {
+      title: '创作模式 - 织夜工具箱',
+    },
+  },
+  {
     path: '/huizhang',
     name: '徽章编辑器',
     component: () => import('./views/HuizhangPage.vue'), // 徽章编辑器页面组件
