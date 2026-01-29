@@ -4,7 +4,47 @@ import { logger } from '@/utils/logger.js'
 
 const SP_BASE_RATE = 0.0125 // SP 基础概率
 
-// 因代码限制，目前每个卡池必须包含rules属性，空的也可以
+/**
+ * =============================================================================
+ * 卡池配置说明
+ * =============================================================================
+ *
+ * 添加新卡池时，请在 cardPools 对象中添加对应配置。
+ *
+ * 注意事项：
+ * 1. 因代码限制，目前每个卡池必须包含 rules 属性，即使为空对象也可以。
+ * 2. 角色名称必须与 cards.js 中的 name 字段完全匹配。
+ *
+ * 配置项字段说明:
+ * - type: 卡池类型 (如 '限定', '常驻', '自选', '祈愿盲盒')
+ * - name: 卡池显示名称
+ * - imageUrl: 卡池封面图路径
+ *
+ * - rates: 基础概率配置
+ *   - [RARITY.SP]: SP 基础概率
+ *   - [RARITY.SSR]: SSR 基础概率
+ *   - [RARITY.SR]: SR 基础概率
+ *   - 剩余概率自动归为 R
+ *
+ * - rules: 保底与概率提升规则 (按稀有度配置)
+ *   - [RARITY.SP] / [RARITY.SSR]:
+ *     - pity: 保底抽数 (如 60，表示60抽必出)
+ *     - boostAfter: 开始概率提升的抽数 (如 40)
+ *     - boost: 每次提升的概率值 (如 0.02，即每次+2%)
+ *     - UpTrigger: 是否启用 UP 机制 (true/false)
+ *     - SelectUpCards: 是否允许玩家从 UpCards 中自选 UP 角色 (true/false)
+ *     - UpCards: UP 角色名称列表 (字符串数组)
+ *     - doubleRateCards: 概率翻倍的角色名称列表 (通常用于 SSR)
+ *     - WishSelection: (自选池) 是否启用心愿自选机制
+ *     - MaximumSelection: (自选池) 最大可选心愿数量
+ *     - pityUP: (常驻池) 触发保底时是否必定为 UP 角色
+ *     - SelectUpCardsGroup: (常驻池) 是否为多组 UP 选择模式
+ *     - UpGroups: (常驻池) UP 组配置列表，包含 id, name, image_url, cards
+ *
+ * - cardNames: 卡池包含的角色列表 (按稀有度分类的名称数组)
+ * =============================================================================
+ */
+
 // 定义卡池配置
 export const cardPools = {
   // 青玉之锋
@@ -12,24 +52,22 @@ export const cardPools = {
     type: '限定',
     name: '青玉之锋',
     imageUrl: '/images/cardpools-icon/10191.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['匣中冰锋', '甜蜜冰霜'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['织夜超可爱'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['织夜超可爱'],
       },
     },
     cardNames: {
@@ -58,24 +96,22 @@ export const cardPools = {
     type: '限定',
     name: '织梦旅行团',
     imageUrl: '/images/cardpools-icon/10182.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['约定天使', '小阳伞'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['嫦娥娃娃'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['嫦娥娃娃'],
       },
     },
     cardNames: {
@@ -104,19 +140,17 @@ export const cardPools = {
     type: '限定',
     name: '鹅崽召唤器',
     imageUrl: '/images/cardpools-icon/122.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['企鹅少女'],
       },
     },
@@ -146,24 +180,22 @@ export const cardPools = {
     type: '限定',
     name: '相约嘉年华',
     imageUrl: '/images/cardpools-icon/10162.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['绯色巧克力', '糖果轰炸机'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['甜甜圈医师'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['甜甜圈医师'],
       },
     },
     cardNames: {
@@ -192,20 +224,18 @@ export const cardPools = {
     type: '限定',
     name: '圣诞邀约',
     imageUrl: '/images/cardpools-icon/120.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['音叉投手', '应援战士'],
       },
     },
@@ -235,19 +265,17 @@ export const cardPools = {
     type: '限定',
     name: '酷玩爆米花',
     imageUrl: '/images/cardpools-icon/119.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['次元加农炮'],
       },
     },
@@ -274,10 +302,10 @@ export const cardPools = {
   },
   // 心愿自选
   xinyuan: {
-    type: '自选', // 类型名称，用于UI显示
+    type: '自选',
     name: '心愿自选',
     imageUrl: '/images/cardpools-icon/1000.webp',
-    challengeDisabled: true, // 自选卡池不支持挑战赛
+    challengeDisabled: true,
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
@@ -286,13 +314,13 @@ export const cardPools = {
     rules: {
       [RARITY.SP]: {
         pity: 60,
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        WishSelection: true, // 启用自选机制
-        MaximumSelection: 4, // 最多可选4张心愿卡
+        boostAfter: 40,
+        boost: 0.02,
+        WishSelection: true,
+        MaximumSelection: 4,
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['特别医护', '冰匙娃娃'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['特别医护', '冰匙娃娃'],
       },
     },
     cardNames: {
@@ -360,20 +388,18 @@ export const cardPools = {
     type: '限定',
     name: '厨娘来啦！',
     imageUrl: '/images/cardpools-icon/10122.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['美味香油壶', '顶级调料罐'],
       },
     },
@@ -403,23 +429,21 @@ export const cardPools = {
     type: '限定',
     name: '超频扭蛋机',
     imageUrl: '/images/cardpools-icon/10112.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['超频游戏姬'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['指路奈奈'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['指路奈奈'],
       },
     },
     cardNames: {
@@ -448,20 +472,18 @@ export const cardPools = {
     type: '限定',
     name: '萌鬼认可证',
     imageUrl: '/images/cardpools-icon/10102.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['猫猫女巫', '乐园实验家'],
       },
     },
@@ -491,19 +513,17 @@ export const cardPools = {
     type: '限定',
     name: '暮色邀请函',
     imageUrl: '/images/cardpools-icon/10092.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['血族女王'],
       },
     },
@@ -533,24 +553,22 @@ export const cardPools = {
     type: '限定',
     name: '游园邀请',
     imageUrl: '/images/cardpools-icon/49.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['键盘乐手', '炽热射线'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['嫦娥娃娃'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['嫦娥娃娃'],
       },
     },
     cardNames: {
@@ -579,19 +597,17 @@ export const cardPools = {
     type: '祈愿盲盒',
     name: '祈愿盲盒-烧烤大师',
     imageUrl: '/images/cardpools-icon/47.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['烧烤大师'],
       },
     },
@@ -621,24 +637,22 @@ export const cardPools = {
     type: '限定',
     name: '地下车手招募',
     imageUrl: '/images/cardpools-icon/10012.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['赛博忍者', '酷玩游戏机'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['指路奈奈'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['指路奈奈'],
       },
     },
     cardNames: {
@@ -666,23 +680,22 @@ export const cardPools = {
     type: '限定',
     name: '扭蛋大作战',
     imageUrl: '/images/cardpools-icon/10062.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
-    }, // 保底/概率提升规则
+      [RARITY.SR]: 0.2,
+    },
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['雪糕刺客', '深海鲨鱼'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['电玩少女'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['电玩少女'],
       },
     },
     cardNames: {
@@ -711,23 +724,21 @@ export const cardPools = {
     type: '限定',
     name: '早稻叽',
     imageUrl: '/images/cardpools-icon/10051.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['光之恶魔'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['歌姬小喵'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['歌姬小喵'],
       },
     },
     cardNames: {
@@ -756,23 +767,22 @@ export const cardPools = {
     type: '限定',
     name: '浴缸大作战',
     imageUrl: '/images/cardpools-icon/10042.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
-    }, // 保底/概率提升规则
+      [RARITY.SR]: 0.2,
+    },
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['海洋果冻', '海军大将'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['水枪普拉斯'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['水枪普拉斯'],
       },
     },
     cardNames: {
@@ -801,24 +811,22 @@ export const cardPools = {
     type: '限定',
     name: '童话国盲盒机',
     imageUrl: '/images/cardpools-icon/10032.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
       [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['彩虹射手', '粉白梦魔'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['嫦娥娃娃'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['嫦娥娃娃'],
       },
     },
     cardNames: {
@@ -847,23 +855,21 @@ export const cardPools = {
     type: '限定',
     name: '塔菲扭蛋',
     imageUrl: '/images/cardpools-icon/108.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        SelectUpCards: true, // 虽然只有一个SP，但为了显示角色还是加上
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        SelectUpCards: true,
         UpCards: ['王牌发明家'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['指路奈奈'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['指路奈奈'],
       },
     },
     cardNames: {
@@ -891,24 +897,22 @@ export const cardPools = {
     type: '限定',
     name: '车手盲盒机',
     imageUrl: '/images/cardpools-icon/29.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
+      [RARITY.SR]: 0.2,
     },
-    // 保底/概率提升规则
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['贪吃天使', '小熊工程队'],
       },
       [RARITY.SSR]: {
-        doubleRateCards: ['甜甜圈医师'], // 双倍概率SSR角色（限定池SSR概率提升）
+        doubleRateCards: ['甜甜圈医师'],
       },
     },
     cardNames: {
@@ -935,24 +939,24 @@ export const cardPools = {
   changzhu: {
     type: '常驻',
     name: '常驻扭蛋',
-    imageUrl: '/images/cardpools-icon/9.webp', // 基础概率
-    challengeDisabled: true, // 常驻卡池不支持挑战赛
+    imageUrl: '/images/cardpools-icon/9.webp',
+    challengeDisabled: true,
     rates: {
       [RARITY.SSR]: 0.08,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
-    }, // 保底/概率提升规则
+      [RARITY.SR]: 0.2,
+    },
     rules: {
       [RARITY.SSR]: {
-        pity: 60, // 60抽必出SSR
-        pityUP: true, // 触发保底时必定抽到UP的SSR
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCardsGroup: true, // 标记为可从多组UP中选择
+        pity: 60,
+        pityUP: true,
+        UpTrigger: true,
+        SelectUpCardsGroup: true,
         UpGroups: [
           {
-            id: '1', // UP组ID
-            name: '甜品派对', // 组的显示名称
-            image_url: '/images/cardpools-icon/1.webp', // 组的封面图片SPL
-            cards: ['卷卷战士', '甜甜圈推车', '甜蜜迫击炮', '裱花千竹'], // 该组包含的卡片ID列表
+            id: '1',
+            name: '甜品派对',
+            image_url: '/images/cardpools-icon/1.webp',
+            cards: ['卷卷战士', '甜甜圈推车', '甜蜜迫击炮', '裱花千竹'],
           },
           {
             id: '2',
@@ -1047,19 +1051,18 @@ export const cardPools = {
     type: '限定',
     name: '高级常驻扭蛋',
     imageUrl: '/images/cardpools-icon/10000.webp',
-    // 基础概率
     rates: {
       [RARITY.SP]: SP_BASE_RATE,
       [RARITY.SSR]: 0.06,
-      [RARITY.SR]: 0.2, // 其他情况都是 R
-    }, // 保底/概率提升规则
+      [RARITY.SR]: 0.2,
+    },
     rules: {
       [RARITY.SP]: {
-        pity: 60, // 60抽必出SP
-        boostAfter: 40, // 40抽后每抽提升SP概率
-        boost: 0.02, // 每抽提升2%的SP概率（41抽SP变为 0.04，42抽0.06......）
-        UpTrigger: true, // 该卡池有UP机制
-        SelectUpCards: true, // 可以选择UpCards中的一个角色UP
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
         UpCards: ['可可乐', '电池霓昂', '沁心浓茶', '烧烤大师'],
       },
     },
@@ -1144,7 +1147,7 @@ function getCardsByNames(names, rarity = -1) {
  * 根据卡池配置信息获取完整的角色数据
  *
  * @param {string} poolId - 卡池ID
- * @returns {Array<Object>} 返回一个包含 角色对象的数组。
+ * @returns {Array<Object>} 返回一个包含角色对象的数组
  */
 export function getFullCardPoolData(poolId) {
   const poolConfig = cardPools[poolId]
@@ -1152,7 +1155,7 @@ export function getFullCardPoolData(poolId) {
     return null
   }
 
-  // 辅助函数：将名称数组转换为ID数组
+  // 将名称数组转换为ID数组
   const convertNamesToIds = (names) => {
     if (!Array.isArray(names)) return []
     return names
@@ -1167,7 +1170,7 @@ export function getFullCardPoolData(poolId) {
       .filter(Boolean)
   }
 
-  // 1. 处理 rules 中的名称转ID，以兼容 GachaPage.vue 的逻辑
+  // 处理 rules 中的名称转ID，以兼容 GachaPage.vue 的逻辑
   const rulesWithIds = {}
   if (poolConfig.rules) {
     for (const [rarity, rule] of Object.entries(poolConfig.rules)) {
@@ -1195,7 +1198,7 @@ export function getFullCardPoolData(poolId) {
     }
   }
 
-  // 2. 生成 cardIds (供 GachaPage 使用，如自选池)
+  // 生成 cardIds 供 GachaPage 使用
   const cardIds = {}
   if (poolConfig.cardNames) {
     for (const [rarity, names] of Object.entries(poolConfig.cardNames)) {
