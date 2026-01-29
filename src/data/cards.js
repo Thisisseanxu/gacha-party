@@ -684,3 +684,4 @@ export const allCards = [
 
 // 将角色ID和角色对象映射到一个Map中，方便通过ID快速查找角色
 export const cardMap = new Map(allCards.map((card) => [card.id, card]))
+export const cardNameMap = new Map(allCards.map((card) => [card.name, card]))
