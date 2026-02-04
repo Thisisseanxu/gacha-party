@@ -322,6 +322,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  newYearGachaData: {
+    type: Array,
+    required: true,
+  },
   eventGachaData: {
     type: Array,
     required: true,
@@ -371,6 +375,7 @@ const CARDPOOLS_NAME_MAP = {
   AdvanceNormal: '高级常驻扭蛋',
   QiYuan: '祈愿盲盒',
   Wish: '心愿自选',
+  NewYear: '新春自选',
 }
 
 // 抽数小于字典键值时显示对应称号
@@ -401,6 +406,7 @@ const cardPoolOptions = ref([
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
   { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
   { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
+  { id: 'NewYear', name: CARDPOOLS_NAME_MAP['NewYear'] }, // 新春自选卡池
   { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
   { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
   // 可折叠的分组
@@ -425,6 +431,7 @@ cardPoolOptions.value = cardPoolOptions.value.filter((option) => {
         ...props.fukeGachaData,
         ...props.qiYuanGachaData,
         ...props.wishGachaData,
+        ...props.newYearGachaData,
       ].length > 0
     )
   }
@@ -449,6 +456,9 @@ cardPoolOptions.value = cardPoolOptions.value.filter((option) => {
   if (option.id === 'Wish') {
     return props.wishGachaData.length > 0
   }
+  if (option.id === 'NewYear') {
+    return props.newYearGachaData.length > 0
+  }
   if (option.id === '---') {
     return true // 保留分隔符
   }
@@ -469,6 +479,7 @@ const isSinglePool = computed(
       'AdvanceNormal',
       'QiYuan',
       'Wish',
+      'NewYear',
       'Event',
       'Fuke',
       'AllLimited',
@@ -549,6 +560,12 @@ const activeWishData = computed(() =>
     : props.wishGachaData,
 )
 
+const activeNewYearData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'NewYear'
+    ? reviewRecords.value
+    : props.newYearGachaData,
+)
+
 // 计算列表平均值的通用函数
 const calculateAverage = (arr) => (arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0)
 
@@ -557,11 +574,9 @@ const getCardInfoAndRemovePrefix = (itemId) => {
   let cardId = itemId.startsWith('15') ? itemId.slice(2) : itemId // 去掉前缀 "15"
   return cardMap.get(cardId) || null
 }
-
-// 限定卡池分析逻辑
-const limitAnalysis = computed(() => {
-  // 仅当有有效数据时才执行计算
-  if (activeLimitData.value.length === 0)
+// 通用卡池分析函数
+const calculatePoolStats = (data, poolName) => {
+  if (data.length === 0)
     return {
       totalPulls: 0,
       SP: 0,
@@ -570,13 +585,14 @@ const limitAnalysis = computed(() => {
       avgPullsForSSR: 0,
       maxSP: 0,
       minSP: Infinity,
+      maxSSR: 0,
+      minSSR: Infinity,
       SPHistory: [],
       SSRHistory: [],
       records: [],
     }
 
-  // 将数据改成从最久远到最近排序，方便计算抽数
-  const records = [...activeLimitData.value].sort(
+  const records = [...data].sort(
     (a, b) => a.created_at - b.created_at || a.id - b.id,
   )
   let SPCounter = 0,
@@ -587,7 +603,7 @@ const limitAnalysis = computed(() => {
   records.forEach((record) => {
     const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
     if (!cardInfo) {
-      logger.warn(`未找到 item_id: ${record.item_id} 的信息，已跳过。`)
+      logger.warn(`(${poolName}) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
       return
     }
     SPCounter++
@@ -602,7 +618,7 @@ const limitAnalysis = computed(() => {
       SPCounter = 0
     }
     if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
+      SSRHistory.unshift({
         ...cardInfo,
         count: SSRCounter,
         gacha_id: record.gacha_id,
@@ -620,216 +636,68 @@ const limitAnalysis = computed(() => {
     avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
     maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
     minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
+    maxSSR: Math.max(...SSRHistory.map((item) => item.count), 0),
+    minSSR: Math.min(...SSRHistory.map((item) => item.count), Infinity),
     SPHistory,
     SSRHistory,
     records,
   }
-})
+}
+
+// 通用单卡池分析函数
+const calculateSinglePoolStats = (baseAnalysis, poolId, singlePoolTotalPulls) => {
+  if (!baseAnalysis) return null
+  const filteredSPHistory = baseAnalysis.SPHistory.filter(
+    (item) => item.gacha_id === Number(poolId),
+  )
+  const filteredSSRHistory = baseAnalysis.SSRHistory.filter(
+    (item) => item.gacha_id === Number(poolId),
+  )
+  return {
+    totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
+    SinglePulls: singlePoolTotalPulls,
+    avgPullsForSP: calculateAverage(filteredSPHistory.map((item) => item.count)),
+    avgPullsForSSR:
+      filteredSSRHistory.length > 0 ? singlePoolTotalPulls / filteredSSRHistory.length : 0,
+    maxSP: Math.max(...filteredSPHistory.map((item) => item.count), 0),
+    minSP: Math.min(...filteredSPHistory.map((item) => item.count), Infinity),
+    SPHistory: filteredSPHistory,
+    SSRHistory: filteredSSRHistory,
+  }
+}
+
+// 限定卡池分析逻辑
+const limitAnalysis = computed(() => calculatePoolStats(activeLimitData.value, 'Limited'))
 
 // 限定卡池单卡池分析逻辑
 const singleLimitAnalysis = computed(() => {
   if (!limitAnalysis.value) return null
   if (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
-    // 如果选择了特定卡池，则只分析该卡池的记录，注意转换成数字
-    const filteredSPHistory = limitAnalysis.value.SPHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    const filteredSSRHistory = limitAnalysis.value.SSRHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    return {
-      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
-      SinglePulls: fullHistory.value.length, // 这里问历史记录要一下单卡池的总抽数
-      avgPullsForSP: calculateAverage(filteredSPHistory.map((item) => item.count)),
-      avgPullsForSSR:
-        filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0, // SSR平均抽数改为总抽数除以SSR数量
-      maxSP: Math.max(...filteredSPHistory.map((item) => item.count), 0),
-      minSP: Math.min(...filteredSPHistory.map((item) => item.count), Infinity),
-      SPHistory: filteredSPHistory,
-      SSRHistory: filteredSSRHistory,
-    }
+    return calculateSinglePoolStats(limitAnalysis.value, CurrentSelectedPool.value, fullHistory.value.length)
   }
   return { ...limitAnalysis.value } // 如果选中的卡池不存在，则返回全部限定卡池的分析数据
 })
 
 // 联动卡池分析逻辑
-const eventAnalysis = computed(() => {
-  if (activeEventData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SP: 0,
-      SSR: 0,
-      avgPullsForSP: 0,
-      avgPullsForSSR: 0,
-      maxSP: 0,
-      minSP: Infinity,
-      SPHistory: [],
-      SSRHistory: [],
-      records: [],
-    }
-
-  const records = [...activeEventData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SPCounter = 0,
-    SSRCounter = 0
-  const SPHistory = [],
-    SSRHistory = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(联动) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SPCounter++
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({
-        ...cardInfo,
-        count: SPCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SPCounter = 0
-    }
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
-        ...cardInfo,
-        count: SSRCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SSRCounter = 0
-    }
-  })
-
-  return {
-    totalPulls: records.length,
-    SP: SPCounter,
-    SSR: SSRCounter,
-    avgPullsForSP: calculateAverage(SPHistory.map((item) => item.count)),
-    avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
-    maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
-    minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
-    SPHistory,
-    SSRHistory,
-    records,
-  }
-})
+const eventAnalysis = computed(() => calculatePoolStats(activeEventData.value, 'Event'))
 
 // 联动卡池单卡池分析逻辑
 const singleEventAnalysis = computed(() => {
   if (!eventAnalysis.value) return null
   if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
-    const filteredSPHistory = eventAnalysis.value.SPHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    const filteredSSRHistory = eventAnalysis.value.SSRHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    return {
-      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
-      SinglePulls: fullHistory.value.length,
-      avgPullsForSP: calculateAverage(filteredSPHistory.map((item) => item.count)),
-      avgPullsForSSR:
-        filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
-      maxSP: Math.max(...filteredSPHistory.map((item) => item.count), 0),
-      minSP: Math.min(...filteredSPHistory.map((item) => item.count), Infinity),
-      SPHistory: filteredSPHistory,
-      SSRHistory: filteredSSRHistory,
-    }
+    return calculateSinglePoolStats(eventAnalysis.value, CurrentSelectedPool.value, fullHistory.value.length)
   }
   return { ...eventAnalysis.value }
 })
 
 // 复刻卡池分析逻辑
-const fukeAnalysis = computed(() => {
-  if (activeFukeData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SP: 0,
-      SSR: 0,
-      avgPullsForSP: 0,
-      avgPullsForSSR: 0,
-      maxSP: 0,
-      minSP: Infinity,
-      SPHistory: [],
-      SSRHistory: [],
-      records: [],
-    }
-
-  const records = [...activeFukeData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SPCounter = 0,
-    SSRCounter = 0
-  const SPHistory = [],
-    SSRHistory = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(复刻) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SPCounter++
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({
-        ...cardInfo,
-        count: SPCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SPCounter = 0
-    }
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
-        ...cardInfo,
-        count: SSRCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SSRCounter = 0
-    }
-  })
-
-  return {
-    totalPulls: records.length,
-    SP: SPCounter,
-    SSR: SSRCounter,
-    avgPullsForSP: calculateAverage(SPHistory.map((item) => item.count)),
-    avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
-    maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
-    minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
-    SPHistory,
-    SSRHistory,
-    records,
-  }
-})
+const fukeAnalysis = computed(() => calculatePoolStats(activeFukeData.value, 'Fuke'))
 
 // 复刻卡池单卡池分析逻辑
 const singleFukeAnalysis = computed(() => {
   if (!fukeAnalysis.value) return null
   if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
-    const filteredSPHistory = fukeAnalysis.value.SPHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    const filteredSSRHistory = fukeAnalysis.value.SSRHistory.filter(
-      (item) => item.gacha_id === Number(CurrentSelectedPool.value),
-    )
-    return {
-      totalPulls: filteredSPHistory.reduce((sum, item) => sum + item.count, 0),
-      SinglePulls: fullHistory.value.length,
-      avgPullsForSP: calculateAverage(filteredSPHistory.map((item) => item.count)),
-      avgPullsForSSR:
-        filteredSSRHistory.length > 0 ? fullHistory.value.length / filteredSSRHistory.length : 0,
-      maxSP: Math.max(...filteredSPHistory.map((item) => item.count), 0),
-      minSP: Math.min(...filteredSPHistory.map((item) => item.count), Infinity),
-      SPHistory: filteredSPHistory,
-      SSRHistory: filteredSSRHistory,
-    }
+    return calculateSinglePoolStats(fukeAnalysis.value, CurrentSelectedPool.value, fullHistory.value.length)
   }
   return { ...fukeAnalysis.value }
 })
@@ -850,204 +718,16 @@ const SinglePoolPulls = computed(() => {
 })
 
 // 高级常驻卡池分析逻辑
-const AdvanceNormalAnalysis = computed(() => {
-  // 仅当有有效数据时才执行计算
-  if (activeAdvancedNormalData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SP: 0,
-      SSR: 0,
-      avgPullsForSP: 0,
-      avgPullsForSSR: 0,
-      maxSP: 0,
-      minSP: Infinity,
-      SPHistory: [],
-      SSRHistory: [],
-      records: [],
-    }
-
-  // 将数据改成从最久远到最近排序，方便计算抽数
-  const records = [...activeAdvancedNormalData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SPCounter = 0,
-    SSRCounter = 0
-  const SPHistory = [],
-    SSRHistory = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(高级常驻) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SPCounter++
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({
-        ...cardInfo,
-        count: SPCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SPCounter = 0
-    }
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
-        ...cardInfo,
-        count: SSRCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SSRCounter = 0
-    }
-  })
-
-  return {
-    totalPulls: records.length,
-    SP: SPCounter,
-    SSR: SSRCounter,
-    avgPullsForSP: calculateAverage(SPHistory.map((item) => item.count)),
-    avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
-    maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
-    minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
-    SPHistory,
-    SSRHistory,
-    records,
-  }
-})
+const AdvanceNormalAnalysis = computed(() => calculatePoolStats(activeAdvancedNormalData.value, 'AdvanceNormal'))
 
 // 祈愿盲盒卡池分析逻辑
-const qiYuanAnalysis = computed(() => {
-  if (activeQiYuanData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SP: 0,
-      SSR: 0,
-      avgPullsForSP: 0,
-      avgPullsForSSR: 0,
-      maxSP: 0,
-      minSP: Infinity,
-      SPHistory: [],
-      SSRHistory: [],
-      records: [],
-    }
-
-  const records = [...activeQiYuanData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SPCounter = 0,
-    SSRCounter = 0
-  const SPHistory = [],
-    SSRHistory = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(祈愿盲盒) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SPCounter++
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({
-        ...cardInfo,
-        count: SPCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SPCounter = 0
-    }
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
-        ...cardInfo,
-        count: SSRCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SSRCounter = 0
-    }
-  })
-
-  return {
-    totalPulls: records.length,
-    SP: SPCounter,
-    SSR: SSRCounter,
-    avgPullsForSP: calculateAverage(SPHistory.map((item) => item.count)),
-    avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
-    maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
-    minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
-    SPHistory,
-    SSRHistory,
-    records,
-  }
-})
+const qiYuanAnalysis = computed(() => calculatePoolStats(activeQiYuanData.value, 'QiYuan'))
 
 // 心愿自选卡池分析逻辑（与祈愿盲盒相同）
-const wishAnalysis = computed(() => {
-  if (activeWishData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SP: 0,
-      SSR: 0,
-      avgPullsForSP: 0,
-      avgPullsForSSR: 0,
-      maxSP: 0,
-      minSP: Infinity,
-      SPHistory: [],
-      SSRHistory: [],
-      records: [],
-    }
+const wishAnalysis = computed(() => calculatePoolStats(activeWishData.value, 'Wish'))
 
-  const records = [...activeWishData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SPCounter = 0,
-    SSRCounter = 0
-  const SPHistory = [],
-    SSRHistory = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(心愿自选) 未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SPCounter++
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
-      SPHistory.unshift({
-        ...cardInfo,
-        count: SPCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SPCounter = 0
-    }
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.push({
-        ...cardInfo,
-        count: SSRCounter,
-        gacha_id: record.gacha_id,
-        created_at: record.created_at,
-      })
-      SSRCounter = 0
-    }
-  })
-
-  return {
-    totalPulls: records.length,
-    SP: SPCounter,
-    SSR: SSRCounter,
-    avgPullsForSP: calculateAverage(SPHistory.map((item) => item.count)),
-    avgPullsForSSR: calculateAverage(SSRHistory.map((item) => item.count)),
-    maxSP: Math.max(...SPHistory.map((item) => item.count), 0),
-    minSP: Math.min(...SPHistory.map((item) => item.count), Infinity),
-    SPHistory,
-    SSRHistory,
-    records,
-  }
-})
+// 新春自选卡池分析逻辑
+const newYearAnalysis = computed(() => calculatePoolStats(activeNewYearData.value, 'NewYear'))
 
 // 所有卡池总览分析逻辑
 const allLimitedAnalysis = computed(() => {
@@ -1057,6 +737,7 @@ const allLimitedAnalysis = computed(() => {
     fukeAnalysis.value,
     qiYuanAnalysis.value,
     wishAnalysis.value,
+    newYearAnalysis.value,
   ]
 
   let totalPulls = 0
@@ -1110,45 +791,10 @@ const allLimitedAnalysis = computed(() => {
 
 // 常驻卡池分析逻辑
 const normalAnalysis = computed(() => {
-  if (activeNormalData.value.length === 0)
-    return {
-      totalPulls: 0,
-      SSR: 0,
-      avgPullsForSSR: 0,
-      maxSSR: 0,
-      minSSR: 0,
-      SSRHistory: [],
-      totalSSRs: 0,
-    }
-  const records = [...activeNormalData.value].sort(
-    (a, b) => a.created_at - b.created_at || a.id - b.id,
-  )
-  let SSRCounter = 0
-  const SSRHistory = [],
-    SSRPulls = []
-
-  records.forEach((record) => {
-    const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
-    if (!cardInfo) {
-      logger.warn(`(常驻池)未找到 item_id: ${record.item_id} 的信息，已跳过。`)
-      return
-    }
-    SSRCounter++
-    if (cardInfo.rarity === RARITY.SSR) {
-      SSRHistory.unshift({ ...cardInfo, count: SSRCounter })
-      SSRPulls.push(SSRCounter)
-      SSRCounter = 0
-    }
-  })
-
+  const stats = calculatePoolStats(activeNormalData.value, 'Normal')
   return {
-    totalPulls: records.length,
-    SSR: SSRCounter,
-    avgPullsForSSR: calculateAverage(SSRPulls),
-    maxSSR: SSRPulls.length > 0 ? Math.max(...SSRPulls) : 0,
-    minSSR: SSRPulls.length > 0 ? Math.min(...SSRPulls) : 0,
-    SSRHistory,
-    totalSSRs: SSRPulls.length,
+    ...stats,
+    totalSSRs: stats.SSRHistory.length,
   }
 })
 
@@ -1158,6 +804,7 @@ const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value
   if (CurrentSelectedPool.value === 'QiYuan') return qiYuanAnalysis.value
   if (CurrentSelectedPool.value === 'Wish') return wishAnalysis.value
+  if (CurrentSelectedPool.value === 'NewYear') return newYearAnalysis.value
   if (CurrentSelectedPool.value === 'Event') return eventAnalysis.value
   if (CurrentSelectedPool.value === 'Fuke') return fukeAnalysis.value
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value
@@ -1378,6 +1025,11 @@ const quantityStatistics = computed(() => {
     const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, RARITY.SSR)
     return [...spStats, ...ssrStats]
   }
+  if (pool === 'NewYear') {
+    const spStats = generateStats(newYearAnalysis.value?.SPHistory, RARITY.SP)
+    const ssrStats = generateStats(newYearAnalysis.value?.SSRHistory, RARITY.SSR)
+    return [...spStats, ...ssrStats]
+  }
   if (pool === 'Event') {
     const spStats = generateStats(eventAnalysis.value?.SPHistory, RARITY.SP)
     const ssrStats = generateStats(eventAnalysis.value?.SSRHistory, RARITY.SSR)
@@ -1437,6 +1089,7 @@ const fullHistory = computed(() => {
       ...props.fukeGachaData,
       ...props.qiYuanGachaData,
       ...props.wishGachaData,
+      ...props.newYearGachaData,
     ]
   } else if (CurrentSelectedPool.value === 'AdvanceNormal') {
     data = [...props.advancedNormalGachaData]
@@ -1444,6 +1097,8 @@ const fullHistory = computed(() => {
     data = [...props.qiYuanGachaData]
   } else if (CurrentSelectedPool.value === 'Wish') {
     data = [...props.wishGachaData]
+  } else if (CurrentSelectedPool.value === 'NewYear') {
+    data = [...props.newYearGachaData]
   } else if (CurrentSelectedPool.value === 'Event') {
     data = [...props.eventGachaData]
   } else if (CurrentSelectedPool.value === 'Fuke') {
@@ -1749,6 +1404,8 @@ const startReviewAnimation = () => {
     sourceData = [...props.qiYuanGachaData]
   } else if (poolId === 'Wish') {
     sourceData = [...props.wishGachaData]
+  } else if (poolId === 'NewYear') {
+    sourceData = [...props.newYearGachaData]
   } else if (poolId === 'Event') {
     sourceData = [...props.eventGachaData]
   } else if (poolId === 'Fuke') {

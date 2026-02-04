@@ -82,7 +82,8 @@
       :advanced-normal-gacha-data="AdvanceNormalGachaData" :qi-yuan-gacha-data="QiYuanGachaData"
       :wish-gacha-data="WishGachaData" :player-id="playerId" :json-input="jsonInput"
       :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
-      :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID" :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
+      :new-year-gacha-data="NewYearGachaData" :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID"
+      :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -159,6 +160,7 @@ const NormalGachaData = ref([]) // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]) // 存储高级常驻卡池抽卡记录
 const QiYuanGachaData = ref([]) // 存储祈愿盲盒卡池抽卡记录
 const WishGachaData = ref([]) // 存储心愿自选卡池抽卡记录
+const NewYearGachaData = ref([]) // 存储新春自选卡池抽卡记录
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示
@@ -410,6 +412,7 @@ const handleJsonAnalysis = () => {
   const AdvanceNormalRecords = [] // 用于存储高级常驻卡池的记录
   const QiYuanGachaRecords = [] // 用于存储祈愿盲盒卡池的记录
   const WishGachaRecords = [] // 用于存储心愿自选卡池的记录
+  const NewYearGachaRecords = [] // 用于存储新春自选卡池的记录
   for (const [gachaId, records] of Object.entries(playerData)) {
     if (gachaId === '9')
       NormalGachaRecords.push(...records) // 常驻卡池ID固定为9
@@ -420,6 +423,8 @@ const handleJsonAnalysis = () => {
       QiYuanGachaRecords.push(...records) // 目前祈愿盲盒卡池ID固定为47
     else if (gachaId === '1000')
       WishGachaRecords.push(...records) // 心愿自选卡池ID固定为1000
+    else if (gachaId === '1001')
+      NewYearGachaRecords.push(...records) // 新春自选卡池ID固定为1001
     else if (LIMITED_CARD_POOLS_ID.value.includes(gachaId)) LimitGachaRecords.push(...records)
     else if (EVENT_CARD_POOLS_ID.value.includes(gachaId)) EventGachaRecords.push(...records)
     else if (FUKE_CARD_POOLS_ID.value.includes(gachaId)) FukeGachaRecords.push(...records)
@@ -461,6 +466,10 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：部分心愿自选卡池抽卡记录缺少必须字段。'
     return
   }
+  if (!NewYearGachaRecords.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分新春自选卡池抽卡记录缺少必须字段。'
+    return
+  }
 
   LimitGachaData.value = LimitGachaRecords
   EventGachaData.value = EventGachaRecords
@@ -469,6 +478,7 @@ const handleJsonAnalysis = () => {
   AdvanceNormalGachaData.value = AdvanceNormalRecords
   QiYuanGachaData.value = QiYuanGachaRecords
   WishGachaData.value = WishGachaRecords
+  NewYearGachaData.value = NewYearGachaRecords
   viewState.value = 'analysis' // 切换到分析视图
 }
 
@@ -831,6 +841,7 @@ const resetView = () => {
   jsonInput.value = ''
   LimitGachaData.value = []
   NormalGachaData.value = []
+  NewYearGachaData.value = []
   errorMessage.value = ''
   playerId.value = ''
   cloudErrorMessage.value = ''
