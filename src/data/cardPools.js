@@ -47,6 +47,47 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 
 // 定义卡池配置
 export const cardPools = {
+  // 焰竹火莲
+  yanzhuhuolian: {
+    type: '限定',
+    name: '焰竹火莲',
+    imageUrl: '/images/cardpools-icon/10201.webp',
+    rates: {
+      [RARITY.SP]: SP_BASE_RATE,
+      [RARITY.SSR]: 0.06,
+      [RARITY.SR]: 0.2,
+    },
+    rules: {
+      [RARITY.SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
+        UpCards: ['光焰火莲', '新年爆竹'],
+      },
+    },
+    cardNames: {
+      [RARITY.SP]: ['光焰火莲', '新年爆竹'],
+      [RARITY.SSR]: ['火焰魔女', '油瓶射手', '棉花糖战士', '椒椒射手'],
+      [RARITY.SR]: [
+        '珍珠射手',
+        '饼干骑士',
+        '劈咔灯泡',
+        '弹幕发射姬',
+        '电音射手',
+        '家用喷火枪',
+        '液氮喷射器',
+        '雪球投掷姬',
+        '梦游月兔',
+        '拳头礼盒',
+        '消防栓',
+        '浅睡千竹',
+        '贝斯战士',
+      ],
+      [RARITY.R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
+    },
+  },
   // 新春自选
   xinchunzixuan: {
     type: '自选',

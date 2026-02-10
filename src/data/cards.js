@@ -283,6 +283,20 @@ export const allCards = [
     imageUrl: '/images/cards/1714.webp',
     realname: '千叶',
   },
+  {
+    id: '1506',
+    name: '新年爆竹',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1506.webp',
+    realname: '希艾姆',
+  },
+  {
+    id: '1612',
+    name: '光焰火莲',
+    rarity: RARITY.SP,
+    imageUrl: '/images/cards/1612.webp',
+    realname: '莲',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',
