@@ -115,7 +115,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
-import * as RARITY from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/rarity.js'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'
@@ -138,18 +138,18 @@ let animationTimeout = null
 const cardsContainerRef = ref(null)
 
 const isHighlightRarity = (rarity) => {
-  return rarity === RARITY.SP || rarity === RARITY.SSR
+  return rarity === SP || rarity === SSR
 }
 
 const getDelayTime = (rarity) => {
   switch (rarity) {
-    case RARITY.SP:
+    case SP:
       return 1000 // 限定卡片
-    case RARITY.SSR:
+    case SSR:
       return 500 // SSR卡片
-    case RARITY.SR:
+    case SR:
       return 100 // SR卡片
-    case RARITY.R:
+    case R:
       return 100 // R卡片
     default:
       return 100 // 默认延迟
@@ -171,8 +171,8 @@ const { currentPool, lastPulledCards, performTenPulls, resetGachaHistory } = use
 
 // --- 核心计分逻辑 ---
 const calculateScore = (cards) => {
-  const spCount = cards.filter((c) => c.rarity === RARITY.SP).length
-  const ssrCount = cards.filter((c) => c.rarity === RARITY.SSR).length
+  const spCount = cards.filter((c) => c.rarity === SP).length
+  const ssrCount = cards.filter((c) => c.rarity === SSR).length
   let score = 0
 
   // 计算SP得分
@@ -276,7 +276,7 @@ const confirmGachaResult = () => {
 
 // UP卡选择逻辑
 const isSelectableUpPool = computed(
-  () => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true,
+  () => currentPool.value?.rules?.[SP]?.SelectUpCards === true,
 )
 const upCardDetails = computed(() => {
   if (!isSelectableUpPool.value) return []

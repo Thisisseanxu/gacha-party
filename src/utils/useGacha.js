@@ -1,6 +1,6 @@
 import { computed, ref, watchEffect, toValue } from 'vue'
 import { getFullCardPoolData } from '@/data/cardPools' // 从 cardPools.js 导入获取完整卡池数据的函数
-import * as RARITY from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/rarity.js'
 import { logger } from '@/utils/logger.js'
 
 /**
@@ -75,10 +75,10 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
   // 稀有度计数器
   const rarityCounts = computed(() => {
     const counts = {
-      [RARITY.SP]: 0,
-      [RARITY.SSR]: 0,
-      [RARITY.SR]: 0,
-      [RARITY.R]: 0,
+      [SP]: 0,
+      [SSR]: 0,
+      [SR]: 0,
+      [R]: 0,
     }
 
     gachaHistory.value.forEach((card) => {
@@ -187,7 +187,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     const baseRates = { ...currentPool.value.rates } // 复制基础概率
 
     // 计算R的概率
-    baseRates[RARITY.R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
+    baseRates[R] = 1 - Object.values(baseRates).reduce((sum, rate) => sum + rate, 0)
 
     let adjustedRates = { ...baseRates } // 存储调整后的概率
 
@@ -199,7 +199,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
         adjustedRates[boostRarity.value] + boostIncrement
       ).toFixed(4)
       // 多出来的概率从R中扣除
-      adjustedRates[RARITY.R] = +(adjustedRates[RARITY.R] - boostIncrement).toFixed(4)
+      adjustedRates[R] = +(adjustedRates[R] - boostIncrement).toFixed(4)
 
       // DEBUG: 在触发boost机制时提示
       logger.log('Boost触发：当前稀有度概率:', adjustedRates)
@@ -221,7 +221,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     boostCounters.value++
     pityCounters.value++
 
-    let selectedRarity = RARITY.R // 默认稀有度为R;
+    let selectedRarity = R // 默认稀有度为R;
     // 如果pityRarity不为空且当前抽卡次数达到保底，直接选中对应的稀有度
     if (pityRarity.value && pityCounters.value >= pityValue.value) {
       selectedRarity = pityRarity.value
@@ -249,10 +249,10 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
         pityCounters.value = 0 // 重置保底计数器
       }
       // 如果当前稀有度是R，则增加没出SR计数器，如果连续十次出R，则这次的改为抽出SR
-      if (selectedRarity === RARITY.R) {
+      if (selectedRarity === R) {
         tenPullNoSRCount.value++
         if (tenPullNoSRCount.value >= 10) {
-          selectedRarity = RARITY.SR // 十次没出SR则这次必定出SR
+          selectedRarity = SR // 十次没出SR则这次必定出SR
           tenPullNoSRCount.value = 0 // 重置计数器
           logger.log('连续十次抽中R，强制抽出一张SR角色')
         }
@@ -404,10 +404,10 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     }
     // 使用单独计数器来统计各稀有度的数量
     const localRarityCounts = {
-      [RARITY.SP]: 0,
-      [RARITY.SSR]: 0,
-      [RARITY.SR]: 0,
-      [RARITY.R]: 0,
+      [SP]: 0,
+      [SSR]: 0,
+      [SR]: 0,
+      [R]: 0,
     }
 
     for (let i = 0; i < pullCount; i++) {

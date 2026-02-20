@@ -292,7 +292,7 @@ import { toBlob } from 'html-to-image'
 import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next'
 
 import { cardMap } from '@/data/cards.js'
-import * as RARITY from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/rarity.js'
 import { colors } from '@/styles/colors.js'
 import { logger } from '@/utils/logger.js'
 
@@ -608,7 +608,7 @@ const calculatePoolStats = (data, poolName) => {
     }
     SPCounter++
     SSRCounter++
-    if (cardInfo.rarity === RARITY.SP) {
+    if (cardInfo.rarity === SP) {
       SPHistory.unshift({
         ...cardInfo,
         count: SPCounter,
@@ -617,7 +617,7 @@ const calculatePoolStats = (data, poolName) => {
       })
       SPCounter = 0
     }
-    if (cardInfo.rarity === RARITY.SSR) {
+    if (cardInfo.rarity === SSR) {
       SSRHistory.unshift({
         ...cardInfo,
         count: SSRCounter,
@@ -836,13 +836,13 @@ const rarityCounts = computed(() => {
 
   // 使用fullHistory过滤好的数据
   for (const item of fullHistory.value) {
-    if (item.rarity === RARITY.SP) {
+    if (item.rarity === SP) {
       counts.SP++
-    } else if (item.rarity === RARITY.SSR) {
+    } else if (item.rarity === SSR) {
       counts.SSR++
-    } else if (item.rarity === RARITY.SR) {
+    } else if (item.rarity === SR) {
       counts.SR++
-    } else if (item.rarity === RARITY.R) {
+    } else if (item.rarity === R) {
       counts.R++
     }
   }
@@ -1008,40 +1008,40 @@ const quantityStatistics = computed(() => {
   // 如果是常驻池则直接返回SSR统计
 
   if (pool === 'Normal') {
-    return generateStats(normalAnalysis.value?.SSRHistory, RARITY.SSR)
+    return generateStats(normalAnalysis.value?.SSRHistory, SSR)
   }
   if (pool === 'AdvanceNormal') {
-    const spStats = generateStats(AdvanceNormalAnalysis.value?.SPHistory, RARITY.SP)
-    const ssrStats = generateStats(AdvanceNormalAnalysis.value?.SSRHistory, RARITY.SSR)
+    const spStats = generateStats(AdvanceNormalAnalysis.value?.SPHistory, SP)
+    const ssrStats = generateStats(AdvanceNormalAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'QiYuan') {
-    const spStats = generateStats(qiYuanAnalysis.value?.SPHistory, RARITY.SP)
-    const ssrStats = generateStats(qiYuanAnalysis.value?.SSRHistory, RARITY.SSR)
+    const spStats = generateStats(qiYuanAnalysis.value?.SPHistory, SP)
+    const ssrStats = generateStats(qiYuanAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'Wish') {
-    const spStats = generateStats(wishAnalysis.value?.SPHistory, RARITY.SP)
-    const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, RARITY.SSR)
+    const spStats = generateStats(wishAnalysis.value?.SPHistory, SP)
+    const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'NewYear') {
-    const spStats = generateStats(newYearAnalysis.value?.SPHistory, RARITY.SP)
-    const ssrStats = generateStats(newYearAnalysis.value?.SSRHistory, RARITY.SSR)
+    const spStats = generateStats(newYearAnalysis.value?.SPHistory, SP)
+    const ssrStats = generateStats(newYearAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'Event') {
-    const spStats = generateStats(eventAnalysis.value?.SPHistory, RARITY.SP)
-    const ssrStats = generateStats(eventAnalysis.value?.SSRHistory, RARITY.SSR)
+    const spStats = generateStats(eventAnalysis.value?.SPHistory, SP)
+    const ssrStats = generateStats(eventAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'Fuke') {
-    return generateStats(fukeAnalysis.value?.SPHistory, RARITY.SP)
+    return generateStats(fukeAnalysis.value?.SPHistory, SP)
   }
   // 默认处理所有其他限定池
   const analysis = CurrentSelectedPoolAnalysis.value
-  const spStats = generateStats(analysis?.SPHistory, RARITY.SP)
-  const ssrStats = generateStats(analysis?.SSRHistory, RARITY.SSR)
+  const spStats = generateStats(analysis?.SPHistory, SP)
+  const ssrStats = generateStats(analysis?.SSRHistory, SSR)
   // 合并列表，SP在前，SSR在后
   return [...spStats, ...ssrStats]
 })
@@ -1049,10 +1049,10 @@ const quantityStatistics = computed(() => {
 // 根据传入的参数获取对应的修改过透明度的背景颜色
 const getAlphaBgWith = (type) => {
   const colorMap = {
-    [RARITY.SP]: colors.rarity.sp,
-    [RARITY.SSR]: colors.rarity.ssr,
-    [RARITY.SR]: colors.rarity.sr,
-    [RARITY.R]: colors.rarity.r,
+    [SP]: colors.rarity.sp,
+    [SSR]: colors.rarity.ssr,
+    [SR]: colors.rarity.sr,
+    [R]: colors.rarity.r,
     veryHigh: colors.colorOfLuck.veryHigh,
     medium: colors.colorOfLuck.medium,
     veryLow: colors.colorOfLuck.veryLow,
@@ -1117,7 +1117,7 @@ const fullHistory = computed(() => {
       const cardInfo = getCardInfoAndRemovePrefix(record.item_id)
       const defaultCard = {
         name: `未知角色 (${record.item_id})`,
-        rarity: RARITY.R,
+        rarity: R,
         imageUrl: '/images/cards/placeholder.webp',
       }
       const createdAt = new Date(record.created_at * 1000)

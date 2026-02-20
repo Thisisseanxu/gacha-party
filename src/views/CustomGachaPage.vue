@@ -82,7 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import * as RARITY from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/rarity.js'
 import { cardMap, allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import pako from 'pako'
@@ -112,7 +112,7 @@ const selectedCardIds = ref(getDefaultConfig().selectedCardIds)
 const upCandidateIds = ref(getDefaultConfig().upCandidateIds)
 const doubleRateSSRIds = ref(getDefaultConfig().doubleRateSSRIds)
 
-const rarities = [RARITY.SP, RARITY.SSR, RARITY.SR, RARITY.R]
+const rarities = [SP, SSR, SR, R]
 const groupedCards = rarities.reduce((acc, rarity) => {
   acc[rarity] = allCards.filter((card) => card.rarity === rarity)
   return acc
@@ -166,8 +166,8 @@ const toggleCardSelection = (rarity, cardId) => {
   const index = set.indexOf(cardId)
   if (index > -1) {
     set.splice(index, 1)
-    if (rarity === RARITY.SP) toggleUpCandidate(cardId, true)
-    if (rarity === RARITY.SSR) toggleDoubleRateSSR(cardId, true)
+    if (rarity === SP) toggleUpCandidate(cardId, true)
+    if (rarity === SSR) toggleDoubleRateSSR(cardId, true)
   } else {
     set.push(cardId)
   }

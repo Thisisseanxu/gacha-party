@@ -99,17 +99,17 @@
           <h2>抽卡统计</h2>
           <p>总抽卡次数: {{ totalPulls }}</p>
           <ul class="rarity-counts-list">
-            <li v-if="rarityCounts[RARITY.SP] > 0" class="text-rarity-sp">
-              限定: {{ rarityCounts[RARITY.SP] }}
+            <li v-if="rarityCounts[SP] > 0" class="text-rarity-sp">
+              限定: {{ rarityCounts[SP] }}
             </li>
-            <li v-if="rarityCounts[RARITY.SSR] > 0" class="text-rarity-ssr">
-              SSR: {{ rarityCounts[RARITY.SSR] }}
+            <li v-if="rarityCounts[SSR] > 0" class="text-rarity-ssr">
+              SSR: {{ rarityCounts[SSR] }}
             </li>
-            <li v-if="rarityCounts[RARITY.SR] > 0" class="text-rarity-sr">
-              SR: {{ rarityCounts[RARITY.SR] }}
+            <li v-if="rarityCounts[SR] > 0" class="text-rarity-sr">
+              SR: {{ rarityCounts[SR] }}
             </li>
-            <li v-if="rarityCounts[RARITY.R] > 0" class="text-rarity-r">
-              R: {{ rarityCounts[RARITY.R] }}
+            <li v-if="rarityCounts[R] > 0" class="text-rarity-r">
+              R: {{ rarityCounts[R] }}
             </li>
           </ul>
 
@@ -117,7 +117,7 @@
           <div class="gacha-history-list">
             <div v-for="(card, index) in paginatedGachaHistory" :key="card.id + '_' + card.name + '_' + index"
               :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">
-              {{ card.name }} ({{ card.rarity === RARITY.SP ? '限定' : card.rarity }})
+              {{ card.name }} ({{ card.rarity === SP ? '限定' : card.rarity }})
             </div>
             <p v-if="gachaHistory.length === 0" class="no-history-text">暂无抽卡历史。</p>
           </div>
@@ -174,7 +174,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
-import * as RARITY from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/rarity.js'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'
@@ -206,39 +206,39 @@ const gachaSource = computed(() => getGachaSource(route))
 
 // 判断卡池类型
 const isSelectableUpPool = computed(
-  () => currentPool.value?.rules?.[RARITY.SP]?.SelectUpCards === true,
+  () => currentPool.value?.rules?.[SP]?.SelectUpCards === true,
 )
 const isSelectableUpGroupPool = computed(
-  () => currentPool.value?.rules?.[RARITY.SSR]?.SelectUpCardsGroup === true,
+  () => currentPool.value?.rules?.[SSR]?.SelectUpCardsGroup === true,
 )
 const isWishPool = computed(() => {
-  return currentPool.value?.rules?.[RARITY.SP]?.WishSelection === true
+  return currentPool.value?.rules?.[SP]?.WishSelection === true
 })
 
 // UP卡片选择
 const selectedUpCard = ref(null)
-const selectableUpGroup = computed(() => currentPool.value?.rules?.[RARITY.SSR]?.UpGroups || [])
+const selectableUpGroup = computed(() => currentPool.value?.rules?.[SSR]?.UpGroups || [])
 
 // 自选池选择
 const selectableWishCards = computed(() => {
   if (!isWishPool.value) return []
-  return currentPool.value.cardIds?.[RARITY.SP]?.map((id) => cardMap.get(id))
+  return currentPool.value.cardIds?.[SP]?.map((id) => cardMap.get(id))
 })
 const selectedWishCards = ref([])
 
 const isHighlightRarity = (rarity) => {
-  return rarity === RARITY.SP || rarity === RARITY.SSR
+  return rarity === SP || rarity === SSR
 }
 
 const getDelayTime = (rarity) => {
   switch (rarity) {
-    case RARITY.SP:
+    case SP:
       return 1000 // 限定卡片
-    case RARITY.SSR:
+    case SSR:
       return 500 // SSR卡片
-    case RARITY.SR:
+    case SR:
       return 100 // SR卡片
-    case RARITY.R:
+    case R:
       return 100 // R卡片
     default:
       return 100 // 默认延迟
@@ -310,7 +310,7 @@ const upCardDetails = computed(() => {
 // 计算当前UP的SSR角色ID
 const upSsrIds = computed(() => {
   const ids = new Set()
-  const ssrRules = currentPool.value?.rules?.[RARITY.SSR]
+  const ssrRules = currentPool.value?.rules?.[SSR]
   if (!ssrRules) return ids
 
   // 优先处理分组UP的情况
@@ -329,7 +329,7 @@ const poolSsrCards = computed(() => {
   if (!currentPool.value?.cards) return []
 
   return currentPool.value.cards
-    .filter((card) => card && card.rarity === RARITY.SSR)
+    .filter((card) => card && card.rarity === SSR)
     .sort((a, b) => {
       const aIsUp = upSsrIds.value.has(a.id)
       const bIsUp = upSsrIds.value.has(b.id)

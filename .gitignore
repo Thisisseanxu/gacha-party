@@ -37,3 +37,6 @@ dev-dist
 
 # 忽略临时目录
 /Temp/
+
+# 忽略Claude.md文件
+Claude.md
