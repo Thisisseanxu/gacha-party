@@ -1,6 +1,6 @@
 import { computed, ref, watchEffect, toValue } from 'vue'
 import { getFullCardPoolData } from '@/data/cardPools' // 从 cardPools.js 导入获取完整卡池数据的函数
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { logger } from '@/utils/logger.js'
 
 /**

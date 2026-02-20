@@ -10,7 +10,8 @@
         </label>
       </div>
       <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
-        :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" @confirm="isSelectionMode = false" />
+        :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" :show-qban="true"
+        @confirm="isSelectionMode = false" />
     </div>
     <div v-else class="strategy-editor">
       <div class="controls-panel card">
@@ -316,13 +317,7 @@ const closeAgreementPopUp = () => {
 }
 
 const filteredCharacterList = computed(() => {
-  return allCards
-    .filter((c) => c.id.match(/^\d+$/))
-    .map((c) => ({
-      ...c,
-      // 通过getCharConfig搜索Q版立绘，如果有则优先使用Q版立绘
-      imageUrl: getCharConfig(c.id)?.image_url || c.imageUrl,
-    }))
+  return allCards.filter((c) => c.id.match(/^\d+$/))
 })
 
 const displayCharacterList = computed(() => {

@@ -3,6 +3,32 @@
     <h2 class="selection-title">{{ title }}</h2>
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
+    <!-- 筛选栏 -->
+    <div class="filter-bar" v-if="availableThemes.length > 0 || availableRarities.length > 0">
+      <!-- 第一行：主题筛选 + 图片切换 -->
+      <div class="filter-row">
+        <div class="theme-chips">
+          <button v-for="theme in availableThemes" :key="theme.id" class="filter-chip theme-chip"
+            :class="{ active: activeThemeFilter === theme.id }" @click="toggleThemeFilter(theme.id)">
+            <img v-if="theme.icon" :src="theme.icon" class="theme-chip-icon" :alt="theme.name" />
+            <span>{{ theme.name }}</span>
+          </button>
+        </div>
+      </div>
+      <!-- 第二行：稀有度筛选 -->
+      <div class="filter-row" v-if="availableRarities.length > 0">
+        <div class="rarity-chips">
+          <button v-for="rarity in availableRarities" :key="rarity" class="filter-chip rarity-chip"
+            :class="[rarity, { active: activeRarityFilter === rarity }]" @click="toggleRarityFilter(rarity)">
+            {{ rarity }}
+          </button>
+        </div>
+        <button v-if="hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }" @click="useQban = !useQban">
+          {{ useQban ? 'Q版' : '立绘' }}
+        </button>
+      </div>
+    </div>
+
     <div class="card-selector-grid">
       <div v-for="card in filteredCards" :key="card.id" :class="[
         'card-option',
@@ -12,7 +38,7 @@
         <button v-if="card.isCustom" class="delete-custom-char-btn" @click.stop="deleteCustomCharacter(card.id)">
           ×
         </button>
-        <img :src="card.imageUrl" :alt="card.name" class="card-image" />
+        <img :src="getDisplayImage(card)" :alt="card.name" class="card-image" />
         <div class="card-name">
           {{
             isDisabled(card)
@@ -25,12 +51,19 @@
         <div class="checkmark">✔</div>
       </div>
     </div>
+    <div v-if="activeThemeFilter || activeRarityFilter" class="filter-tips">
+      Tips:再次点击可以取消筛选
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { colors } from '@/styles/colors.js'
+import { THEMES } from '@/data/constant.js'
+
+const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'eiji']
+const RARITY_ORDER = ['SP', 'SSR', 'SR', 'R']
 
 const props = defineProps({
   modelValue: {
@@ -66,12 +99,86 @@ const props = defineProps({
     type: String,
     default: '放心，你可以随时回来重选！',
   },
+  showQban: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm'])
 
+// 筛选状态
+const activeThemeFilter = ref(null)
+const activeRarityFilter = ref(null)
+const useQban = ref(props.showQban)
+
+// 自定义角色判断：ID 不是纯数字的为自定义角色
+const isCustomCard = (card) => !card.id?.toString().match(/^\d+$/)
+
+const hasCustomCards = computed(() => props.characterList.some(isCustomCard))
+
+const getDisplayImage = (card) => {
+  if (useQban.value && card.qban_url) {
+    return card.qban_url
+  }
+  return card.imageUrl
+}
+
+const toggleThemeFilter = (themeId) => {
+  activeThemeFilter.value = activeThemeFilter.value === themeId ? null : themeId
+}
+
+const toggleRarityFilter = (rarity) => {
+  activeRarityFilter.value = activeRarityFilter.value === rarity ? null : rarity
+}
+
+const availableThemes = computed(() => {
+  const themeIds = new Set()
+  props.characterList.forEach((card) => {
+    if (!isCustomCard(card) && card.theme?.id) {
+      themeIds.add(card.theme.id)
+    }
+  })
+  const themes = THEME_ORDER.filter((id) => themeIds.has(id)).map((id) => THEMES[id])
+
+  if (hasCustomCards.value) {
+    themes.push({
+      id: 'custom',
+      name: '自定义',
+      icon: null,
+    })
+  }
+  return themes
+})
+
+const availableRarities = computed(() => {
+  const rarities = new Set()
+  props.characterList.forEach((card) => {
+    if (!isCustomCard(card) && card.rarity) {
+      rarities.add(card.rarity)
+    }
+  })
+  return RARITY_ORDER.filter((r) => rarities.has(r))
+})
+
+const hasAnyQban = computed(() => {
+  return props.characterList.some((card) => !isCustomCard(card) && card.qban_url)
+})
+
 const filteredCards = computed(() => {
-  return props.characterList
+  return props.characterList.filter((card) => {
+    const isCustom = isCustomCard(card)
+
+    // 应用主题筛选
+    if (activeThemeFilter.value) {
+      if (activeThemeFilter.value === 'custom') {
+        if (!isCustom) return false
+      } else if (card.theme?.id !== activeThemeFilter.value) return false
+    }
+    // 应用稀有度筛选
+    if (activeRarityFilter.value && card.rarity !== activeRarityFilter.value) return false
+    return true
+  })
 })
 
 const isSelected = (id) => {
@@ -149,6 +256,109 @@ const deleteCustomCharacter = (characterId) => {
   margin: 0rem;
 }
 
+/* 筛选栏 */
+.filter-bar {
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.theme-chips,
+.rarity-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 20px;
+  border: 1px solid v-bind('colors.border.primary');
+  background: v-bind('colors.background.light');
+  color: v-bind('colors.text.primary');
+  cursor: pointer;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.theme-chip-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.filter-chip:hover {
+  border-color: v-bind('colors.brand.primary');
+  background: v-bind('colors.shadow.primaryHover');
+}
+
+.filter-chip.active {
+  background: v-bind('colors.brand.primary');
+  border-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+  font-weight: bold;
+}
+
+/* 稀有度筛选激活颜色 */
+.rarity-chip.SP.active {
+  background: v-bind('colors.rarity.sp');
+  border-color: v-bind('colors.rarity.sp');
+  color: white;
+}
+
+.rarity-chip.SSR.active {
+  background: v-bind('colors.rarity.ssr');
+  border-color: v-bind('colors.rarity.ssr');
+  color: white;
+}
+
+.rarity-chip.SR.active {
+  background: v-bind('colors.rarity.sr');
+  border-color: v-bind('colors.rarity.sr');
+  color: white;
+}
+
+.rarity-chip.R.active {
+  background: v-bind('colors.rarity.r');
+  border-color: v-bind('colors.rarity.r');
+  color: white;
+}
+
+/* 图片切换按钮 */
+.image-toggle-btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid v-bind('colors.border.primary');
+  background: v-bind('colors.background.light');
+  color: v-bind('colors.text.secondary');
+  cursor: pointer;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.image-toggle-btn.active {
+  background: v-bind('colors.brand.primary');
+  border-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+  font-weight: bold;
+}
+
 .card-selector-grid {
   margin-top: 0.5rem;
   display: grid;
@@ -201,6 +411,8 @@ const deleteCustomCharacter = (characterId) => {
 .card-option .card-image {
   width: 100%;
   display: block;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
 .card-option .card-name {
@@ -212,7 +424,7 @@ const deleteCustomCharacter = (characterId) => {
   bottom: 0;
   left: 0;
   width: 100%;
-  color: v-bind('colors.text.primary');
+  color: v-bind('colors.text.white');
 }
 
 .card-option .checkmark {
@@ -267,5 +479,12 @@ const deleteCustomCharacter = (characterId) => {
 
 .card-option:hover .delete-custom-char-btn {
   opacity: 1;
+}
+
+.filter-tips {
+  text-align: center;
+  font-size: 0.8rem;
+  color: v-bind('colors.text.tertiary');
+  margin-top: 10px;
 }
 </style>

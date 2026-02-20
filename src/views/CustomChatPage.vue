@@ -185,7 +185,7 @@
           <div class="slot-row-top" style="justify-content: center">
             <span class="slot-time-small">{{
               autoSaveTime ? formatTime(autoSaveTime) : '暂无记录'
-              }}</span>
+            }}</span>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">
@@ -204,7 +204,7 @@
             <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
             <span class="slot-time-small">{{
               slot.timestamp ? formatTime(slot.timestamp) : '空'
-              }}</span>
+            }}</span>
             <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
               ×
             </button>
@@ -305,7 +305,7 @@ const closeAgreementPopUp = () => {
 
 // true: 显示角色选择界面, false: 显示聊天编辑器
 const isSelectionMode = ref(true)
-const showRealName = ref(false)
+const showRealName = ref(true)
 // 存储用户选择的角色ID
 const selectedCharacterIds = ref([])
 // 用于本地存储的键名

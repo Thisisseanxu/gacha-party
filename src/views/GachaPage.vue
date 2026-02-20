@@ -174,7 +174,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'

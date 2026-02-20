@@ -14,7 +14,7 @@
             <span class="stat-label">目标卡池</span>
             <span class="stat-value pool-name">{{
               currentPool ? currentPool.name : '加载中...'
-              }}</span>
+            }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">总得分</span>
@@ -115,7 +115,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'

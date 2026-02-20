@@ -292,7 +292,7 @@ import { toBlob } from 'html-to-image'
 import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next'
 
 import { cardMap } from '@/data/cards.js'
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { colors } from '@/styles/colors.js'
 import { logger } from '@/utils/logger.js'
 

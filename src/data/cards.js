@@ -1,4 +1,5 @@
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
+import { THEMES } from '@/data/constant.js'
 
 // 所有角色的详细数据
 export const allCards = [
@@ -9,6 +10,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1110.webp',
     realname: '芙洛丽亚',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1110.webp',
   },
   {
     id: '1111',
@@ -16,6 +19,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1111.webp',
     realname: '日露霞',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1111.webp',
   },
   {
     id: '1906',
@@ -23,6 +28,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1906.webp',
     realname: '伊迪斯',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1906.webp',
   },
   {
     id: '1211',
@@ -30,6 +37,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1211.webp',
     realname: '阿芙洛',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1211.webp',
   },
   {
     id: '1212',
@@ -37,6 +46,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1212.webp',
     realname: '安娜',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1212.webp',
   },
   {
     id: '1309',
@@ -44,6 +55,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1309.webp',
     realname: '霓昂',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1309.webp',
   },
   {
     id: '1312',
@@ -51,6 +64,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1312.webp',
     realname: '月',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1312.webp',
   },
   {
     id: '1311',
@@ -58,6 +73,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1311.webp',
     realname: '黑木幸',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1311.webp',
   },
   {
     id: '1408',
@@ -65,6 +82,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1408.webp',
     realname: '萱',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1408.webp',
   },
   {
     id: '1709',
@@ -72,6 +91,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1709.webp',
     realname: '辛西娅',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1709.webp',
   },
   {
     id: '1710',
@@ -79,6 +100,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1710.webp',
     realname: '薇薇恩',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1710.webp',
   },
   {
     id: '1711',
@@ -86,6 +109,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1711.webp',
     realname: '远坂秋',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1711.webp',
   },
   {
     id: '1502',
@@ -93,6 +118,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1502.webp',
     realname: '啸',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1502.webp',
   },
   {
     id: '1610',
@@ -100,6 +127,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1610.webp',
     realname: '芙雷',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1610.webp',
   },
   {
     id: '1609',
@@ -107,6 +136,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1609.webp',
     realname: '伊卡洛维',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1609.webp',
   },
   {
     id: '1503',
@@ -114,6 +145,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1503.webp',
     realname: '蛟',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1503.webp',
   },
   {
     id: '1809',
@@ -121,6 +154,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1809.webp',
     realname: '布露',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1809.webp',
   },
   {
     id: '1811',
@@ -128,6 +163,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1811.webp',
     realname: '刻罗',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1811.webp',
   },
   {
     id: '1810',
@@ -135,6 +172,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1810.webp',
     realname: '卡翠欧娜',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1810.webp',
   },
   {
     id: '11006',
@@ -142,6 +181,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11006.webp',
     realname: '永雏塔菲',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11006.webp',
   },
   {
     id: '11007',
@@ -149,6 +190,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11007.webp',
     realname: '早稻叽',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11007.webp',
   },
   {
     id: '11008',
@@ -156,6 +199,8 @@ export const allCards = [
     rarity: SP,
     realname: '穆小泠',
     imageUrl: '/images/cards/11008.webp',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11008.webp',
   },
   {
     id: '11101',
@@ -163,6 +208,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11101.webp',
     realname: '伊芙',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/11101.webp',
   },
   {
     id: '11105',
@@ -170,6 +217,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11105.webp',
     realname: '妮妮珐',
+    theme: THEMES.music,
+    qban_url: '/images/qban/11105.webp',
   },
   {
     id: '11009',
@@ -177,6 +226,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11009.webp',
     realname: '月隐空夜',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11009.webp',
   },
   {
     id: '1605',
@@ -184,6 +235,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1605.webp',
     realname: '萨拉',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1605.webp',
   },
   {
     id: '1611',
@@ -191,6 +244,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1611.webp',
     realname: '茴香',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1611.webp',
   },
   {
     id: '1712',
@@ -198,6 +253,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1712.webp',
     realname: '柳生薰',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1712.webp',
   },
   {
     id: '11001',
@@ -205,6 +262,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11001.webp',
     realname: '小爆妹',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11001.webp',
   },
   {
     id: '11003',
@@ -212,6 +271,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11003.webp',
     realname: '爆爆',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11003.webp',
   },
   {
     id: '1410',
@@ -219,6 +280,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1410.webp',
     realname: '洛可可',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1410.webp',
   },
   {
     id: '1411',
@@ -226,6 +289,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1411.webp',
     realname: '莱拉',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1411.webp',
   },
   {
     id: '1112',
@@ -233,6 +298,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1112.webp',
     realname: '红叶',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1112.webp',
   },
   {
     id: '1113',
@@ -240,6 +307,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1113.webp',
     realname: '风魔眬',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1113.webp',
   },
   {
     id: '1409',
@@ -247,6 +316,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1409.webp',
     realname: '提可',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1409.webp',
   },
   {
     id: '11010',
@@ -254,6 +325,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/11010.webp',
     realname: '安晴',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11010.webp',
   },
   {
     id: '1902',
@@ -261,6 +334,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1902.webp',
     realname: '小幽灵',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1902.webp',
   },
   {
     id: '1904',
@@ -268,6 +343,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1904.webp',
     realname: '光月',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1904.webp',
   },
   {
     id: '1713',
@@ -275,6 +352,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1713.webp',
     realname: '李',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1713.webp',
   },
   {
     id: '1714',
@@ -282,6 +361,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1714.webp',
     realname: '千叶',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1714.webp',
   },
   {
     id: '1506',
@@ -289,6 +370,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1506.webp',
     realname: '希艾姆',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1506.webp',
   },
   {
     id: '1612',
@@ -296,6 +379,8 @@ export const allCards = [
     rarity: SP,
     imageUrl: '/images/cards/1612.webp',
     realname: '莲',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1612.webp',
   },
   // ---------------限定角色 结束---------------
   {
@@ -312,6 +397,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1102.webp',
     realname: '黑木 幸',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1102.webp',
   },
   {
     id: '1105',
@@ -319,6 +406,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1105.webp',
     realname: '妮可尔',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1105.webp',
   },
   {
     id: '1106',
@@ -326,6 +415,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1106.webp',
     realname: '妮可尔',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1106.webp',
   },
   {
     id: '1108',
@@ -333,6 +424,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1108.webp',
     realname: '爱丽丝',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1108.webp',
   },
   {
     id: '1109',
@@ -340,6 +433,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1109.webp',
     realname: '千竹',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1109.webp',
   },
   {
     id: '1201',
@@ -347,6 +442,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1201.webp',
     realname: '皮卡',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1201.webp',
   },
   {
     id: '1202',
@@ -354,6 +451,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1209.webp',
     realname: '千竹',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1209.webp',
   }, // 浅睡和梦境的图片地址相反
   {
     id: '1203',
@@ -361,6 +460,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1203.webp',
     realname: '琉璃',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1203.webp',
   },
   {
     id: '1210',
@@ -368,6 +469,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1210.webp',
     realname: '伦茨',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1210.webp',
   },
   {
     id: '1206',
@@ -375,6 +478,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1206.webp',
     realname: '嫦娥',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1206.webp',
   },
   {
     id: '1301',
@@ -382,6 +487,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1301.webp',
     realname: '千竹',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1301.webp',
   },
   {
     id: '1302',
@@ -389,6 +496,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1302.webp',
     realname: '索菲亚',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1302.webp',
   },
   {
     id: '1305',
@@ -396,6 +505,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1305.webp',
     realname: '佩特里夏',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1305.webp',
   },
   {
     id: '1310',
@@ -403,6 +514,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1310.webp',
     realname: '艾丝翠德',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1310.webp',
   },
   {
     id: '1808',
@@ -410,6 +523,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1307.webp',
     realname: '奈奈',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1307.webp',
   }, // 新版的指路奈奈，但是图片地址为旧版
   {
     id: '1401',
@@ -417,6 +532,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1401.webp',
     realname: '琉璃',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1401.webp',
   },
   {
     id: '1402',
@@ -424,6 +541,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1402.webp',
     realname: '夏洛特',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1402.webp',
   },
   {
     id: '1403',
@@ -431,6 +550,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1403.webp',
     realname: '梅洛迪',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1403.webp',
   },
   {
     id: '1504',
@@ -438,6 +559,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1504.webp',
     realname: '火羽',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1504.webp',
   },
   {
     id: '1701',
@@ -445,6 +568,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1701.webp',
     realname: '艾斯',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1701.webp',
   },
   {
     id: '1703',
@@ -452,6 +577,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1703.webp',
     realname: '赛雅',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1703.webp',
   },
   {
     id: '1704',
@@ -459,6 +586,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1704.webp',
     realname: '织夜',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1704.webp',
   },
   {
     id: '1708',
@@ -466,6 +595,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1708.webp',
     realname: '球球',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1708.webp',
   },
   {
     id: '1601',
@@ -473,6 +604,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1601.webp',
     realname: '诺诺妮娅',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1601.webp',
   },
   {
     id: '1602',
@@ -480,6 +613,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1602.webp',
     realname: '露缇',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1602.webp',
   },
   {
     id: '1603',
@@ -487,6 +622,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1603.webp',
     realname: '坎迪',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1603.webp',
   },
   {
     id: '1608',
@@ -494,6 +631,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1608.webp',
     realname: '椒椒',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1608.webp',
   },
   {
     id: '1801',
@@ -501,6 +640,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1801.webp',
     realname: '柳生 薰',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1801.webp',
   },
   {
     id: '1803',
@@ -508,6 +649,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1803.webp',
     realname: '拉普拉斯',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1803.webp',
   },
   {
     id: '1807',
@@ -515,6 +658,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1804.webp',
     realname: '卡米拉',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1804.webp',
   }, // 新版的强力消防栓，图片地址为1804
   {
     id: '1806',
@@ -522,6 +667,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1806.webp',
     realname: '麟',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1806.webp',
   },
   {
     id: '1407',
@@ -529,6 +676,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1407.webp',
     realname: '伊文捷琳',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1407.webp',
   },
   {
     id: '1706',
@@ -536,6 +685,8 @@ export const allCards = [
     rarity: SSR,
     imageUrl: '/images/cards/1706.webp',
     realname: '摩洛娜',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1706.webp',
   },
   // ---------------SSR角色 结束---------------
   {
@@ -559,6 +710,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1103.webp',
     realname: '爱丽丝',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1103.webp',
   },
   {
     id: '1104',
@@ -566,6 +719,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1104.webp',
     realname: '诺比',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1104.webp',
   },
   {
     id: '1209',
@@ -573,6 +728,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1202.webp',
     realname: '千竹',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1202.webp',
   }, // 浅睡和梦境的图片地址相反
   {
     id: '1205',
@@ -580,6 +737,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1205.webp',
     realname: '洛卡娜',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1205.webp',
   },
   {
     id: '1207',
@@ -587,6 +746,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1207.webp',
     realname: '奥德莉',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1207.webp',
   },
   {
     id: '1303',
@@ -594,6 +755,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1303.webp',
     realname: '缇法',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1303.webp',
   },
   {
     id: '1304',
@@ -601,6 +764,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1304.webp',
     realname: '布兰琪',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1304.webp',
   },
   {
     id: '1404',
@@ -608,6 +773,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1404.webp',
     realname: '薇薇恩',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1404.webp',
   },
   {
     id: '1405',
@@ -615,6 +782,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1405.webp',
     realname: '妮妙',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1405.webp',
   },
   {
     id: '1606',
@@ -622,6 +791,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1606.webp',
     realname: '梅尔',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1606.webp',
   },
   {
     id: '1702',
@@ -629,6 +800,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1702.webp',
     realname: '思诺',
+    theme: THEMES.ice,
+    qban_url: '/images/qban/1702.webp',
   },
   {
     id: '1604',
@@ -636,6 +809,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1604.webp',
     realname: '梅尔',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1604.webp',
   },
   {
     id: '1805',
@@ -643,6 +818,8 @@ export const allCards = [
     rarity: SR,
     imageUrl: '/images/cards/1805.webp',
     realname: '卡米拉',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1805.webp',
   },
   // ---------------SR角色 结束---------------
   // ---------------R角色 开始---------------
@@ -652,6 +829,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1101.webp',
     realname: '千竹',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1101.webp',
   },
   {
     id: '1107',
@@ -659,6 +838,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1107.webp',
     realname: '雅娜黛西亚',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1107.webp',
   },
   {
     id: '1204',
@@ -666,6 +847,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1204.webp',
     realname: '伦茨',
+    theme: THEMES.dream,
+    qban_url: '/images/qban/1204.webp',
   },
   {
     id: '1306',
@@ -673,6 +856,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1306.webp',
     realname: '吹叶',
+    theme: THEMES.elec,
+    qban_url: '/images/qban/1306.webp',
   },
   {
     id: '1406',
@@ -680,6 +865,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1406.webp',
     realname: '尼基',
+    theme: THEMES.music,
+    qban_url: '/images/qban/1406.webp',
   },
   {
     id: '1607',
@@ -687,6 +874,8 @@ export const allCards = [
     rarity: R,
     imageUrl: '/images/cards/1607.webp',
     realname: '多莉丝',
+    theme: THEMES.fire,
+    qban_url: '/images/qban/1607.webp',
   },
   {
     id: 'CustomRshuan',

@@ -1,3 +1,5 @@
+import { cardMap } from '@/data/cards.js'
+
 // 徽章形状 (对应文件名中的标识)
 export const HUIZHANG_SHAPES = {
   CIRCLE: 'support', // 支援徽章 (圆形)
@@ -12,18 +14,6 @@ export const HUIZHANG_RARITY = {
   PURPLE: { id: '2', name: '紫' },
   GOLD: { id: '3', name: '金' },
   RED: { id: '4', name: '红' },
-}
-
-// 角色所属主题（徽章左下角小图标）
-export const HUIZHANG_THEMES = {
-  cake: { id: 'cake', name: '甜品', icon: '/images/huizhang/attr_color_cake.webp' },
-  dream: { id: 'dream', name: '梦境', icon: '/images/huizhang/attr_color_dream.webp' },
-  elec: { id: 'elec', name: '电玩', icon: '/images/huizhang/attr_color_elec.webp' },
-  music: { id: 'music', name: '电音', icon: '/images/huizhang/attr_color_music.webp' },
-  ice: { id: 'ice', name: '寒冰', icon: '/images/huizhang/attr_color_ice.webp' },
-  fire: { id: 'fire', name: '火焰', icon: '/images/huizhang/attr_color_fire.webp' },
-  water: { id: 'water', name: '流水', icon: '/images/huizhang/attr_color_water.webp' },
-  eiji: { id: 'eiji', name: '异界', icon: '/images/huizhang/attr_color_eiji.webp' },
 }
 
 // 获取徽章背景图片路径
@@ -72,8 +62,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1102.webp', // 角色Q版立绘
-    theme: HUIZHANG_THEMES.cake, // 角色所属主题
   },
   1110: {
     shape: [
@@ -84,8 +72,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1110.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1111: {
     shape: [
@@ -96,8 +82,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1111.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1906: {
     shape: [
@@ -108,8 +92,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1906.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1211: {
     shape: [
@@ -120,8 +102,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1211.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1212: {
     shape: [
@@ -132,8 +112,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1212.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1309: {
     shape: [
@@ -144,8 +122,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1309.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1312: {
     shape: [
@@ -156,8 +132,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1312.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1311: {
     shape: [
@@ -168,8 +142,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1311.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1408: {
     shape: [
@@ -180,8 +152,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1408.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1709: {
     shape: [
@@ -192,8 +162,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1709.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1710: {
     shape: [
@@ -204,8 +172,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1710.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1711: {
     shape: [
@@ -216,8 +182,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1711.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1502: {
     shape: [
@@ -228,8 +192,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1502.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1610: {
     shape: [
@@ -240,8 +202,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1610.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1609: {
     shape: [
@@ -252,8 +212,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1609.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1503: {
     shape: [
@@ -264,8 +222,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1503.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1809: {
     shape: [
@@ -276,8 +232,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1809.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1811: {
     shape: [
@@ -288,8 +242,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1811.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1810: {
     shape: [
@@ -300,8 +252,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1810.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   11006: {
     shape: [
@@ -312,8 +262,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11006.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   11007: {
     shape: [
@@ -324,8 +272,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11007.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   11008: {
     shape: [
@@ -336,8 +282,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/11008.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   11101: {
     shape: [
@@ -348,8 +292,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11101.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   11105: {
     shape: [
@@ -360,8 +302,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11105.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   11009: {
     shape: [
@@ -372,8 +312,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11009.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   1605: {
     shape: [
@@ -384,8 +322,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1605.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1611: {
     shape: [
@@ -396,8 +332,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1611.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   11001: {
     shape: [
@@ -408,8 +342,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11001.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   11003: {
     shape: [
@@ -420,8 +352,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11003.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   1410: {
     shape: [
@@ -432,8 +362,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1410.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1411: {
     shape: [
@@ -444,8 +372,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1411.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1105: {
     shape: [
@@ -456,8 +382,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1105.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1106: {
     shape: [
@@ -468,8 +392,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1106.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1108: {
     shape: [
@@ -480,8 +402,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1108.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1109: {
     shape: [
@@ -490,8 +410,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1109.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1201: {
     shape: [
@@ -502,8 +420,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1201.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1202: {
     shape: [
@@ -512,8 +428,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1209.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1203: {
     shape: [
@@ -524,8 +438,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1203.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1210: {
     shape: [
@@ -536,8 +448,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1210.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1206: {
     shape: [
@@ -548,8 +458,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1206.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1301: {
     shape: [
@@ -558,8 +466,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1301.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1302: {
     shape: [
@@ -570,8 +476,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1302.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1305: {
     shape: [
@@ -582,8 +486,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1305.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1310: {
     shape: [
@@ -594,8 +496,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1310.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1808: {
     shape: [
@@ -606,8 +506,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1307.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1401: {
     shape: [
@@ -616,8 +514,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1401.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1402: {
     shape: [
@@ -628,8 +524,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1402.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1403: {
     shape: [
@@ -640,8 +534,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1403.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1504: {
     shape: [
@@ -652,8 +544,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1504.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1701: {
     shape: [
@@ -662,8 +552,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1701.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1703: {
     shape: [
@@ -674,8 +562,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1703.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1704: {
     shape: [
@@ -686,8 +572,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1704.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1708: {
     shape: [
@@ -698,8 +582,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1708.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1601: {
     shape: [
@@ -708,8 +590,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1601.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1602: {
     shape: [
@@ -720,8 +600,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1602.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1603: {
     shape: [
@@ -732,8 +610,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1603.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1608: {
     shape: [
@@ -744,8 +620,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1608.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1801: {
     shape: [
@@ -754,8 +628,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1801.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1803: {
     shape: [
@@ -766,8 +638,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1803.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1807: {
     shape: [
@@ -778,8 +648,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1804.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1806: {
     shape: [
@@ -790,8 +658,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1806.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1407: {
     shape: [
@@ -802,8 +668,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1407.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1706: {
     shape: [
@@ -814,8 +678,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1706.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1103: {
     shape: [
@@ -824,8 +686,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1103.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1104: {
     shape: [
@@ -834,13 +694,9 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1104.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1209: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
-    image_url: '/images/qban/1202.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1205: {
     shape: [
@@ -849,8 +705,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1205.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1207: {
     shape: [
@@ -859,8 +713,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1207.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1303: {
     shape: [
@@ -869,8 +721,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1303.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1304: {
     shape: [
@@ -879,8 +729,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1304.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1404: {
     shape: [
@@ -889,8 +737,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1404.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1405: {
     shape: [
@@ -899,8 +745,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1405.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1606: {
     shape: [
@@ -909,8 +753,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1606.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1702: {
     shape: [
@@ -919,8 +761,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1702.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1604: {
     shape: [
@@ -929,8 +769,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1604.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1805: {
     shape: [
@@ -939,38 +777,24 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1805.webp',
-    theme: HUIZHANG_THEMES.water,
   },
   1101: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
-    image_url: '/images/qban/1101.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1107: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
-    image_url: '/images/qban/1107.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1204: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
-    image_url: '/images/qban/1204.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1306: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
-    image_url: '/images/qban/1306.webp',
-    theme: HUIZHANG_THEMES.elec,
   },
   1406: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
-    image_url: '/images/qban/1406.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   1607: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
-    image_url: '/images/qban/1607.webp',
-    theme: HUIZHANG_THEMES.fire,
   },
   1712: {
     shape: [
@@ -981,8 +805,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1712.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1112: {
     shape: [
@@ -993,8 +815,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1112.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1113: {
     shape: [
@@ -1005,8 +825,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1113.webp',
-    theme: HUIZHANG_THEMES.cake,
   },
   1409: {
     shape: [
@@ -1017,8 +835,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1409.webp',
-    theme: HUIZHANG_THEMES.music,
   },
   11010: {
     shape: [
@@ -1029,8 +845,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/11010.webp',
-    theme: HUIZHANG_THEMES.eiji,
   },
   1902: {
     shape: [
@@ -1041,8 +855,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
       HUIZHANG_SHAPES.SHIELD,
     ],
-    image_url: '/images/qban/1902.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1904: {
     shape: [
@@ -1053,8 +865,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1904.webp',
-    theme: HUIZHANG_THEMES.dream,
   },
   1713: {
     shape: [
@@ -1065,8 +875,6 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
       HUIZHANG_SHAPES.DIAMOND,
     ],
-    image_url: '/images/qban/1713.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
   1714: {
     shape: [
@@ -1077,12 +885,18 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
       HUIZHANG_SHAPES.CIRCLE,
     ],
-    image_url: '/images/qban/1714.webp',
-    theme: HUIZHANG_THEMES.ice,
   },
 }
 
-// 获取角色的配置
+// 获取角色的配置（theme 和 qban_url 从 cards.js 读取，合并后返回）
 export const getCharConfig = (charId) => {
-  return CHAR_HUIZHANG_CONFIG[charId] || null
+  const baseConfig = CHAR_HUIZHANG_CONFIG[charId]
+  if (!baseConfig) return null
+
+  const card = cardMap.get(String(charId))
+  return {
+    ...baseConfig,
+    theme: card?.theme || null,
+    image_url: card?.qban_url || null,
+  }
 }

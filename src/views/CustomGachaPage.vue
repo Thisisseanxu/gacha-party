@@ -82,7 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardMap, allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import pako from 'pako'

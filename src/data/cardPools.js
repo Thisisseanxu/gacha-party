@@ -1,4 +1,4 @@
-import { SP, SSR, SR, R } from '@/data/rarity.js'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardNameMap } from '@/data/cards.js'
 import { logger } from '@/utils/logger.js'
 
