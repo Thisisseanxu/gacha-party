@@ -2,16 +2,10 @@
   <div class="page-container">
     <h1 class="page-title">徽章攻略编辑器</h1>
     <div v-if="isSelectionMode" class="selector-container">
-      <div class="import-section">
-        <button @click="openCustomCharModal" class="action-button">上传自定义角色</button>
-        <label class="action-button" title="选择之前导出的json文件可直接恢复编辑">
-          导入攻略数据
-          <input type="file" accept=".json" @change="importData" style="display: none" />
-        </label>
-      </div>
       <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
         :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" :show-qban="true"
-        @confirm="isSelectionMode = false" />
+        :show-add-custom="true" :add-custom-always-visible="true" @confirm="isSelectionMode = false"
+        @add-custom="openCustomCharModal" />
     </div>
     <div v-else class="strategy-editor">
       <div class="controls-panel card">
@@ -583,41 +577,41 @@ const exportData = () => {
 }
 
 // 导入数据
-const importData = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
+// const importData = (event) => {
+//   const file = event.target.files[0]
+//   if (!file) return
 
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const json = JSON.parse(e.target.result)
-      if (json.charId) {
-        if (json.customChar) {
-          tempCustomChar.value = json.customChar
-        }
-        selectedCharId.value = json.charId
-        // 等待 selectedCharId 的 watcher 执行完毕（重置 slots）后再覆盖数据
-        nextTick(() => {
-          if (json.stars) recommendedStars.value = json.stars
-          if (json.customTitle !== undefined) customTitle.value = json.customTitle
-          if (json.recTitle !== undefined) recommendTitle.value = json.recTitle
-          if (json.recText !== undefined) recommendText.value = json.recText
-          if (json.authorName !== undefined) authorName.value = json.authorName
-          if (json.slots) currentSlots.value = json.slots
+//   const reader = new FileReader()
+//   reader.onload = (e) => {
+//     try {
+//       const json = JSON.parse(e.target.result)
+//       if (json.charId) {
+//         if (json.customChar) {
+//           tempCustomChar.value = json.customChar
+//         }
+//         selectedCharId.value = json.charId
+//         // 等待 selectedCharId 的 watcher 执行完毕（重置 slots）后再覆盖数据
+//         nextTick(() => {
+//           if (json.stars) recommendedStars.value = json.stars
+//           if (json.customTitle !== undefined) customTitle.value = json.customTitle
+//           if (json.recTitle !== undefined) recommendTitle.value = json.recTitle
+//           if (json.recText !== undefined) recommendText.value = json.recText
+//           if (json.authorName !== undefined) authorName.value = json.authorName
+//           if (json.slots) currentSlots.value = json.slots
 
-          isSelectionMode.value = false
-        })
-      } else {
-        throw new Error('Invalid data format')
-      }
-    } catch (err) {
-      logger.error(err)
-      alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件')
-    }
-  }
-  reader.readAsText(file)
-  event.target.value = '' // 重置 input，允许重复选择同一文件
-}
+//           isSelectionMode.value = false
+//         })
+//       } else {
+//         throw new Error('Invalid data format')
+//       }
+//     } catch (err) {
+//       logger.error(err)
+//       alert('无法解析该文件或文件格式错误，请确保是有效的徽章配置JSON文件')
+//     }
+//   }
+//   reader.readAsText(file)
+//   event.target.value = '' // 重置 input，允许重复选择同一文件
+// }
 
 // 预览区域缩放逻辑
 const updatePreviewScale = () => {
@@ -741,8 +735,8 @@ const saveCustomChar = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px;
   color: v-bind('colors.text.primary');
+  padding: 0.5rem;
 }
 
 .strategy-editor {
@@ -760,10 +754,9 @@ const saveCustomChar = () => {
 
 .page-title {
   text-align: center;
-  font-size: 2em;
+  font-size: 2rem;
   color: v-bind('colors.text.highlight');
-  margin-bottom: 0;
-  margin-top: 10px;
+  margin: 0.5rem 0 1rem 0;
 }
 
 .agreement {
@@ -979,13 +972,6 @@ textarea {
   color: v-bind('colors.text.secondary');
   margin-left: auto;
   white-space: nowrap;
-}
-
-.import-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 .generate-btn {

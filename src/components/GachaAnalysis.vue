@@ -1528,7 +1528,7 @@ const formatDateTime = (timestamp) => {
 .gacha-analysis-container {
   background-color: v-bind('colors.background.content');
   padding: 0.5rem;
-  margin: 0.5rem;
+  margin: 1rem;
   min-width: 300px;
   width: 500px;
   border-radius: 12px;

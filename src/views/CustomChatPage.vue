@@ -4,14 +4,9 @@
       <h1 class="page-title">导演模式</h1>
 
       <div v-if="isSelectionMode" class="selection-mode-container">
-        <div class="selection-toolbar">
-          <button @click="openCreateCharModal" class="action-button create-char-btn">
-            创建新角色
-          </button>
-          <SwitchComponent v-model="showRealName" label="显示角色真名" />
-        </div>
         <CharacterSelector v-model="selectedCharacterIds" v-model:customCharacters="customCharacters"
-          :characterList="displayableCharacterList" :showRealName="showRealName" mode="multiple" />
+          :characterList="displayableCharacterList" mode="multiple" :show-real-name-toggle="true"
+          :show-add-custom="true" @add-custom="openCreateCharModal" />
         <button @click="confirmSelection" class="finalize-button" :disabled="selectedCharacterIds.length === 0">
           开始创作 →
         </button>
@@ -185,7 +180,7 @@
           <div class="slot-row-top" style="justify-content: center">
             <span class="slot-time-small">{{
               autoSaveTime ? formatTime(autoSaveTime) : '暂无记录'
-            }}</span>
+              }}</span>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">
@@ -204,7 +199,7 @@
             <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
             <span class="slot-time-small">{{
               slot.timestamp ? formatTime(slot.timestamp) : '空'
-            }}</span>
+              }}</span>
             <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
               ×
             </button>
@@ -305,7 +300,6 @@ const closeAgreementPopUp = () => {
 
 // true: 显示角色选择界面, false: 显示聊天编辑器
 const isSelectionMode = ref(true)
-const showRealName = ref(true)
 // 存储用户选择的角色ID
 const selectedCharacterIds = ref([])
 // 用于本地存储的键名
@@ -1300,17 +1294,17 @@ onUnmounted(() => {
 }
 
 .chat-page-container {
-  padding: 8px;
   width: 100%;
   color: v-bind('colors.text.primary');
   box-sizing: border-box;
+  padding: 0.5rem;
 }
 
 .page-title {
   text-align: center;
   font-size: 2em;
   color: v-bind('colors.text.highlight');
-  margin: 10px 0;
+  margin: 0.5rem 0 1rem 0;
 }
 
 /* 布局容器 */
@@ -2092,15 +2086,6 @@ onUnmounted(() => {
   padding-bottom: 10px;
 }
 
-.selection-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  max-width: 800px;
-  margin: 0 auto 10px auto;
-}
-
 .finalize-button {
   cursor: pointer;
   border-radius: 8px;
@@ -2125,16 +2110,5 @@ onUnmounted(() => {
 .finalize-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.create-char-btn {
-  background-color: v-bind('colors.brand.confirm');
-  color: white;
-  border-color: v-bind('colors.brand.confirm');
-}
-
-.create-char-btn:hover {
-  background-color: v-bind('colors.brand.confirmHover');
-  color: white;
 }
 </style>

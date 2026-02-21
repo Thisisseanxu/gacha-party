@@ -864,7 +864,7 @@ const resetView = () => {
 .gacha-analysis-container {
   background-color: v-bind('colors.background.content');
   padding: 0.5rem;
-  margin: 0.5rem;
+  margin: 1rem;
   min-width: 300px;
   width: 500px;
   border-radius: 12px;
@@ -919,7 +919,7 @@ const resetView = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 16px;
+  padding-top: 0.5rem;
 }
 
 .split {

@@ -4,9 +4,9 @@
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
     <!-- 筛选栏 -->
-    <div class="filter-bar" v-if="availableThemes.length > 0 || availableRarities.length > 0">
-      <!-- 第一行：主题筛选 + 图片切换 -->
-      <div class="filter-row">
+    <div class="filter-bar" v-if="availableThemes.length > 0 || availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
+      <!-- 第一行：主题筛选 -->
+      <div class="filter-row" v-if="availableThemes.length > 0">
         <div class="theme-chips">
           <button v-for="theme in availableThemes" :key="theme.id" class="filter-chip theme-chip"
             :class="{ active: activeThemeFilter === theme.id }" @click="toggleThemeFilter(theme.id)">
@@ -15,14 +15,18 @@
           </button>
         </div>
       </div>
-      <!-- 第二行：稀有度筛选 -->
-      <div class="filter-row" v-if="availableRarities.length > 0">
+      <!-- 第二行：稀有度筛选 + 功能切换按钮 -->
+      <div class="filter-row" v-if="availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
         <div class="rarity-chips">
           <button v-for="rarity in availableRarities" :key="rarity" class="filter-chip rarity-chip"
             :class="[rarity, { active: activeRarityFilter === rarity }]" @click="toggleRarityFilter(rarity)">
             {{ rarity }}
           </button>
         </div>
+        <button v-if="showRealNameToggle" class="image-toggle-btn" :class="{ active: internalShowRealName }"
+          @click="internalShowRealName = !internalShowRealName">
+          真名
+        </button>
         <button v-if="hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }" @click="useQban = !useQban">
           {{ useQban ? 'Q版' : '立绘' }}
         </button>
@@ -43,12 +47,16 @@
           {{
             isDisabled(card)
               ? '暂不可用'
-              : showRealName && card.realname
+              : internalShowRealName && card.realname
                 ? card.realname
                 : card.name
           }}
         </div>
         <div class="checkmark">✔</div>
+      </div>
+      <div v-if="showAddCustomButton" class="card-option add-custom-btn" @click="emit('add-custom')">
+        <div class="add-custom-icon">+</div>
+        <div class="card-name">创建角色</div>
       </div>
     </div>
     <div v-if="activeThemeFilter || activeRarityFilter" class="filter-tips">
@@ -87,7 +95,15 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  showRealName: {
+  showRealNameToggle: {
+    type: Boolean,
+    default: false,
+  },
+  showAddCustom: {
+    type: Boolean,
+    default: false,
+  },
+  addCustomAlwaysVisible: {
     type: Boolean,
     default: false,
   },
@@ -105,12 +121,13 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm', 'add-custom'])
 
 // 筛选状态
 const activeThemeFilter = ref(null)
 const activeRarityFilter = ref(null)
 const useQban = ref(props.showQban)
+const internalShowRealName = ref(true)
 
 // 自定义角色判断：ID 不是纯数字的为自定义角色
 const isCustomCard = (card) => !card.id?.toString().match(/^\d+$/)
@@ -163,6 +180,13 @@ const availableRarities = computed(() => {
 
 const hasAnyQban = computed(() => {
   return props.characterList.some((card) => !isCustomCard(card) && card.qban_url)
+})
+
+const showAddCustomButton = computed(() => {
+  if (!props.showAddCustom) return false
+  if (props.addCustomAlwaysVisible) return true
+  // 仅在无筛选或选中"自定义"主题时显示
+  return !activeRarityFilter.value && (!activeThemeFilter.value || activeThemeFilter.value === 'custom')
 })
 
 const filteredCards = computed(() => {
@@ -479,6 +503,48 @@ const deleteCustomCharacter = (characterId) => {
 
 .card-option:hover .delete-custom-char-btn {
   opacity: 1;
+}
+
+.add-custom-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.2rem;
+  border: 2px dashed v-bind('colors.border.primary');
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-custom-btn:hover {
+  border-color: v-bind('colors.brand.primary');
+  background: v-bind('colors.shadow.primaryHover');
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+}
+
+.add-custom-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: v-bind('colors.text.secondary');
+  padding-bottom: 0.5rem;
+}
+
+.add-custom-btn:hover .add-custom-icon {
+  color: v-bind('colors.brand.primary');
+}
+
+.add-custom-btn .card-name {
+  position: static;
+  background: none;
+  backdrop-filter: none;
+  color: v-bind('colors.text.secondary');
+  padding: 0 0 0.3rem 0;
+}
+
+.add-custom-btn:hover .card-name {
+  color: v-bind('colors.brand.primary');
 }
 
 .filter-tips {
