@@ -4,7 +4,8 @@
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
     <!-- 筛选栏 -->
-    <div class="filter-bar" v-if="availableThemes.length > 0 || availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
+    <div class="filter-bar"
+      v-if="availableThemes.length > 0 || availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
       <!-- 第一行：主题筛选 -->
       <div class="filter-row" v-if="availableThemes.length > 0">
         <div class="theme-chips">
@@ -28,7 +29,7 @@
           真名
         </button>
         <button v-if="hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }" @click="useQban = !useQban">
-          {{ useQban ? 'Q版' : '立绘' }}
+          {{ useQban ? '立绘' : 'Q版' }}
         </button>
       </div>
     </div>
@@ -127,7 +128,7 @@ const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confi
 const activeThemeFilter = ref(null)
 const activeRarityFilter = ref(null)
 const useQban = ref(props.showQban)
-const internalShowRealName = ref(true)
+const internalShowRealName = ref(false)
 
 // 自定义角色判断：ID 不是纯数字的为自定义角色
 const isCustomCard = (card) => !card.id?.toString().match(/^\d+$/)
@@ -319,8 +320,8 @@ const deleteCustomCharacter = (characterId) => {
 }
 
 .theme-chip-icon {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 

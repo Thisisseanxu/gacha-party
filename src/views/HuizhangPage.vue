@@ -1,6 +1,5 @@
 <template>
   <div class="page-container">
-    <h1 class="page-title">徽章攻略编辑器</h1>
     <div v-if="isSelectionMode" class="selector-container">
       <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
         :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" :show-qban="true"
@@ -9,7 +8,10 @@
     </div>
     <div v-else class="strategy-editor">
       <div class="controls-panel card">
-        <h2>攻略配置</h2>
+        <div class="editor-nav">
+          <button class="back-nav-btn" @click="router.back()">← 返回</button>
+          <h2>攻略编辑器</h2>
+        </div>
 
         <div class="control-group">
           <label>当前角色: {{ selectedCardInfo.name }}</label>
@@ -61,19 +63,25 @@
 
         <div class="control-group">
           <label>文本相关设置（留空则不显示）</label>
-          <input v-model="customTitle" class="input-select" placeholder="大标题内容" />
+          <input v-model="customTitle" class="input-select" placeholder="攻略名称" />
         </div>
         <div class="control-group">
-          <input v-model="recommendTitle" class="input-select" style="margin-bottom: 8px; font-weight: bold"
-            placeholder="小标题" />
-          <textarea v-model="recommendText" rows="4" placeholder="文本内容"></textarea>
-          <input v-model="authorName" class="input-select" placeholder="作者署名（选填）" />
+          <textarea v-model="recommendText" rows="4" placeholder="注释（可以写推荐理由等）"></textarea>
+          <input v-model="authorName" class="input-select" placeholder="作者署名" />
         </div>
         <div class="control-group"></div>
 
         <div class="action-buttons">
-          <button @click="exportData" class="export-btn">保存数据</button>
+          <button @click="exportData" class="export-btn">
+            {{ showCopied ? '✓ 已复制！' : '导出代码' }}
+          </button>
           <button @click="generateImage" class="generate-btn">导出攻略图</button>
+        </div>
+        <!-- 代码文本框（剪贴板不可用时显示） -->
+        <div v-if="exportCodeText" class="code-export-area">
+          <label class="code-export-label">攻略代码</label>
+          <textarea class="code-export-textarea" :value="exportCodeText" readonly rows="3"
+            @click="$event.target.select()"></textarea>
         </div>
       </div>
 
@@ -91,10 +99,6 @@
                 <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star" />
               </div>
             </div>
-          </div>
-
-          <div class="custom-title-display">
-            {{ customTitle }}
           </div>
 
           <div class="character-display">
@@ -155,7 +159,6 @@
               <span class="effect-text">{{ calculatedEffects }}</span>
             </div>
             <div class="recommendation-text">
-              <span class="label">{{ recommendTitle }}</span>
               <p>{{ recommendText }}</p>
             </div>
           </div>
@@ -263,6 +266,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import {
@@ -272,6 +276,7 @@ import {
   getCharConfig,
   getHuizhangBgUrl,
 } from '@/data/huizhang.js'
+import { encodeStrategy, decodeStrategy } from '@/utils/huizhangCode.js'
 import { toPng } from 'html-to-image'
 import PopUp from '@/components/PopUp.vue'
 import CharacterSelector from '@/components/CharacterSelector.vue'
@@ -279,10 +284,9 @@ import { logger } from '@/utils/logger'
 
 // 状态
 const selectedCharId = ref('')
-const recommendedStars = ref([0, 5])
+const recommendedStars = ref([0, 1, 2, 3, 4, 5])
 const customTitle = ref('')
 const authorName = ref('')
-const recommendTitle = ref('推荐理由：')
 const recommendText = ref('')
 const captureRef = ref(null)
 const currentSlots = ref([])
@@ -291,6 +295,13 @@ const previewWrapper = ref(null)
 const previewScale = ref(1)
 const isSelectionMode = ref(true)
 const showAgreementPopUp = ref(false)
+
+// 导出代码相关
+const showCopied = ref(false)
+const exportCodeText = ref('')
+
+const route = useRoute()
+const router = useRouter()
 
 // 自定义角色相关
 const tempCustomChar = ref(null)
@@ -354,8 +365,50 @@ watch(isSelectionMode, (newVal) => {
 
 // 初始化
 onMounted(() => {
-  selectedCharId.value = '1111'
-  isSelectionMode.value = true
+  // 检查来自首页的自定义角色（通过 sessionStorage 传递）
+  const storedCustomChar = sessionStorage.getItem('huizhang_customChar')
+  if (storedCustomChar) {
+    try {
+      tempCustomChar.value = JSON.parse(storedCustomChar)
+      sessionStorage.removeItem('huizhang_customChar')
+      selectedCharId.value = tempCustomChar.value.id
+      isSelectionMode.value = false
+      window.addEventListener('resize', updatePreviewScale)
+      updatePreviewScale()
+      return
+    } catch { /* 忽略解析失败，继续正常流程 */ }
+  }
+
+  const { code, charId } = route.query
+
+  if (code) {
+    // 从分享代码加载攻略
+    try {
+      const data = decodeStrategy(code)
+      if (data.customChar) tempCustomChar.value = data.customChar
+      selectedCharId.value = data.charId || charId || '1111'
+      nextTick(() => {
+        if (data.stars) recommendedStars.value = data.stars
+        if (data.customTitle !== undefined) customTitle.value = data.customTitle
+        if (data.recText !== undefined) recommendText.value = data.recText
+        if (data.authorName !== undefined) authorName.value = data.authorName
+        if (data.slots) currentSlots.value = data.slots
+        isSelectionMode.value = false
+      })
+    } catch (e) {
+      logger.error('无法解析攻略代码:', e)
+      selectedCharId.value = charId || '1111'
+      isSelectionMode.value = !charId
+    }
+  } else if (charId) {
+    // 从角色页进入，直接开始编辑
+    selectedCharId.value = charId
+    isSelectionMode.value = false
+  } else {
+    selectedCharId.value = '1111'
+    isSelectionMode.value = true
+  }
+
   window.addEventListener('resize', updatePreviewScale)
   updatePreviewScale()
 })
@@ -550,13 +603,12 @@ const getStarImage = (level, starIndex) => {
   return `/images/huizhang/icon_star_${typeIndex}.webp`
 }
 
-// 导出数据
-const exportData = () => {
+// 导出为短代码
+const exportData = async () => {
   const data = {
     charId: selectedCharId.value,
     stars: recommendedStars.value,
     customTitle: customTitle.value,
-    recTitle: recommendTitle.value,
     recText: recommendText.value,
     authorName: authorName.value,
     slots: currentSlots.value,
@@ -564,16 +616,17 @@ const exportData = () => {
   if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
     data.customChar = tempCustomChar.value
   }
-  const jsonStr = JSON.stringify(data, null, 2)
-  const blob = new Blob([jsonStr], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `徽章配置-${selectedCardInfo.value.name || 'data'}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  const code = encodeStrategy(data)
+  exportCodeText.value = code
+  try {
+    await navigator.clipboard.writeText(code)
+    showCopied.value = true
+    setTimeout(() => {
+      showCopied.value = false
+    }, 2500)
+  } catch {
+    // 剪贴板不可用时仍显示代码文本框让用户手动复制
+  }
 }
 
 // 导入数据
@@ -618,6 +671,7 @@ const updatePreviewScale = () => {
   if (!previewWrapper.value) return
   const wrapperWidth = previewWrapper.value.clientWidth
   const targetWidth = 820 // 800px + 左右留白
+
 
   if (wrapperWidth < targetWidth) {
     previewScale.value = wrapperWidth / targetWidth
@@ -1003,6 +1057,57 @@ textarea {
   gap: 10px;
 }
 
+.editor-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.editor-nav h2 {
+  margin: 0;
+}
+
+.back-nav-btn {
+  background: none;
+  border: none;
+  color: v-bind('colors.text.secondary');
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.back-nav-btn:hover {
+  color: v-bind('colors.brand.primary');
+}
+
+.code-export-area {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.code-export-label {
+  font-size: 0.82rem;
+  color: v-bind('colors.text.secondary');
+}
+
+.code-export-textarea {
+  width: 100%;
+  background: v-bind('colors.background.light');
+  border: 1px solid v-bind('colors.border.primary');
+  border-radius: 6px;
+  color: v-bind('colors.text.primary');
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: monospace;
+}
+
 /* --- 预览区 --- */
 .preview-wrapper {
   overflow: hidden;
@@ -1071,7 +1176,7 @@ textarea {
 
 .custom-title-display {
   position: absolute;
-  top: 160px;
+  top: 140px;
   left: 30px;
   font-size: 2.5rem;
   color: v-bind('colors.preview.highlight');
@@ -1235,6 +1340,7 @@ textarea {
   right: 20px;
   min-width: 370px;
   min-height: 180px;
+  max-width: 480px;
   background: v-bind('colors.preview.panelBg');
   border: 1px solid #555;
   border-radius: 10px;

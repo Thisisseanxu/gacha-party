@@ -83,10 +83,27 @@ const routes = [
   },
   {
     path: '/huizhang',
-    name: '徽章编辑器',
-    component: () => import('./views/HuizhangPage.vue'), // 徽章编辑器页面组件
+    name: '徽章攻略助手',
+    component: () => import('./views/HuizhangHome.vue'),
     meta: {
-      title: '徽章编辑器 - 织夜工具箱',
+      title: '徽章攻略助手 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/huizhang/char/:charId',
+    name: '角色徽章攻略',
+    component: () => import('./views/HuizhangCharPage.vue'),
+    props: true,
+    meta: {
+      title: '角色徽章攻略 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/huizhang/edit',
+    name: '徽章攻略编辑器',
+    component: () => import('./views/HuizhangPage.vue'),
+    meta: {
+      title: '徽章攻略编辑器 - 织夜工具箱',
     },
   },
   {
