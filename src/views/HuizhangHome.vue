@@ -34,7 +34,7 @@
               <!-- 徽章搭配摘要 -->
               <div class="badge-summary" v-if="item.strategy.slots?.length">
                 <span v-for="(g, i) in summarizeSlots(item.strategy.slots)" :key="i" class="badge-chip-item"
-                  :style="{ color: RARITY_COLORS[g.rarityId] }">
+                  :style="{ color: badgeRarityColors[g.rarityId] }">
                   {{ HUIZHANG_TYPES[g.typeId]?.name || g.typeId }}
                   <template v-if="g.count > 1">×{{ g.count }}</template>
                   <span class="badge-chip-lv">Lv.{{ g.level }}</span>
@@ -257,13 +257,14 @@ const saveCustomChar = () => {
 }
 
 // 徽章摘要：合并相同稀有度+类型+等级的槽位
-const RARITY_COLORS = {
-  '0': '#888888',
-  '1': '#64b5f6',
-  '2': '#ce93d8',
-  '3': '#ffd54f',
-  '4': '#ef9a9a',
-}
+// 颜色从 colors.badgeRarity 取，随主题切换自动更新
+const badgeRarityColors = computed(() => ({
+  '0': colors.badgeRarity.empty,
+  '1': colors.badgeRarity.blue,
+  '2': colors.badgeRarity.purple,
+  '3': colors.badgeRarity.gold,
+  '4': colors.badgeRarity.red,
+}))
 
 const summarizeSlots = (slots) => {
   if (!slots?.length) return []
@@ -302,7 +303,7 @@ const summarizeSlots = (slots) => {
 
 .page-title {
   font-size: 1.8rem;
-  color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.primary');
   margin: 0 0 0.3rem;
 }
 
@@ -553,7 +554,7 @@ const summarizeSlots = (slots) => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: v-bind('colors.background.overlay');
   display: flex;
   justify-content: center;
   align-items: center;
@@ -564,7 +565,7 @@ const summarizeSlots = (slots) => {
   background-color: v-bind('colors.background.content');
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 15px v-bind('colors.shadow.primary');
   display: flex;
   flex-direction: column;
   gap: 14px;

@@ -806,13 +806,6 @@ const saveCustomChar = () => {
   max-width: 800px;
 }
 
-.page-title {
-  text-align: center;
-  font-size: 2rem;
-  color: v-bind('colors.text.highlight');
-  margin: 0.5rem 0 1rem 0;
-}
-
 .agreement {
   margin-top: 10px;
   margin-bottom: 20px;
@@ -828,7 +821,7 @@ const saveCustomChar = () => {
 .agreement-list {
   max-height: 20rem;
   overflow-y: auto;
-  border: 1px solid #e0e0e0;
+  border: 1px solid v-bind('colors.border.primary');
   padding: 0 0 0 20px;
   border-radius: 8px;
   background-color: v-bind('colors.shadow.primaryHover');
@@ -855,9 +848,9 @@ const saveCustomChar = () => {
 
 .action-button {
   padding: 0.5rem 1rem;
-  border: 1px solid #344767;
-  background-color: #ccc;
-  color: #344767;
+  border: 1px solid v-bind('colors.button.defaultText');
+  background-color: v-bind('colors.button.defaultBg');
+  color: v-bind('colors.button.defaultText');
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -866,8 +859,8 @@ const saveCustomChar = () => {
 }
 
 .action-button:hover {
-  background-color: #344767;
-  color: #ccc;
+  background-color: v-bind('colors.button.hoverBg');
+  color: v-bind('colors.button.hoverText');
 }
 
 .controls-panel {
@@ -1174,18 +1167,6 @@ textarea {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-.custom-title-display {
-  position: absolute;
-  top: 140px;
-  left: 30px;
-  font-size: 2.5rem;
-  color: v-bind('colors.preview.highlight');
-  font-weight: 700;
-  text-shadow: v-bind('colors.preview.shadow');
-  z-index: 10;
-  font-style: italic;
-}
-
 /* 立绘 */
 .character-display {
   position: absolute;
@@ -1408,7 +1389,7 @@ textarea {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: v-bind('colors.background.overlay');
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1419,7 +1400,7 @@ textarea {
   background-color: v-bind('colors.background.content');
   padding: 20px 30px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 15px v-bind('colors.shadow.primary');
   display: flex;
   flex-direction: column;
   gap: 15px;

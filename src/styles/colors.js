@@ -91,6 +91,14 @@ const dark = {
     white: 'rgba(255, 255, 255, 0.3)', // 用于深色背景上的阴影
     whiteHover: 'rgba(255, 255, 255, 0.5)', // 用于深色背景上的悬浮阴影
   },
+  // --- 徽章稀有度颜色（用于徽章攻略界面的标签文字） ---
+  badgeRarity: {
+    empty: '#888888', // 稀有度 0：空/灰
+    blue: '#64b5f6', // 稀有度 1：蓝色
+    purple: '#ce93d8', // 稀有度 2：紫色
+    gold: '#ffd54f', // 稀有度 3：金色
+    red: '#ef9a9a', // 稀有度 4：红色
+  },
   // --- 其他 ---
   scrollbar: 'rgba(85, 85, 85, 1)', // 滚动条滑块颜色
   textShadow: 'rgba(0, 0, 0, 0.6)', // 文本阴影
@@ -169,6 +177,14 @@ const light = {
     background: '#e5e7eb', // 进度条背景
   },
   gacha: { ...dark.gacha }, // 抽卡颜色保持一致
+  // 浅色模式下需要更深的颜色才能在浅色背景上清晰可见
+  badgeRarity: {
+    empty: '#6b7280', // 稀有度 0：深灰
+    blue: '#1565c0', // 稀有度 1：深蓝
+    purple: '#7b1fa2', // 稀有度 2：深紫
+    gold: '#dfb52d', // 稀有度 3：深金
+    red: '#b91c1c', // 稀有度 4：深红
+  },
   border: {
     primary: 'rgba(229, 231, 235, 1)',
     secondary: 'rgba(209, 213, 219, 1)',

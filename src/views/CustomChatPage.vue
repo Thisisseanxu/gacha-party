@@ -1303,7 +1303,7 @@ onUnmounted(() => {
 .page-title {
   text-align: center;
   font-size: 2em;
-  color: v-bind('colors.text.highlight');
+  color: v-bind('colors.text.primary');
   margin: 0.5rem 0 1rem 0;
 }
 
