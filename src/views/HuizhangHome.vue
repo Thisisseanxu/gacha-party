@@ -124,15 +124,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { getCharConfig, HUIZHANG_SHAPES, HUIZHANG_TYPES } from '@/data/huizhang.js'
-import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { colors } from '@/styles/colors.js'
-import { FEATURED_STRATEGIES } from '@/data/huizhangdata/index.js'
 import CharacterSelector from '@/components/CharacterSelector.vue'
+import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 
 const router = useRouter()
 const selectedCharId = ref('')
 
-const strategyModules = import.meta.glob('/src/data/huizhangdata/*.js', { eager: false })
+const { init, getFeaturedGuides } = useHuizhangGuides()
 
 const baseCharacterList = computed(() => allCards.filter((c) => c.id.match(/^\d+$/)))
 
@@ -169,25 +168,20 @@ const cardMap = computed(() => {
   return m
 })
 
-// 精选攻略数据
-const featuredItems = ref([])
+// 精选攻略数据（从 D1 实时加载，缓存4小时）
+const featuredItems = computed(() =>
+  getFeaturedGuides()
+    .filter((g) => g.data !== null)
+    .map((g) => ({
+      charId: g.charId,
+      strategy: g.data,
+      card: cardMap.value.get(g.charId),
+      charConfig: getCharConfig(g.charId),
+    })),
+)
 
 onMounted(async () => {
-  const loaded = []
-  for (const { charId, index } of FEATURED_STRATEGIES) {
-    const path = `/src/data/huizhangdata/${charId}.js`
-    const loader = strategyModules[path]
-    if (!loader) continue
-    try {
-      const mod = await loader()
-      const codes = mod.default || []
-      const code = codes[index]
-      if (!code) continue
-      const strategy = decodeStrategy(code)
-      loaded.push({ charId, strategy, card: cardMap.value.get(charId), charConfig: getCharConfig(charId) })
-    } catch { /* 跳过 */ }
-  }
-  featuredItems.value = loaded
+  await init()
 })
 
 const goToChar = (charId) => router.push(`/huizhang/char/${charId}`)

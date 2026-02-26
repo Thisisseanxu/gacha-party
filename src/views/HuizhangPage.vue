@@ -72,17 +72,12 @@
         <div class="control-group"></div>
 
         <div class="action-buttons">
-          <button @click="exportData" class="export-btn">
-            {{ showCopied ? '✓ 已复制！' : '导出代码' }}
+          <button @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
+            投稿攻略
           </button>
           <button @click="generateImage" class="generate-btn">导出攻略图</button>
         </div>
-        <!-- 代码文本框（剪贴板不可用时显示） -->
-        <div v-if="exportCodeText" class="code-export-area">
-          <label class="code-export-label">攻略代码</label>
-          <textarea class="code-export-textarea" :value="exportCodeText" readonly rows="3"
-            @click="$event.target.select()"></textarea>
-        </div>
+        <p v-if="isCustomChar" class="custom-char-hint">自定义角色暂不支持投稿</p>
       </div>
 
       <div class="preview-wrapper" ref="previewWrapper">
@@ -204,6 +199,47 @@
     <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
   </PopUp>
 
+  <!-- 投稿攻略弹窗 -->
+  <div v-if="showSubmitDialog" class="overlay" @click.self="showSubmitDialog = false">
+    <div class="submit-confirm-form" @click.stop>
+      <h3 class="submit-title">投稿攻略</h3>
+      <p class="submit-sub">投稿后需要管理员审核，审核通过后将显示在攻略列表中。</p>
+
+      <div class="submit-info-row">
+        <span class="submit-info-label">角色</span>
+        <span class="submit-info-value">{{ selectedCardInfo.name }}</span>
+      </div>
+      <div v-if="customTitle" class="submit-info-row">
+        <span class="submit-info-label">攻略名称</span>
+        <span class="submit-info-value">{{ customTitle }}</span>
+      </div>
+      <div v-if="authorName" class="submit-info-row">
+        <span class="submit-info-label">署名</span>
+        <span class="submit-info-value">{{ authorName }}</span>
+      </div>
+
+      <div class="form-row">
+        <label>激活码 <span class="required">*</span></label>
+        <input v-model="submitLicenseKey" class="input-select" placeholder="与抽卡记录功能的相同" autocomplete="off" />
+        <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱并联系客服</span>
+        <label class="checkbox-row">
+          <input type="checkbox" v-model="saveKey" />
+          <span>保存激活码到本地（下次自动填充）</span>
+        </label>
+      </div>
+
+      <div v-if="submitError" class="feedback-msg error-msg">{{ submitError }}</div>
+      <div v-if="submitSuccess" class="feedback-msg success-msg">{{ submitSuccess }}</div>
+
+      <div class="form-actions">
+        <button class="action-button" :disabled="submitLoading" @click="handleSubmit">
+          {{ submitLoading ? '提交中…' : '提交审核' }}
+        </button>
+        <button class="action-button cancel" @click="showSubmitDialog = false">取消</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 自定义角色弹窗 -->
   <div v-if="showCustomCharForm" class="overlay" @click="showCustomCharForm = false">
     <div class="custom-character-form" @click.stop>
@@ -267,6 +303,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 import { allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import {
@@ -296,12 +333,19 @@ const previewScale = ref(1)
 const isSelectionMode = ref(true)
 const showAgreementPopUp = ref(false)
 
-// 导出代码相关
-const showCopied = ref(false)
-const exportCodeText = ref('')
+// 投稿攻略相关
+const showSubmitDialog = ref(false)
+const submitLicenseKey = ref('')
+const saveKey = ref(true)
+const submitLoading = ref(false)
+const submitError = ref('')
+const submitSuccess = ref('')
+
+const isCustomChar = computed(() => selectedCharId.value?.startsWith('custom_temp_'))
 
 const route = useRoute()
 const router = useRouter()
+const { getWorkerBase } = useHuizhangGuides()
 
 // 自定义角色相关
 const tempCustomChar = ref(null)
@@ -603,29 +647,82 @@ const getStarImage = (level, starIndex) => {
   return `/images/huizhang/icon_star_${typeIndex}.webp`
 }
 
-// 导出为短代码
-const exportData = async () => {
-  const data = {
-    charId: selectedCharId.value,
-    stars: recommendedStars.value,
-    customTitle: customTitle.value,
-    recText: recommendText.value,
-    authorName: authorName.value,
-    slots: currentSlots.value,
+// 打开投稿确认框
+const openSubmitDialog = () => {
+  const saved = localStorage.getItem('hz_license_key')
+  if (saved) {
+    submitLicenseKey.value = saved
+    saveKey.value = true
   }
-  if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
-    data.customChar = tempCustomChar.value
+  submitError.value = ''
+  submitSuccess.value = ''
+  showSubmitDialog.value = true
+}
+
+// 提交攻略
+const handleSubmit = async () => {
+  submitError.value = ''
+  submitSuccess.value = ''
+
+  if (!submitLicenseKey.value.trim()) {
+    submitError.value = '请输入激活码'
+    return
   }
-  const code = encodeStrategy(data)
-  exportCodeText.value = code
+
+  if (saveKey.value) {
+    localStorage.setItem('hz_license_key', submitLicenseKey.value.trim())
+  }
+
+  let code
   try {
-    await navigator.clipboard.writeText(code)
-    showCopied.value = true
-    setTimeout(() => {
-      showCopied.value = false
-    }, 2500)
+    code = encodeStrategy({
+      charId: selectedCharId.value,
+      stars: recommendedStars.value,
+      customTitle: customTitle.value,
+      recText: recommendText.value,
+      authorName: authorName.value,
+      slots: currentSlots.value,
+    })
   } catch {
-    // 剪贴板不可用时仍显示代码文本框让用户手动复制
+    submitError.value = '攻略编码失败，请检查配置后重试'
+    return
+  }
+
+  submitLoading.value = true
+  try {
+    const base = getWorkerBase()
+    const res = await fetch(`${base}/api/hz/submit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-License-Key': submitLicenseKey.value.trim(),
+      },
+      body: JSON.stringify({
+        charId: selectedCharId.value,
+        code,
+        title: customTitle.value.trim(),
+        authorName: authorName.value.trim(),
+      }),
+    })
+    const resData = await res.json()
+    if (!res.ok) {
+      if (res.status === 429 && resData.timeLeft) {
+        const secs = Math.ceil(resData.timeLeft / 1000)
+        submitError.value = `提交过于频繁，请 ${secs} 秒后再试`
+      } else {
+        submitError.value = resData.message || '提交失败，请稍后重试'
+      }
+    } else {
+      submitSuccess.value = resData.message || '提交成功！攻略将在审核通过后显示。'
+      setTimeout(() => {
+        showSubmitDialog.value = false
+        submitSuccess.value = ''
+      }, 2000)
+    }
+  } catch {
+    submitError.value = '网络错误，请检查网络连接后重试'
+  } finally {
+    submitLoading.value = false
   }
 }
 
@@ -1045,6 +1142,18 @@ textarea {
   cursor: pointer;
 }
 
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.custom-char-hint {
+  font-size: 0.8rem;
+  color: v-bind('colors.text.tertiary');
+  margin: -4px 0 0;
+  text-align: center;
+}
+
 .action-buttons {
   display: flex;
   gap: 10px;
@@ -1076,29 +1185,96 @@ textarea {
   color: v-bind('colors.brand.primary');
 }
 
-.code-export-area {
-  margin-top: 0.6rem;
+/* 投稿弹窗 */
+.submit-confirm-form {
+  background-color: v-bind('colors.background.content');
+  padding: 1.4rem 1.6rem;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px v-bind('colors.shadow.primary');
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.9rem;
+  width: 90%;
+  max-width: 420px;
+  border: 1px solid v-bind('colors.border.primary');
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.code-export-label {
+.submit-title {
+  text-align: center;
+  margin: 0;
+  color: v-bind('colors.text.primary');
+  font-size: 1.1rem;
+}
+
+.submit-sub {
+  text-align: center;
+  margin: -0.4rem 0 0;
+  color: v-bind('colors.text.tertiary');
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.submit-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  padding: 4px 0;
+  border-bottom: 1px solid v-bind('colors.border.secondary');
+}
+
+.submit-info-label {
+  color: v-bind('colors.text.secondary');
+  font-weight: bold;
+  min-width: 5em;
+  flex-shrink: 0;
+}
+
+.submit-info-value {
+  color: v-bind('colors.text.primary');
+}
+
+.required {
+  color: v-bind('colors.brand.cancel');
+}
+
+.input-with-eye {
+  display: flex;
+  gap: 6px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.82rem;
   color: v-bind('colors.text.secondary');
+  cursor: pointer;
+  font-weight: normal;
 }
 
-.code-export-textarea {
-  width: 100%;
-  background: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+.checkbox-row input[type='checkbox'] {
+  accent-color: v-bind('colors.brand.primary');
+  cursor: pointer;
+}
+
+.feedback-msg {
+  font-size: 0.85rem;
+  padding: 8px 12px;
   border-radius: 6px;
-  color: v-bind('colors.text.primary');
-  font-size: 0.75rem;
-  padding: 0.5rem;
-  resize: vertical;
-  box-sizing: border-box;
-  font-family: monospace;
+  text-align: center;
+}
+
+.error-msg {
+  background: v-bind('colors.status.errorBg');
+  color: v-bind('colors.status.error');
+}
+
+.success-msg {
+  background: v-bind('colors.status.successBg');
+  color: v-bind('colors.status.success');
 }
 
 /* --- 预览区 --- */

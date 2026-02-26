@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__4b7ec826-9775-462c-a1b2-d461ee482cf6__accounts_list",
+      "mcp__4b7ec826-9775-462c-a1b2-d461ee482cf6__set_active_account",
+      "mcp__4b7ec826-9775-462c-a1b2-d461ee482cf6__d1_database_create"
+    ]
+  }
+}

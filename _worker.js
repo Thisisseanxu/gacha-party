@@ -145,6 +145,501 @@ export class TaskRunner {
   // }
 }
 
+// ============================================================
+//  徽章攻略系统 — 管理员 Token 工具函数
+// ============================================================
+
+/**
+ * 签发管理员 Token（HMAC-SHA256，24小时有效期）
+ * 环境变量：ADMIN_SECRET（签名密钥）
+ */
+async function signAdminToken(env) {
+  const now = Date.now()
+  const payload = JSON.stringify({ iat: now, exp: now + 24 * 60 * 60 * 1000 })
+  const payloadB64 = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(env.ADMIN_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payloadB64))
+  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+  return `${payloadB64}.${sigB64}`
+}
+
+/**
+ * 验证管理员 Token，返回 true/false
+ */
+async function verifyAdminToken(token, env) {
+  if (!token || !env.ADMIN_SECRET) return false
+  try {
+    const dotIdx = token.lastIndexOf('.')
+    if (dotIdx === -1) return false
+    const payloadB64 = token.slice(0, dotIdx)
+    const sigB64 = token.slice(dotIdx + 1)
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(env.ADMIN_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    )
+    const sigBytes = Uint8Array.from(
+      atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')),
+      (c) => c.charCodeAt(0),
+    )
+    const valid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      sigBytes,
+      new TextEncoder().encode(payloadB64),
+    )
+    if (!valid) return false
+    const paddedPayload =
+      payloadB64.replace(/-/g, '+').replace(/_/g, '/') +
+      '='.repeat((4 - (payloadB64.length % 4)) % 4)
+    const payload = JSON.parse(atob(paddedPayload))
+    return Date.now() < payload.exp
+  } catch {
+    return false
+  }
+}
+
+/**
+ * 计算密码哈希：SHA-256(ADMIN_SALT + password) → hex
+ */
+async function hashPassword(password, salt) {
+  const data = new TextEncoder().encode((salt || '') + password)
+  const hashBuf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(hashBuf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// ============================================================
+//  徽章攻略 Hono 子路由
+// ============================================================
+const hzApp = new Hono()
+
+// ── 公开接口 ──────────────────────────────────────────────
+
+/**
+ * GET /api/hz/version
+ * 返回当前攻略数据版本号（1次D1读取）
+ */
+hzApp.get('/version', async (c) => {
+  try {
+    const row = await c.env.HZ_DB.prepare(
+      'SELECT version, updated_at FROM hz_guide_meta WHERE id = 1',
+    ).first()
+    return c.json({ version: row?.version ?? '0', updated_at: row?.updated_at ?? 0 })
+  } catch (e) {
+    return c.json({ message: '数据库查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * GET /api/hz/guides
+ * 返回所有已审核攻略（1次D1 batch读取）
+ */
+hzApp.get('/guides', async (c) => {
+  try {
+    const [metaRes, guidesRes] = await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare('SELECT version, updated_at FROM hz_guide_meta WHERE id = 1'),
+      c.env.HZ_DB.prepare(
+        'SELECT id, char_id, code, title, author_name, user_id, is_featured, created_at, approved_at FROM hz_guides ORDER BY approved_at DESC',
+      ),
+    ])
+    const meta = metaRes.results[0] ?? { version: '0', updated_at: 0 }
+    return c.json({
+      version: meta.version,
+      updated_at: meta.updated_at,
+      guides: guidesRes.results,
+    })
+  } catch (e) {
+    return c.json({ message: '数据库查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * POST /api/hz/submit
+ * 投稿攻略（验证激活码 + 限速 + 写入待审核）
+ */
+hzApp.post('/submit', async (c) => {
+  const licenseKey = c.req.header('X-License-Key')
+  if (!licenseKey) {
+    return c.json({ message: '请提供激活码（X-License-Key 请求头）' }, 401)
+  }
+
+  let userId
+  try {
+    const result = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
+    userId = String(result.userId)
+  } catch (e) {
+    return c.json({ message: '激活码无效: ' + e.message }, 403)
+  }
+
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误，请发送 JSON' }, 400)
+  }
+
+  const { charId, code, title = '', authorName = '' } = body
+
+  // 参数校验
+  if (!charId || !/^\d+$/.test(String(charId))) {
+    return c.json({ message: 'charId 格式错误' }, 400)
+  }
+  if (!code || typeof code !== 'string' || code.length > 15360) {
+    return c.json({ message: '攻略代码无效或超出大小限制（15KB）' }, 400)
+  }
+  if (typeof title !== 'string' || title.length > 100) {
+    return c.json({ message: '标题过长（最多100字符）' }, 400)
+  }
+  if (typeof authorName !== 'string' || authorName.length > 100) {
+    return c.json({ message: '署名过长（最多100字符）' }, 400)
+  }
+
+  try {
+    // 限速检查：同一 userId 3分钟内只能投稿1次
+    const lastRow = await c.env.HZ_DB.prepare(
+      'SELECT submitted_at FROM hz_pending WHERE user_id = ? ORDER BY submitted_at DESC LIMIT 1',
+    )
+      .bind(userId)
+      .first()
+
+    if (lastRow) {
+      const elapsed = Date.now() - lastRow.submitted_at
+      const RATE_LIMIT_MS = 3 * 60 * 1000
+      if (elapsed < RATE_LIMIT_MS) {
+        const timeLeft = RATE_LIMIT_MS - elapsed
+        return c.json(
+          {
+            message: `提交过于频繁，请 ${Math.ceil(timeLeft / 1000)} 秒后再试`,
+            timeLeft,
+          },
+          429,
+        )
+      }
+    }
+
+    const now = Date.now()
+    await c.env.HZ_DB.prepare(
+      'INSERT INTO hz_pending (char_id, code, title, author_name, user_id, submitted_at) VALUES (?, ?, ?, ?, ?, ?)',
+    )
+      .bind(String(charId), code, title.trim(), authorName.trim(), userId, now)
+      .run()
+
+    return c.json({ message: '提交成功！攻略将在审核通过后显示。' }, 201)
+  } catch (e) {
+    return c.json({ message: '数据库操作失败: ' + e.message }, 500)
+  }
+})
+
+// ── 管理员认证接口 ────────────────────────────────────────
+
+/**
+ * POST /api/hz/admin/auth
+ * 密码验证，成功签发管理员 Token
+ * IP 限速：5次失败 → 封禁60分钟（存于现有 KV）
+ */
+hzApp.post('/admin/auth', async (c) => {
+  if (!c.env.ADMIN_PASSWORD_HASH || !c.env.ADMIN_SECRET) {
+    return c.json({ message: '管理员功能未配置' }, 503)
+  }
+
+  const ip = c.req.header('CF-Connecting-IP') || 'unknown'
+  const bruteKey = `hz_admin_brute_${ip}`
+
+  // 读取暴力破解记录
+  let brute = { count: 0, blockedUntil: 0 }
+  try {
+    const raw = await c.env.GACHA_PARTY_RECORDS.get(bruteKey)
+    if (raw) brute = JSON.parse(raw)
+  } catch { /* 忽略 */ }
+
+  if (brute.blockedUntil > Date.now()) {
+    const remaining = Math.ceil((brute.blockedUntil - Date.now()) / 60000)
+    return c.json(
+      { message: `登录尝试次数过多，请 ${remaining} 分钟后再试` },
+      429,
+    )
+  }
+
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
+
+  const { password } = body
+  if (!password || typeof password !== 'string') {
+    return c.json({ message: '请输入密码' }, 400)
+  }
+
+  const hash = await hashPassword(password, c.env.ADMIN_SALT || '')
+  if (hash !== c.env.ADMIN_PASSWORD_HASH) {
+    brute.count = (brute.count || 0) + 1
+    if (brute.count >= 5) {
+      brute.blockedUntil = Date.now() + 60 * 60 * 1000
+    }
+    await c.env.GACHA_PARTY_RECORDS.put(bruteKey, JSON.stringify(brute), {
+      expirationTtl: 7200,
+    })
+    const attemptsLeft = Math.max(0, 5 - brute.count)
+    return c.json(
+      {
+        message: attemptsLeft > 0 ? `密码错误，剩余尝试次数：${attemptsLeft}` : '密码错误，账号已被暂时锁定',
+        attemptsLeft,
+      },
+      401,
+    )
+  }
+
+  // 验证成功：清除暴力破解记录
+  await c.env.GACHA_PARTY_RECORDS.delete(bruteKey)
+  const token = await signAdminToken(c.env)
+  return c.json({ token })
+})
+
+// ── 管理员操作接口（统一 Token 验证中间件）────────────────
+
+const adminRouter = new Hono()
+
+// Token 验证中间件
+adminRouter.use('*', async (c, next) => {
+  const authHeader = c.req.header('Authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  const valid = await verifyAdminToken(token, c.env)
+  if (!valid) return c.json({ message: '未授权，请重新登录' }, 401)
+  await next()
+})
+
+/**
+ * GET /api/hz/admin/pending?page=N
+ * 分页获取待审核攻略
+ */
+adminRouter.get('/pending', async (c) => {
+  const page = Math.max(1, parseInt(c.req.query('page') || '1'))
+  const perPage = 20
+  const offset = (page - 1) * perPage
+  try {
+    const [countRes, rowsRes] = await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare('SELECT COUNT(*) as total FROM hz_pending'),
+      c.env.HZ_DB.prepare(
+        'SELECT * FROM hz_pending ORDER BY submitted_at DESC LIMIT ? OFFSET ?',
+      ).bind(perPage, offset),
+    ])
+    return c.json({
+      total: countRes.results[0]?.total ?? 0,
+      page,
+      perPage,
+      items: rowsRes.results,
+    })
+  } catch (e) {
+    return c.json({ message: '查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * POST /api/hz/admin/approve/:id
+ * 审核通过：pending → guides，更新版本
+ */
+adminRouter.post('/approve/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+
+  try {
+    const pending = await c.env.HZ_DB.prepare('SELECT * FROM hz_pending WHERE id = ?')
+      .bind(id)
+      .first()
+    if (!pending) return c.json({ message: '待审核条目不存在' }, 404)
+
+    const now = Date.now()
+    const newVersion = String(now)
+
+    await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare(
+        'INSERT INTO hz_guides (char_id, code, title, author_name, user_id, is_featured, created_at, approved_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+      ).bind(
+        pending.char_id,
+        pending.code,
+        pending.title,
+        pending.author_name,
+        pending.user_id,
+        pending.submitted_at,
+        now,
+      ),
+      c.env.HZ_DB.prepare('DELETE FROM hz_pending WHERE id = ?').bind(id),
+      c.env.HZ_DB.prepare(
+        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
+      ).bind(newVersion, now),
+    ])
+
+    return c.json({ message: '审核通过', newVersion })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * DELETE /api/hz/admin/pending/:id
+ * 拒绝并删除待审核攻略
+ */
+adminRouter.delete('/pending/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+  try {
+    const result = await c.env.HZ_DB.prepare('DELETE FROM hz_pending WHERE id = ?')
+      .bind(id)
+      .run()
+    if (result.changes === 0) return c.json({ message: '条目不存在' }, 404)
+    return c.json({ message: '已拒绝并删除' })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * GET /api/hz/admin/guides?page=N
+ * 分页获取已审核攻略列表
+ */
+adminRouter.get('/guides', async (c) => {
+  const page = Math.max(1, parseInt(c.req.query('page') || '1'))
+  const perPage = 20
+  const offset = (page - 1) * perPage
+  try {
+    const [countRes, rowsRes] = await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare('SELECT COUNT(*) as total FROM hz_guides'),
+      c.env.HZ_DB.prepare(
+        'SELECT id, char_id, title, author_name, user_id, is_featured, approved_at FROM hz_guides ORDER BY approved_at DESC LIMIT ? OFFSET ?',
+      ).bind(perPage, offset),
+    ])
+    return c.json({
+      total: countRes.results[0]?.total ?? 0,
+      page,
+      perPage,
+      items: rowsRes.results,
+    })
+  } catch (e) {
+    return c.json({ message: '查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * DELETE /api/hz/admin/guide/:id
+ * 删除已审核攻略，更新版本
+ */
+adminRouter.delete('/guide/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+  try {
+    const now = Date.now()
+    await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare('DELETE FROM hz_guides WHERE id = ?').bind(id),
+      c.env.HZ_DB.prepare(
+        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
+      ).bind(String(now), now),
+    ])
+    return c.json({ message: '已删除' })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * PATCH /api/hz/admin/guide/:id/feature
+ * 切换精选状态，更新版本
+ */
+adminRouter.patch('/guide/:id/feature', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
+  const featured = body.featured ? 1 : 0
+  try {
+    const now = Date.now()
+    await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare('UPDATE hz_guides SET is_featured = ? WHERE id = ?').bind(
+        featured,
+        id,
+      ),
+      c.env.HZ_DB.prepare(
+        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
+      ).bind(String(now), now),
+    ])
+    return c.json({ message: featured ? '已设为精选' : '已取消精选' })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * POST /api/hz/admin/seed
+ * 一次性迁移静态数据（接受 { entries: [{ charId, codes[] }] }）
+ */
+adminRouter.post('/seed', async (c) => {
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
+  const { entries } = body
+  if (!Array.isArray(entries)) {
+    return c.json({ message: 'entries 必须是数组' }, 400)
+  }
+
+  const now = Date.now()
+  const statements = []
+
+  for (const entry of entries) {
+    if (!entry.charId || !/^\d+$/.test(String(entry.charId))) continue
+    if (!Array.isArray(entry.codes)) continue
+    for (const code of entry.codes) {
+      if (typeof code !== 'string' || code.length > 15360) continue
+      statements.push(
+        c.env.HZ_DB.prepare(
+          'INSERT INTO hz_guides (char_id, code, title, author_name, user_id, is_featured, created_at, approved_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+        ).bind(entry.charId, code, '', '官方导入', '0', now, now),
+      )
+    }
+  }
+
+  const insertCount = statements.length
+  statements.push(
+    c.env.HZ_DB.prepare(
+      'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
+    ).bind(String(now), now),
+  )
+
+  try {
+    // D1 batch 每次最多100条，分块处理
+    const CHUNK_SIZE = 99
+    for (let i = 0; i < statements.length; i += CHUNK_SIZE) {
+      await c.env.HZ_DB.batch(statements.slice(i, i + CHUNK_SIZE))
+    }
+    return c.json({ message: `迁移完成，共导入 ${insertCount} 条攻略` })
+  } catch (e) {
+    return c.json({ message: '迁移失败: ' + e.message }, 500)
+  }
+})
+
+// 挂载管理员子路由
+hzApp.route('/admin', adminRouter)
+
 const mainApp = new Hono()
 
 // 增强的 CORS 配置，支持动态 localhost 端口
@@ -380,6 +875,9 @@ function base64UrlToStandard(base64url) {
 //   }
 //   return { data: newlyFetched, error: null }
 // }
+
+// 挂载徽章攻略子路由
+mainApp.route('/api/hz', hzApp)
 
 mainApp.get('/get-record', async (c) => {
   try {
@@ -629,6 +1127,7 @@ export default {
     // 检查是否是 API 请求。如果是，则由 Hono 应用处理。
     // 这里列出您所有的 API 路径前缀。
     const isApiRequest =
+      url.pathname.startsWith('/api/hz/') ||
       url.pathname.startsWith('/start-update-task') ||
       url.pathname.startsWith('/task-status/') ||
       url.pathname.startsWith('/get-record') ||
