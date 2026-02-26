@@ -107,6 +107,14 @@ const routes = [
     },
   },
   {
+    path: '/huizhang/admin',
+    name: '徽章攻略管理',
+    component: () => import('./views/HuizhangAdmin.vue'),
+    meta: {
+      title: '徽章攻略管理 - 织夜工具箱',
+    },
+  },
+  {
     path: '/zako',
     name: 'Zako',
     component: () => import('./views/ZakoPage.vue'),

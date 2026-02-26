@@ -69,41 +69,30 @@ import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { colors } from '@/styles/colors.js'
 import HuizhangPreviewImage from '@/components/HuizhangPreviewImage.vue'
+import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 
 const route = useRoute()
 const router = useRouter()
 const charId = computed(() => route.params.charId)
 
-const strategies = ref([]) // [{ code: string, data: Object }]
-const loading = ref(true)
 const showImportInput = ref(false)
 const importCodeInput = ref('')
 const importCodeError = ref('')
 
-const strategyModules = import.meta.glob('/src/data/huizhangdata/*.js', { eager: false })
+const { init, getGuidesForChar, loading } = useHuizhangGuides()
 
 const card = computed(() => allCards.find((c) => c.id === charId.value) || null)
 const charConfig = computed(() => getCharConfig(charId.value))
 
+// 从 D1 加载的攻略列表，格式与原来保持兼容
+const strategies = computed(() =>
+  getGuidesForChar(charId.value)
+    .filter((g) => g.data !== null)
+    .map((g) => ({ code: g.code, data: g.data })),
+)
+
 onMounted(async () => {
-  const path = `/src/data/huizhangdata/${charId.value}.js`
-  const loader = strategyModules[path]
-  if (loader) {
-    try {
-      const mod = await loader()
-      const codes = mod.default || []
-      strategies.value = codes.map((code) => {
-        try {
-          return { code, data: decodeStrategy(code) }
-        } catch {
-          return null
-        }
-      }).filter(Boolean)
-    } catch {
-      strategies.value = []
-    }
-  }
-  loading.value = false
+  await init()
 })
 
 const createNew = () => {

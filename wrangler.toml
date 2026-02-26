@@ -20,3 +20,9 @@ class_name = "TaskRunner" # 调用DO数据库的函数
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["TaskRunner"]
+
+# 徽章攻略 D1 数据库
+[[d1_databases]]
+binding = "HZ_DB"
+database_name = "gacha-party-hz"
+database_id = "44011edb-72e6-4b5d-914d-29293f3bf018"
