@@ -32,5 +32,12 @@ CREATE TABLE IF NOT EXISTS hz_pending (
   submitted_at INTEGER NOT NULL
 );
 
+-- 封禁用户列表（按玩家ID封禁，禁止投稿）
+CREATE TABLE IF NOT EXISTS hz_banned_users (
+  user_id TEXT PRIMARY KEY,
+  banned_at INTEGER NOT NULL,
+  reason TEXT NOT NULL DEFAULT ''
+);
+
 -- 初始化版本行
 INSERT OR IGNORE INTO hz_guide_meta (id, version, updated_at) VALUES (1, '0', 0);

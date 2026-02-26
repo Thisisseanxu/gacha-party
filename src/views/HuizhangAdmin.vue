@@ -156,6 +156,56 @@
         </div>
       </div>
 
+      <!-- Tab 内容：封禁管理 -->
+      <div v-if="currentTab === 'bans'" class="tab-content">
+        <!-- 封禁新用户 -->
+        <div class="ban-form-card">
+          <h3 class="ban-form-title">封禁玩家</h3>
+          <div class="ban-inputs">
+            <input
+              v-model="banUserId"
+              class="form-input ban-id-input"
+              placeholder="玩家ID（数字）"
+              inputmode="numeric"
+            />
+            <input
+              v-model="banReason"
+              class="form-input ban-reason-input"
+              placeholder="封禁原因（可选）"
+            />
+            <button class="action-btn danger-btn ban-submit-btn" :disabled="!banUserId.trim() || banLoading" @click="banUser">
+              {{ banLoading ? '处理中…' : '封禁' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 封禁列表 -->
+        <div v-if="bansLoading" class="loading-msg">加载中…</div>
+        <div v-else-if="banItems.length === 0" class="empty-msg">暂无封禁记录</div>
+        <div v-else class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>玩家ID</th>
+                <th>封禁时间</th>
+                <th>原因</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in banItems" :key="item.user_id">
+                <td class="td-id">{{ item.user_id }}</td>
+                <td class="td-time">{{ formatTime(item.banned_at) }}</td>
+                <td class="td-title">{{ item.reason || '—' }}</td>
+                <td class="td-actions">
+                  <button class="action-btn approve-btn" @click="unbanUser(item.user_id)">解封</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Tab 内容：迁移静态数据 -->
       <div v-if="currentTab === 'seed'" class="tab-content">
         <div class="seed-warn">
@@ -290,6 +340,7 @@ function handleLogout() {
 const tabs = [
   { key: 'pending', label: '待审核' },
   { key: 'approved', label: '已发布' },
+  { key: 'bans', label: '封禁管理' },
   { key: 'seed', label: '迁移静态数据' },
 ]
 const currentTab = ref('pending')
@@ -298,6 +349,7 @@ function switchTab(key) {
   currentTab.value = key
   if (key === 'pending') loadPending()
   if (key === 'approved') loadApproved()
+  if (key === 'bans') loadBans()
 }
 
 // ── 待审核 ────────────────────────────────────────────────
@@ -433,6 +485,83 @@ function confirmDeleteGuide(id) {
           loadApproved(approvedPage.value)
         } else {
           const data = await res.json()
+          showToast(data.message || '操作失败', 'error')
+        }
+      } catch {
+        showToast('网络错误', 'error')
+      }
+    },
+  }
+}
+
+// ── 封禁管理 ──────────────────────────────────────────────
+const banItems = ref([])
+const bansLoading = ref(false)
+const banUserId = ref('')
+const banReason = ref('')
+const banLoading = ref(false)
+
+async function loadBans() {
+  bansLoading.value = true
+  try {
+    const base = getWorkerBase()
+    const res = await fetch(`${base}/api/hz/admin/bans`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+    if (res.status === 401) { handleLogout(); return }
+    const data = await res.json()
+    banItems.value = data.items || []
+  } catch {
+    showToast('加载封禁列表失败', 'error')
+  } finally {
+    bansLoading.value = false
+  }
+}
+
+async function banUser() {
+  if (!banUserId.value.trim()) return
+  banLoading.value = true
+  try {
+    const base = getWorkerBase()
+    const res = await fetch(`${base}/api/hz/admin/ban`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ userId: banUserId.value.trim(), reason: banReason.value.trim() }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      showToast(data.message, 'success')
+      banUserId.value = ''
+      banReason.value = ''
+      loadBans()
+    } else {
+      showToast(data.message || '操作失败', 'error')
+    }
+  } catch {
+    showToast('网络错误', 'error')
+  } finally {
+    banLoading.value = false
+  }
+}
+
+async function unbanUser(userId) {
+  confirmState.value = {
+    message: `确认解封玩家 ${userId}？`,
+    onConfirm: async () => {
+      try {
+        const base = getWorkerBase()
+        const res = await fetch(`${base}/api/hz/admin/ban/${encodeURIComponent(userId)}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${getToken()}` },
+        })
+        const data = await res.json()
+        if (res.ok) {
+          showToast(data.message, 'success')
+          loadBans()
+        } else {
           showToast(data.message || '操作失败', 'error')
         }
       } catch {
@@ -820,6 +949,41 @@ onMounted(() => {
 .page-info {
   color: v-bind('colors.text.tertiary');
   font-size: 0.82rem;
+}
+
+/* ── 封禁管理 ── */
+.ban-form-card {
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ban-form-title {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  color: v-bind('colors.text.primary');
+}
+
+.ban-inputs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ban-id-input {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.ban-reason-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.ban-submit-btn {
+  flex-shrink: 0;
 }
 
 /* ── 迁移数据 ── */

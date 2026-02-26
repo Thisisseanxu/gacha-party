@@ -653,7 +653,6 @@ const handleGetRecord = async () => {
   }
   isFetchingOnline.value = true
   try {
-    logger.log('正在客户端验证激活码...')
     const result = verifyLicense(licenseKey)
     if (!result.success) throw new Error(result.message || '激活码验证失败，请检查激活码是否正确。')
 

@@ -189,9 +189,8 @@ async function verifyAdminToken(token, env) {
       false,
       ['verify'],
     )
-    const sigBytes = Uint8Array.from(
-      atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')),
-      (c) => c.charCodeAt(0),
+    const sigBytes = Uint8Array.from(atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')), (c) =>
+      c.charCodeAt(0),
     )
     const valid = await crypto.subtle.verify(
       'HMAC',
@@ -268,20 +267,45 @@ hzApp.get('/guides', async (c) => {
 
 /**
  * POST /api/hz/submit
- * 投稿攻略（验证激活码 + 限速 + 写入待审核）
+ * 投稿攻略（验证激活码 + 玩家ID匹配 + 封禁检查 + 限速 + 写入待审核）
+ * 安全说明：所有数据库操作均使用从 Ed25519 签名中解出的 userId（不可伪造），
+ * X-Player-Id 仅用于用户侧验证（确认用户知道自己的ID），不直接写入数据库。
  */
 hzApp.post('/submit', async (c) => {
   const licenseKey = c.req.header('X-License-Key')
+  const playerId = c.req.header('X-Player-Id')
+
   if (!licenseKey) {
     return c.json({ message: '请提供激活码（X-License-Key 请求头）' }, 401)
   }
+  if (!playerId) {
+    return c.json({ message: '请提供玩家ID（X-Player-Id 请求头）' }, 400)
+  }
 
+  // 从 Ed25519 签名中解出可信 userId
   let userId
   try {
     const result = await verifyLicenseForWorker(licenseKey, c.env.PUBLIC_KEY)
     userId = String(result.userId)
   } catch (e) {
     return c.json({ message: '激活码无效: ' + e.message }, 403)
+  }
+
+  // 验证 playerId 与激活码中的 userId 必须一致（所有人，包括管理员）
+  if (playerId !== userId) {
+    return c.json({ message: '玩家ID与激活码不匹配，请确认填写正确' }, 403)
+  }
+
+  // 封禁检查（使用签名解出的 userId，而非请求头中的 playerId）
+  try {
+    const bannedRow = await c.env.HZ_DB.prepare('SELECT 1 FROM hz_banned_users WHERE user_id = ?')
+      .bind(userId)
+      .first()
+    if (bannedRow) {
+      return c.json({ message: '该账号已被封禁，无法提交攻略' }, 403)
+    }
+  } catch (e) {
+    return c.json({ message: '数据库查询失败: ' + e.message }, 500)
   }
 
   let body
@@ -308,7 +332,7 @@ hzApp.post('/submit', async (c) => {
   }
 
   try {
-    // 限速检查：同一 userId 3分钟内只能投稿1次
+    // 限速检查：同一 userId 3分钟内只能投稿1次（使用可信 userId）
     const lastRow = await c.env.HZ_DB.prepare(
       'SELECT submitted_at FROM hz_pending WHERE user_id = ? ORDER BY submitted_at DESC LIMIT 1',
     )
@@ -330,6 +354,7 @@ hzApp.post('/submit', async (c) => {
       }
     }
 
+    // 写入数据库使用签名解出的 userId（可信），而非请求头中的 playerId
     const now = Date.now()
     await c.env.HZ_DB.prepare(
       'INSERT INTO hz_pending (char_id, code, title, author_name, user_id, submitted_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -363,14 +388,13 @@ hzApp.post('/admin/auth', async (c) => {
   try {
     const raw = await c.env.GACHA_PARTY_RECORDS.get(bruteKey)
     if (raw) brute = JSON.parse(raw)
-  } catch { /* 忽略 */ }
+  } catch {
+    /* 忽略 */
+  }
 
   if (brute.blockedUntil > Date.now()) {
     const remaining = Math.ceil((brute.blockedUntil - Date.now()) / 60000)
-    return c.json(
-      { message: `登录尝试次数过多，请 ${remaining} 分钟后再试` },
-      429,
-    )
+    return c.json({ message: `登录尝试次数过多，请 ${remaining} 分钟后再试` }, 429)
   }
 
   let body
@@ -397,7 +421,10 @@ hzApp.post('/admin/auth', async (c) => {
     const attemptsLeft = Math.max(0, 5 - brute.count)
     return c.json(
       {
-        message: attemptsLeft > 0 ? `密码错误，剩余尝试次数：${attemptsLeft}` : '密码错误，账号已被暂时锁定',
+        message:
+          attemptsLeft > 0
+            ? `密码错误，剩余尝试次数：${attemptsLeft}`
+            : '密码错误，账号已被暂时锁定',
         attemptsLeft,
       },
       401,
@@ -479,9 +506,10 @@ adminRouter.post('/approve/:id', async (c) => {
         now,
       ),
       c.env.HZ_DB.prepare('DELETE FROM hz_pending WHERE id = ?').bind(id),
-      c.env.HZ_DB.prepare(
-        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
-      ).bind(newVersion, now),
+      c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
+        newVersion,
+        now,
+      ),
     ])
 
     return c.json({ message: '审核通过', newVersion })
@@ -498,9 +526,7 @@ adminRouter.delete('/pending/:id', async (c) => {
   const id = parseInt(c.req.param('id'))
   if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
   try {
-    const result = await c.env.HZ_DB.prepare('DELETE FROM hz_pending WHERE id = ?')
-      .bind(id)
-      .run()
+    const result = await c.env.HZ_DB.prepare('DELETE FROM hz_pending WHERE id = ?').bind(id).run()
     if (result.changes === 0) return c.json({ message: '条目不存在' }, 404)
     return c.json({ message: '已拒绝并删除' })
   } catch (e) {
@@ -545,9 +571,10 @@ adminRouter.delete('/guide/:id', async (c) => {
     const now = Date.now()
     await c.env.HZ_DB.batch([
       c.env.HZ_DB.prepare('DELETE FROM hz_guides WHERE id = ?').bind(id),
-      c.env.HZ_DB.prepare(
-        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
-      ).bind(String(now), now),
+      c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
+        String(now),
+        now,
+      ),
     ])
     return c.json({ message: '已删除' })
   } catch (e) {
@@ -572,13 +599,11 @@ adminRouter.patch('/guide/:id/feature', async (c) => {
   try {
     const now = Date.now()
     await c.env.HZ_DB.batch([
-      c.env.HZ_DB.prepare('UPDATE hz_guides SET is_featured = ? WHERE id = ?').bind(
-        featured,
-        id,
+      c.env.HZ_DB.prepare('UPDATE hz_guides SET is_featured = ? WHERE id = ?').bind(featured, id),
+      c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
+        String(now),
+        now,
       ),
-      c.env.HZ_DB.prepare(
-        'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
-      ).bind(String(now), now),
     ])
     return c.json({ message: featured ? '已设为精选' : '已取消精选' })
   } catch (e) {
@@ -620,9 +645,10 @@ adminRouter.post('/seed', async (c) => {
 
   const insertCount = statements.length
   statements.push(
-    c.env.HZ_DB.prepare(
-      'UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1',
-    ).bind(String(now), now),
+    c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
+      String(now),
+      now,
+    ),
   )
 
   try {
@@ -634,6 +660,67 @@ adminRouter.post('/seed', async (c) => {
     return c.json({ message: `迁移完成，共导入 ${insertCount} 条攻略` })
   } catch (e) {
     return c.json({ message: '迁移失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * GET /api/hz/admin/bans
+ * 获取所有封禁用户列表
+ */
+adminRouter.get('/bans', async (c) => {
+  try {
+    const result = await c.env.HZ_DB.prepare(
+      'SELECT user_id, banned_at, reason FROM hz_banned_users ORDER BY banned_at DESC',
+    ).all()
+    return c.json({ items: result.results })
+  } catch (e) {
+    return c.json({ message: '数据库查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * POST /api/hz/admin/ban
+ * 封禁指定玩家ID（body: { userId, reason? }）
+ */
+adminRouter.post('/ban', async (c) => {
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
+  const { userId, reason = '' } = body
+  if (!userId || typeof userId !== 'string' || !userId.trim()) {
+    return c.json({ message: '请提供有效的玩家ID' }, 400)
+  }
+  try {
+    await c.env.HZ_DB.prepare(
+      'INSERT OR REPLACE INTO hz_banned_users (user_id, banned_at, reason) VALUES (?, ?, ?)',
+    )
+      .bind(userId.trim(), Date.now(), reason.trim())
+      .run()
+    return c.json({ message: `已封禁玩家 ${userId.trim()}` })
+  } catch (e) {
+    return c.json({ message: '数据库操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * DELETE /api/hz/admin/ban/:userId
+ * 解封指定玩家ID
+ */
+adminRouter.delete('/ban/:userId', async (c) => {
+  const userId = c.req.param('userId')
+  try {
+    const result = await c.env.HZ_DB.prepare('DELETE FROM hz_banned_users WHERE user_id = ?')
+      .bind(userId)
+      .run()
+    if (result.changes === 0) {
+      return c.json({ message: '未找到该玩家的封禁记录' }, 404)
+    }
+    return c.json({ message: `已解封玩家 ${userId}` })
+  } catch (e) {
+    return c.json({ message: '数据库操作失败: ' + e.message }, 500)
   }
 })
 

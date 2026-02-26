@@ -203,7 +203,7 @@
   <div v-if="showSubmitDialog" class="overlay" @click.self="showSubmitDialog = false">
     <div class="submit-confirm-form" @click.stop>
       <h3 class="submit-title">投稿攻略</h3>
-      <p class="submit-sub">投稿后需要管理员审核，审核通过后将显示在攻略列表中。</p>
+      <p class="submit-sub">投稿审核通过后将显示在攻略列表中</p>
 
       <div class="submit-info-row">
         <span class="submit-info-label">角色</span>
@@ -219,12 +219,18 @@
       </div>
 
       <div class="form-row">
+        <label>玩家ID <span class="required">*</span></label>
+        <input v-model="submitPlayerId" class="input-select" placeholder="游戏内的数字玩家ID" autocomplete="off"
+          inputmode="numeric" />
+      </div>
+
+      <div class="form-row">
         <label>激活码 <span class="required">*</span></label>
         <input v-model="submitLicenseKey" class="input-select" placeholder="与抽卡记录功能的相同" autocomplete="off" />
         <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱并联系客服</span>
         <label class="checkbox-row">
           <input type="checkbox" v-model="saveKey" />
-          <span>保存激活码到本地（下次自动填充）</span>
+          <span>保存玩家ID和激活码到本地（下次自动填充）</span>
         </label>
       </div>
 
@@ -304,6 +310,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
+import { verifyLicense } from '@/utils/licenseManager.js'
 import { allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import {
@@ -335,6 +342,7 @@ const showAgreementPopUp = ref(false)
 
 // 投稿攻略相关
 const showSubmitDialog = ref(false)
+const submitPlayerId = ref('')
 const submitLicenseKey = ref('')
 const saveKey = ref(true)
 const submitLoading = ref(false)
@@ -649,11 +657,11 @@ const getStarImage = (level, starIndex) => {
 
 // 打开投稿确认框
 const openSubmitDialog = () => {
-  const saved = localStorage.getItem('hz_license_key')
-  if (saved) {
-    submitLicenseKey.value = saved
-    saveKey.value = true
-  }
+  const savedId = localStorage.getItem('hz_player_id')
+  const savedKey = localStorage.getItem('hz_license_key')
+  if (savedId) submitPlayerId.value = savedId
+  if (savedKey) submitLicenseKey.value = savedKey
+  if (savedId || savedKey) saveKey.value = true
   submitError.value = ''
   submitSuccess.value = ''
   showSubmitDialog.value = true
@@ -664,13 +672,41 @@ const handleSubmit = async () => {
   submitError.value = ''
   submitSuccess.value = ''
 
-  if (!submitLicenseKey.value.trim()) {
+  const inputId = submitPlayerId.value.trim()
+  const inputKey = submitLicenseKey.value.trim()
+
+  if (!inputId) {
+    submitError.value = '请输入玩家ID'
+    return
+  }
+  if (!inputKey) {
     submitError.value = '请输入激活码'
     return
   }
 
+  // ── 前端预校验：本地验证激活码签名并比对ID（节省无效的服务器请求）──
+  const licenseResult = verifyLicense(inputKey)
+  if (!licenseResult.success) {
+    submitError.value = `激活码无效：${licenseResult.message}`
+    return
+  }
+
+  const licenseUserId = String(licenseResult.userId)
+
+  // 支持管理员账号省略 "33" 前缀：先尝试精确匹配，再尝试自动补全
+  let actualPlayerId
+  if (inputId === licenseUserId) {
+    actualPlayerId = inputId
+  } else if ('33' + inputId === licenseUserId) {
+    actualPlayerId = licenseUserId // 管理员：自动补全前缀后与激活码中的 ID 完全一致
+  } else {
+    submitError.value = '玩家ID与激活码不匹配，请确认填写正确'
+    return
+  }
+
   if (saveKey.value) {
-    localStorage.setItem('hz_license_key', submitLicenseKey.value.trim())
+    localStorage.setItem('hz_player_id', inputId) // 保存用户输入的原始ID（无需带33）
+    localStorage.setItem('hz_license_key', inputKey)
   }
 
   let code
@@ -696,6 +732,7 @@ const handleSubmit = async () => {
       headers: {
         'Content-Type': 'application/json',
         'X-License-Key': submitLicenseKey.value.trim(),
+        'X-Player-Id': actualPlayerId,
       },
       body: JSON.stringify({
         charId: selectedCharId.value,
@@ -1240,11 +1277,6 @@ textarea {
   color: v-bind('colors.brand.cancel');
 }
 
-.input-with-eye {
-  display: flex;
-  gap: 6px;
-}
-
 .checkbox-row {
   display: flex;
   align-items: center;
@@ -1596,7 +1628,7 @@ textarea {
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.25rem;
 }
 
 .form-row label {
