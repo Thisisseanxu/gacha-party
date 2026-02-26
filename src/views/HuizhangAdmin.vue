@@ -7,14 +7,8 @@
         <p class="login-sub">输入管理员密码以继续</p>
         <div class="form-row">
           <label class="form-label">管理员密码</label>
-          <input
-            type="password"
-            v-model="password"
-            class="form-input"
-            placeholder="••••••••"
-            @keyup.enter="handleLogin"
-            autocomplete="current-password"
-          />
+          <input type="password" v-model="password" class="form-input" placeholder="••••••••" @keyup.enter="handleLogin"
+            autocomplete="current-password" />
         </div>
         <div v-if="loginError" class="feedback-msg error-msg">{{ loginError }}</div>
         <button class="primary-btn full-btn" @click="handleLogin" :disabled="loginLoading">
@@ -32,13 +26,8 @@
 
       <!-- Tab 切换 -->
       <div class="tab-bar">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          class="tab-btn"
-          :class="{ active: currentTab === tab.key }"
-          @click="switchTab(tab.key)"
-        >
+        <button v-for="tab in tabs" :key="tab.key" class="tab-btn" :class="{ active: currentTab === tab.key }"
+          @click="switchTab(tab.key)">
           {{ tab.label }}
           <span v-if="tab.key === 'pending' && totalPending > 0" class="tab-badge">
             {{ totalPending }}
@@ -59,6 +48,7 @@
                   <th>角色ID</th>
                   <th>标题</th>
                   <th>作者</th>
+                  <th>投稿者ID</th>
                   <th>提交时间</th>
                   <th>操作</th>
                 </tr>
@@ -80,17 +70,11 @@
             </table>
           </div>
           <div class="pagination">
-            <button
-              class="page-btn"
-              :disabled="pendingPage <= 1"
-              @click="loadPending(pendingPage - 1)"
-            >← 上一页</button>
-            <span class="page-info">第 {{ pendingPage }} 页 / 共 {{ Math.ceil(totalPending / 20) }} 页（{{ totalPending }} 条）</span>
-            <button
-              class="page-btn"
-              :disabled="pendingPage * 20 >= totalPending"
-              @click="loadPending(pendingPage + 1)"
-            >下一页 →</button>
+            <button class="page-btn" :disabled="pendingPage <= 1" @click="loadPending(pendingPage - 1)">← 上一页</button>
+            <span class="page-info">第 {{ pendingPage }} 页 / 共 {{ Math.ceil(totalPending / 20) }} 页（{{ totalPending }}
+              条）</span>
+            <button class="page-btn" :disabled="pendingPage * 20 >= totalPending"
+              @click="loadPending(pendingPage + 1)">下一页 →</button>
           </div>
         </div>
       </div>
@@ -108,6 +92,7 @@
                   <th>角色ID</th>
                   <th>标题</th>
                   <th>作者</th>
+                  <th>投稿者ID</th>
                   <th>精选</th>
                   <th>操作</th>
                 </tr>
@@ -118,40 +103,30 @@
                   <td>{{ item.char_id }}</td>
                   <td class="td-title">{{ item.title || '（无标题）' }}</td>
                   <td>{{ item.author_name || '—' }}</td>
+                  <td class="td-userid">{{ item.user_id || '未知' }}</td>
                   <td>
                     <span class="featured-tag" :class="{ active: item.is_featured }">
                       {{ item.is_featured ? '✦ 精选' : '—' }}
                     </span>
                   </td>
                   <td class="td-actions">
-                    <button
-                      class="action-btn"
-                      :class="item.is_featured ? 'warn-btn' : 'approve-btn'"
-                      @click="toggleFeature(item)"
-                    >
+                    <button class="action-btn" :class="item.is_featured ? 'warn-btn' : 'approve-btn'"
+                      @click="toggleFeature(item)">
                       {{ item.is_featured ? '取消精选' : '设为精选' }}
                     </button>
-                    <button
-                      class="action-btn danger-btn"
-                      @click="confirmDeleteGuide(item.id)"
-                    >删除</button>
+                    <button class="action-btn danger-btn" @click="confirmDeleteGuide(item.id)">删除</button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="pagination">
-            <button
-              class="page-btn"
-              :disabled="approvedPage <= 1"
-              @click="loadApproved(approvedPage - 1)"
-            >← 上一页</button>
-            <span class="page-info">第 {{ approvedPage }} 页 / 共 {{ Math.ceil(totalApproved / 20) }} 页（{{ totalApproved }} 条）</span>
-            <button
-              class="page-btn"
-              :disabled="approvedPage * 20 >= totalApproved"
-              @click="loadApproved(approvedPage + 1)"
-            >下一页 →</button>
+            <button class="page-btn" :disabled="approvedPage <= 1" @click="loadApproved(approvedPage - 1)">←
+              上一页</button>
+            <span class="page-info">第 {{ approvedPage }} 页 / 共 {{ Math.ceil(totalApproved / 20) }} 页（{{ totalApproved }}
+              条）</span>
+            <button class="page-btn" :disabled="approvedPage * 20 >= totalApproved"
+              @click="loadApproved(approvedPage + 1)">下一页 →</button>
           </div>
         </div>
       </div>
@@ -162,18 +137,10 @@
         <div class="ban-form-card">
           <h3 class="ban-form-title">封禁玩家</h3>
           <div class="ban-inputs">
-            <input
-              v-model="banUserId"
-              class="form-input ban-id-input"
-              placeholder="玩家ID（数字）"
-              inputmode="numeric"
-            />
-            <input
-              v-model="banReason"
-              class="form-input ban-reason-input"
-              placeholder="封禁原因（可选）"
-            />
-            <button class="action-btn danger-btn ban-submit-btn" :disabled="!banUserId.trim() || banLoading" @click="banUser">
+            <input v-model="banUserId" class="form-input ban-id-input" placeholder="玩家ID（数字）" inputmode="numeric" />
+            <input v-model="banReason" class="form-input ban-reason-input" placeholder="封禁原因（可选）" />
+            <button class="action-btn danger-btn ban-submit-btn" :disabled="!banUserId.trim() || banLoading"
+              @click="banUser">
               {{ banLoading ? '处理中…' : '封禁' }}
             </button>
           </div>
@@ -216,11 +183,7 @@
           ✓ {{ seedResult }}
         </div>
         <div v-if="seedError" class="feedback-msg error-msg">{{ seedError }}</div>
-        <button
-          class="primary-btn"
-          :disabled="seedLoading || seedDone"
-          @click="handleSeed"
-        >
+        <button class="primary-btn" :disabled="seedLoading || seedDone" @click="handleSeed">
           {{ seedDone ? '已完成' : seedLoading ? '迁移中…' : '开始迁移静态数据' }}
         </button>
       </div>
@@ -237,11 +200,8 @@
           <span>标题：{{ previewItem.title || '（无标题）' }}</span>
           <span>作者：{{ previewItem.author_name || '—' }}</span>
         </div>
-        <HuizhangPreviewImage
-          v-if="previewItem && previewStrategy"
-          :strategy="previewStrategy"
-          :charConfig="getCharConfig(previewItem.char_id)"
-        />
+        <HuizhangPreviewImage v-if="previewItem && previewStrategy" :strategy="previewStrategy"
+          :charConfig="getCharConfig(previewItem.char_id)" />
         <p v-else class="preview-error">无法解析攻略代码</p>
       </div>
     </div>
@@ -251,10 +211,8 @@
       <div class="confirm-dialog">
         <p class="confirm-msg">{{ confirmState.message }}</p>
         <div class="confirm-actions">
-          <button
-            class="primary-btn danger-primary"
-            @click="() => { confirmState.onConfirm(); confirmState = null }"
-          >确认</button>
+          <button class="primary-btn danger-primary"
+            @click="() => { confirmState.onConfirm(); confirmState = null }">确认</button>
           <button class="cancel-btn" @click="confirmState = null">取消</button>
         </div>
       </div>
@@ -857,6 +815,30 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.td-userid {
+  font-size: 0.8rem;
+  color: v-bind('colors.text.secondary');
+  white-space: nowrap;
+}
+
+.userid-text {
+  margin-right: 4px;
+}
+
+.ban-quick-btn {
+  padding: 0.15rem 0.45rem !important;
+  font-size: 0.72rem !important;
+  border-color: v-bind('colors.rarity.SSR') !important;
+  background: transparent !important;
+  color: v-bind('colors.rarity.SSR') !important;
+  vertical-align: middle;
+}
+
+.ban-quick-btn:hover {
+  background: v-bind('colors.rarity.SSR') !important;
+  color: #fff !important;
+}
+
 .action-btn {
   padding: 0.28rem 0.7rem;
   border-radius: 5px;
@@ -1222,8 +1204,15 @@ onMounted(() => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 @media (max-width: 600px) {

@@ -72,10 +72,10 @@
         <div class="control-group"></div>
 
         <div class="action-buttons">
+          <button @click="generateImage" class="generate-btn">导出攻略图</button>
           <button @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
             投稿攻略
           </button>
-          <button @click="generateImage" class="generate-btn">导出攻略图</button>
         </div>
         <p v-if="isCustomChar" class="custom-char-hint">自定义角色暂不支持投稿</p>
       </div>
@@ -1156,9 +1156,9 @@ textarea {
 }
 
 .generate-btn {
-  flex: 2;
+  flex: 1;
   padding: 15px;
-  background: v-bind('colors.brand.confirm');
+  background: v-bind('colors.button.infoBg');
   color: white;
   border: none;
   border-radius: 8px;
@@ -1170,7 +1170,7 @@ textarea {
 .export-btn {
   flex: 1;
   padding: 15px;
-  background: v-bind('colors.button.infoBg');
+  background: v-bind('colors.brand.confirm');
   color: white;
   border: none;
   border-radius: 8px;
