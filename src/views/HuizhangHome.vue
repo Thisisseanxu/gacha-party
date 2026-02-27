@@ -29,7 +29,7 @@
               </div>
               <div class="strategy-stars" v-if="item.strategy.stars?.length">
                 <span class="stars-label">适配星级</span>
-                <span v-for="s in item.strategy.stars" :key="s" class="star-chip">{{ s }}★</span>
+                <span v-for="s in [...(item.strategy.stars || [])].sort((a, b) => a - b)" :key="s" class="star-chip">{{ s }}★</span>
               </div>
               <!-- 徽章搭配摘要 -->
               <div class="badge-summary" v-if="item.strategy.slots?.length">

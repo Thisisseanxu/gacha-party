@@ -519,6 +519,43 @@ adminRouter.post('/approve/:id', async (c) => {
 })
 
 /**
+ * PATCH /api/hz/admin/pending/:id
+ * 编辑待审核攻略的文字字段（标题、作者名、攻略码）
+ */
+adminRouter.patch('/pending/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+  let body
+  try { body = await c.req.json() } catch { return c.json({ message: '请求体格式错误' }, 400) }
+
+  const { title, author_name, code } = body
+  if (title === undefined && author_name === undefined && code === undefined) {
+    return c.json({ message: '至少提供一个可编辑字段' }, 400)
+  }
+
+  try {
+    // 先确认条目存在
+    const row = await c.env.HZ_DB.prepare('SELECT id FROM hz_pending WHERE id = ?').bind(id).first()
+    if (!row) return c.json({ message: '待审核条目不存在' }, 404)
+
+    // 动态构建 SET 子句，只更新提供的字段
+    const sets = []
+    const vals = []
+    if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
+    if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
+    if (code !== undefined) { sets.push('code = ?'); vals.push(String(code).trim()) }
+    vals.push(id)
+
+    await c.env.HZ_DB.prepare(`UPDATE hz_pending SET ${sets.join(', ')} WHERE id = ?`)
+      .bind(...vals).run()
+
+    return c.json({ message: '修改已保存' })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
  * DELETE /api/hz/admin/pending/:id
  * 拒绝并删除待审核攻略
  */
@@ -557,6 +594,47 @@ adminRouter.get('/guides', async (c) => {
     })
   } catch (e) {
     return c.json({ message: '查询失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * PATCH /api/hz/admin/guide/:id
+ * 编辑已审核攻略的文字字段（标题、作者名、攻略码），并更新版本
+ */
+adminRouter.patch('/guide/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
+  let body
+  try { body = await c.req.json() } catch { return c.json({ message: '请求体格式错误' }, 400) }
+
+  const { title, author_name, code } = body
+  if (title === undefined && author_name === undefined && code === undefined) {
+    return c.json({ message: '至少提供一个可编辑字段' }, 400)
+  }
+
+  try {
+    const row = await c.env.HZ_DB.prepare('SELECT id FROM hz_guides WHERE id = ?').bind(id).first()
+    if (!row) return c.json({ message: '攻略不存在' }, 404)
+
+    const sets = []
+    const vals = []
+    if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
+    if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
+    if (code !== undefined) { sets.push('code = ?'); vals.push(String(code).trim()) }
+    vals.push(id)
+
+    const now = Date.now()
+    await c.env.HZ_DB.batch([
+      c.env.HZ_DB.prepare(`UPDATE hz_guides SET ${sets.join(', ')} WHERE id = ?`).bind(...vals),
+      // 修改已发布攻略内容需要让客户端缓存失效
+      c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
+        String(now), now,
+      ),
+    ])
+
+    return c.json({ message: '修改已保存' })
+  } catch (e) {
+    return c.json({ message: '操作失败: ' + e.message }, 500)
   }
 })
 

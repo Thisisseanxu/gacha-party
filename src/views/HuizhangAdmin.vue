@@ -50,7 +50,6 @@
                   <th>作者</th>
                   <th>投稿者ID</th>
                   <th>提交时间</th>
-                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -62,6 +61,7 @@
                   <td class="td-time">{{ formatTime(item.submitted_at) }}</td>
                   <td class="td-actions">
                     <button class="action-btn info-btn" @click="openPreview(item)">预览</button>
+                    <button class="action-btn edit-btn" @click="openEditItem(item, 'pending')">编辑</button>
                     <button class="action-btn approve-btn" @click="approveItem(item.id)">通过</button>
                     <button class="action-btn danger-btn" @click="rejectItem(item.id)">拒绝</button>
                   </td>
@@ -110,6 +110,7 @@
                     </span>
                   </td>
                   <td class="td-actions">
+                    <button class="action-btn edit-btn" @click="openEditItem(item, 'guide')">编辑</button>
                     <button class="action-btn" :class="item.is_featured ? 'warn-btn' : 'approve-btn'"
                       @click="toggleFeature(item)">
                       {{ item.is_featured ? '取消精选' : '设为精选' }}
@@ -214,6 +215,31 @@
           <button class="primary-btn danger-primary"
             @click="() => { confirmState.onConfirm(); confirmState = null }">确认</button>
           <button class="cancel-btn" @click="confirmState = null">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑弹窗 -->
+    <div v-if="editItem" class="overlay" @click.self="editItem = null">
+      <div class="edit-dialog">
+        <div class="preview-header">
+          <span>编辑攻略 #{{ editItem.id }}（{{ editSource === 'pending' ? '待审核' : '已发布' }}）</span>
+          <button class="close-btn" @click="editItem = null">✕</button>
+        </div>
+        <div class="edit-form">
+          <label class="edit-label">标题</label>
+          <input v-model="editForm.title" class="form-input" placeholder="攻略名称（留空则无标题）" />
+          <label class="edit-label">作者署名</label>
+          <input v-model="editForm.author_name" class="form-input" placeholder="作者名（留空则不显示）" />
+          <label class="edit-label">攻略码</label>
+          <textarea v-model="editForm.code" class="form-input code-textarea" rows="4" placeholder="粘贴新的攻略码（不修改则留原值）" />
+          <div v-if="editError" class="feedback-msg error-msg">{{ editError }}</div>
+          <div class="confirm-actions">
+            <button class="primary-btn" :disabled="editLoading" @click="saveEdit">
+              {{ editLoading ? '保存中…' : '保存修改' }}
+            </button>
+            <button class="cancel-btn" @click="editItem = null">取消</button>
+          </div>
         </div>
       </div>
     </div>
@@ -526,6 +552,65 @@ async function unbanUser(userId) {
         showToast('网络错误', 'error')
       }
     },
+  }
+}
+
+// ── 编辑攻略 ──────────────────────────────────────────────
+const editItem = ref(null)   // 被编辑的条目原始数据
+const editSource = ref('')   // 'pending' | 'guide'
+const editForm = ref({ title: '', author_name: '', code: '' })
+const editLoading = ref(false)
+const editError = ref('')
+
+function openEditItem(item, source) {
+  editItem.value = item
+  editSource.value = source
+  editForm.value = {
+    title: item.title || '',
+    author_name: item.author_name || '',
+    code: item.code || '',
+  }
+  editError.value = ''
+}
+
+async function saveEdit() {
+  if (!editItem.value) return
+  editError.value = ''
+  editLoading.value = true
+  try {
+    const base = getWorkerBase()
+    const endpoint = editSource.value === 'pending'
+      ? `/api/hz/admin/pending/${editItem.value.id}`
+      : `/api/hz/admin/guide/${editItem.value.id}`
+    const res = await fetch(`${base}${endpoint}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({
+        title: editForm.value.title,
+        author_name: editForm.value.author_name,
+        code: editForm.value.code,
+      }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      showToast(data.message, 'success')
+      // 同步更新本地列表数据，避免重新拉取
+      Object.assign(editItem.value, {
+        title: editForm.value.title,
+        author_name: editForm.value.author_name,
+        code: editForm.value.code,
+      })
+      editItem.value = null
+    } else {
+      editError.value = data.message || '保存失败'
+    }
+  } catch {
+    editError.value = '网络错误，请重试'
+  } finally {
+    editLoading.value = false
   }
 }
 
@@ -887,6 +972,47 @@ onMounted(() => {
 
 .danger-btn:hover {
   background: v-bind('colors.status.errorBg');
+}
+
+.edit-btn {
+  border-color: v-bind('colors.text.secondary');
+  color: v-bind('colors.text.secondary');
+  background: transparent;
+}
+
+.edit-btn:hover {
+  border-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.brand.primary');
+}
+
+.edit-dialog {
+  background: v-bind('colors.background.primary');
+  border-radius: 12px;
+  padding: 0;
+  width: min(520px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.edit-form {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-label {
+  font-size: 0.82rem;
+  color: v-bind('colors.text.tertiary');
+  margin-bottom: 2px;
+}
+
+.code-textarea {
+  font-family: monospace;
+  font-size: 0.78rem;
+  resize: vertical;
+  min-height: 72px;
 }
 
 .featured-tag {

@@ -713,7 +713,7 @@ const handleSubmit = async () => {
   try {
     code = encodeStrategy({
       charId: selectedCharId.value,
-      stars: recommendedStars.value,
+      stars: [...recommendedStars.value].sort((a, b) => a - b),
       customTitle: customTitle.value,
       recText: recommendText.value,
       authorName: authorName.value,
