@@ -128,7 +128,7 @@ const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confi
 const activeThemeFilter = ref(null)
 const activeRarityFilter = ref(null)
 const useQban = ref(props.showQban)
-const internalShowRealName = ref(false)
+const internalShowRealName = ref(props.showRealNameToggle)
 
 // 自定义角色判断：ID 不是纯数字的为自定义角色
 const isCustomCard = (card) => !card.id?.toString().match(/^\d+$/)
