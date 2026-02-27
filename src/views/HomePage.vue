@@ -21,7 +21,7 @@
 
         <router-link to="huizhang" class="btn huizhang">
           <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
-          <span>徽章攻略编辑器</span>
+          <span>徽章助手<sup class="beta-tag">BETA</sup></span>
         </router-link>
 
         <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon">
@@ -253,6 +253,12 @@ const handleComingSoon = () => {
 
 .huizhang {
   background: linear-gradient(145deg, #3b82f6, #2563eb);
+}
+
+.beta-tag {
+  font-size: 0.6em;
+  margin-left: 2px;
+  vertical-align: super;
 }
 
 /* --- 开发中功能的按钮 --- */

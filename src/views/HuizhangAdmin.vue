@@ -55,7 +55,7 @@
               <tbody>
                 <tr v-for="item in pendingItems" :key="item.id">
                   <td class="td-id">#{{ item.id }}</td>
-                  <td>{{ item.char_id }}</td>
+                  <td>{{ charName(item.char_id) }}</td>
                   <td class="td-title">{{ item.title || '（无标题）' }}</td>
                   <td>{{ item.author_name || '—' }}</td>
                   <td class="td-time">{{ formatTime(item.submitted_at) }}</td>
@@ -100,7 +100,7 @@
               <tbody>
                 <tr v-for="item in approvedItems" :key="item.id">
                   <td class="td-id">#{{ item.id }}</td>
-                  <td>{{ item.char_id }}</td>
+                  <td>{{ charName(item.char_id) }}</td>
                   <td class="td-title">{{ item.title || '（无标题）' }}</td>
                   <td>{{ item.author_name || '—' }}</td>
                   <td class="td-userid">{{ item.user_id || '未知' }}</td>
@@ -194,7 +194,7 @@
     <div v-if="previewItem" class="overlay" @click.self="previewItem = null">
       <div class="preview-dialog">
         <div class="preview-header">
-          <span>攻略预览 — 角色 {{ previewItem.char_id }}</span>
+          <span>攻略预览 — {{ charName(previewItem.char_id) }}</span>
           <button class="close-btn" @click="previewItem = null">✕</button>
         </div>
         <div class="preview-meta">
@@ -256,8 +256,12 @@ import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 import HuizhangPreviewImage from '@/components/HuizhangPreviewImage.vue'
+import { cardMap } from '@/data/cards.js'
 
 const { getWorkerBase } = useHuizhangGuides()
+
+// 将角色ID映射为角色名，找不到时退回显示原始ID
+const charName = (charId) => cardMap.get(String(charId))?.name || charId
 
 // ── 登录态 ────────────────────────────────────────────────
 const isAuthenticated = ref(false)
