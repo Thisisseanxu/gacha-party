@@ -50,6 +50,7 @@
                   <th>作者</th>
                   <th>投稿者ID</th>
                   <th>提交时间</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,6 +59,7 @@
                   <td>{{ charName(item.char_id) }}</td>
                   <td class="td-title">{{ item.title || '（无标题）' }}</td>
                   <td>{{ item.author_name || '—' }}</td>
+                  <td class="td-userid">{{ item.user_id || '未知' }}</td>
                   <td class="td-time">{{ formatTime(item.submitted_at) }}</td>
                   <td class="td-actions">
                     <button class="action-btn info-btn" @click="openPreview(item)">预览</button>
