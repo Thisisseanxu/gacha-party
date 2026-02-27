@@ -47,6 +47,50 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 
 // 定义卡池配置
 export const cardPools = {
+  // 上元灯火
+  shangyuandenghuo: {
+    type: '限定',
+    name: '上元灯火',
+    imageUrl: '/images/cardpools-icon/10212.webp',
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2,
+    },
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
+        UpCards: ['果冻冰粥', '魔弹射手'],
+      },
+      [SSR]: {
+        doubleRateCards: ['水枪普拉斯'],
+      },
+    },
+    cardNames: {
+      [SP]: ['果冻冰粥', '魔弹射手'],
+      [SSR]: ['水枪普拉斯', '强力消防栓', '功夫沙袋', '竹子水车'],
+      [SR]: [
+        '珍珠射手',
+        '饼干骑士',
+        '劈咔灯泡',
+        '弹幕发射姬',
+        '电音射手',
+        '家用喷火枪',
+        '液氮喷射器',
+        '雪球投掷姬',
+        '梦游月兔',
+        '拳头礼盒',
+        '消防栓',
+        '浅睡千竹',
+        '贝斯战士',
+      ],
+      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
+    },
+  },
   // 焰竹火莲
   yanzhuhuolian: {
     type: '限定',

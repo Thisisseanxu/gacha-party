@@ -382,6 +382,24 @@ export const allCards = [
     theme: THEMES.fire,
     qban_url: '/images/qban/1612.webp',
   },
+  {
+    id: '1812',
+    name: '果冻冰粥',
+    rarity: SP,
+    imageUrl: '/images/cards/1812.webp',
+    realname: '布露',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1812.webp',
+  },
+  {
+    id: '1813',
+    name: '魔弹射手',
+    rarity: SP,
+    imageUrl: '/images/cards/1813.webp',
+    realname: '桃子',
+    theme: THEMES.water,
+    qban_url: '/images/qban/1813.webp',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',
