@@ -3,7 +3,7 @@
     <div class="content-wrap">
       <div class="hero-section">
         <h1 class="page-title">徽章攻略助手</h1>
-        <p class="hero-sub">浏览角色徽章搭配攻略，或使用编辑器创建自己的攻略图</p>
+        <p class="hero-sub">浏览角色徽章搭配攻略，或创建投稿自己的攻略</p>
       </div>
 
       <div class="main-layout">
