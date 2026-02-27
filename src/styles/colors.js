@@ -36,6 +36,9 @@ const dark = {
     cancel: 'rgba(244, 67, 54, 1)', // 取消/删除操作颜色
     cancelHover: 'rgba(229, 57, 53, 1)', // 取消悬浮
     disabled: '#71717a', // 品牌色禁用状态
+    warn: '#c98a00', // 警告文字色
+    warnBg: 'rgba(255, 180, 0, 0.12)', // 警告背景色
+    warnBorder: 'rgba(255, 180, 0, 0.35)', // 警告边框色
   },
   // --- 游戏内特定颜色 ---
   game: {
@@ -164,6 +167,9 @@ const light = {
     cancel: '#ef4444',
     cancelHover: '#dc2626',
     disabled: '#d1d5db',
+    warn: '#92400e', // 警告文字色（浅色模式用更深的琥珀色保证对比度）
+    warnBg: 'rgba(245, 158, 11, 0.12)', // 警告背景色
+    warnBorder: 'rgba(245, 158, 11, 0.35)', // 警告边框色
   },
   game: { ...dark.game }, // 游戏内颜色保持一致
   rarity: { ...dark.rarity }, // 稀有度颜色保持一致

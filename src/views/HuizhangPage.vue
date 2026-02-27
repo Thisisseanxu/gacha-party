@@ -72,7 +72,7 @@
         <div class="control-group"></div>
 
         <div class="action-buttons">
-          <button @click="generateImage" class="generate-btn">导出攻略图</button>
+          <button @click="generateImage" class="generate-btn">导出图片</button>
           <button @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
             投稿攻略
           </button>
@@ -205,6 +205,10 @@
       <h3 class="submit-title">投稿攻略</h3>
       <p class="submit-sub">投稿审核通过后将显示在攻略列表中</p>
 
+      <div v-if="submitHint" class="feedback-msg" :class="submitHint.blocking ? 'error-msg' : 'warn-msg'">
+        {{ submitHint.blocking ? '⚠' : '💡' }} {{ submitHint.message }}
+      </div>
+
       <div class="submit-info-row">
         <span class="submit-info-label">角色</span>
         <span class="submit-info-value">{{ selectedCardInfo.name }}</span>
@@ -238,7 +242,7 @@
       <div v-if="submitSuccess" class="feedback-msg success-msg">{{ submitSuccess }}</div>
 
       <div class="form-actions">
-        <button class="action-button" :disabled="submitLoading" @click="handleSubmit">
+        <button class="action-button" :disabled="submitLoading || !!submitHint?.blocking" @click="handleSubmit">
           {{ submitLoading ? '提交中…' : '提交审核' }}
         </button>
         <button class="action-button cancel" @click="showSubmitDialog = false">取消</button>
@@ -594,6 +598,32 @@ const sortedStars = computed(() => {
   return [...recommendedStars.value].sort((a, b) => a - b)
 })
 
+// 投稿内容校验提示：按优先级返回第一个问题，blocking=true 时禁用投稿按钮
+// 优先级：红徽章 > 等级超限 > 无标题 > 推荐理由过短
+const submitHint = computed(() => {
+  const activeSlots = currentSlots.value.filter((s) => s.rarityId !== '0')
+
+  if (activeSlots.some((s) => s.rarityId === '4'))
+    return { message: '红徽章尚未加入游戏，请移除后再投稿', blocking: true }
+
+  if (activeSlots.some((s) => s.level > 10))
+    return { message: '10级以上的徽章尚未加入游戏，请移除后再投稿', blocking: true }
+
+  if (!customTitle.value.trim())
+    return { message: '攻略名称不能为空，请填写后再投稿', blocking: true }
+
+  const recLen = recommendText.value.trim().length
+  if (recLen < 20)
+    return {
+      message: recLen === 0
+        ? '未填写推荐理由，超过20字的详细说明更有机会入选'
+        : `推荐理由仅 ${recLen} 字，超过20字的详细说明更有机会入选`,
+      blocking: false,
+    }
+
+  return null
+})
+
 const toggleStar = (star) => {
   const index = recommendedStars.value.indexOf(star)
   if (index > -1) recommendedStars.value.splice(index, 1)
@@ -671,6 +701,9 @@ const openSubmitDialog = () => {
 const handleSubmit = async () => {
   submitError.value = ''
   submitSuccess.value = ''
+
+  // 内容安全兜底
+  if (submitHint.value?.blocking) return
 
   const inputId = submitPlayerId.value.trim()
   const inputKey = submitLicenseKey.value.trim()
@@ -1156,7 +1189,7 @@ textarea {
 }
 
 .generate-btn {
-  flex: 1;
+  flex: 0.618;
   padding: 15px;
   background: v-bind('colors.button.infoBg');
   color: white;
@@ -1307,6 +1340,13 @@ textarea {
 .success-msg {
   background: v-bind('colors.status.successBg');
   color: v-bind('colors.status.success');
+}
+
+.warn-msg {
+  background: v-bind('colors.brand.warnBg');
+  color: v-bind('colors.brand.warn');
+  border: 1px solid v-bind('colors.brand.warnBorder');
+  text-align: left;
 }
 
 /* --- 预览区 --- */
