@@ -73,11 +73,21 @@
 
         <div class="action-buttons">
           <button @click="generateImage" class="generate-btn">导出图片</button>
-          <button @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
+          <button v-if="overwriteId && isAdminLoggedIn()" @click="overwriteSave" class="export-btn overwrite-save-btn"
+            :disabled="overwriteSaving">
+            {{ overwriteSaving ? '保存中…' : `覆盖保存 #${overwriteId}` }}
+          </button>
+          <button v-else @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
             投稿攻略
           </button>
         </div>
-        <p v-if="isCustomChar" class="custom-char-hint">自定义角色暂不支持投稿</p>
+        <div v-if="overwriteResult === 'success'" class="feedback-msg success-msg" style="margin-top:0.4rem">
+          ✓ 已覆盖保存，正在返回…
+        </div>
+        <div v-if="overwriteResult === 'error'" class="feedback-msg error-msg" style="margin-top:0.4rem">
+          {{ overwriteError }}
+        </div>
+        <p v-if="!overwriteId && isCustomChar" class="custom-char-hint">自定义角色暂不支持投稿</p>
       </div>
 
       <div class="preview-wrapper" ref="previewWrapper">
@@ -358,7 +368,16 @@ const isCustomChar = computed(() => selectedCharId.value?.startsWith('custom_tem
 
 const route = useRoute()
 const router = useRouter()
-const { getWorkerBase } = useHuizhangGuides()
+const { getWorkerBase, isAdminLoggedIn, adminSaveGuideCode } = useHuizhangGuides()
+
+// 覆盖编辑模式（从角色页点"覆盖编辑"进入时携带 overwriteId）
+const overwriteId = computed(() => {
+  const v = parseInt(route.query.overwriteId)
+  return isNaN(v) ? null : v
+})
+const overwriteSaving = ref(false)
+const overwriteResult = ref('')  // 'success' | 'error' | ''
+const overwriteError = ref('')
 
 // 自定义角色相关
 const tempCustomChar = ref(null)
@@ -796,6 +815,38 @@ const handleSubmit = async () => {
   }
 }
 
+// 覆盖保存（管理员）
+async function overwriteSave() {
+  if (!overwriteId.value) return
+  overwriteResult.value = ''
+  overwriteError.value = ''
+  let code
+  try {
+    code = encodeStrategy({
+      charId: selectedCharId.value,
+      stars: [...recommendedStars.value].sort((a, b) => a - b),
+      customTitle: customTitle.value,
+      recText: recommendText.value,
+      authorName: authorName.value,
+      slots: currentSlots.value,
+    })
+  } catch {
+    overwriteError.value = '攻略编码失败，请检查配置'
+    return
+  }
+  overwriteSaving.value = true
+  try {
+    await adminSaveGuideCode(overwriteId.value, code)
+    overwriteResult.value = 'success'
+    setTimeout(() => router.back(), 1200)
+  } catch (e) {
+    overwriteError.value = e.message || '保存失败'
+    overwriteResult.value = 'error'
+  } finally {
+    overwriteSaving.value = false
+  }
+}
+
 // 导入数据
 // const importData = (event) => {
 //   const file = event.target.files[0]
@@ -1209,6 +1260,11 @@ textarea {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
+}
+
+.overwrite-save-btn {
+  background: v-bind('colors.brand.primary') !important;
+  color: v-bind('colors.text.black') !important;
 }
 
 .export-btn:disabled {

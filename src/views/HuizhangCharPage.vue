@@ -47,10 +47,30 @@
         <div v-if="loading" class="empty-msg">加载中…</div>
         <div v-else-if="strategies.length === 0" class="empty-msg">暂无攻略，快来创建第一个吧！</div>
 
-        <div v-for="(item, idx) in strategies" :key="idx" class="strategy-card">
+        <div v-for="(item, idx) in strategies" :key="idx" class="strategy-card"
+          :class="{ 'featured-card': item.isFeatured }">
           <div class="strategy-card-header">
-            <span class="strategy-title">{{ item.data.customTitle || `攻略 #${idx + 1}` }}</span>
-            <button class="edit-btn" @click="editStrategy(item.code)">编辑</button>
+            <span class="strategy-title">
+              <span v-if="item.isFeatured" class="featured-badge">精选</span>
+              {{ item.data.customTitle || `攻略 #${idx + 1}` }}
+            </span>
+            <div class="card-btn-group">
+              <template v-if="isAdmin">
+                <button class="card-action-btn feature-btn" @click.stop="doToggleFeature(item)"
+                  :disabled="adminLoadingId === item.id">
+                  {{ item.isFeatured ? '取消精选' : '设精选' }}
+                </button>
+                <button class="card-action-btn overwrite-btn" @click.stop="editOverwrite(item)"
+                  :disabled="adminLoadingId === item.id">
+                  覆盖编辑
+                </button>
+                <button class="card-action-btn delete-btn" @click.stop="doDelete(item)"
+                  :disabled="adminLoadingId === item.id">
+                  删除
+                </button>
+              </template>
+              <button class="edit-btn" @click="editStrategy(item.code)">编辑</button>
+            </div>
           </div>
 
           <!-- 攻略图预览 -->
@@ -62,6 +82,9 @@
       </section>
     </div>
   </div>
+
+  <!-- 管理员操作 Toast -->
+  <div v-if="adminToast" class="admin-toast">{{ adminToast }}</div>
 
   <!-- 全屏预览 Overlay -->
   <div v-if="showPreview" class="preview-overlay" @click="closePreview">
@@ -108,7 +131,13 @@ const showImportInput = ref(false)
 const importCodeInput = ref('')
 const importCodeError = ref('')
 
-const { init, getGuidesForChar, loading } = useHuizhangGuides()
+const { init, getGuidesForChar, loading, isAdminLoggedIn, adminDeleteGuide, adminToggleFeature } = useHuizhangGuides()
+
+// 管理员模式：有有效 token 时开启
+const isAdmin = computed(() => isAdminLoggedIn())
+
+// 管理员操作加载态
+const adminLoadingId = ref(null)
 
 const card = computed(() => allCards.find((c) => c.id === charId.value) || null)
 const charConfig = computed(() => getCharConfig(charId.value))
@@ -123,7 +152,7 @@ const onImageGenerated = (index, url) => {
 const strategies = computed(() =>
   getGuidesForChar(charId.value)
     .filter((g) => g.data !== null)
-    .map((g) => ({ code: g.code, data: g.data })),
+    .map((g) => ({ id: g.id, code: g.code, data: g.data, isFeatured: g.isFeatured })),
 )
 
 onMounted(async () => {
@@ -152,6 +181,44 @@ const openFromCode = () => {
   } catch {
     importCodeError.value = '无法解析此代码，请确认代码完整且未损坏。'
   }
+}
+
+// 管理员操作
+const adminToast = ref('')
+const adminToastTimer = ref(null)
+function showAdminToast(msg) {
+  adminToast.value = msg
+  clearTimeout(adminToastTimer.value)
+  adminToastTimer.value = setTimeout(() => { adminToast.value = '' }, 2500)
+}
+
+async function doDelete(item) {
+  if (!window.confirm(`确认删除攻略「${item.data.customTitle || '#' + item.id}」？此操作不可撤销。`)) return
+  adminLoadingId.value = item.id
+  try {
+    await adminDeleteGuide(item.id)
+    showAdminToast('已删除')
+  } catch (e) {
+    showAdminToast('删除失败: ' + e.message)
+  } finally {
+    adminLoadingId.value = null
+  }
+}
+
+async function doToggleFeature(item) {
+  adminLoadingId.value = item.id
+  try {
+    await adminToggleFeature(item.id, !item.isFeatured)
+    showAdminToast(item.isFeatured ? '已取消精选' : '已设为精选')
+  } catch (e) {
+    showAdminToast('操作失败: ' + e.message)
+  } finally {
+    adminLoadingId.value = null
+  }
+}
+
+function editOverwrite(item) {
+  router.push(`/huizhang/edit?code=${encodeURIComponent(item.code)}&overwriteId=${item.id}`)
 }
 
 // 全屏预览逻辑
@@ -597,5 +664,90 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   display: flex;
   gap: 1rem;
   justify-content: center;
+}
+
+/* 管理员相关 */
+.featured-card {
+  border-color: v-bind('colors.brand.primary');
+}
+
+.featured-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  background: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-right: 4px;
+  vertical-align: middle;
+  font-weight: bold;
+}
+
+.card-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.card-action-btn {
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.card-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feature-btn {
+  border-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.brand.primary');
+  background: transparent;
+}
+.feature-btn:not(:disabled):hover {
+  background: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+}
+
+.overwrite-btn {
+  border-color: v-bind('colors.text.secondary');
+  color: v-bind('colors.text.secondary');
+  background: transparent;
+}
+.overwrite-btn:not(:disabled):hover {
+  border-color: v-bind('colors.text.primary');
+  color: v-bind('colors.text.primary');
+}
+
+.delete-btn {
+  border-color: v-bind('colors.status.error');
+  color: v-bind('colors.status.error');
+  background: transparent;
+}
+.delete-btn:not(:disabled):hover {
+  background: v-bind('colors.status.error');
+  color: #fff;
+}
+
+.admin-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  z-index: 3000;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  pointer-events: none;
 }
 </style>

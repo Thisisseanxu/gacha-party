@@ -6,8 +6,8 @@ const LS_KEY_DATA = 'hz_guide_data'
 const LS_KEY_VERSION = 'hz_guide_version'
 const LS_KEY_LAST_CHECK = 'hz_guide_last_check'
 
-// 4小时缓存有效期
-const CACHE_TTL_MS = 4 * 60 * 60 * 1000
+// 1小时缓存有效期
+const CACHE_TTL_MS = 1 * 60 * 60 * 1000
 
 // 模块级单例状态，多组件共享
 const _guides = ref([])
@@ -104,6 +104,68 @@ async function fetchAllGuides() {
   const res = await fetch(`${base}/api/hz/guides`)
   if (!res.ok) throw new Error(`guides 请求失败: ${res.status}`)
   return res.json()
+}
+
+// ── 管理员工具函数 ────────────────────────────────────────
+
+function getAdminToken() {
+  return sessionStorage.getItem('hz_admin_token') || ''
+}
+
+function isAdminLoggedIn() {
+  const token = getAdminToken()
+  if (!token) return false
+  try {
+    const dotIdx = token.lastIndexOf('.')
+    if (dotIdx === -1) return false
+    const payloadB64 = token.slice(0, dotIdx)
+    const padded = payloadB64.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (payloadB64.length % 4)) % 4)
+    const { exp } = JSON.parse(atob(padded))
+    return Date.now() < exp
+  } catch {
+    return false
+  }
+}
+
+async function adminDeleteGuide(id) {
+  const base = getWorkerBase()
+  const res = await fetch(`${base}/api/hz/admin/guide/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getAdminToken()}` },
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.message || '删除失败')
+  }
+  await forceRefresh()
+}
+
+async function adminToggleFeature(id, featured) {
+  const base = getWorkerBase()
+  const res = await fetch(`${base}/api/hz/admin/guide/${id}/feature`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAdminToken()}` },
+    body: JSON.stringify({ featured }),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.message || '操作失败')
+  }
+  await forceRefresh()
+}
+
+async function adminSaveGuideCode(id, code) {
+  const base = getWorkerBase()
+  const res = await fetch(`${base}/api/hz/admin/guide/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAdminToken()}` },
+    body: JSON.stringify({ code }),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.message || '保存失败')
+  }
+  await forceRefresh()
 }
 
 /**
@@ -229,5 +291,17 @@ export function useHuizhangGuides() {
      * 获取 Worker 基础 URL（供其他地方直接 fetch 用）
      */
     getWorkerBase,
+
+    // ── 管理员工具 ──────────────────────────────────────────
+    /** 读取 sessionStorage 中的管理员 Token */
+    getAdminToken,
+    /** 检查管理员 Token 是否有效（未过期） */
+    isAdminLoggedIn,
+    /** 删除已发布攻略，完成后强制刷新缓存 */
+    adminDeleteGuide,
+    /** 切换精选状态，完成后强制刷新缓存 */
+    adminToggleFeature,
+    /** 用新的攻略码覆盖保存已发布攻略，完成后强制刷新缓存 */
+    adminSaveGuideCode,
   }
 }
