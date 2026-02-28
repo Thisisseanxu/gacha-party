@@ -89,21 +89,24 @@
   <!-- 全屏预览 Overlay -->
   <div v-if="showPreview" class="preview-overlay" @click="closePreview">
     <div class="preview-container">
-      <HuizhangPreviewImage v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
-        :previewSrc="generatedImages[previewIndex]" class="fullscreen-preview" />
+      <!-- 图片区域（含导航热区） -->
+      <div class="preview-image-area">
+        <HuizhangPreviewImage v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
+          :previewSrc="generatedImages[previewIndex]" class="fullscreen-preview" />
 
-      <!-- 左右导航区域 -->
-      <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
-        <span class="nav-arrow">&lt;</span>
-        <span class="nav-text">上一个</span>
+        <!-- 左右导航热区：固定在图片区域底部，不遮挡主体 -->
+        <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
+          <span class="nav-arrow">&lt;</span>
+          <span class="nav-text">上一个</span>
+        </div>
+        <div class="nav-zone right" v-if="previewIndex < strategies.length - 1" @click.stop="nextStrategy">
+          <span class="nav-arrow">&gt;</span>
+          <span class="nav-text">下一个</span>
+        </div>
       </div>
-      <div class="nav-zone right" v-if="previewIndex < strategies.length - 1" @click.stop="nextStrategy">
-        <span class="nav-arrow">&gt;</span>
-        <span class="nav-text">下一个</span>
-      </div>
 
-
-      <div class="preview-info" v-if="previewStrategy">
+      <!-- 底部信息栏：独立 flex 行，始终可见 -->
+      <div class="preview-info" v-if="previewStrategy" @click.stop>
         <h3>{{ previewStrategy.data.customTitle || '未命名攻略' }}</h3>
         <div class="preview-meta">
           <span class="index-indicator">{{ previewIndex + 1 }} / {{ strategies.length }}</span>
@@ -568,62 +571,64 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   top: 0;
   left: 0;
   width: 100vw;
+  /* 100dvh 在真机上排除浏览器工具栏，避免内容被裁切；100vh 作为回退 */
   height: 100vh;
+  height: 100dvh;
   background: rgba(0, 0, 0, 0.9);
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   backdrop-filter: blur(5px);
-  padding: 4px;
   box-sizing: border-box;
 }
 
 .preview-container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
+}
+
+/* 图片区域：占用剩余空间，nav-zone 相对此定位 */
+.preview-image-area {
   flex: 1;
   min-height: 0;
+  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  flex-direction: column;
-  box-sizing: border-box;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .fullscreen-preview {
   width: 100%;
-  flex: 1;
-  min-height: 0;
+  height: 100%;
 }
 
 .fullscreen-preview :deep(.rendered-img) {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
+/* 导航热区：只占图片区域下半部分，不遮挡图片主体 */
 .nav-zone {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 15%;
+  min-width: 50px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding-bottom: 3rem;
   cursor: pointer;
-  opacity: 1;
-  transition: opacity 0.2s;
   color: white;
-  font-size: 3rem;
+  font-size: 2.4rem;
   font-weight: bold;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-  flex-direction: column;
-  min-width: 50px;
-}
-
-.nav-zone:hover {
-  opacity: 1;
+  transition: background 0.2s;
 }
 
 .nav-zone.left {
@@ -631,7 +636,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
 }
 
 .nav-zone.left:hover {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.45), transparent);
 }
 
 .nav-zone.right {
@@ -639,28 +644,32 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
 }
 
 .nav-zone.right:hover {
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.45), transparent);
 }
 
 .nav-text {
-  font-size: 1rem;
-  margin-top: -10px;
+  font-size: 0.85rem;
+  margin-top: -6px;
 }
 
+/* 底部信息栏：独立 flex 项，不参与图片区域 flex，始终在视口内可见 */
 .preview-info {
-  margin-top: 1.5rem;
+  flex-shrink: 0;
+  padding: 0.75rem 1rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   text-align: center;
   color: white;
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .preview-info h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1.2rem;
+  margin: 0 0 0.2rem;
+  font-size: 1.1rem;
 }
 
 .preview-meta {
-  font-size: 0.9rem;
-  opacity: 0.8;
+  font-size: 0.85rem;
+  opacity: 0.75;
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -710,6 +719,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   color: v-bind('colors.brand.primary');
   background: transparent;
 }
+
 .feature-btn:not(:disabled):hover {
   background: v-bind('colors.brand.primary');
   color: v-bind('colors.text.black');
@@ -720,6 +730,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   color: v-bind('colors.text.secondary');
   background: transparent;
 }
+
 .overwrite-btn:not(:disabled):hover {
   border-color: v-bind('colors.text.primary');
   color: v-bind('colors.text.primary');
@@ -730,6 +741,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   color: v-bind('colors.status.error');
   background: transparent;
 }
+
 .delete-btn:not(:disabled):hover {
   background: v-bind('colors.status.error');
   color: #fff;
@@ -747,7 +759,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   border-radius: 8px;
   font-size: 0.9rem;
   z-index: 3000;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   pointer-events: none;
 }
 </style>

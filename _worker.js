@@ -530,7 +530,11 @@ adminRouter.patch('/pending/:id', async (c) => {
   const id = parseInt(c.req.param('id'))
   if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
   let body
-  try { body = await c.req.json() } catch { return c.json({ message: '请求体格式错误' }, 400) }
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
 
   const { title, author_name, code } = body
   if (title === undefined && author_name === undefined && code === undefined) {
@@ -545,13 +549,23 @@ adminRouter.patch('/pending/:id', async (c) => {
     // 动态构建 SET 子句，只更新提供的字段
     const sets = []
     const vals = []
-    if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
-    if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
-    if (code !== undefined && String(code).trim() !== '') { sets.push('code = ?'); vals.push(String(code).trim()) }
+    if (title !== undefined) {
+      sets.push('title = ?')
+      vals.push(String(title).trim())
+    }
+    if (author_name !== undefined) {
+      sets.push('author_name = ?')
+      vals.push(String(author_name).trim())
+    }
+    if (code !== undefined && String(code).trim() !== '') {
+      sets.push('code = ?')
+      vals.push(String(code).trim())
+    }
     vals.push(id)
 
     await c.env.HZ_DB.prepare(`UPDATE hz_pending SET ${sets.join(', ')} WHERE id = ?`)
-      .bind(...vals).run()
+      .bind(...vals)
+      .run()
 
     return c.json({ message: '修改已保存' })
   } catch (e) {
@@ -609,7 +623,11 @@ adminRouter.patch('/guide/:id', async (c) => {
   const id = parseInt(c.req.param('id'))
   if (isNaN(id)) return c.json({ message: 'id 格式错误' }, 400)
   let body
-  try { body = await c.req.json() } catch { return c.json({ message: '请求体格式错误' }, 400) }
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ message: '请求体格式错误' }, 400)
+  }
 
   const { title, author_name, code } = body
   if (title === undefined && author_name === undefined && code === undefined) {
@@ -622,10 +640,19 @@ adminRouter.patch('/guide/:id', async (c) => {
 
     const sets = []
     const vals = []
-    if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
-    if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
+    if (title !== undefined) {
+      sets.push('title = ?')
+      vals.push(String(title).trim())
+    }
+    if (author_name !== undefined) {
+      sets.push('author_name = ?')
+      vals.push(String(author_name).trim())
+    }
     // code 为空字符串时不覆写，防止前端未加载 code 字段时意外清空攻略码
-    if (code !== undefined && String(code).trim() !== '') { sets.push('code = ?'); vals.push(String(code).trim()) }
+    if (code !== undefined && String(code).trim() !== '') {
+      sets.push('code = ?')
+      vals.push(String(code).trim())
+    }
     vals.push(id)
 
     const now = Date.now()
@@ -633,7 +660,8 @@ adminRouter.patch('/guide/:id', async (c) => {
       c.env.HZ_DB.prepare(`UPDATE hz_guides SET ${sets.join(', ')} WHERE id = ?`).bind(...vals),
       // 修改已发布攻略内容需要让客户端缓存失效
       c.env.HZ_DB.prepare('UPDATE hz_guide_meta SET version = ?, updated_at = ? WHERE id = 1').bind(
-        String(now), now,
+        String(now),
+        now,
       ),
     ])
 
