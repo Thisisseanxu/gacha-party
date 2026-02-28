@@ -510,6 +510,10 @@ adminRouter.post('/approve/:id', async (c) => {
         newVersion,
         now,
       ),
+      // 投稿通过计数 +1（只增不减，删稿不影响）
+      c.env.HZ_DB.prepare(
+        'INSERT INTO hz_user_stats (user_id, approved_count) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET approved_count = approved_count + 1',
+      ).bind(pending.user_id),
     ])
 
     return c.json({ message: '审核通过', newVersion })
@@ -798,6 +802,21 @@ adminRouter.delete('/ban/:userId', async (c) => {
       return c.json({ message: '未找到该玩家的封禁记录' }, 404)
     }
     return c.json({ message: `已解封玩家 ${userId}` })
+  } catch (e) {
+    return c.json({ message: '数据库操作失败: ' + e.message }, 500)
+  }
+})
+
+/**
+ * GET /api/hz/admin/user-stats
+ * 获取所有玩家的投稿通过数量，按数量降序排列
+ */
+adminRouter.get('/user-stats', async (c) => {
+  try {
+    const result = await c.env.HZ_DB.prepare(
+      'SELECT user_id, approved_count FROM hz_user_stats ORDER BY approved_count DESC',
+    ).all()
+    return c.json({ items: result.results || [] })
   } catch (e) {
     return c.json({ message: '数据库操作失败: ' + e.message }, 500)
   }

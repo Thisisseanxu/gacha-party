@@ -39,5 +39,11 @@ CREATE TABLE IF NOT EXISTS hz_banned_users (
   reason TEXT NOT NULL DEFAULT ''
 );
 
+-- 用户投稿通过统计（只增不减，删稿不影响）
+CREATE TABLE IF NOT EXISTS hz_user_stats (
+  user_id TEXT PRIMARY KEY,
+  approved_count INTEGER NOT NULL DEFAULT 0
+);
+
 -- 初始化版本行
 INSERT OR IGNORE INTO hz_guide_meta (id, version, updated_at) VALUES (1, '0', 0);

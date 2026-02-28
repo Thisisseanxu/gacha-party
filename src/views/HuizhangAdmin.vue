@@ -177,6 +177,36 @@
       </div>
 
       <!-- Tab 内容：迁移静态数据 -->
+      <!-- Tab 内容：投稿统计 -->
+      <div v-if="currentTab === 'stats'" class="tab-content">
+        <div class="section-header-row">
+          <span class="section-count">共 {{ statsItems.length }} 位玩家有通过记录</span>
+          <button class="action-btn" @click="loadStats" :disabled="statsLoading">
+            {{ statsLoading ? '加载中…' : '刷新' }}
+          </button>
+        </div>
+        <div v-if="statsLoading" class="loading-msg">加载中…</div>
+        <div v-else-if="statsItems.length === 0" class="empty-msg">暂无数据</div>
+        <div v-else class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="th-rank">排名</th>
+                <th>玩家ID</th>
+                <th class="th-count">通过篇数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in statsItems" :key="item.user_id">
+                <td class="td-rank">{{ index + 1 }}</td>
+                <td class="td-userid"><span class="userid-text">{{ item.user_id }}</span></td>
+                <td class="td-count"><strong>{{ item.approved_count }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div v-if="currentTab === 'seed'" class="tab-content">
         <div class="seed-warn">
           <strong>⚠ 注意：</strong>此操作将把静态攻略文件中的所有数据批量导入数据库，
@@ -331,6 +361,7 @@ const tabs = [
   { key: 'pending', label: '待审核' },
   { key: 'approved', label: '已发布' },
   { key: 'bans', label: '封禁管理' },
+  { key: 'stats', label: '投稿统计' },
   { key: 'seed', label: '迁移静态数据' },
 ]
 const currentTab = ref('pending')
@@ -340,6 +371,7 @@ function switchTab(key) {
   if (key === 'pending') loadPending()
   if (key === 'approved') loadApproved()
   if (key === 'bans') loadBans()
+  if (key === 'stats') loadStats()
 }
 
 // ── 待审核 ────────────────────────────────────────────────
@@ -558,6 +590,27 @@ async function unbanUser(userId) {
         showToast('网络错误', 'error')
       }
     },
+  }
+}
+
+// ── 投稿统计 ──────────────────────────────────────────────
+const statsItems = ref([])
+const statsLoading = ref(false)
+
+async function loadStats() {
+  statsLoading.value = true
+  try {
+    const base = getWorkerBase()
+    const res = await fetch(`${base}/api/hz/admin/user-stats`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+    if (res.status === 401) { handleLogout(); return }
+    const data = await res.json()
+    statsItems.value = data.items || []
+  } catch {
+    showToast('加载统计数据失败', 'error')
+  } finally {
+    statsLoading.value = false
   }
 }
 
@@ -915,6 +968,37 @@ onMounted(() => {
 
 .userid-text {
   margin-right: 4px;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.section-count {
+  font-size: 0.85rem;
+  color: v-bind('colors.text.secondary');
+}
+
+.th-rank,
+.td-rank {
+  width: 50px;
+  text-align: center;
+  color: v-bind('colors.text.secondary');
+  font-size: 0.85rem;
+}
+
+.th-count,
+.td-count {
+  width: 90px;
+  text-align: center;
+}
+
+.td-count strong {
+  font-size: 1rem;
+  color: v-bind('colors.brand.primary');
 }
 
 .ban-quick-btn {
