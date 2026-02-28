@@ -61,6 +61,19 @@
       <Moon v-if="currentTheme.value === 'dark'" />
       <SunOne v-else />
     </button>
+
+    <div class="social-buttons" :class="{ retracted: isRetracted }">
+      <a href="https://space.bilibili.com/33809083" target="_blank" rel="noopener noreferrer" class="social-btn"
+        :class="btnStates[0]" @mouseenter="onBtnEnter(0)" @mouseleave="onBtnLeave(0)">
+        <img src="/images/bili_avatar.webp" class="social-icon" alt="bilibili" />
+        <span>关注</span>
+      </a>
+      <a href="https://boxparty.aojiaostudio.com" target="_blank" rel="noopener noreferrer" class="social-btn"
+        :class="btnStates[1]" @mouseenter="onBtnEnter(1)" @mouseleave="onBtnLeave(1)">
+        <img src="/images/manghe_icon.webp" class="social-icon" alt="官网" />
+        <span>官网</span>
+      </a>
+    </div>
   </div>
 </template>
 
@@ -73,11 +86,36 @@ import { logger } from '@/utils/logger'
 const appVersion = __VERSION__
 
 const isReady = ref(false)
+const isRetracted = ref(false)
+let retractTimer = null
+
+// 收起状态下每个按钮的子状态：'' = 收起 | 'resting' = 悬浮离开后停留 | 'extended' = 悬浮中
+const btnStates = ref(['', ''])
+const btnTimers = [null, null]
+
+function onBtnEnter(idx) {
+  if (!isRetracted.value) return
+  clearTimeout(btnTimers[idx])
+  btnTimers[idx] = null
+  btnStates.value[idx] = 'extended'
+}
+
+function onBtnLeave(idx) {
+  if (!isRetracted.value) return
+  btnStates.value[idx] = 'resting'
+  btnTimers[idx] = setTimeout(() => {
+    btnStates.value[idx] = ''
+    btnTimers[idx] = null
+  }, 2000)
+}
 
 onMounted(() => {
   setTimeout(() => {
     isReady.value = true
   }, 100)
+  retractTimer = setTimeout(() => {
+    isRetracted.value = true
+  }, 5000)
 })
 
 // 创建一个 ref 保存 'beforeinstallprompt' 事件
@@ -96,6 +134,8 @@ onMounted(() => {
 })
 onUnmounted(() => {
   window.removeEventListener('beforeinstallprompt', captureInstallPrompt)
+  if (retractTimer) clearTimeout(retractTimer)
+  btnTimers.forEach((t) => clearTimeout(t))
 })
 
 const handleInstallClick = async () => {
@@ -109,13 +149,12 @@ const handleInstallClick = async () => {
   const { outcome } = await deferredPrompt.value.userChoice
   logger.log(`PWA 安装提示的用户选择: ${outcome}`)
 
-  // 无论用户选择什么，这个事件都已经用过，无法再次使用。
-  // 清空 ref，安装按钮也会因此被 v-if 隐藏。
+  // 无论用户选择什么，这个事件都无法再次使用，清空保存的对象。
   deferredPrompt.value = null
 }
 
 // --- 开发中按钮控制逻辑 ---
-const originalComingSoonText = '更多功能即将上线'
+const originalComingSoonText = '功能开发中'
 const comingSoonText = ref(originalComingSoonText)
 const isComingSoonClicked = ref(false)
 
@@ -124,7 +163,7 @@ const handleComingSoon = () => {
   if (isComingSoonClicked.value) return
 
   // 更新文本并禁用按钮
-  comingSoonText.value = '正在努力更新，不要戳我了！'
+  comingSoonText.value = '正在努力更新'
   isComingSoonClicked.value = true
 
   // 3秒后恢复按钮
@@ -177,7 +216,7 @@ const handleComingSoon = () => {
   align-items: center;
   text-align: center;
   box-sizing: border-box;
-  max-width: min(100vw, 800px);
+  max-width: min(100dvw, 700px);
   min-width: 0;
 }
 
@@ -189,8 +228,8 @@ const handleComingSoon = () => {
   font-size: 3rem;
   font-weight: bold;
   color: v-bind('colors.text.primary');
-  margin-top: 1rem;
-  margin-bottom: 2rem;
+  margin-top: 0rem;
+  margin-bottom: 1.5rem;
 }
 
 .title.smooth-transition {
@@ -286,7 +325,7 @@ const handleComingSoon = () => {
   justify-content: center;
   gap: 2rem;
   row-gap: 0.8rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   margin-bottom: 0.8rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(58, 59, 64, 0.5);
@@ -331,5 +370,79 @@ const handleComingSoon = () => {
 .theme-toggle-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.social-buttons {
+  position: fixed;
+  bottom: 80px;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.social-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  /* 向左延伸 20px 至视口外，确保向右滑出时左侧无空隙 */
+  margin-left: -20px;
+  padding: 6px 6px 6px 26px;
+  text-decoration: none;
+  color: v-bind('colors.text.primary');
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
+  transform: translateX(0);
+  transition:
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.2s ease,
+    background-color 1s ease,
+    color 1s ease,
+    border-color 1s ease;
+  cursor: pointer;
+}
+
+.social-btn:hover {
+  transform: translateX(8px);
+  box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* 5秒后自动收起：整体向左 3rem，仅露出部分 logo 与文字 */
+.social-buttons.retracted .social-btn {
+  transform: translateX(-3rem);
+}
+
+/* 收起状态：悬停离开后先回到静止位置，2秒后再收起 */
+.social-buttons.retracted .social-btn.resting {
+  transform: translateX(0);
+}
+
+/* 收起状态：悬停中完整弹出 */
+.social-buttons.retracted .social-btn.extended {
+  transform: translateX(8px);
+  box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+.social-icon {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.social-btn span {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  line-height: 1;
+  letter-spacing: 0.1em;
 }
 </style>
