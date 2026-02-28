@@ -14,7 +14,7 @@
           </div>
           <div class="featured-list">
             <div v-for="item in featuredItems" :key="item.charId + item.strategy.customTitle" class="strategy-card"
-              @click="goToChar(item.charId)">
+              @click="goToChar(item.charId, item.code)">
               <div class="strategy-card-header">
                 <!-- Q版头像 -->
                 <img v-if="item.card?.qban_url" :src="item.card.qban_url" class="card-qban" :alt="item.card.name" />
@@ -29,7 +29,8 @@
               </div>
               <div class="strategy-stars" v-if="item.strategy.stars?.length">
                 <span class="stars-label">适配星级</span>
-                <span v-for="s in [...(item.strategy.stars || [])].sort((a, b) => a - b)" :key="s" class="star-chip">{{ s }}★</span>
+                <span v-for="s in [...(item.strategy.stars || [])].sort((a, b) => a - b)" :key="s" class="star-chip">{{
+                  s }}★</span>
               </div>
               <!-- 徽章搭配摘要 -->
               <div class="badge-summary" v-if="item.strategy.slots?.length">
@@ -120,13 +121,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { getCharConfig, HUIZHANG_SHAPES, HUIZHANG_TYPES } from '@/data/huizhang.js'
 import { colors } from '@/styles/colors.js'
 import CharacterSelector from '@/components/CharacterSelector.vue'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
+import { setPendingCustomChar } from '@/utils/huizhangCustomCharStore.js'
 
 const router = useRouter()
 const selectedCharId = ref('')
@@ -175,6 +177,7 @@ const featuredItems = computed(() =>
     .map((g) => ({
       charId: g.charId,
       strategy: g.data,
+      code: g.code,
       card: cardMap.value.get(g.charId),
       charConfig: getCharConfig(g.charId),
     })),
@@ -184,12 +187,20 @@ onMounted(async () => {
   await init()
 })
 
-const goToChar = (charId) => router.push(`/huizhang/char/${charId}`)
+const goToChar = (charId, code) => {
+  if (code) {
+    router.push(`/huizhang/char/${charId}?viewCode=${encodeURIComponent(code)}`)
+  } else {
+    router.push(`/huizhang/char/${charId}`)
+  }
+}
 
 const onCharConfirm = () => {
   if (!selectedCharId.value) return
   if (tempCustomChar.value && selectedCharId.value === tempCustomChar.value.id) {
-    sessionStorage.setItem('huizhang_customChar', JSON.stringify(tempCustomChar.value))
+    // 转移 blob URL 所有权到 HuizhangPage，避免 onUnmounted 中提前释放导致图片失效
+    _customCharBlobUrl.value = null
+    setPendingCustomChar(tempCustomChar.value)
     router.push('/huizhang/edit')
   } else {
     router.push(`/huizhang/char/${selectedCharId.value}`)
@@ -209,14 +220,23 @@ const openCustomCharModal = () => {
 
 const triggerCustomCharUpload = () => customCharInputRef.value?.click()
 
+// 当前自定义角色图片的 blob URL，用于适时释放内存
+const _customCharBlobUrl = ref(null)
+
 const handleCustomCharImage = (event) => {
   const file = event.target.files[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = (e) => { customCharForm.value.image = e.target.result }
-  reader.readAsDataURL(file)
+  // 释放上一个 blob URL，再创建新的，避免内存泄漏
+  if (_customCharBlobUrl.value) URL.revokeObjectURL(_customCharBlobUrl.value)
+  const url = URL.createObjectURL(file)
+  _customCharBlobUrl.value = url
+  customCharForm.value.image = url
   event.target.value = ''
 }
+
+onUnmounted(() => {
+  if (_customCharBlobUrl.value) URL.revokeObjectURL(_customCharBlobUrl.value)
+})
 
 const updateCustomCharShapes = () => {
   const count = Number(customCharForm.value.count)
@@ -246,8 +266,10 @@ const saveCustomChar = () => {
       shapes: [...customCharForm.value.shapes],
     },
   }
-  selectedCharId.value = tempCustomChar.value.id
-  showCustomCharForm.value = false
+  // 转移 blob URL 所有权到 HuizhangPage，避免 onUnmounted 中提前释放导致图片失效
+  _customCharBlobUrl.value = null
+  setPendingCustomChar(tempCustomChar.value)
+  router.push('/huizhang/edit')
 }
 
 // 徽章摘要：合并相同稀有度+类型+等级的槽位

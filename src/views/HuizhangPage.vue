@@ -315,6 +315,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 import { verifyLicense } from '@/utils/licenseManager.js'
+import { takePendingCustomChar } from '@/utils/huizhangCustomCharStore.js'
 import { allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import {
@@ -361,6 +362,7 @@ const { getWorkerBase } = useHuizhangGuides()
 
 // 自定义角色相关
 const tempCustomChar = ref(null)
+const _customCharBlobUrl = ref(null)  // 追踪当前 blob URL，用于释放内存
 const showCustomCharForm = ref(false)
 const customCharForm = ref({
   image: null,
@@ -421,18 +423,15 @@ watch(isSelectionMode, (newVal) => {
 
 // 初始化
 onMounted(() => {
-  // 检查来自首页的自定义角色（通过 sessionStorage 传递）
-  const storedCustomChar = sessionStorage.getItem('huizhang_customChar')
-  if (storedCustomChar) {
-    try {
-      tempCustomChar.value = JSON.parse(storedCustomChar)
-      sessionStorage.removeItem('huizhang_customChar')
-      selectedCharId.value = tempCustomChar.value.id
-      isSelectionMode.value = false
-      window.addEventListener('resize', updatePreviewScale)
-      updatePreviewScale()
-      return
-    } catch { /* 忽略解析失败，继续正常流程 */ }
+  // 检查来自首页的自定义角色（内存传递，不经过 sessionStorage）
+  const pendingChar = takePendingCustomChar()
+  if (pendingChar) {
+    tempCustomChar.value = pendingChar
+    selectedCharId.value = pendingChar.id
+    isSelectionMode.value = false
+    window.addEventListener('resize', updatePreviewScale)
+    updatePreviewScale()
+    return
   }
 
   const { code, charId } = route.query
@@ -471,6 +470,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', updatePreviewScale)
+  if (_customCharBlobUrl.value) URL.revokeObjectURL(_customCharBlobUrl.value)
 })
 
 // 等级输入交互逻辑
@@ -905,11 +905,10 @@ const triggerCustomCharUpload = () => {
 const handleCustomCharImage = (event) => {
   const file = event.target.files[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    customCharForm.value.image = e.target.result
-  }
-  reader.readAsDataURL(file)
+  if (_customCharBlobUrl.value) URL.revokeObjectURL(_customCharBlobUrl.value)
+  const url = URL.createObjectURL(file)
+  _customCharBlobUrl.value = url
+  customCharForm.value.image = url
   event.target.value = ''
 }
 

@@ -54,15 +54,44 @@
           </div>
 
           <!-- 攻略图预览 -->
-          <HuizhangPreviewImage :strategy="item.data" :charConfig="charConfig" />
+          <div class="preview-click-wrapper" @click="openPreview(idx)">
+            <HuizhangPreviewImage :strategy="item.data" :charConfig="charConfig" />
+          </div>
         </div>
       </section>
+    </div>
+  </div>
+
+  <!-- 全屏预览 Overlay -->
+  <div v-if="showPreview" class="preview-overlay" @click.self="closePreview">
+    <button class="close-btn" @click="closePreview">×</button>
+
+    <div class="preview-container" @click="handlePreviewClick">
+      <HuizhangPreviewImage v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
+        class="fullscreen-preview" />
+
+      <!-- 左右导航区域 -->
+      <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
+        <span class="nav-arrow">‹</span>
+        <span class="nav-text">上一页</span>
+      </div>
+      <div class="nav-zone right" v-if="previewIndex < strategies.length - 1" @click.stop="nextStrategy">
+        <span class="nav-arrow">›</span>
+        <span class="nav-text">下一页</span>
+      </div>
+    </div>
+
+    <div class="preview-info" v-if="previewStrategy">
+      <h3>{{ previewStrategy.data.customTitle || '未命名攻略' }}</h3>
+      <div class="preview-meta">
+        <span class="index-indicator">{{ previewIndex + 1 }} / {{ strategies.length }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { getCharConfig } from '@/data/huizhang.js'
@@ -93,6 +122,12 @@ const strategies = computed(() =>
 
 onMounted(async () => {
   await init()
+  window.addEventListener('keyup', onKeyup)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keyup', onKeyup)
+  document.body.style.overflow = ''
 })
 
 const createNew = () => {
@@ -112,6 +147,60 @@ const openFromCode = () => {
     importCodeError.value = '无法解析此代码，请确认代码完整且未损坏。'
   }
 }
+
+// 全屏预览逻辑
+const showPreview = ref(false)
+const previewIndex = ref(0)
+const previewStrategy = computed(() => strategies.value[previewIndex.value])
+
+const openPreview = (index) => {
+  previewIndex.value = index
+  showPreview.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closePreview = () => {
+  showPreview.value = false
+  document.body.style.overflow = ''
+  // 清除 URL 中的 viewCode 参数
+  if (route.query.viewCode) {
+    router.replace({ query: { ...route.query, viewCode: undefined } })
+  }
+}
+
+const prevStrategy = () => {
+  if (previewIndex.value > 0) previewIndex.value--
+}
+
+const nextStrategy = () => {
+  if (previewIndex.value < strategies.value.length - 1) previewIndex.value++
+}
+
+const handlePreviewClick = (e) => {
+  // 点击图片左右侧切换
+  const rect = e.currentTarget.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const width = rect.width
+  if (x < width * 0.3) prevStrategy()
+  else if (x > width * 0.7) nextStrategy()
+}
+
+const onKeyup = (e) => {
+  if (!showPreview.value) return
+  if (e.key === 'Escape') closePreview()
+  if (e.key === 'ArrowLeft') prevStrategy()
+  if (e.key === 'ArrowRight') nextStrategy()
+}
+
+// 监听路由参数，自动打开对应攻略
+watch([strategies, () => route.query.viewCode], ([list, code]) => {
+  if (code && list.length && !showPreview.value) {
+    const idx = list.findIndex(s => s.code === code)
+    if (idx !== -1) {
+      openPreview(idx)
+    }
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
@@ -398,5 +487,134 @@ const openFromCode = () => {
   color: v-bind('colors.text.secondary');
   border-radius: 4px;
   padding: 1px 5px;
+}
+
+.preview-click-wrapper {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.preview-click-wrapper:hover {
+  transform: scale(1.01);
+}
+
+/* 全屏预览 Overlay */
+.preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.preview-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fullscreen-preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.nav-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  font-size: 3rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  flex-direction: column;
+}
+
+.nav-zone:hover {
+  opacity: 1;
+}
+
+.nav-zone.left {
+  left: 0;
+}
+
+.nav-zone.left:hover {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.nav-zone.right {
+  right: 0;
+}
+
+.nav-zone.right:hover {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.nav-text {
+  font-size: 1rem;
+  margin-top: -10px;
+}
+
+.preview-info {
+  margin-top: 1rem;
+  text-align: center;
+  color: white;
+}
+
+.preview-info h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.2rem;
+}
+
+.preview-meta {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 </style>

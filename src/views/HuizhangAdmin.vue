@@ -597,7 +597,8 @@ async function saveEdit() {
       body: JSON.stringify({
         title: editForm.value.title,
         author_name: editForm.value.author_name,
-        code: editForm.value.code,
+        // code 为空时不发送，避免已发布攻略列表未返回 code 字段时意外清空攻略码
+        ...(editForm.value.code ? { code: editForm.value.code } : {}),
       }),
     })
     const data = await res.json()

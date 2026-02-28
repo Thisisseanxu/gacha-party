@@ -543,7 +543,7 @@ adminRouter.patch('/pending/:id', async (c) => {
     const vals = []
     if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
     if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
-    if (code !== undefined) { sets.push('code = ?'); vals.push(String(code).trim()) }
+    if (code !== undefined && String(code).trim() !== '') { sets.push('code = ?'); vals.push(String(code).trim()) }
     vals.push(id)
 
     await c.env.HZ_DB.prepare(`UPDATE hz_pending SET ${sets.join(', ')} WHERE id = ?`)
@@ -620,7 +620,8 @@ adminRouter.patch('/guide/:id', async (c) => {
     const vals = []
     if (title !== undefined) { sets.push('title = ?'); vals.push(String(title).trim()) }
     if (author_name !== undefined) { sets.push('author_name = ?'); vals.push(String(author_name).trim()) }
-    if (code !== undefined) { sets.push('code = ?'); vals.push(String(code).trim()) }
+    // code 为空字符串时不覆写，防止前端未加载 code 字段时意外清空攻略码
+    if (code !== undefined && String(code).trim() !== '') { sets.push('code = ?'); vals.push(String(code).trim()) }
     vals.push(id)
 
     const now = Date.now()
