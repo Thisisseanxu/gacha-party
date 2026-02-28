@@ -1,7 +1,7 @@
 <template>
   <div class="preview-root">
     <!-- Hidden capture area for rendering -->
-    <div class="capture-wrapper" ref="captureWrapperRef" aria-hidden="true">
+    <div v-if="!previewSrc" class="capture-wrapper" ref="captureWrapperRef" aria-hidden="true">
       <div class="capture-area" ref="captureRef">
         <div class="bg-decoration">
           <div class="stars-bg"></div>
@@ -86,7 +86,7 @@
         <span class="loading-text">生成预览中…</span>
       </div>
       <img v-else-if="imageSrc" :src="imageSrc" class="rendered-img" alt="攻略预览"
-        :style="{ maxWidth: '100%', height: 'auto' }" />
+        :style="{ maxWidth: '100%', maxHeight: '100%' }" />
       <div v-else class="render-error">预览生成失败，请刷新页面重试</div>
     </div>
   </div>
@@ -103,7 +103,10 @@ import { logger } from '@/utils/logger'
 const props = defineProps({
   strategy: { type: Object, required: true },
   charConfig: { type: Object, default: null },
+  previewSrc: { type: String, default: '' },
 })
+
+const emit = defineEmits(['generated'])
 
 const captureRef = ref(null)
 const captureWrapperRef = ref(null)
@@ -183,6 +186,11 @@ const preloadIcons = async () => {
 }
 
 const renderToImage = async () => {
+  if (props.previewSrc) {
+    imageSrc.value = props.previewSrc
+    isRendering.value = false
+    return
+  }
   if (!captureRef.value) return
   isRendering.value = true
   try {
@@ -198,6 +206,7 @@ const renderToImage = async () => {
       skipFonts: false,
     })
     imageSrc.value = dataUrl
+    emit('generated', dataUrl)
   } catch (err) {
     logger.error('预览生成失败:', err)
     imageSrc.value = ''
@@ -214,6 +223,13 @@ watch(() => props.strategy, () => {
   imageSrc.value = ''
   renderToImage()
 }, { deep: true })
+
+watch(() => props.previewSrc, (newVal) => {
+  if (newVal) {
+    imageSrc.value = newVal
+    isRendering.value = false
+  }
+})
 </script>
 
 <style scoped>
@@ -242,13 +258,20 @@ watch(() => props.strategy, () => {
 /* Preview display area */
 .preview-display {
   width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .rendered-img {
   display: block;
-  width: 100%;
+  width: auto;
   height: auto;
   border-radius: 8px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .render-loading {
@@ -313,18 +336,6 @@ watch(() => props.strategy, () => {
   height: 40px;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-.custom-title-display {
-  position: absolute;
-  top: 140px;
-  left: 30px;
-  font-size: 2.5rem;
-  color: v-bind('colors.preview.highlight');
-  font-weight: 700;
-  text-shadow: v-bind('colors.preview.shadow');
-  z-index: 10;
-  font-style: italic;
 }
 
 .character-display {
@@ -529,7 +540,10 @@ watch(() => props.strategy, () => {
 }
 
 .preview-root {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: 100%;
+  height: 100%;
 }
 </style>

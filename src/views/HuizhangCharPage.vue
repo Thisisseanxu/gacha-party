@@ -55,7 +55,8 @@
 
           <!-- 攻略图预览 -->
           <div class="preview-click-wrapper" @click="openPreview(idx)">
-            <HuizhangPreviewImage :strategy="item.data" :charConfig="charConfig" />
+            <HuizhangPreviewImage :strategy="item.data" :charConfig="charConfig"
+              @generated="(url) => onImageGenerated(idx, url)" />
           </div>
         </div>
       </section>
@@ -63,28 +64,27 @@
   </div>
 
   <!-- 全屏预览 Overlay -->
-  <div v-if="showPreview" class="preview-overlay" @click.self="closePreview">
-    <button class="close-btn" @click="closePreview">×</button>
-
-    <div class="preview-container" @click="handlePreviewClick">
+  <div v-if="showPreview" class="preview-overlay" @click="closePreview">
+    <div class="preview-container">
       <HuizhangPreviewImage v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
-        class="fullscreen-preview" />
+        :previewSrc="generatedImages[previewIndex]" class="fullscreen-preview" />
 
       <!-- 左右导航区域 -->
       <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
-        <span class="nav-arrow">‹</span>
-        <span class="nav-text">上一页</span>
+        <span class="nav-arrow">&lt;</span>
+        <span class="nav-text">上一个</span>
       </div>
       <div class="nav-zone right" v-if="previewIndex < strategies.length - 1" @click.stop="nextStrategy">
-        <span class="nav-arrow">›</span>
-        <span class="nav-text">下一页</span>
+        <span class="nav-arrow">&gt;</span>
+        <span class="nav-text">下一个</span>
       </div>
-    </div>
 
-    <div class="preview-info" v-if="previewStrategy">
-      <h3>{{ previewStrategy.data.customTitle || '未命名攻略' }}</h3>
-      <div class="preview-meta">
-        <span class="index-indicator">{{ previewIndex + 1 }} / {{ strategies.length }}</span>
+
+      <div class="preview-info" v-if="previewStrategy">
+        <h3>{{ previewStrategy.data.customTitle || '未命名攻略' }}</h3>
+        <div class="preview-meta">
+          <span class="index-indicator">{{ previewIndex + 1 }} / {{ strategies.length }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -112,6 +112,12 @@ const { init, getGuidesForChar, loading } = useHuizhangGuides()
 
 const card = computed(() => allCards.find((c) => c.id === charId.value) || null)
 const charConfig = computed(() => getCharConfig(charId.value))
+
+// 缓存已生成的图片URL，避免全屏预览时重复生成
+const generatedImages = ref({})
+const onImageGenerated = (index, url) => {
+  generatedImages.value[index] = url
+}
 
 // 从 D1 加载的攻略列表，格式与原来保持兼容
 const strategies = computed(() =>
@@ -174,15 +180,6 @@ const prevStrategy = () => {
 
 const nextStrategy = () => {
   if (previewIndex.value < strategies.value.length - 1) previewIndex.value++
-}
-
-const handlePreviewClick = (e) => {
-  // 点击图片左右侧切换
-  const rect = e.currentTarget.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const width = rect.width
-  if (x < width * 0.3) prevStrategy()
-  else if (x > width * 0.7) nextStrategy()
 }
 
 const onKeyup = (e) => {
@@ -516,43 +513,26 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   box-sizing: border-box;
 }
 
-.close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: white;
-  font-size: 2rem;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 2010;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 .preview-container {
   position: relative;
   width: 100%;
+  height: 100%;
   flex: 1;
   min-height: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .fullscreen-preview {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.fullscreen-preview :deep(.rendered-img) {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -560,18 +540,19 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 30%;
+  width: 15%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s;
   color: white;
   font-size: 3rem;
   font-weight: bold;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
   flex-direction: column;
+  min-width: 50px;
 }
 
 .nav-zone:hover {
@@ -600,7 +581,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
 }
 
 .preview-info {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
   color: white;
 }
