@@ -115,7 +115,7 @@ onMounted(() => {
   }, 100)
   retractTimer = setTimeout(() => {
     isRetracted.value = true
-  }, 5000)
+  }, 3000)
 })
 
 // 创建一个 ref 保存 'beforeinstallprompt' 事件

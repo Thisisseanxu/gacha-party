@@ -38,7 +38,7 @@
       </div>
 
       <!-- 攻略列表 -->
-      <section class="strategies-section">
+      <section class="strategies-section" ref="strategiesSectionRef">
         <div class="section-title">
           <span>现有攻略</span>
           <span class="count-badge">{{ strategies.length }}</span>
@@ -73,10 +73,8 @@
             </div>
           </div>
 
-          <!-- 攻略图预览 -->
           <div class="preview-click-wrapper" @click="openPreview(idx)">
-            <HuizhangPreviewImage :strategy="item.data" :charConfig="charConfig"
-              @generated="(url) => onImageGenerated(idx, url)" />
+            <HuizhangLiveCard :strategy="item.data" :charConfig="charConfig" :scale="cardScale" />
           </div>
         </div>
       </section>
@@ -91,8 +89,8 @@
     <div class="preview-container">
       <!-- 图片区域（含导航热区） -->
       <div class="preview-image-area">
-        <HuizhangPreviewImage v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
-          :previewSrc="generatedImages[previewIndex]" class="fullscreen-preview" />
+        <HuizhangLiveCard v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
+          :scale="fullscreenScale" />
 
         <!-- 左右导航热区：固定在图片区域底部，不遮挡主体 -->
         <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
@@ -123,7 +121,7 @@ import { allCards } from '@/data/cards.js'
 import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { colors } from '@/styles/colors.js'
-import HuizhangPreviewImage from '@/components/HuizhangPreviewImage.vue'
+import HuizhangLiveCard from '@/components/HuizhangLiveCard.vue'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 
 const route = useRoute()
@@ -145,12 +143,6 @@ const adminLoadingId = ref(null)
 const card = computed(() => allCards.find((c) => c.id === charId.value) || null)
 const charConfig = computed(() => getCharConfig(charId.value))
 
-// 缓存已生成的图片URL，避免全屏预览时重复生成
-const generatedImages = ref({})
-const onImageGenerated = (index, url) => {
-  generatedImages.value[index] = url
-}
-
 // 从 D1 加载的攻略列表，格式与原来保持兼容
 const strategies = computed(() =>
   getGuidesForChar(charId.value)
@@ -158,14 +150,48 @@ const strategies = computed(() =>
     .map((g) => ({ id: g.id, code: g.code, data: g.data, isFeatured: g.isFeatured })),
 )
 
+// Card scale: measured from the strategies section width
+const strategiesSectionRef = ref(null)
+const sectionWidth = ref(700)
+let _cardResizeObs = null
+
+// Window size for fullscreen scale (reactive)
+const windowWidth = ref(window.innerWidth)
+const windowHeight = ref(window.innerHeight)
+
 onMounted(async () => {
-  await init()
   window.addEventListener('keyup', onKeyup)
+  window.addEventListener('resize', onWindowResize)
+  if (strategiesSectionRef.value) {
+    sectionWidth.value = strategiesSectionRef.value.clientWidth
+    _cardResizeObs = new ResizeObserver(([entry]) => {
+      sectionWidth.value = entry.contentRect.width
+    })
+    _cardResizeObs.observe(strategiesSectionRef.value)
+  }
+  await init()
 })
 
 onUnmounted(() => {
   window.removeEventListener('keyup', onKeyup)
+  window.removeEventListener('resize', onWindowResize)
   document.body.style.overflow = ''
+  _cardResizeObs?.disconnect()
+})
+
+function onWindowResize() {
+  windowWidth.value = window.innerWidth
+  windowHeight.value = window.innerHeight
+}
+
+// Card scale: strategy-card has padding:1rem on each side → subtract 32px
+const cardScale = computed(() => Math.min(1, (sectionWidth.value - 32) / 800))
+
+// Fullscreen scale: fit within 92% of viewport, leaving 100px for info bar
+const fullscreenScale = computed(() => {
+  const maxW = windowWidth.value * 0.92
+  const maxH = (windowHeight.value - 100) * 0.92
+  return Math.min(1, maxW / 800, maxH / 550)
 })
 
 const createNew = () => {
@@ -283,7 +309,7 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
 
 .content-wrap {
   width: 100%;
-  max-width: 900px;
+  max-width: 850px;
   padding: 0.5rem 0.5rem 4rem;
 }
 
@@ -602,14 +628,6 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   overflow: hidden;
 }
 
-.fullscreen-preview {
-  width: 100%;
-  height: 100%;
-}
-
-.fullscreen-preview :deep(.rendered-img) {
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
 
 /* 导航热区：只占图片区域下半部分，不遮挡图片主体 */
 .nav-zone {
