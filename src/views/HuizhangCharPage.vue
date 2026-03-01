@@ -185,13 +185,15 @@ function onWindowResize() {
 }
 
 // Card scale: strategy-card has padding:1rem on each side → subtract 32px
-const cardScale = computed(() => Math.min(1, (sectionWidth.value - 32) / 800))
+// No upper cap: allow scaling above 1 on large screens to fill the section
+const cardScale = computed(() => (sectionWidth.value - 32) / 800)
 
-// Fullscreen scale: fit within 92% of viewport, leaving 100px for info bar
+// Fullscreen scale: fit within 95% of viewport, leaving ~80px for info bar
+// No upper cap: allow scaling above 1 to fill the viewport; Math.min preserves aspect ratio
 const fullscreenScale = computed(() => {
-  const maxW = windowWidth.value * 0.92
-  const maxH = (windowHeight.value - 100) * 0.92
-  return Math.min(1, maxW / 800, maxH / 550)
+  const maxW = windowWidth.value * 0.98
+  const maxH = (windowHeight.value - 80) * 0.98
+  return Math.min(maxW / 800, maxH / 550)
 })
 
 const createNew = () => {
