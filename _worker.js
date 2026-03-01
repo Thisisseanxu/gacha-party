@@ -341,7 +341,7 @@ hzApp.post('/submit', async (c) => {
 
     if (lastRow) {
       const elapsed = Date.now() - lastRow.submitted_at
-      const RATE_LIMIT_MS = 3 * 60 * 1000
+      const RATE_LIMIT_MS = 2 * 60 * 1000
       if (elapsed < RATE_LIMIT_MS) {
         const timeLeft = RATE_LIMIT_MS - elapsed
         return c.json(
