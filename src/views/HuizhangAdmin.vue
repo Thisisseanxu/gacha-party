@@ -233,8 +233,8 @@
           <span>标题：{{ previewItem.title || '（无标题）' }}</span>
           <span>作者：{{ previewItem.author_name || '—' }}</span>
         </div>
-        <HuizhangPreviewImage v-if="previewItem && previewStrategy" :strategy="previewStrategy"
-          :charConfig="getCharConfig(previewItem.char_id)" />
+        <HuizhangLiveCard v-if="previewItem && previewStrategy" :strategy="previewStrategy"
+          :charConfig="getCharConfig(previewItem.char_id)" :scale="previewScale" />
         <p v-else class="preview-error">无法解析攻略代码</p>
       </div>
     </div>
@@ -282,12 +282,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { colors } from '@/styles/colors.js'
 import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
-import HuizhangPreviewImage from '@/components/HuizhangPreviewImage.vue'
+import HuizhangLiveCard from '@/components/HuizhangLiveCard.vue'
 import { cardMap } from '@/data/cards.js'
 
 const { getWorkerBase } = useHuizhangGuides()
@@ -742,6 +742,22 @@ function openPreview(item) {
   previewItem.value = item
 }
 
+// Responsive scale for the preview dialog
+// Dialog: max(90vw, 860px) with ~38px padding; 85vh max-height with ~120px chrome
+const previewWindowWidth = ref(window.innerWidth)
+const previewWindowHeight = ref(window.innerHeight)
+
+function onPreviewResize() {
+  previewWindowWidth.value = window.innerWidth
+  previewWindowHeight.value = window.innerHeight
+}
+
+const previewScale = computed(() => {
+  const maxW = Math.min(previewWindowWidth.value * 0.9, 860) - 38
+  const maxH = previewWindowHeight.value * 0.85 - 120
+  return Math.min(maxW / 800, maxH / 550)
+})
+
 // ── 确认弹窗 ──────────────────────────────────────────────
 const confirmState = ref(null)
 
@@ -765,11 +781,16 @@ function formatTime(ts) {
 
 // ── 初始化 ────────────────────────────────────────────────
 onMounted(() => {
+  window.addEventListener('resize', onPreviewResize)
   const token = getToken()
   if (isTokenValid(token)) {
     isAuthenticated.value = true
     loadPending()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onPreviewResize)
 })
 </script>
 
@@ -1325,7 +1346,7 @@ onMounted(() => {
   border-radius: 14px;
   padding: 1.2rem;
   width: 90%;
-  max-width: 560px;
+  max-width: 860px;
   max-height: 85vh;
   overflow-y: auto;
   display: flex;
