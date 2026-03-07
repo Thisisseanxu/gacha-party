@@ -24,14 +24,6 @@ const routes = [
     },
   },
   {
-    path: '/chouka',
-    name: '抽卡模拟器主页',
-    component: () => import('./views/GachaHomePage.vue'), // 抽卡模拟器主页组件
-    meta: {
-      title: '抽卡模拟器主页 - 织夜工具箱',
-    },
-  },
-  {
     path: '/chouka/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
     name: '抽卡模拟器',
     component: () => import('./views/GachaPage.vue'), // 抽卡页面组件
