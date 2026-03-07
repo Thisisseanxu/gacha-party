@@ -41,7 +41,7 @@
         { selected: isSelected(card.id), disabled: isDisabled(card) },
       ]" @click="toggleCharacterSelection(card)">
         <button v-if="card.isCustom" class="delete-custom-char-btn" @click.stop="deleteCustomCharacter(card.id)">
-          ×
+          &times;
         </button>
         <img :src="getDisplayImage(card)" :alt="card.name" class="card-image" />
         <div class="card-name">
@@ -68,11 +68,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { SP, SSR, SR, R } from '@/data/constant.js'
 import { colors } from '@/styles/colors.js'
 import { THEMES } from '@/data/constant.js'
 
 const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'eiji']
-const RARITY_ORDER = ['SP', 'SSR', 'SR', 'R']
+const RARITY_ORDER = [SP, SSR, SR, R]
 
 const props = defineProps({
   modelValue: {

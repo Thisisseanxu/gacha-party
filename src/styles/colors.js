@@ -155,7 +155,7 @@ const light = {
     black: '#000000',
     disabled: '#9ca3af',
     light: '#4b5563',
-    highlight: '#2563eb',
+    highlight: '#c9a218',
     white: '#ffffff',
   },
   brand: {
@@ -216,8 +216,8 @@ const light = {
     defaultText: '#374151',
     hoverBg: '#374151',
     hoverText: '#e5e7eb',
-    secondaryBg: '#e5e7eb',
-    secondaryText: '#374151',
+    secondaryBg: '#9b9b9b', // 次要按钮背景
+    secondaryText: '#000000', // 次要按钮文字
     infoBg: '#607d8b',
     dangerBg: '#fef2f2',
     dangerText: '#dc2626',

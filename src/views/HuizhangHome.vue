@@ -37,7 +37,7 @@
                 <span v-for="(g, i) in summarizeSlots(item.strategy.slots)" :key="i" class="badge-chip-item"
                   :style="{ color: badgeRarityColors[g.rarityId] }">
                   {{ HUIZHANG_TYPES[g.typeId]?.name || g.typeId }}
-                  <template v-if="g.count > 1">×{{ g.count }}</template>
+                  <template v-if="g.count > 1">&times;{{ g.count }}</template>
                   <span class="badge-chip-lv">Lv.{{ g.level }}</span>
                 </span>
               </div>

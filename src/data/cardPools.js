@@ -51,6 +51,7 @@ export const cardPools = {
   shangyuandenghuo: {
     type: '限定',
     name: '上元灯火',
+    isAvailable: true,
     imageUrl: '/images/cardpools-icon/10212.webp',
     rates: {
       [SP]: SP_BASE_RATE,
@@ -95,6 +96,7 @@ export const cardPools = {
   yanzhuhuolian: {
     type: '限定',
     name: '焰竹火莲',
+    isAvailable: true,
     imageUrl: '/images/cardpools-icon/10201.webp',
     rates: {
       [SP]: SP_BASE_RATE,
@@ -314,9 +316,10 @@ export const cardPools = {
   },
   // 鹅崽召唤器
   euzaisaoyinqi: {
-    type: '限定',
+    type: '联动',
     name: '鹅崽召唤器',
     imageUrl: '/images/cardpools-icon/122.webp',
+    isAvailable: true,
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -439,7 +442,7 @@ export const cardPools = {
   },
   // 酷玩爆米花
   kuwanbaomihua: {
-    type: '限定',
+    type: '联动',
     name: '酷玩爆米花',
     imageUrl: '/images/cardpools-icon/119.webp',
     rates: {
@@ -479,7 +482,7 @@ export const cardPools = {
   },
   // 心愿自选
   xinyuan: {
-    type: '自选',
+    type: '心愿',
     name: '心愿自选',
     imageUrl: '/images/cardpools-icon/1000.webp',
     challengeDisabled: true,
@@ -603,7 +606,7 @@ export const cardPools = {
   },
   // 超频扭蛋机
   chaopingniudanji: {
-    type: '限定',
+    type: '联动',
     name: '超频扭蛋机',
     imageUrl: '/images/cardpools-icon/10112.webp',
     rates: {
@@ -687,7 +690,7 @@ export const cardPools = {
   },
   // 暮色邀请函
   museyaoqinghan: {
-    type: '限定',
+    type: '联动',
     name: '暮色邀请函',
     imageUrl: '/images/cardpools-icon/10092.webp',
     rates: {
@@ -898,7 +901,7 @@ export const cardPools = {
   },
   // 早稻叽
   zaodaoji: {
-    type: '限定',
+    type: '联动',
     name: '早稻叽',
     imageUrl: '/images/cardpools-icon/10051.webp',
     rates: {
@@ -1029,7 +1032,7 @@ export const cardPools = {
   },
   // 网游卡池
   wangyoukachi: {
-    type: '限定',
+    type: '联动',
     name: '塔菲扭蛋',
     imageUrl: '/images/cardpools-icon/108.webp',
     rates: {
@@ -1116,6 +1119,7 @@ export const cardPools = {
   changzhu: {
     type: '常驻',
     name: '常驻扭蛋',
+    isAvailable: true,
     imageUrl: '/images/cardpools-icon/9.webp',
     challengeDisabled: true,
     rates: {
@@ -1225,9 +1229,10 @@ export const cardPools = {
   },
   // 高级常驻扭蛋
   gaojichangzhu: {
-    type: '限定',
+    type: '高级常驻',
     name: '高级常驻扭蛋',
     imageUrl: '/images/cardpools-icon/10000.webp',
+    isAvailable: true,
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,

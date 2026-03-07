@@ -158,7 +158,7 @@
   <!-- 编辑菜单 -->
   <div v-if="editMenu.visible" class="overlay" @click="closeEditMenu">
     <div class="edit-menu-container">
-      <button class="close-menu-top-right" @click="closeEditMenu">×</button>
+      <button class="close-menu-top-right" @click="closeEditMenu">&times;</button>
       <h3 class="edit-menu-title">编辑消息</h3>
       <button class="edit-menu-button" @click="startEditing">编辑这条消息</button>
       <button v-if="chatLog[editMenu.index].type === 'image'" class="edit-menu-button" @click="triggerImageReplace">
@@ -171,7 +171,7 @@
   <!-- 存档/读档菜单 -->
   <div v-if="showSaveLoadMenu" class="overlay" @click.self="closeSaveLoadMenu">
     <div class="save-load-menu">
-      <button class="close-menu-top-right" @click="closeSaveLoadMenu">×</button>
+      <button class="close-menu-top-right" @click="closeSaveLoadMenu">&times;</button>
       <h3 class="menu-title">存档管理</h3>
 
       <div class="slot-section">
@@ -201,7 +201,7 @@
               slot.timestamp ? formatTime(slot.timestamp) : '空'
               }}</span>
             <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
-              ×
+              &times;
             </button>
           </div>
           <div class="slot-row-bottom">
@@ -263,7 +263,7 @@
       </li>
       <li>
         <strong>数据使用与隐私保护：</strong>
-        我们承诺保护您的个人隐私。目前织夜工具箱不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
+        我们承诺保护您的个人隐私。目前织夜工具箱导演模式不收集任何个人数据，所有聊天记录和图片数据均存储在您的本地浏览器中。
       </li>
       <li>
         <strong>服务变更、中断或终止：</strong>

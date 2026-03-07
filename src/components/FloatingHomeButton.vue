@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-wrapper">
+  <div class="floating-wrapper" v-if="!isFullscreen">
     <div class="floating-home-button" @click="goToHome"></div>
 
     <div class="hints-container">
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { colors } from '@/styles/colors.js'
 
@@ -32,6 +32,20 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const showHint = ref(false)
+const isFullscreen = ref(false)
+
+const checkFullscreen = () => {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
+onMounted(() => {
+  document.addEventListener('fullscreenchange', checkFullscreen)
+  checkFullscreen()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', checkFullscreen)
+})
 
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {

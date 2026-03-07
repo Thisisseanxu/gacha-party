@@ -391,6 +391,18 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
   }
 
   /**
+   * 重置所有保底、计数器和历史记录（切换不同类型卡池时调用）
+   */
+  const resetAll = () => {
+    gachaHistory.value = []
+    lastPulledCards.value = []
+    pityCounters.value = 0
+    boostCounters.value = 0
+    tenPullNoSRCount.value = 0
+    nextIsUP.value = false
+  }
+
+  /**
    * 测试用：执行指定次数的批量抽卡模拟。
    * 它直接返回本次批量抽卡的结果统计。
    * @param {number} pullCount - 要模拟的抽卡次数。
@@ -435,7 +447,12 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     performSinglePull,
     performTenPulls,
     performMultiPulls,
+    resetAll,
     setSelectedUpGroup,
     selectedUpGroup,
+    pityCounters,
+    pityRarity,
+    pityValue,
+    nextIsUP,
   }
 }

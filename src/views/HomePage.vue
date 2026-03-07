@@ -2,9 +2,10 @@
   <div class="background" :class="{ 'smooth-transition': isReady }">
     <div class="home-container" :class="{ 'smooth-transition': isReady }">
       <h1 class="title" :class="{ 'smooth-transition': isReady }">织夜工具箱</h1>
+      <h2 class="subtitle" :class="{ 'smooth-transition': isReady }">盲盒派对小助手</h2>
 
       <div class="button-group">
-        <router-link to="chouka" class="btn chouka">
+        <router-link :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }" class="btn chouka">
           <img src="/images/icons/chouka.webp" class="btn-icon" alt="icon" />
           <span>抽卡模拟器</span>
         </router-link>
@@ -82,12 +83,16 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
 import { GithubOne, TencentQq, Install, Info, Moon, SunOne } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
+import { cardPools } from '@/data/cardPools'
 
 const appVersion = __VERSION__
 
 const isReady = ref(false)
 const isRetracted = ref(false)
 let retractTimer = null
+
+// 获取最新的卡池ID（取第一个key）
+const latestPoolId = Object.keys(cardPools)[0]
 
 // 收起状态下每个按钮的子状态：'' = 收起 | 'resting' = 悬浮离开后停留 | 'extended' = 悬浮中
 const btnStates = ref(['', ''])
@@ -208,7 +213,7 @@ const handleComingSoon = () => {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 2rem;
+  padding: 1.5rem;
   background-color: v-bind('colors.background.content');
   border-radius: 12px;
   display: flex;
@@ -228,11 +233,22 @@ const handleComingSoon = () => {
   font-size: 3rem;
   font-weight: bold;
   color: v-bind('colors.text.primary');
-  margin-top: 0rem;
-  margin-bottom: 1.5rem;
+  margin: 0;
 }
 
 .title.smooth-transition {
+  transition: color 1s ease;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  font-weight: normal;
+  color: v-bind('colors.text.secondary');
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.subtitle.smooth-transition {
   transition: color 1s ease;
 }
 
@@ -325,9 +341,9 @@ const handleComingSoon = () => {
   justify-content: center;
   gap: 2rem;
   row-gap: 0.8rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   margin-bottom: 0.8rem;
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid rgba(58, 59, 64, 0.5);
   width: 100%;
 }

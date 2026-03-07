@@ -1380,7 +1380,7 @@ export default {
 
       return newResponse
     } catch (e) {
-      // 如果找不到资源，对于单页应用(SPA)，我们应该返回 index.html
+      // 如果找不到资源，对于单页应用应返回index.html
       // 这样可以确保客户端路由正常工作
       try {
         console.warn(`资源未找到: ${url.pathname}, 错误: ${e.message}`)

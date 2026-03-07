@@ -96,8 +96,8 @@ const storageKey = 'customGachaPoolConfig'
 // 默认配置的函数
 const getDefaultConfig = () => ({
   name: '我的梦想卡池',
-  rates: { SP: 1.25, SSR: 8, SR: 20 },
-  selectedCardIds: { SP: [], SSR: [], SR: [], R: [] },
+  rates: { [SP]: 1.25, [SSR]: 8, [SR]: 20 },
+  selectedCardIds: { [SP]: [], [SSR]: [], [SR]: [], [R]: [] },
   upCandidateIds: [],
   doubleRateSSRIds: [],
 })

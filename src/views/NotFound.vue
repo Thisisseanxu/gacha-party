@@ -2,9 +2,9 @@
   <div class="not-found-page">
     <div class="container">
       <div class="status-code">404</div>
-      <h1 class="title">页面未找到</h1>
+      <h1 class="title">网页未找到</h1>
       <p class="description">
-        抱歉，找不到您要访问的页面。如果您确信页面存在，请稍作等待后刷新页面。
+        抱歉，找不到您要访问的网页。<br />如果您确定页面应该存在，请稍作等待后刷新网页。
       </p>
       <router-link to="/" class="home-button">返回首页</router-link>
     </div>
@@ -35,8 +35,8 @@ import { colors } from '../styles/colors.js'
 .status-code {
   font-size: 10rem;
   font-weight: bold;
-  color: v-bind('colors.background.lighter');
-  text-shadow: 4px 4px 0px v-bind('colors.background.content');
+  color: v-bind('colors.text.highlight');
+  text-shadow: 4px 4px 0px v-bind('colors.shadow.whiteHover');
   line-height: 1;
 }
 

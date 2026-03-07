@@ -52,9 +52,11 @@ const close = () => {
   position: relative;
   text-align: center;
   padding: 0.5rem;
-  padding-top: 3rem;
+  padding-top: 1rem;
   width: 90%;
   max-width: 800px;
+  max-height: 90dvh;
+  overflow: hidden;
   background-color: v-bind('colors.background.light');
   border: 1px solid v-bind('colors.border.primary');
   border-radius: 12px;
