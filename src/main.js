@@ -33,15 +33,6 @@ const routes = [
     },
   },
   {
-    path: '/choukatiaozhansai/:poolId', // 动态路由参数:poolId 用于区分不同的卡池
-    name: '抽卡挑战赛',
-    component: () => import('./views/GachaChallangePage.vue'), // 抽卡挑战赛页面组件
-    props: true, // 将路由参数作为props传递给组件
-    meta: {
-      title: '抽卡挑战赛 - 熊月定制版',
-    },
-  },
-  {
     path: '/zidingyichouka',
     name: '自定义卡池',
     component: () => import('./views/CustomGachaPage.vue'), // 自定义卡池页面组件

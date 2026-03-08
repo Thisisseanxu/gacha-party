@@ -2,8 +2,9 @@
   <div class="gacha-bg-fill" :style="bgFillStyle">
 
     <!-- 返回主页按钮：屏幕左上角，不随画布缩放，点击退出全屏并返回主页 -->
-    <button class="back-to-home-btn" @click="exitFullscreenAndGoHome" title="返回主页">
-      <BackOne theme="outline" :size="26" :fill="colors.text.primary" />
+    <button v-if="!showGachaResultOverlay" class="back-to-home-btn" @click="HandleFloatingButton" title="返回主页">
+      <BackOne v-if="isFullscreen" theme="outline" :size="26" :fill="colors.text.primary" />
+      <FullScreenOne v-else theme="outline" :size="26" :fill="colors.text.primary" />
     </button>
 
     <div class="gacha-landscape-root" :style="canvasStyle" :class="{ 'overlay-active': showGachaResultOverlay }">
@@ -126,7 +127,8 @@
           <!-- 稀有度统计 -->
           <div class="rarity-counts" v-if="gachaHistory.length > 0">
             <span v-if="rarityCounts[SP]" class="rarity-count-item text-rarity-sp">限定×{{ rarityCounts[SP] }}</span>
-            <span v-if="rarityCounts[SSR]" class="rarity-count-item text-rarity-ssr">SSR×{{ rarityCounts[SSR] }}</span>
+            <span v-if="rarityCounts[SSR]" class="rarity-count-item text-rarity-ssr">SSR×{{ rarityCounts[SSR]
+              }}</span>
             <span v-if="rarityCounts[SR]" class="rarity-count-item text-rarity-sr">SR×{{ rarityCounts[SR] }}</span>
             <span v-if="rarityCounts[R]" class="rarity-count-item text-rarity-r">R×{{ rarityCounts[R] }}</span>
           </div>
@@ -265,7 +267,7 @@ import QRCode from 'qrcode'
 
 import PopUp from '@/components/PopUp.vue'
 import SwitchComponent from '@/components/SwitchComponent.vue'
-import { BackOne, Info } from '@icon-park/vue-next'
+import { BackOne, Info, FullScreenOne } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 
 // 模板有多个根节点（div + Teleport），禁用自动属性继承以消除 Vue 警告
@@ -292,6 +294,11 @@ const showProbabilityPopup = ref(false)
 
 // 全屏/横屏提示
 const showOrientationPrompt = ref(true)
+const isFullscreen = ref(false)
+
+const onFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement
+}
 
 const enterFullscreen = async () => {
   showOrientationPrompt.value = false
@@ -300,16 +307,20 @@ const enterFullscreen = async () => {
     if (screen.orientation?.lock) {
       await screen.orientation.lock('landscape').catch(() => { })
     }
+    isFullscreen.value = true
   } catch {
     // 全屏被拒绝或不支持，忽略
   }
 }
 
-const exitFullscreenAndGoHome = async () => {
+const HandleFloatingButton = async () => {
   if (document.fullscreenElement) {
     try { await document.exitFullscreen() } catch { /* 忽略 */ }
+    router.push({ name: '主页' })
   }
-  router.push({ name: '主页' })
+  else {
+    await enterFullscreen()
+  }
 }
 
 // 16:10 固定画布缩放布局
@@ -357,10 +368,12 @@ const updateLayout = () => {
 onMounted(() => {
   updateLayout()
   window.addEventListener('resize', updateLayout)
+  document.addEventListener('fullscreenchange', onFullscreenChange)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateLayout)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
 })
 
 // 路由

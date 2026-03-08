@@ -2,7 +2,8 @@
   <div class="custom-gacha-page-background">
     <div class="config-container">
       <div class="button-group">
-        <router-link to="/chouka" class="back-home-button-config">返回主页</router-link>
+        <router-link :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
+          class="back-home-button-config">返回</router-link>
         <button @click="resetConfiguration" class="reset-button-config">重置配置</button>
       </div>
       <h1 class="config-title">创建自定义卡池</h1>
@@ -87,8 +88,10 @@ import { cardMap, allCards } from '@/data/cards.js'
 import { colors } from '@/styles/colors.js'
 import pako from 'pako'
 import { logger } from '@/utils/logger'
+import { cardPools } from '@/data/cardPools'
 
 const router = useRouter()
+const latestPoolId = Object.keys(cardPools)[0]
 
 // 定义用于localStorage的key
 const storageKey = 'customGachaPoolConfig'
