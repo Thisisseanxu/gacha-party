@@ -400,6 +400,24 @@ export const allCards = [
     theme: THEMES.water,
     qban_url: '/images/qban/1813.webp',
   },
+  {
+    id: '11005',
+    name: '妙笔创作家',
+    rarity: SP,
+    imageUrl: '/images/cards/11005.webp',
+    realname: '创创',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11005.webp',
+  },
+  {
+    id: '11004',
+    name: '明珠星探',
+    rarity: SP,
+    imageUrl: '/images/cards/11004.webp',
+    realname: '琳琅',
+    theme: THEMES.eiji,
+    qban_url: '/images/qban/11004.webp',
+  },
   // ---------------限定角色 结束---------------
   {
     id: 'CustomSPshuan',
