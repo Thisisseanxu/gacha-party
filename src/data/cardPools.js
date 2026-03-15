@@ -47,6 +47,48 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 
 // 定义卡池配置
 export const cardPools = {
+  // 笔尖与四叶草
+  bijianyusiyecao: {
+    type: '联动',
+    name: '笔尖与四叶草',
+    isAvailable: true,
+    imageUrl: '/images/cardpools-icon/129.webp',
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2,
+    },
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
+        UpCards: ['明珠星探', '妙笔创作家'],
+      },
+    },
+    cardNames: {
+      [SP]: ['明珠星探', '妙笔创作家'],
+      [SSR]: ['裱花千竹', '甜蜜迫击炮', '卷卷战士', '甜甜圈推车'],
+      [SR]: [
+        '珍珠射手',
+        '饼干骑士',
+        '劈咔灯泡',
+        '弹幕发射姬',
+        '电音射手',
+        '家用喷火枪',
+        '液氮喷射器',
+        '雪球投掷姬',
+        '梦游月兔',
+        '拳头礼盒',
+        '消防栓',
+        '浅睡千竹',
+        '贝斯战士',
+      ],
+      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
+    },
+  },
   // 上元灯火
   shangyuandenghuo: {
     type: '限定',

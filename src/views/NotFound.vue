@@ -12,7 +12,6 @@
 </template>
 
 <script setup>
-// !重要: 请确保这个路径是正确的
 import { colors } from '../styles/colors.js'
 </script>
 
