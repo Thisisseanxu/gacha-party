@@ -1,13 +1,8 @@
 <template>
   <div class="dev-editor-page">
-    <div class="dev-banner">⚠ DEV MODE 配置编辑器 — 此页面仅在开发模式中可访问</div>
     <div class="tab-bar">
-      <button
-        v-for="t in tabs"
-        :key="t.key"
-        :class="['tab-btn', { active: activeTab === t.key }]"
-        @click="activeTab = t.key"
-      >
+      <button v-for="t in tabs" :key="t.key" :class="['tab-btn', { active: activeTab === t.key }]"
+        @click="activeTab = t.key">
         {{ t.label }}
       </button>
     </div>
@@ -16,7 +11,6 @@
       <CardPoolsTab v-else-if="activeTab === 'cardpools'" />
       <HuizhangTab v-else-if="activeTab === 'huizhang'" />
       <GachaPoolsTab v-else-if="activeTab === 'gachapools'" />
-      <DatabaseTab v-else-if="activeTab === 'database36'" />
     </div>
   </div>
 </template>
@@ -27,21 +21,17 @@ import CardsTab from './dev-editor/CardsTab.vue'
 import CardPoolsTab from './dev-editor/CardPoolsTab.vue'
 import HuizhangTab from './dev-editor/HuizhangTab.vue'
 import GachaPoolsTab from './dev-editor/GachaPoolsTab.vue'
-import DatabaseTab from './dev-editor/DatabaseTab.vue'
+import './dev-editor/dev-shared.css'; // 公共样式
 
 const tabs = [
   { key: 'cards', label: '角色数据' },
   { key: 'cardpools', label: '卡池配置' },
   { key: 'huizhang', label: '徽章槽位' },
-  { key: 'gachapools', label: 'gacha_pools.json' },
-  { key: 'database36', label: 'database_36.json' },
+  { key: 'gachapools', label: '卡池数据' },
 ]
 
 const activeTab = ref('cards')
 </script>
-
-<!-- 共享样式全局加载 -->
-<style src="./dev-editor/de-shared.css"></style>
 
 <style scoped>
 .dev-editor-page {
@@ -49,16 +39,6 @@ const activeTab = ref('cards')
   background: #1a1b20;
   color: #e0e0e0;
   font-family: monospace, sans-serif;
-}
-
-.dev-banner {
-  background: #7c3700;
-  color: #ffd580;
-  text-align: center;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
 }
 
 .tab-bar {

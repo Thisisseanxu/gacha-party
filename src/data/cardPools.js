@@ -92,6 +92,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 焰竹火莲
   yanzhuhuolian: {
     type: '限定',
@@ -134,6 +135,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 新春自选
   xinchunzixuan: {
     type: '自选',
@@ -226,6 +228,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球'],
     },
   },
+
   // 青玉之锋
   qingyuzhifeng: {
     type: '限定',
@@ -270,6 +273,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 织梦旅行团
   zhimenglvxingtuan: {
     type: '限定',
@@ -314,6 +318,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 鹅崽召唤器
   euzaisaoyinqi: {
     type: '联动',
@@ -355,6 +360,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 相约嘉年华
   xiangyuejianianhua: {
     type: '限定',
@@ -399,6 +405,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 圣诞邀约
   shengdanyaoyue: {
     type: '限定',
@@ -440,6 +447,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 酷玩爆米花
   kuwanbaomihua: {
     type: '联动',
@@ -480,6 +488,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 心愿自选
   xinyuan: {
     type: '心愿',
@@ -563,6 +572,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球'],
     },
   },
+
   // 厨娘来啦
   chunianglaila: {
     type: '限定',
@@ -604,6 +614,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 超频扭蛋机
   chaopingniudanji: {
     type: '联动',
@@ -647,6 +658,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 萌鬼认可证
   mengguirenkezhen: {
     type: '限定',
@@ -688,6 +700,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 暮色邀请函
   museyaoqinghan: {
     type: '联动',
@@ -728,6 +741,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 游园邀请
   youyaunyaoqing: {
     type: '限定',
@@ -772,6 +786,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 祈愿盲盒-烧烤大师
   qiyuanmanghe1: {
     type: '祈愿盲盒',
@@ -812,6 +827,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 地下车手招募
   dixiacheshouzhaomu: {
     type: '限定',
@@ -855,6 +871,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 扭蛋大作战
   niudandazuozhan: {
     type: '限定',
@@ -899,6 +916,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 早稻叽
   zaodaoji: {
     type: '联动',
@@ -942,6 +960,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 浴缸大作战
   yugangdazuozhan: {
     type: '限定',
@@ -986,6 +1005,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 童话国盲盒机
   tonghuaguomangheji: {
     type: '限定',
@@ -1030,6 +1050,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 网游卡池
   wangyoukachi: {
     type: '联动',
@@ -1072,6 +1093,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 车手盲盒机
   cheshoumangheji: {
     type: '限定',
@@ -1115,6 +1137,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 常驻扭蛋
   changzhu: {
     type: '常驻',
@@ -1227,6 +1250,7 @@ export const cardPools = {
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
+
   // 高级常驻扭蛋
   gaojichangzhu: {
     type: '高级常驻',

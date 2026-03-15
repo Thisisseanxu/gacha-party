@@ -918,6 +918,9 @@ export const allCards = [
     name: '弱力消防栓',
     rarity: R,
     imageUrl: '/images/cards/1805.webp',
+    realname: '',
+    theme: THEMES.cake,
+    notInGame: true,
   },
 ]
 

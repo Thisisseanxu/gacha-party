@@ -16,12 +16,8 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div
-          v-for="[key, pool] in filteredPools"
-          :key="key"
-          :class="['list-item', { active: form.poolId === key }]"
-          @click="selectPool(key, pool)"
-        >
+        <div v-for="[key, pool] in filteredPools" :key="key" :class="['list-item', { active: form.poolId === key }]"
+          @click="selectPool(key, pool)">
           <span class="rarity-tag">{{ pool.type }}</span>
           <span class="item-name">{{ pool.name }}</span>
           <span v-if="pool.isAvailable" class="avail-dot" title="上架中">●</span>
@@ -52,7 +48,7 @@
           <label>封面图 URL</label>
           <input v-model="form.imageUrl" class="de-input" placeholder="/images/cardpools-icon/10212.webp" />
 
-          <label>是否上架</label>
+          <label>是否置顶</label>
           <input type="checkbox" v-model="form.isAvailable" />
         </div>
       </div>
@@ -296,4 +292,6 @@ async function save() {
 onMounted(load)
 </script>
 
-<style>/* CardPoolsTab */</style>
+<style>
+/* CardPoolsTab */
+</style>

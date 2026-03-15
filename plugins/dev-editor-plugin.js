@@ -14,7 +14,7 @@ const CARDS_FILE = resolve(ROOT, 'src/data/cards.js')
 const CARD_POOLS_FILE = resolve(ROOT, 'src/data/cardPools.js')
 const HUIZHANG_FILE = resolve(ROOT, 'src/data/huizhang.js')
 const GACHA_POOLS_FILE = resolve(ROOT, 'public/data/gacha_pools.json')
-const DATABASE_FILE = resolve(ROOT, 'public/data/database_36.json')
+const DATABASE_FILE = resolve(ROOT, 'public/data/gacha_info.json')
 
 // ── 符号映射：AST Identifier/MemberExpression → JSON 值 ────────────────────
 const SYMBOL_RESOLVE = {

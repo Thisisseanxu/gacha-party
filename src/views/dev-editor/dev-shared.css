@@ -341,3 +341,38 @@
   font-size: 10px;
   margin-left: auto;
 }
+
+/* ── active-pool-list（卡池行列表，GachaPoolsTab 使用）── */
+.active-pool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.active-pool-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  background: #2a2b30;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.pool-id {
+  font-family: monospace;
+  color: #90b8ff;
+  min-width: 40px;
+  font-weight: bold;
+}
+
+.pool-name {
+  flex: 1;
+  color: #e0e0e0;
+}
+
+.pool-name-missing {
+  flex: 1;
+  color: #555;
+  font-style: italic;
+}
