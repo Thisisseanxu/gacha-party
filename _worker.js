@@ -236,7 +236,10 @@ hzApp.get('/version', async (c) => {
     const row = await c.env.HZ_DB.prepare(
       'SELECT version, updated_at FROM hz_guide_meta WHERE id = 1',
     ).first()
-    return c.json({ version: row?.version ?? '0', updated_at: row?.updated_at ?? 0 })
+    return c.json({
+      version: row?.version ?? '0',
+      updated_at: row?.updated_at ?? 0,
+    })
   } catch (e) {
     return c.json({ message: '数据库查询失败: ' + e.message }, 500)
   }
@@ -1089,8 +1092,184 @@ function base64UrlToStandard(base64url) {
 //   return { data: newlyFetched, error: null }
 // }
 
+// ============================================================
+//  激活码 Auth API
+// ============================================================
+
+/**
+ * 生成激活码（格式与 generate.py 完全一致）
+ * 格式：base64url(payload[12字节] + signature[64字节])
+ * payload = uint32(uid, LE) + uint64(expiry秒, LE)，过期设为100年后
+ * 环境变量：PRIVATE_KEY（Ed25519 PKCS#8 DER base64，即 PEM 去掉头尾行后的内容）
+ * @param {string} uid
+ * @param {object} env
+ * @returns {Promise<string>}
+ */
+async function generateActivationKey(uid, env) {
+  if (!env.PRIVATE_KEY) throw new Error('PRIVATE_KEY 未设置')
+
+  const uidInt = parseInt(String(uid), 10)
+  if (isNaN(uidInt) || uidInt < 0 || uidInt > 0xffffffff) throw new Error('UID 超出 uint32 范围')
+
+  const expiry = BigInt(Math.floor(Date.now() / 1000) + 100 * 365 * 24 * 3600)
+  const payload = new Uint8Array(12)
+  const dv = new DataView(payload.buffer)
+  dv.setUint32(0, uidInt, true) // uint32 LE
+  dv.setBigUint64(4, expiry, true) // uint64 LE
+
+  const keyBytes = Buffer.from(env.PRIVATE_KEY, 'base64')
+  const privateKey = await crypto.subtle.importKey('pkcs8', keyBytes, { name: 'Ed25519' }, false, [
+    'sign',
+  ])
+  const sigBuf = await crypto.subtle.sign('Ed25519', privateKey, payload)
+
+  const full = new Uint8Array(12 + 64)
+  full.set(payload, 0)
+  full.set(new Uint8Array(sigBuf), 12)
+
+  return Buffer.from(full)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+}
+
+const authApp = new Hono()
+
+/**
+ * POST /api/auth/begin
+ * Body: { uid }
+ * 用 APP_SECRET 生成 HMAC-SHA256 签名会话令牌，无状态，无 KV 存储。
+ * 令牌格式：`${uid}:${timestamp}:${hmacHex}`，有效期10分钟。
+ */
+authApp.post('/begin', async (c) => {
+  if (!c.env.AppSecret) return c.json({ success: false, message: '服务端未配置 APP_SECRET' }, 503)
+
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ success: false, message: '请求体格式错误' }, 400)
+  }
+
+  const { uid } = body
+  if (!uid || !/^\d{4,}$/.test(String(uid))) {
+    return c.json({ success: false, message: 'UID格式不正确' }, 400)
+  }
+
+  const message = `${String(uid)}:${Date.now()}`
+  const hmacKey = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(c.env.AppSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const sigBuf = await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode(message))
+  const sigHex = Array.from(new Uint8Array(sigBuf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+
+  return c.json({ success: true, session: `${message}:${sigHex}` })
+})
+
+/**
+ * POST /api/auth/activate
+ * Body: { uid, session, game_response }
+ * 无 KV 存储：验证 APP_SECRET HMAC 签名会话令牌，颁发激活码。
+ */
+authApp.post('/activate', async (c) => {
+  if (!c.env.AppSecret) return c.json({ success: false, message: '服务端未配置 APP_SECRET' }, 503)
+
+  let body
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ success: false, message: '请求体格式错误' }, 400)
+  }
+
+  const { uid, session, game_response } = body
+  if (!uid || !session || !game_response) {
+    return c.json({ success: false, message: '缺少必要参数' }, 400)
+  }
+  const uidStr = String(uid)
+
+  // 会话令牌格式：`${uid}:${timestamp}:${hmacHex}`
+  // 用 lastIndexOf 分割，因为 hmacHex 是固定 64 位十六进制，不含冒号
+  const lastColon = session.lastIndexOf(':')
+  if (lastColon === -1) {
+    return c.json({ success: false, code: 'SESSION_EXPIRED', message: '会话格式无效' }, 400)
+  }
+  const message = session.slice(0, lastColon)
+  const hmacHex = session.slice(lastColon + 1)
+
+  // 解析 uid 和时间戳
+  const firstColon = message.indexOf(':')
+  if (firstColon === -1) {
+    return c.json({ success: false, code: 'SESSION_EXPIRED', message: '会话格式无效' }, 400)
+  }
+  const sessionUid = message.slice(0, firstColon)
+  const ts = parseInt(message.slice(firstColon + 1), 10)
+
+  // 检查令牌是否过期（10分钟）
+  if (isNaN(ts) || Date.now() - ts > 10 * 60 * 1000) {
+    return c.json(
+      {
+        success: false,
+        code: 'SESSION_EXPIRED',
+        message: '会话已过期，请重新获取验证码',
+      },
+      400,
+    )
+  }
+
+  // 检查 uid 是否与令牌绑定一致
+  if (sessionUid !== uidStr) {
+    return c.json({ success: false, code: 'SESSION_MISMATCH', message: '会话与UID不符' }, 403)
+  }
+
+  // 验证 HMAC 签名
+  const hmacKey = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(c.env.AppSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  )
+  const sigBytes = new Uint8Array(hmacHex.match(/../g).map((b) => parseInt(b, 16)))
+  const valid = await crypto.subtle.verify(
+    'HMAC',
+    hmacKey,
+    sigBytes,
+    new TextEncoder().encode(message),
+  )
+  if (!valid) {
+    return c.json({ success: false, code: 'SESSION_EXPIRED', message: '会话签名无效' }, 400)
+  }
+
+  // 验证游戏响应
+  if (game_response.code !== 0) {
+    return c.json({ success: false, message: '游戏账号验证未通过' }, 400)
+  }
+
+  // 生成激活码
+  let activationKey
+  try {
+    activationKey = await generateActivationKey(uidStr, c.env)
+  } catch (e) {
+    return c.json({ success: false, message: '生成激活码失败: ' + e.message }, 500)
+  }
+
+  return c.json({
+    success: true,
+    player_name: game_response.nickname || '',
+    activation_key: activationKey,
+  })
+})
+
 // 挂载徽章攻略子路由
 mainApp.route('/api/hz', hzApp)
+mainApp.route('/api/auth', authApp)
 
 mainApp.get('/get-record', async (c) => {
   try {
@@ -1341,6 +1520,7 @@ export default {
     // 这里列出您所有的 API 路径前缀。
     const isApiRequest =
       url.pathname.startsWith('/api/hz/') ||
+      url.pathname.startsWith('/api/auth/') ||
       url.pathname.startsWith('/start-update-task') ||
       url.pathname.startsWith('/task-status/') ||
       url.pathname.startsWith('/get-record') ||
