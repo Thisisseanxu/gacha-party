@@ -17,3 +17,9 @@ defineProps({
 })
 defineEmits(['remove'])
 </script>
+
+<style scoped>
+.active-pool-list {
+  overflow-y: auto;
+}
+</style>

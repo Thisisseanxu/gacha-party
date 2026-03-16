@@ -34,6 +34,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const rows = ref(Object.entries(props.modelValue ?? {}).map(([key, val]) => ({ key, val })))
 
+// Only reset on reference change (e.g., full reload) — NOT on in-place mutations
 watch(
   () => props.modelValue,
   (v) => {
@@ -51,12 +52,23 @@ function emitChange() {
 
 function addRow() {
   rows.value.push({ key: '', val: '' })
+  emitChange()
 }
 
 function removeRow(idx) {
   rows.value.splice(idx, 1)
   emitChange()
 }
+
+// Called externally to append a row without going through the watch cycle
+function appendRow(key, val) {
+  rows.value.push({ key, val })
+  emitChange()
+}
+
+defineExpose({ appendRow })
 </script>
 
-<style>/* KvTable */</style>
+<style>
+/* KvTable */
+</style>

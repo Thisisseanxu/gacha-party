@@ -12,12 +12,8 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div
-          v-for="[charId] in filteredEntries"
-          :key="charId"
-          :class="['list-item', { active: form.charId === String(charId) }]"
-          @click="selectEntry(charId)"
-        >
+        <div v-for="[charId] in filteredEntries" :key="charId"
+          :class="['list-item', { active: form.charId === String(charId) }]" @click="selectEntry(charId)">
           <span class="item-id">#{{ charId }}</span>
           <span class="item-name">{{ charNameMap?.[charId] ?? '' }}</span>
         </div>
@@ -33,24 +29,15 @@
 
       <div class="form-grid" style="margin-bottom: 12px;">
         <label>角色 ID</label>
-        <input
-          v-model="form.charId"
-          class="de-input"
-          :disabled="!isNew"
-          placeholder="如 1110"
-          type="number"
-        />
+        <input v-model="form.charId" class="de-input" :disabled="!isNew" placeholder="如 1110" type="number" />
       </div>
 
       <div class="form-section">
         <div class="form-section-title">
           Shape 槽位配置（{{ form.shapes.length }} 个槽位）
         </div>
-        <div
-          v-for="(shape, idx) in form.shapes"
-          :key="idx"
-          style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;"
-        >
+        <div v-for="(shape, idx) in form.shapes" :key="idx"
+          style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
           <span style="color: #888; font-size: 11px; width: 48px;">槽位 {{ idx + 1 }}</span>
           <select v-model="form.shapes[idx]" class="de-select" style="max-width: 220px;">
             <option value="defence">SHIELD（生命 defence）</option>
@@ -90,7 +77,9 @@ async function loadCardNames() {
       if (c.id) map[c.id] = c.name
     }
     charNameMap.value = map
-  } catch {}
+  } catch {
+    console.warn('无法加载角色名称列表')
+  }
 }
 
 const search = ref('')
@@ -171,4 +160,4 @@ onMounted(async () => {
 })
 </script>
 
-<style>/* HuizhangTab */</style>
+<style scoped></style>

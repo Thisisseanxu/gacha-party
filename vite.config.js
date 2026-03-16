@@ -10,7 +10,7 @@ import { devEditorPlugin } from './plugins/dev-editor-plugin.js'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    devEditorPlugin(), // 可视化配置编辑器（仅 dev server 生效）
+    devEditorPlugin(), // 可视化配置编辑器
     vue(),
     vueDevTools(),
     // PWA插件和相关配置

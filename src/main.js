@@ -112,13 +112,13 @@ const routes = [
   }, // 404 页面处理
 ]
 
-// 仅在开发模式下注册配置编辑器路由（生产构建时被 tree-shake 移除）
+// 仅在开发模式下注册路由
 if (import.meta.env.DEV) {
   routes.push({
     path: '/dev',
-    name: '配置编辑器',
+    name: '开发界面',
     component: () => import('./views/DevEditorPage.vue'),
-    meta: { title: '配置编辑器 [DEV ONLY]' },
+    meta: { title: '开发界面' },
   })
 }
 
