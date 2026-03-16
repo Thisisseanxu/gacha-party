@@ -1,0 +1,407 @@
+/* 开发编辑器共享样式 — 仅在 dev mode 使用 */
+.editor-layout {
+  display: flex;
+  gap: 16px;
+  min-height: calc(100vh - 100px);
+}
+
+.list-panel {
+  width: 280px;
+  flex-shrink: 0;
+  background: #222328;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-panel {
+  flex: 1;
+  background: #222328;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: background 0.1s;
+}
+
+.list-item:hover {
+  background: #2e2f36;
+}
+
+.list-item.active {
+  background: #1e3a5f;
+  border-color: #3b6ea5;
+}
+
+.rarity-tag {
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #444;
+  color: #ccc;
+  min-width: 28px;
+  text-align: center;
+}
+
+.rarity-tag[data-rarity='SP'] {
+  background: #7c3000;
+  color: #ffd580;
+}
+.rarity-tag[data-rarity='SSR'] {
+  background: #5a4000;
+  color: #f0c040;
+}
+.rarity-tag[data-rarity='SR'] {
+  background: #2a3a60;
+  color: #90b8ff;
+}
+.rarity-tag[data-rarity='R'] {
+  background: #2a4030;
+  color: #80d080;
+}
+
+.item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-id {
+  color: #666;
+  font-size: 10px;
+}
+
+.form-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.form-grid label {
+  font-size: 12px;
+  color: #aaa;
+  text-align: right;
+}
+
+.form-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.form-section-title {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.de-input {
+  background: #2a2b30;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.de-input:focus {
+  outline: none;
+  border-color: #5a8fd6;
+}
+
+.de-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.de-select {
+  background: #2a2b30;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.de-textarea {
+  background: #2a2b30;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.de-textarea:focus {
+  outline: none;
+  border-color: #5a8fd6;
+}
+
+.de-btn {
+  padding: 7px 14px;
+  background: #2a2b30;
+  color: #ccc;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+
+.de-btn:hover {
+  background: #333;
+  color: #fff;
+}
+
+.de-btn.primary {
+  background: #1e3a5f;
+  color: #90c0ff;
+  border-color: #3b6ea5;
+}
+
+.de-btn.primary:hover {
+  background: #24487a;
+}
+
+.de-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.de-btn.small {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.de-btn.danger {
+  background: #3a1818;
+  color: #ff9090;
+  border-color: #7a3030;
+}
+
+.de-btn.danger:hover {
+  background: #4a2020;
+}
+
+.save-msg {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.save-msg.ok {
+  background: #1a3a20;
+  color: #80d080;
+  border: 1px solid #2a6030;
+}
+
+.save-msg.err {
+  background: #3a1818;
+  color: #ff9090;
+  border: 1px solid #7a3030;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  padding: 8px;
+}
+
+.hint.error {
+  color: #ff9090;
+}
+
+.count-hint {
+  font-size: 11px;
+  color: #666;
+}
+
+/* tag input */
+.tag-input-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: #2a2b30;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px;
+  min-height: 36px;
+  align-items: center;
+}
+
+.tag {
+  background: #1e3a5f;
+  color: #90b8ff;
+  border: 1px solid #3b6ea5;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-remove {
+  cursor: pointer;
+  color: #888;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.tag-remove:hover {
+  color: #ff9090;
+}
+
+.tag-new-input {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 12px;
+  font-family: monospace;
+  outline: none;
+  min-width: 60px;
+}
+
+/* kv table */
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.kv-table th {
+  text-align: left;
+  padding: 4px 8px;
+  color: #888;
+  border-bottom: 1px solid #333;
+  font-weight: normal;
+}
+
+.kv-table td {
+  padding: 3px 4px;
+  border-bottom: 1px solid #2a2b30;
+}
+
+.kv-table .de-input {
+  margin: 0;
+}
+
+.avail-dot {
+  color: #50c050;
+  font-size: 10px;
+  margin-left: auto;
+}
+
+/* ── active-pool-list（卡池行列表，GachaPoolsTab 使用）── */
+.active-pool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #2a2b30;
+}
+.active-pool-list::-webkit-scrollbar {
+  width: 5px;
+}
+.active-pool-list::-webkit-scrollbar-track {
+  background: #2a2b30;
+}
+.active-pool-list::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+.active-pool-list::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
+.active-pool-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  background: #2a2b30;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.pool-id {
+  font-family: monospace;
+  color: #90b8ff;
+  min-width: 40px;
+  font-weight: bold;
+}
+
+.pool-name {
+  flex: 1;
+  color: #e0e0e0;
+}
+
+.pool-name-missing {
+  flex: 1;
+  color: #555;
+  font-style: italic;
+}

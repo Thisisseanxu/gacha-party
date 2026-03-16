@@ -112,6 +112,16 @@ const routes = [
   }, // 404 页面处理
 ]
 
+// 仅在开发模式下注册路由
+if (import.meta.env.DEV) {
+  routes.push({
+    path: '/dev',
+    name: '开发界面',
+    component: () => import('./views/DevEditorPage.vue'),
+    meta: { title: '开发界面' },
+  })
+}
+
 // 创建路由实例
 const router = createRouter({
   history: createWebHistory(), // 使用 HTML5 History 模式

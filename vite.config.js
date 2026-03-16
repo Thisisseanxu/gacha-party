@@ -5,10 +5,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import pkg from './package.json'
+import { devEditorPlugin } from './plugins/dev-editor-plugin.js'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    devEditorPlugin(), // 可视化配置编辑器
     vue(),
     vueDevTools(),
     // PWA插件和相关配置
