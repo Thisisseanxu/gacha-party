@@ -12,16 +12,25 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div v-for="[charId] in filteredEntries" :key="charId"
-          :class="['list-item', { active: form.charId === String(charId) }]" @click="selectEntry(charId)">
+        <div
+          v-for="{ charId, isMissing } in filteredEntries"
+          :key="charId"
+          :class="['list-item', { active: form.charId === String(charId), 'missing-config': isMissing }]"
+          @click="selectEntry(charId)"
+        >
           <span class="item-id">#{{ charId }}</span>
           <span class="item-name">{{ charNameMap?.[charId] ?? '' }}</span>
+          <span v-if="isMissing" class="missing-warn" title="缺少徽章槽位配置">⚠</span>
         </div>
       </div>
     </div>
 
     <!-- 右侧：编辑表单 -->
     <div class="form-panel">
+      <div v-if="!isNew && !form.charId" class="form-empty">
+        在左侧选择要编辑的角色，或点击「+ 新增角色配置」
+      </div>
+      <template v-else>
       <div class="form-title">
         {{ form.charId ? `角色 #${form.charId} 徽章槽位` : '选择或新增角色' }}
       </div>
@@ -55,6 +64,7 @@
         </button>
         <button class="de-btn" @click="resetForm">重置</button>
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -66,17 +76,23 @@ import { useEditorApi } from '@/composables/useEditorApi.js'
 const { data: hzData, loading, error, load } = useEditorApi('huizhang')
 const { save: saveApi } = useEditorApi('huizhang')
 
-// 加载角色名用于辅助显示
 const charNameMap = ref({})
+const notInGameSet = ref(new Set())
+
 async function loadCardNames() {
   try {
     const res = await fetch('/api/dev-editor/cards')
     const cards = await res.json()
     const map = {}
+    const nig = new Set()
     for (const c of cards) {
-      if (c.id) map[c.id] = c.name
+      if (c.id) {
+        map[c.id] = c.name
+        if (c.notInGame) nig.add(String(c.id))
+      }
     }
     charNameMap.value = map
+    notInGameSet.value = nig
   } catch {
     console.warn('无法加载角色名称列表')
   }
@@ -89,23 +105,47 @@ const isNew = ref(false)
 
 const form = ref({ charId: '', shapes: [] })
 
-const filteredEntries = computed(() => {
+// 在游戏内、且尚无徽章槽位配置的角色 ID 列表
+const missingConfigIds = computed(() => {
   if (!hzData.value) return []
-  return Object.entries(hzData.value).filter(([charId]) => {
-    if (!search.value) return true
-    const q = search.value.toLowerCase()
+  const configured = new Set(Object.keys(hzData.value).map(String))
+  return Object.keys(charNameMap.value).filter(
+    (id) => !notInGameSet.value.has(id) && !configured.has(id),
+  )
+})
+
+// 所有列表条目：缺失配置的置顶高亮 + 已配置的
+const filteredEntries = computed(() => {
+  const q = search.value.toLowerCase()
+  const matches = (charId) => {
+    if (!q) return true
     const name = charNameMap.value[charId] ?? ''
     return String(charId).includes(q) || name.toLowerCase().includes(q)
-  })
+  }
+  const missing = missingConfigIds.value
+    .filter(matches)
+    .map((charId) => ({ charId, isMissing: true }))
+  const existing = (hzData.value ? Object.keys(hzData.value) : [])
+    .filter(matches)
+    .map((charId) => ({ charId, isMissing: false }))
+  return [...missing, ...existing]
 })
 
 function selectEntry(charId) {
-  isNew.value = false
   saveMsg.value = null
   const entry = hzData.value?.[charId]
-  form.value = {
-    charId: String(charId),
-    shapes: entry?.shape ? [...entry.shape] : [],
+  if (!entry) {
+    isNew.value = true
+    form.value = {
+      charId: String(charId),
+      shapes: ['defence', 'defence', 'defence', 'attack', 'attack', 'defence'],
+    }
+  } else {
+    isNew.value = false
+    form.value = {
+      charId: String(charId),
+      shapes: [...entry.shape],
+    }
   }
 }
 

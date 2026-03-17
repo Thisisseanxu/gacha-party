@@ -3,7 +3,7 @@
     <table class="kv-table">
       <thead>
         <tr>
-          <th style="width: 140px;">ID (key)</th>
+          <th style="width: 70px;">ID (key)</th>
           <th>名称 (value)</th>
           <th style="width: 60px;"></th>
         </tr>
@@ -69,6 +69,6 @@ function appendRow(key, val) {
 defineExpose({ appendRow })
 </script>
 
-<style>
+<style scoped>
 /* KvTable */
 </style>

@@ -25,107 +25,137 @@
       </div>
     </div>
 
-    <!-- 右侧：编辑表单 -->
+    <!-- 右侧：编辑区域 -->
     <div class="form-panel" style="overflow-y: auto; max-height: calc(100vh - 110px);">
-      <div class="form-title">{{ isNew ? '新增卡池' : `编辑卡池 "${form.name}"` }}</div>
-      <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
 
-      <!-- 基本信息 -->
-      <div class="form-section">
-        <div class="form-section-title">基本信息</div>
-        <div class="form-grid">
-          <label>Pool ID</label>
-          <input v-model="form.poolId" class="de-input" :disabled="!isNew" placeholder="如 shangyuandenghuo" />
+      <!-- 未选中时的空状态 -->
+      <div v-if="!isNew && !form.poolId" class="form-empty">
+        在左侧选择要编辑的卡池，或点击「+ 新增卡池」
+      </div>
 
-          <label>卡池类型</label>
-          <select v-model="form.type" class="de-select">
-            <option v-for="t in allTypes" :key="t" :value="t">{{ t }}</option>
-          </select>
-
-          <label>显示名称</label>
-          <input v-model="form.name" class="de-input" placeholder="如 上元灯火" />
-
-          <label>封面图 URL</label>
-          <input v-model="form.imageUrl" class="de-input" placeholder="/images/cardpools-icon/10212.webp" />
-
-          <label>是否置顶</label>
-          <input type="checkbox" v-model="form.isAvailable" />
+      <!-- 不支持可视化编辑 -->
+      <template v-else-if="isUnsupported && !isNew">
+        <div class="form-title">编辑卡池 "{{ form.name }}"</div>
+        <div class="cp-unsupported">
+          <div style="font-size: 15px; margin-bottom: 6px;">⚠ 暂不支持可视化编辑</div>
+          <div class="hint">该卡池含有编辑器未知的配置字段（如心愿自选、常驻等特殊规则）</div>
+          <div class="hint" style="margin-top: 4px;">请前往 <code style="color:#90b8ff;">src/data/cardPools.js</code>
+            直接编辑源代码</div>
         </div>
-      </div>
+      </template>
 
-      <!-- 基础概率 -->
-      <div class="form-section">
-        <div class="form-section-title">基础概率 rates</div>
-        <div class="form-grid">
-          <label>SP 概率</label>
-          <input v-model.number="form.rates.SP" type="number" step="0.0001" min="0" max="1" class="de-input" />
-          <label>SSR 概率</label>
-          <input v-model.number="form.rates.SSR" type="number" step="0.01" min="0" max="1" class="de-input" />
-          <label>SR 概率</label>
-          <input v-model.number="form.rates.SR" type="number" step="0.01" min="0" max="1" class="de-input" />
+      <!-- 正常编辑表单 -->
+      <template v-else>
+        <div class="form-title">{{ isNew ? '新增卡池' : `编辑卡池 "${form.name}"` }}</div>
+        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
+
+        <!-- 基本信息 -->
+        <div class="form-section">
+          <div class="form-section-title">基本信息</div>
+          <div class="form-grid">
+            <label>Pool ID</label>
+            <input v-model="form.poolId" class="de-input" :disabled="!isNew" placeholder="如 shangyuandenghuo" />
+
+            <label>卡池类型</label>
+            <select v-model="form.type" class="de-select">
+              <option v-for="t in allTypes" :key="t" :value="t">{{ t }}</option>
+            </select>
+
+            <label>显示名称</label>
+            <input v-model="form.name" class="de-input" placeholder="如 上元灯火" />
+
+            <label>封面图 URL</label>
+            <div>
+              <input v-model="form.imageUrl" class="de-input" style="width: 100%;"
+                placeholder="/images/cardpools-icon/10212.webp" @blur="fixWebp('imageUrl')" />
+              <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
+            </div>
+
+            <label>是否置顶</label>
+            <input type="checkbox" v-model="form.isAvailable" />
+          </div>
         </div>
-      </div>
 
-      <!-- SP 规则 -->
-      <div class="form-section">
-        <div class="form-section-title">保底规则 rules.SP</div>
-        <div class="form-grid">
-          <label>pity 保底抽数</label>
-          <input v-model.number="form.rulesSP.pity" type="number" class="de-input" />
-          <label>boostAfter</label>
-          <input v-model.number="form.rulesSP.boostAfter" type="number" class="de-input" />
-          <label>boost 每次提升</label>
-          <input v-model.number="form.rulesSP.boost" type="number" step="0.01" class="de-input" />
-          <label>UpTrigger (UP 机制)</label>
-          <input type="checkbox" v-model="form.rulesSP.UpTrigger" />
-          <label>SelectUpCards (自选)</label>
-          <input type="checkbox" v-model="form.rulesSP.SelectUpCards" />
-          <label>UpCards（每行一名）</label>
-          <textarea v-model="form.rulesSP.UpCardsText" class="de-textarea" rows="3" placeholder="果冻冰粥&#10;魔弹射手" />
+        <!-- 基础概率 -->
+        <div class="form-section">
+          <div class="form-section-title">基础概率 rates</div>
+          <div class="form-grid">
+            <label>SP 概率</label>
+            <input v-model.number="form.rates.SP" type="number" step="0.0001" min="0" max="1" class="de-input" />
+            <label>SSR 概率</label>
+            <input v-model.number="form.rates.SSR" type="number" step="0.01" min="0" max="1" class="de-input" />
+            <label>SR 概率</label>
+            <input v-model.number="form.rates.SR" type="number" step="0.01" min="0" max="1" class="de-input" />
+          </div>
         </div>
-      </div>
 
-      <!-- SSR 规则 -->
-      <div class="form-section">
-        <div class="form-section-title">保底规则 rules.SSR</div>
-        <div class="form-grid">
-          <label>pity 保底抽数</label>
-          <input v-model.number="form.rulesSSR.pity" type="number" class="de-input" />
-          <label>UpTrigger (UP 机制)</label>
-          <input type="checkbox" v-model="form.rulesSSR.UpTrigger" />
-          <label>doubleRateCards（每行一名）</label>
-          <textarea v-model="form.rulesSSR.doubleRateCardsText" class="de-textarea" rows="3" placeholder="概率双倍的角色名" />
+        <!-- 卡池角色名单 -->
+        <div class="form-section">
+          <div class="form-section-title">卡池角色名单 cardNames</div>
+          <div v-if="cardsLoading" class="hint">角色数据加载中…</div>
+          <template v-else>
+            <div class="cp-roster-block" v-for="rar in ['SP', 'SSR', 'SR', 'R']" :key="rar">
+              <div class="cp-roster-label">
+                <span class="rarity-tag" :data-rarity="rar">{{ rar }}</span>
+                <span style="color:#aaa;">{{ form.cardNames[rar].length }} 人已选</span>
+              </div>
+              <CharacterSelector v-model="form.cardNames[rar]" :characterList="cardsByRarity[rar]" sub-title=""
+                hide-title :hide-theme-filter="rar == 'SR' || rar == 'R'" hide-rarity-filter hide-qban-toggle />
+            </div>
+          </template>
         </div>
-      </div>
 
-      <!-- 角色名单 -->
-      <div class="form-section">
-        <div class="form-section-title">卡池角色名单 cardNames</div>
-        <div class="form-grid">
-          <label>SP（每行一名）</label>
-          <textarea v-model="form.cardNames.SPText" class="de-textarea" rows="3" />
-          <label>SSR（每行一名）</label>
-          <textarea v-model="form.cardNames.SSRText" class="de-textarea" rows="4" />
-          <label>SR（每行一名）</label>
-          <textarea v-model="form.cardNames.SRText" class="de-textarea" rows="4" />
-          <label>R（每行一名）</label>
-          <textarea v-model="form.cardNames.RText" class="de-textarea" rows="3" />
+        <!-- SP 保底规则 -->
+        <div class="form-section">
+          <div class="form-section-title">保底规则 rules.SP</div>
+          <div class="form-grid">
+            <label>pity 保底抽数</label>
+            <input v-model.number="form.rulesSP.pity" type="number" class="de-input" />
+            <label>boostAfter</label>
+            <input v-model.number="form.rulesSP.boostAfter" type="number" class="de-input" />
+            <label>boost 每次提升</label>
+            <input v-model.number="form.rulesSP.boost" type="number" step="0.01" class="de-input" />
+            <label>UpTrigger (UP 机制)</label>
+            <input type="checkbox" v-model="form.rulesSP.UpTrigger" />
+            <label>SelectUpCards (自选)</label>
+            <input type="checkbox" v-model="form.rulesSP.SelectUpCards" />
+          </div>
+          <div class="cp-roster-label" style="margin-top: 8px;">
+            <span style="color:#aaa; font-size:12px;">UpCards — 从 SP 名单中选（{{ form.rulesSP.UpCards.length }} 人）</span>
+          </div>
+          <div v-if="spRosterCards.length === 0" class="hint">先在「角色名单」中添加 SP 角色</div>
+          <CharacterSelector v-else v-model="form.rulesSP.UpCards" :characterList="spRosterCards" sub-title=""
+            hide-title hide-theme-filter hide-rarity-filter hide-qban-toggle />
         </div>
-      </div>
 
-      <div class="form-actions">
-        <button class="de-btn primary" :disabled="saving" @click="save">
-          {{ saving ? '保存中…' : '保存到 cardPools.js' }}
-        </button>
-        <button class="de-btn" @click="resetForm">重置</button>
-      </div>
+        <!-- SSR 保底规则 -->
+        <div class="form-section">
+          <div class="form-section-title">保底规则 rules.SSR</div>
+          <div class="cp-roster-label">
+            <span style="color:#aaa; font-size:12px;">doubleRateCards — 从 SSR 名单中选（{{
+              form.rulesSSR.doubleRateCards.length }}
+              人）</span>
+          </div>
+          <div v-if="ssrRosterCards.length === 0" class="hint">先在「角色名单」中添加 SSR 角色</div>
+          <CharacterSelector v-else v-model="form.rulesSSR.doubleRateCards" :characterList="ssrRosterCards" sub-title=""
+            hide-title hide-theme-filter hide-rarity-filter hide-qban-toggle />
+        </div>
+
+        <div class="form-actions">
+          <button class="de-btn primary" :disabled="saving" @click="save">
+            {{ saving ? '保存中…' : '保存到 cardPools.js' }}
+          </button>
+          <button class="de-btn" @click="resetForm">重置</button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
+import CharacterSelector from '@/components/CharacterSelector.vue'
 
 const { data: poolsData, loading, error, load } = useEditorApi('cardpools')
 const { save: saveApi } = useEditorApi('cardpools')
@@ -133,27 +163,121 @@ const { save: saveApi } = useEditorApi('cardpools')
 const poolTypes = ['限定', '常驻', '自选', '祈愿盲盒', '联动', '心愿', '高级常驻']
 const allTypes = [...poolTypes, '其他']
 
+const KNOWN_SSR_KEYS = new Set(['pity', 'doubleRateCards', 'UpTrigger'])
+const KNOWN_SP_KEYS = new Set(['pity', 'boostAfter', 'boost', 'UpTrigger', 'SelectUpCards', 'UpCards'])
+
+// ── 角色数据 ──────────────────────────────────────────
+const allCards = ref([])
+const cardsLoading = ref(false)
+
+async function loadCards() {
+  cardsLoading.value = true
+  try {
+    const res = await fetch('/api/dev-editor/cards')
+    const cards = await res.json()
+    allCards.value = cards.map((c) => ({
+      ...c,
+      theme: typeof c.theme === 'string' ? { id: c.theme } : (c.theme ?? null),
+    }))
+  } catch {
+    console.warn('[CardPoolsTab] 无法加载角色列表')
+  } finally {
+    cardsLoading.value = false
+  }
+}
+
+// name ↔ id 双向映射
+const nameToId = computed(() => {
+  const m = {}
+  for (const c of allCards.value) if (c.name && c.id) m[c.name] = c.id
+  return m
+})
+const idToName = computed(() => {
+  const m = {}
+  for (const c of allCards.value) if (c.id && c.name) m[c.id] = c.name
+  return m
+})
+
+const cardsByRarity = computed(() => {
+  const groups = { SP: [], SSR: [], SR: [], R: [] }
+  for (const c of allCards.value) {
+    if (groups[c.rarity]) groups[c.rarity].push(c)
+  }
+  return groups
+})
+
+function namesToIds(names) {
+  if (!Array.isArray(names)) return []
+  return names.flatMap((n) => {
+    const id = nameToId.value[n]
+    if (!id) { console.warn('[CardPoolsTab] 找不到角色名称:', n); return [] }
+    return [id]
+  })
+}
+
+function idsToNames(ids) {
+  if (!Array.isArray(ids)) return []
+  return ids.flatMap((id) => {
+    const name = idToName.value[id]
+    if (!name) { console.warn('[CardPoolsTab] 找不到角色ID:', id); return [] }
+    return [name]
+  })
+}
+
+// ── 表单（在 watch/computed 引用前先声明）────────────────
+const form = ref(emptyForm())
+
+// 从 SP/SSR 名单中过滤出对应的 card 对象，供 UpCards/doubleRateCards 选择器使用
+const spRosterCards = computed(() =>
+  allCards.value.filter((c) => form.value.cardNames.SP.includes(c.id)),
+)
+const ssrRosterCards = computed(() =>
+  allCards.value.filter((c) => form.value.cardNames.SSR.includes(c.id)),
+)
+
+// SP 名单变化时清理不再存在的 UpCards
+watch(
+  () => form.value.cardNames.SP,
+  (newSP) => {
+    form.value.rulesSP.UpCards = form.value.rulesSP.UpCards.filter((id) => newSP.includes(id))
+  },
+)
+// SSR 名单变化时清理不再存在的 doubleRateCards
+watch(
+  () => form.value.cardNames.SSR,
+  (newSSR) => {
+    form.value.rulesSSR.doubleRateCards = form.value.rulesSSR.doubleRateCards.filter((id) =>
+      newSSR.includes(id),
+    )
+  },
+)
+
+// ── 表单 ──────────────────────────────────────────────
 const typeFilter = ref('')
 const search = ref('')
 const saving = ref(false)
 const saveMsg = ref(null)
 const isNew = ref(false)
+const isUnsupported = ref(false)
 
 function emptyForm() {
   return {
     poolId: '',
     type: '限定',
     name: '',
-    imageUrl: '',
+    imageUrl: '/images/cardpools-icon/',
     isAvailable: true,
     rates: { SP: 0.0125, SSR: 0.06, SR: 0.2 },
-    rulesSP: { pity: 60, boostAfter: 40, boost: 0.02, UpTrigger: true, SelectUpCards: false, UpCardsText: '' },
-    rulesSSR: { pity: 80, UpTrigger: false, doubleRateCardsText: '' },
-    cardNames: { SPText: '', SSRText: '', SRText: '', RText: '' },
+    rulesSP: { pity: 60, boostAfter: 40, boost: 0.02, UpTrigger: true, SelectUpCards: false, UpCards: [] },
+    rulesSSR: { doubleRateCards: [], _pity: null },
+    cardNames: { SP: [], SSR: [], SR: [], R: [] },
   }
 }
 
-const form = ref(emptyForm())
+function fixWebp(field) {
+  const v = form.value[field]
+  if (v && !v.endsWith('/') && !v.endsWith('.webp')) form.value[field] = v + '.webp'
+}
 
 const filteredPools = computed(() => {
   if (!poolsData.value) return []
@@ -167,20 +291,16 @@ const filteredPools = computed(() => {
   })
 })
 
-function toLines(arr) {
-  return Array.isArray(arr) ? arr.join('\n') : ''
-}
-
-function fromLines(text) {
-  return text
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
+function detectUnsupported(pool) {
+  const ssrKeys = Object.keys(pool.rules?.SSR ?? {})
+  const spKeys = Object.keys(pool.rules?.SP ?? {})
+  return ssrKeys.some((k) => !KNOWN_SSR_KEYS.has(k)) || spKeys.some((k) => !KNOWN_SP_KEYS.has(k))
 }
 
 function selectPool(key, pool) {
   isNew.value = false
   saveMsg.value = null
+  isUnsupported.value = detectUnsupported(pool)
   const rSP = pool.rules?.SP ?? {}
   const rSSR = pool.rules?.SSR ?? {}
   form.value = {
@@ -200,24 +320,24 @@ function selectPool(key, pool) {
       boost: rSP.boost ?? 0.02,
       UpTrigger: !!rSP.UpTrigger,
       SelectUpCards: !!rSP.SelectUpCards,
-      UpCardsText: toLines(rSP.UpCards),
+      UpCards: namesToIds(rSP.UpCards),
     },
     rulesSSR: {
-      pity: rSSR.pity ?? 80,
-      UpTrigger: !!rSSR.UpTrigger,
-      doubleRateCardsText: toLines(rSSR.doubleRateCards),
+      doubleRateCards: namesToIds(rSSR.doubleRateCards),
+      _pity: rSSR.pity ?? null,
     },
     cardNames: {
-      SPText: toLines(pool.cardNames?.SP),
-      SSRText: toLines(pool.cardNames?.SSR),
-      SRText: toLines(pool.cardNames?.SR),
-      RText: toLines(pool.cardNames?.R),
+      SP: namesToIds(pool.cardNames?.SP),
+      SSR: namesToIds(pool.cardNames?.SSR),
+      SR: namesToIds(pool.cardNames?.SR),
+      R: namesToIds(pool.cardNames?.R),
     },
   }
 }
 
 function newPool() {
   isNew.value = true
+  isUnsupported.value = false
   saveMsg.value = null
   form.value = emptyForm()
 }
@@ -240,20 +360,19 @@ function buildPayload() {
   if (f.rulesSP.boost) rSP.boost = f.rulesSP.boost
   if (f.rulesSP.UpTrigger) rSP.UpTrigger = true
   if (f.rulesSP.SelectUpCards) rSP.SelectUpCards = true
-  const upCards = fromLines(f.rulesSP.UpCardsText)
+  const upCards = idsToNames(f.rulesSP.UpCards)
   if (upCards.length) rSP.UpCards = upCards
 
   const rSSR = {}
-  if (f.rulesSSR.pity) rSSR.pity = f.rulesSSR.pity
-  if (f.rulesSSR.UpTrigger) rSSR.UpTrigger = true
-  const dCards = fromLines(f.rulesSSR.doubleRateCardsText)
+  if (f.rulesSSR._pity) rSSR.pity = f.rulesSSR._pity
+  const dCards = idsToNames(f.rulesSSR.doubleRateCards)
   if (dCards.length) rSSR.doubleRateCards = dCards
 
   const cardNames = {}
-  const sp = fromLines(f.cardNames.SPText)
-  const ssr = fromLines(f.cardNames.SSRText)
-  const sr = fromLines(f.cardNames.SRText)
-  const r = fromLines(f.cardNames.RText)
+  const sp = idsToNames(f.cardNames.SP)
+  const ssr = idsToNames(f.cardNames.SSR)
+  const sr = idsToNames(f.cardNames.SR)
+  const r = idsToNames(f.cardNames.R)
   if (sp.length) cardNames.SP = sp
   if (ssr.length) cardNames.SSR = ssr
   if (sr.length) cardNames.SR = sr
@@ -289,9 +408,27 @@ async function save() {
   }
 }
 
-onMounted(load)
+onMounted(() => Promise.all([load(), loadCards()]))
 </script>
 
-<style>
-/* CardPoolsTab */
+<style scoped>
+.cp-unsupported {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(255, 160, 64, 0.07);
+  border: 1px solid rgba(255, 160, 64, 0.3);
+  border-radius: 6px;
+  color: #ffa040;
+}
+
+.cp-roster-block {
+  margin-bottom: 8px;
+}
+
+.cp-roster-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
 </style>

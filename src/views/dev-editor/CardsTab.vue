@@ -16,12 +16,8 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div
-          v-for="card in filteredCards"
-          :key="card.id"
-          :class="['list-item', { active: form.id === card.id }]"
-          @click="selectCard(card)"
-        >
+        <div v-for="card in filteredCards" :key="card.id" :class="['list-item', { active: form.id === card.id }]"
+          @click="selectCard(card)">
           <span class="rarity-tag" :data-rarity="card.rarity">{{ card.rarity }}</span>
           <span class="item-name">{{ card.name }}</span>
           <span class="item-id">#{{ card.id }}</span>
@@ -31,50 +27,58 @@
 
     <!-- 右侧：编辑表单 -->
     <div class="form-panel">
-      <div class="form-title">{{ isNew ? '新增角色' : `编辑角色 #${form.id}` }}</div>
-      <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
-
-      <div class="form-grid">
-        <label>ID</label>
-        <input
-          v-model="form.id"
-          class="de-input"
-          :disabled="!isNew"
-          placeholder="如 1110"
-        />
-
-        <label>名称</label>
-        <input v-model="form.name" class="de-input" placeholder="如 贪吃天使" />
-
-        <label>稀有度</label>
-        <select v-model="form.rarity" class="de-select">
-          <option v-for="r in rarities" :key="r" :value="r">{{ r }}</option>
-        </select>
-
-        <label>卡面图 URL</label>
-        <input v-model="form.imageUrl" class="de-input" placeholder="/images/cards/1110.webp" />
-
-        <label>真名</label>
-        <input v-model="form.realname" class="de-input" placeholder="如 芙洛丽亚" />
-
-        <label>主题属性</label>
-        <select v-model="form.theme" class="de-select">
-          <option v-for="th in themes" :key="th.value" :value="th.value">{{ th.label }}</option>
-        </select>
-
-        <label>Q版图 URL</label>
-        <input v-model="form.qban_url" class="de-input" placeholder="/images/qban/1110.webp（可选）" />
-
-        <label>非游戏内角色</label>
-        <input type="checkbox" v-model="form.notInGame" />
+      <div v-if="!isNew && !form.id" class="form-empty">
+        在左侧选择要编辑的角色，或点击「+ 新增角色」
       </div>
+      <template v-else>
+        <div class="form-title">{{ isNew ? '新增角色' : `编辑角色 #${form.id}` }}</div>
+        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
 
-      <div class="form-actions">
-        <button class="de-btn primary" :disabled="saving" @click="save">
-          {{ saving ? '保存中…' : '保存到 cards.js' }}
-        </button>
-        <button class="de-btn" @click="resetForm">重置</button>
-      </div>
+        <div class="form-grid">
+          <label>ID</label>
+          <input v-model="form.id" class="de-input" :disabled="!isNew" placeholder="如 1110" @blur="autofillImageUrl" />
+
+          <label>名称</label>
+          <input v-model="form.name" class="de-input" placeholder="如 贪吃天使" />
+
+          <label>稀有度</label>
+          <select v-model="form.rarity" class="de-select">
+            <option v-for="r in rarities" :key="r" :value="r">{{ r }}</option>
+          </select>
+
+          <label>卡面图 URL</label>
+          <div>
+            <input v-model="form.imageUrl" class="de-input" style="width: 100%;" placeholder="/images/cards/1110.webp"
+              @blur="fixWebp('imageUrl')" />
+            <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
+          </div>
+
+          <label>真名</label>
+          <input v-model="form.realname" class="de-input" placeholder="如 芙洛丽亚" />
+
+          <label>主题属性</label>
+          <select v-model="form.theme" class="de-select">
+            <option v-for="th in themes" :key="th.value" :value="th.value">{{ th.label }}</option>
+          </select>
+
+          <label>Q版图 URL</label>
+          <div>
+            <input v-model="form.qban_url" class="de-input" style="width: 100%;" placeholder="/images/qban/1110.webp"
+              @blur="fixWebp('qban_url')" />
+            <img v-if="form.qban_url" :src="form.qban_url" class="img-preview" />
+          </div>
+
+          <label>非游戏内角色</label>
+          <input type="checkbox" v-model="form.notInGame" />
+        </div>
+
+        <div class="form-actions">
+          <button class="de-btn primary" :disabled="saving" @click="save">
+            {{ saving ? '保存中…' : '保存到 cards.js' }}
+          </button>
+          <button class="de-btn" @click="resetForm">重置</button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -108,10 +112,10 @@ const emptyForm = () => ({
   id: '',
   name: '',
   rarity: 'SSR',
-  imageUrl: '',
+  imageUrl: '/images/cards/',
   realname: '',
   theme: 'cake',
-  qban_url: '',
+  qban_url: '/images/qban/',
   notInGame: false,
 })
 
@@ -164,6 +168,17 @@ function resetForm() {
   }
 }
 
+// 当id填写完成后自动补全图片和Q版URL
+function autofillImageUrl() {
+  form.value.imageUrl = `/images/cards/${form.value.id}.webp`
+  form.value.qban_url = `/images/qban/${form.value.id}.webp`
+}
+
+function fixWebp(field) {
+  const v = form.value[field]
+  if (v && !v.endsWith('/') && !v.endsWith('.webp')) form.value[field] = v + '.webp'
+}
+
 async function save() {
   if (!form.value.id || !form.value.name) {
     saveMsg.value = { ok: false, text: 'ID 和名称不能为空' }
@@ -189,4 +204,6 @@ async function save() {
 onMounted(load)
 </script>
 
-<style>/* CardsTab */</style>
+<style scoped>
+/* CardsTab */
+</style>

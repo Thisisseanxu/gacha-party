@@ -1,13 +1,13 @@
 <template>
   <div class="character-selection-container">
-    <h2 class="selection-title">{{ title }}</h2>
+    <h2 v-if="!hideTitle" class="selection-title">{{ title }}</h2>
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
     <!-- 筛选栏 -->
     <div class="filter-bar"
-      v-if="availableThemes.length > 0 || availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
+      v-if="(!hideThemeFilter && availableThemes.length > 0) || (!hideRarityFilter && availableRarities.length > 0) || (!hideQbanToggle && hasAnyQban) || showRealNameToggle">
       <!-- 第一行：主题筛选 -->
-      <div class="filter-row" v-if="availableThemes.length > 0">
+      <div class="filter-row" v-if="!hideThemeFilter && availableThemes.length > 0">
         <div class="theme-chips">
           <button v-for="theme in availableThemes" :key="theme.id" class="filter-chip theme-chip"
             :class="{ active: activeThemeFilter === theme.id }" @click="toggleThemeFilter(theme.id)">
@@ -17,8 +17,9 @@
         </div>
       </div>
       <!-- 第二行：稀有度筛选 + 功能切换按钮 -->
-      <div class="filter-row" v-if="availableRarities.length > 0 || hasAnyQban || showRealNameToggle">
-        <div class="rarity-chips">
+      <div class="filter-row"
+        v-if="(!hideRarityFilter && availableRarities.length > 0) || (!hideQbanToggle && hasAnyQban) || showRealNameToggle">
+        <div v-if="!hideRarityFilter" class="rarity-chips">
           <button v-for="rarity in availableRarities" :key="rarity" class="filter-chip rarity-chip"
             :class="[rarity, { active: activeRarityFilter === rarity }]" @click="toggleRarityFilter(rarity)">
             {{ rarity }}
@@ -28,7 +29,8 @@
           @click="internalShowRealName = !internalShowRealName">
           真名
         </button>
-        <button v-if="hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }" @click="useQban = !useQban">
+        <button v-if="!hideQbanToggle && hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }"
+          @click="useQban = !useQban">
           {{ useQban ? '立绘' : 'Q版' }}
         </button>
       </div>
@@ -118,6 +120,22 @@ const props = defineProps({
     default: '放心，你可以随时回来重选！',
   },
   showQban: {
+    type: Boolean,
+    default: false,
+  },
+  hideTitle: {
+    type: Boolean,
+    default: false,
+  },
+  hideThemeFilter: {
+    type: Boolean,
+    default: false,
+  },
+  hideRarityFilter: {
+    type: Boolean,
+    default: false,
+  },
+  hideQbanToggle: {
     type: Boolean,
     default: false,
   },

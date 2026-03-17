@@ -14,6 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: calc(100vh - 120px);
 }
 
 .form-panel {
@@ -41,6 +42,22 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #2a2b30;
+}
+
+.item-list::-webkit-scrollbar {
+  width: 5px;
+}
+.item-list::-webkit-scrollbar-track {
+  background: #2a2b30;
+}
+.item-list::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+.item-list::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
 }
 
 .list-item {
@@ -125,6 +142,10 @@
   font-size: 12px;
   color: #aaa;
   text-align: right;
+}
+
+.form-grid input[type='checkbox'] {
+  justify-self: start;
 }
 
 .form-section {
@@ -404,4 +425,44 @@
   flex: 1;
   color: #555;
   font-style: italic;
+}
+
+/* ── 图片预览 ── */
+.img-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 80px;
+  margin-top: 5px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  object-fit: contain;
+  background: #1a1a1e;
+}
+
+/* ── 徽章配置缺失高亮 ── */
+.list-item.missing-config {
+  border-left: 2px solid #ffa040;
+  background: rgba(255, 160, 64, 0.07);
+}
+
+.list-item.missing-config:hover {
+  background: rgba(255, 160, 64, 0.13);
+}
+
+.missing-warn {
+  margin-left: auto;
+  color: #ffa040;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* ── 右侧空状态 ── */
+.form-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #555;
+  font-size: 13px;
+  text-align: center;
 }

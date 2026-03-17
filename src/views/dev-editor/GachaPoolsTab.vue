@@ -65,7 +65,7 @@
               <span class="pool-id">{{ id }}</span>
               <span v-if="nameMap[id]" class="pool-name">{{ nameMap[id] }}</span>
               <span v-else class="no-name-warn">⚠ 无名称</span>
-              <button class="de-btn small danger" @click="markEnded(id)">标记已结束</button>
+              <button class="de-btn small danger" @click="markEnded(id)">已结束</button>
             </div>
             <div v-if="activePools.length === 0" class="hint">暂无未结束卡池</div>
           </div>
@@ -80,7 +80,7 @@
               <span class="pool-id">{{ id }}</span>
               <span v-if="nameMap[id]" class="pool-name">{{ nameMap[id] }}</span>
               <span v-else class="no-name-warn">⚠ 无名称</span>
-              <button class="de-btn small" @click="restoreActive(id)">恢复未结束</button>
+              <button class="de-btn small" @click="restoreActive(id)">未结束</button>
             </div>
             <div v-if="endedIds.length === 0" class="hint">暂无已结束卡池</div>
           </div>
@@ -308,12 +308,12 @@ onMounted(reloadAll)
 
 .gp-row3-main {
   flex: 2;
-  min-width: 500px;
+  min-width: 400px;
 }
 
 .gp-row3-side {
   flex: 1;
-  min-width: 280px;
+  min-width: 260px;
 }
 
 .gp-row3-scroll {
