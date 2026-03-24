@@ -192,7 +192,7 @@ function writeCardPool(poolId, poolData) {
     existing.value = buildPoolNode(poolData)
   } else {
     const newProp = b.property('init', b.identifier(poolId), buildPoolNode(poolData))
-    obj.properties.push(newProp)
+    obj.properties.unshift(newProp)
   }
   writeFileSync(CARD_POOLS_FILE, recast.print(ast).code, 'utf8')
 }

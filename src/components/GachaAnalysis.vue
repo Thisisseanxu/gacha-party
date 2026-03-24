@@ -398,7 +398,7 @@ const NORMALPOOL_TITLE_MAP = {
   120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
 } // 区间：0-8.75，8.75-9.75，9.75-10.5，10.5-11.5，11.5-12.25，12.25-13.25，13.25+
 
-const CurrentSelectedPool = ref('Limited') // 控制显示哪个卡池
+const CurrentSelectedPool = ref('AllLimited') // 控制显示哪个卡池
 // 合成下拉框的选项，并进行分组
 const cardPoolOptions = ref([
   // 默认展开的顶级选项
@@ -406,7 +406,6 @@ const cardPoolOptions = ref([
   { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
   { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
   { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
-  { id: 'NewYear', name: CARDPOOLS_NAME_MAP['NewYear'] }, // 新春自选卡池
   { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
   { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
   // 可折叠的分组
@@ -418,6 +417,7 @@ const cardPoolOptions = ref([
   ...props.FUKE_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
   { id: '---', name: '其他扭蛋机' }, // 分隔符
   { id: 'QiYuan', name: CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
+  { id: 'NewYear', name: CARDPOOLS_NAME_MAP['NewYear'] }, // 新春自选卡池
   { id: 'Wish', name: CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
 ])
 

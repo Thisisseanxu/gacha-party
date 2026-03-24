@@ -25,7 +25,7 @@ import './dev-editor/dev-shared.css'; // 公共样式
 
 const tabs = [
   { key: 'cards', label: '角色数据' },
-  { key: 'cardpools', label: '卡池配置' },
+  { key: 'cardpools', label: '模拟器配置' },
   { key: 'huizhang', label: '徽章槽位' },
   { key: 'gachapools', label: '卡池数据' },
 ]

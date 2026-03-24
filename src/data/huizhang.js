@@ -63,6 +63,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1110: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -73,6 +74,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1111: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -83,6 +85,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1906: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -93,6 +96,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1211: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -103,6 +107,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1212: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -113,6 +118,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1309: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -123,6 +129,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1312: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -133,6 +140,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1311: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -143,6 +151,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1408: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -153,6 +162,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1709: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -163,6 +173,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1710: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -173,6 +184,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1711: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -183,6 +195,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1502: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -193,6 +206,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1610: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -203,6 +217,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1609: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -213,6 +228,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1503: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -223,6 +239,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1809: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -233,6 +250,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1811: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -243,6 +261,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1810: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -253,6 +272,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11006: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -263,6 +283,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11007: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -273,6 +294,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11008: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -283,6 +305,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   11101: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -293,6 +316,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11105: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -303,6 +327,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11009: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -313,6 +338,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1605: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -323,6 +349,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1611: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -333,6 +360,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   11001: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -343,6 +371,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11003: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -353,6 +382,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1410: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -363,6 +393,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1411: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -373,6 +404,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1105: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -383,6 +415,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1106: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -393,6 +426,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1108: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -403,6 +437,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1109: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -411,6 +446,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1201: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -421,6 +457,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1202: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -429,6 +466,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1203: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -439,6 +477,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1210: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -449,6 +488,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1206: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -459,6 +499,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1301: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -467,6 +508,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1302: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -477,6 +519,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1305: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -487,6 +530,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1310: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -497,6 +541,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1808: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -507,6 +552,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1401: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -515,6 +561,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1402: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -525,6 +572,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1403: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -535,6 +583,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1504: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -545,6 +594,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1701: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -553,6 +603,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1703: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -563,6 +614,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1704: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -573,6 +625,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1708: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -583,6 +636,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1601: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -591,6 +645,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1602: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -601,6 +656,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1603: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -611,6 +667,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1608: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -621,6 +678,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1801: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -629,6 +687,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1803: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -639,6 +698,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1807: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -649,6 +709,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1806: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -659,6 +720,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1407: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -669,6 +731,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1706: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -679,6 +742,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1103: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -687,6 +751,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1104: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -695,9 +760,11 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1209: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
   },
+
   1205: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -706,6 +773,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1207: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -714,6 +782,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1303: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -722,6 +791,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1304: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -730,6 +800,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1404: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -738,6 +809,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1405: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -746,6 +818,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1606: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -754,6 +827,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1702: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -762,6 +836,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1604: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -770,6 +845,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1805: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -778,24 +854,31 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1101: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
   },
+
   1107: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
   },
+
   1204: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
   },
+
   1306: {
     shape: [HUIZHANG_SHAPES.CIRCLE, HUIZHANG_SHAPES.CIRCLE],
   },
+
   1406: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
   },
+
   1607: {
     shape: [HUIZHANG_SHAPES.DIAMOND, HUIZHANG_SHAPES.DIAMOND],
   },
+
   1712: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -806,6 +889,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1112: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -816,6 +900,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1113: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -826,6 +911,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1409: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -836,6 +922,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11010: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -846,6 +933,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1902: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -856,6 +944,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1904: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -866,6 +955,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1713: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -876,6 +966,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1714: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -886,6 +977,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.CIRCLE,
     ],
   },
+
   1506: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,
@@ -896,6 +988,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1612: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -906,6 +999,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   1812: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -916,6 +1010,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
   1813: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -926,6 +1021,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11004: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
@@ -936,6 +1032,7 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.DIAMOND,
     ],
   },
+
   11005: {
     shape: [
       HUIZHANG_SHAPES.CIRCLE,
@@ -946,6 +1043,28 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
+  11103: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND
+    ]
+  },
+
+  11104: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD
+    ]
+  }
 }
 
 // 获取角色的配置（theme 和 qban_url 从 cards.js 读取，合并后返回）
