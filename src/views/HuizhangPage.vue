@@ -399,7 +399,7 @@ const closeAgreementPopUp = () => {
 }
 
 const filteredCharacterList = computed(() => {
-  return allCards.filter((c) => c.id.match(/^\d+$/))
+  return allCards.filter((c) => !c.notInGame)
 })
 
 const displayCharacterList = computed(() => {

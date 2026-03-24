@@ -180,7 +180,7 @@
           <div class="slot-row-top" style="justify-content: center">
             <span class="slot-time-small">{{
               autoSaveTime ? formatTime(autoSaveTime) : '暂无记录'
-              }}</span>
+            }}</span>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button" @click="loadAutoSave" :disabled="!autoSaveTime">
@@ -199,7 +199,7 @@
             <input v-model="slot.name" class="slot-name-input" :placeholder="'点击输入存档名'" />
             <span class="slot-time-small">{{
               slot.timestamp ? formatTime(slot.timestamp) : '空'
-              }}</span>
+            }}</span>
             <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
               &times;
             </button>
@@ -433,8 +433,8 @@ const displayableCharacterList = computed(() => {
     realname: c.name,
     isCustom: true,
   }))
-  // 仅包含纯数字id的预设角色
-  return [...allCards.filter((card) => /^\d+$/.test(card.id)), ...formattedCustom]
+  // 仅包含游戏内的预设角色
+  return [...allCards.filter((card) => !card.notInGame), ...formattedCustom]
 })
 
 // 监听自定义角色数组的变化，并自动保存到localStorage

@@ -149,8 +149,8 @@ const activeRarityFilter = ref(null)
 const useQban = ref(props.showQban)
 const internalShowRealName = ref(props.showRealNameToggle)
 
-// 自定义角色判断：ID 不是纯数字的为自定义角色
-const isCustomCard = (card) => !card.id?.toString().match(/^\d+$/)
+// 自定义角色判断：根据 notInGame 或 isCustom 属性判断
+const isCustomCard = (card) => !!card.notInGame || !!card.isCustom
 
 const hasCustomCards = computed(() => props.characterList.some(isCustomCard))
 
@@ -210,7 +210,7 @@ const showAddCustomButton = computed(() => {
 })
 
 const filteredCards = computed(() => {
-  return props.characterList.filter((card) => {
+  const filtered = props.characterList.filter((card) => {
     const isCustom = isCustomCard(card)
 
     // 应用主题筛选
@@ -222,6 +222,15 @@ const filteredCards = computed(() => {
     // 应用稀有度筛选
     if (activeRarityFilter.value && card.rarity !== activeRarityFilter.value) return false
     return true
+  })
+
+  // Sort by rarity (SP > SSR > SR > R), maintaining original order for same rarity
+  return filtered.sort((a, b) => {
+    const rarityA = RARITY_ORDER.indexOf(a.rarity)
+    const rarityB = RARITY_ORDER.indexOf(b.rarity)
+    const orderA = rarityA === -1 ? RARITY_ORDER.length : rarityA
+    const orderB = rarityB === -1 ? RARITY_ORDER.length : rarityB
+    return orderA - orderB
   })
 })
 
