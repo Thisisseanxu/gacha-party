@@ -48,6 +48,78 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 定义卡池配置
 // 注意：推荐使用可视化编辑器进行修改，在本地运行npm run dev后访问地址/dev在模拟器配置一栏进行编辑
 export const cardPools = {
+  // 春日自选扩招
+  chunrizixuankuozhao: {
+    type: '春日自选',
+    name: '春日自选扩招',
+    isAvailable: true,
+    imageUrl: '/images/cardpools-icon/1002.webp',
+
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2,
+    },
+
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        WishSelection: true,
+        MaximumSelection: 4,
+      },
+
+      [SSR]: {
+        doubleRateCards: ['冰匙娃娃', '甜甜圈医师'],
+      },
+    },
+
+    cardNames: {
+      [SP]: [
+        '音叉投手',
+        '应援战士',
+        '彩虹射手',
+        '绯色巧克力',
+        '约定天使',
+        '粉白梦魔',
+        '海军大将',
+        '海洋果冻',
+      ],
+
+      [SSR]: [
+        '卷卷战士',
+        '甜甜圈医师',
+        '甜蜜迫击炮',
+        '深睡千竹',
+        '琉璃治疗师',
+        '底鼓坦克',
+        '歌姬小喵',
+        '功夫沙袋',
+        '竹子水车',
+        '冰匙娃娃',
+      ],
+
+      [SR]: [
+        '珍珠射手',
+        '饼干骑士',
+        '浅睡千竹',
+        '梦游月兔',
+        '劈咔灯泡',
+        '弹幕发射姬',
+        '拳头礼盒',
+        '贝斯战士',
+        '电音射手',
+        '液氮喷射器',
+        '雪球投掷姬',
+        '家用喷火枪',
+        '消防栓',
+      ],
+
+      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
+    },
+  },
+
   konglujingying: {
     type: '限定',
     name: '空路菁英',
@@ -826,12 +898,15 @@ export const cardPools = {
   museyaoqinghan: {
     type: '联动',
     name: '暮色邀请函',
+    isAvailable: true,
     imageUrl: '/images/cardpools-icon/10092.webp',
+
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
       [SR]: 0.2,
     },
+
     rules: {
       [SP]: {
         pity: 60,
@@ -840,10 +915,14 @@ export const cardPools = {
         SelectUpCards: true,
         UpCards: ['血族女王'],
       },
+
+      [SSR]: {},
     },
+
     cardNames: {
       [SP]: ['血族女王'],
       [SSR]: ['火焰魔女', '油瓶射手', '棉花糖战士', '椒椒射手'],
+
       [SR]: [
         '珍珠射手',
         '饼干骑士',
@@ -859,6 +938,7 @@ export const cardPools = {
         '浅睡千竹',
         '贝斯战士',
       ],
+
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
   },
