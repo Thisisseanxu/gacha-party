@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-wrapper" v-if="!isFullscreen">
+  <div class="floating-wrapper" v-if="!isFullscreen && !isFloatingButtonHidden">
     <div class="floating-home-button" @click="goToHome"></div>
 
     <div class="hints-container">
@@ -21,6 +21,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { colors } from '@/styles/colors.js'
+import { isFloatingButtonHidden } from '@/utils/floatingButtonState.js'
 
 const props = defineProps({
   isUpdating: {

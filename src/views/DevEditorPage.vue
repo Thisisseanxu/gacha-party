@@ -1,5 +1,6 @@
 <template>
   <div class="dev-editor-page">
+    <NoFloatingButton />
     <div class="tab-bar">
       <button
         v-for="t in tabs"
@@ -25,6 +26,7 @@ import CardsTab from './dev-editor/CardsTab.vue'
 import CardPoolsTab from './dev-editor/CardPoolsTab.vue'
 import HuizhangTab from './dev-editor/HuizhangTab.vue'
 import GachaPoolsTab from './dev-editor/GachaPoolsTab.vue'
+import NoFloatingButton from '@/components/NoFloatingButton.vue'
 import './dev-editor/dev-shared.css' // 公共样式
 
 const tabs = [
