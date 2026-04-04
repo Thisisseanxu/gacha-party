@@ -128,7 +128,7 @@
           <div class="rarity-counts" v-if="gachaHistory.length > 0">
             <span v-if="rarityCounts[SP]" class="rarity-count-item text-rarity-sp">限定×{{ rarityCounts[SP] }}</span>
             <span v-if="rarityCounts[SSR]" class="rarity-count-item text-rarity-ssr">SSR×{{ rarityCounts[SSR]
-              }}</span>
+            }}</span>
             <span v-if="rarityCounts[SR]" class="rarity-count-item text-rarity-sr">SR×{{ rarityCounts[SR] }}</span>
             <span v-if="rarityCounts[R]" class="rarity-count-item text-rarity-r">R×{{ rarityCounts[R] }}</span>
           </div>
@@ -165,7 +165,8 @@
                   `rarity-border-${card.rarity.toLowerCase()}`,
                   { 'highlight-rarity': isHighlightRarity(card.rarity) },
                 ]">
-                  <img :src="card.imageUrl || '/images/cards/1101.webp'" :alt="`${card.name}的立绘图`" class="card-image" />
+                  <img :src="card.imageUrl || '/images/characters/1101.webp'" :alt="`${card.name}的立绘图`"
+                    class="card-image" />
                 </div>
                 <p class="card-name">{{ card.name }}</p>
               </div>

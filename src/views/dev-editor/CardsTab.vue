@@ -48,8 +48,8 @@
 
           <label>卡面图 URL</label>
           <div>
-            <input v-model="form.imageUrl" class="de-input" style="width: 100%;" placeholder="/images/cards/1110.webp"
-              @blur="fixWebp('imageUrl')" />
+            <input v-model="form.imageUrl" class="de-input" style="width: 100%;"
+              placeholder="/images/characters/1110.webp" @blur="fixWebp('imageUrl')" />
             <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
           </div>
 
@@ -111,8 +111,8 @@ const isNew = ref(false)
 const emptyForm = () => ({
   id: '',
   name: '',
-  rarity: 'SSR',
-  imageUrl: '/images/cards/',
+  rarity: 'SP',
+  imageUrl: '/images/characters/',
   realname: '',
   theme: 'cake',
   qban_url: '/images/qban/',
@@ -170,7 +170,7 @@ function resetForm() {
 
 // 当id填写完成后自动补全图片和Q版URL
 function autofillImageUrl() {
-  form.value.imageUrl = `/images/cards/${form.value.id}.webp`
+  form.value.imageUrl = `/images/characters/${form.value.id}.webp`
   form.value.qban_url = `/images/qban/${form.value.id}.webp`
 }
 

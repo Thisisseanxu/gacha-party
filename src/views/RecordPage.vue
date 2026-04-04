@@ -55,7 +55,7 @@
         <p>
           使用小程序获取抽卡记录<br /><span class="highlight">微信搜索“织夜工具箱”或扫描小程序码</span>
         </p>
-        <img src="/images/mp_weixin.jpg" class="mp-weixin-image" />
+        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
         <p>使用教程</p>
         <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
           <iframe

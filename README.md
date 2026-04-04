@@ -106,9 +106,9 @@
 
 │   ├── images/             # 项目中使用的图片资源
 
-│   │   ├── cards/          # 角色立绘
+│   │   ├── characters/          # 角色立绘
 
-│   │   ├── cardpools-icon/ # 卡池封面
+│   │   ├── cardpools/ # 卡池封面
 
 │   └── favicon.ico
 

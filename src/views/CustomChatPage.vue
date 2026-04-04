@@ -543,7 +543,7 @@ const getCardAvatar = (cardId) => {
     return customCard.imageUrl
   }
   // 都找不到则返回占位图
-  return '/images/cards/placeholder.jpg'
+  return '/images/characters/placeholder.webp'
 }
 
 const getCardName = (cardId) => {

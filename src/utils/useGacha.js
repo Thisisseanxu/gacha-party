@@ -319,7 +319,12 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     // 如果某种稀有度没有角色，返回错误角色
     if (possibleCards.length === 0) {
       logger.warn(`出现卡池没有对应卡的情况，请检查卡池设置和保底规则。`)
-      return { id: 404, name: '卡池出现错误', rarity: '', imageUrl: '/images/cards/404.webp ' }
+      return {
+        id: 404,
+        name: '卡池出现错误',
+        rarity: '',
+        imageUrl: '/images/characters/placeholder.webp ',
+      }
     }
 
     let pulledCard = null

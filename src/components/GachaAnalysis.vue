@@ -1118,7 +1118,7 @@ const fullHistory = computed(() => {
       const defaultCard = {
         name: `未知角色 (${record.item_id})`,
         rarity: R,
-        imageUrl: '/images/cards/placeholder.webp',
+        imageUrl: '/images/characters/placeholder.webp',
       }
       const createdAt = new Date(record.created_at * 1000)
       const formattedDate = `${createdAt.getFullYear()}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${String(createdAt.getDate()).padStart(2, '0')} ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')}:${String(createdAt.getSeconds()).padStart(2, '0')}`

@@ -53,7 +53,7 @@ export const cardPools = {
     type: '春日自选',
     name: '春日自选扩招',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/1002.webp',
+    imageUrl: '/images/cardpools/1002.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -124,7 +124,7 @@ export const cardPools = {
     type: '限定',
     name: '空路菁英',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/10221.webp',
+    imageUrl: '/images/cardpools/10221.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -174,7 +174,7 @@ export const cardPools = {
     type: '联动',
     name: '笔尖与四叶草',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/129.webp',
+    imageUrl: '/images/cardpools/129.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -217,7 +217,7 @@ export const cardPools = {
     type: '限定',
     name: '上元灯火',
     isAvailable: false,
-    imageUrl: '/images/cardpools-icon/10212.webp',
+    imageUrl: '/images/cardpools/10212.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -269,7 +269,7 @@ export const cardPools = {
     type: '限定',
     name: '焰竹火莲',
     isAvailable: false,
-    imageUrl: '/images/cardpools-icon/10201.webp',
+    imageUrl: '/images/cardpools/10201.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -318,7 +318,7 @@ export const cardPools = {
   xinchunzixuan: {
     type: '自选',
     name: '新春自选',
-    imageUrl: '/images/cardpools-icon/1001.webp',
+    imageUrl: '/images/cardpools/1001.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -411,7 +411,7 @@ export const cardPools = {
   qingyuzhifeng: {
     type: '限定',
     name: '青玉之锋',
-    imageUrl: '/images/cardpools-icon/10191.webp',
+    imageUrl: '/images/cardpools/10191.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -456,7 +456,7 @@ export const cardPools = {
   zhimenglvxingtuan: {
     type: '限定',
     name: '织梦旅行团',
-    imageUrl: '/images/cardpools-icon/10182.webp',
+    imageUrl: '/images/cardpools/10182.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -502,7 +502,7 @@ export const cardPools = {
     type: '联动',
     name: '鹅崽召唤器',
     isAvailable: false,
-    imageUrl: '/images/cardpools-icon/122.webp',
+    imageUrl: '/images/cardpools/122.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -550,7 +550,7 @@ export const cardPools = {
   xiangyuejianianhua: {
     type: '限定',
     name: '相约嘉年华',
-    imageUrl: '/images/cardpools-icon/10162.webp',
+    imageUrl: '/images/cardpools/10162.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -595,7 +595,7 @@ export const cardPools = {
   shengdanyaoyue: {
     type: '限定',
     name: '圣诞邀约',
-    imageUrl: '/images/cardpools-icon/120.webp',
+    imageUrl: '/images/cardpools/120.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -638,7 +638,7 @@ export const cardPools = {
     type: '联动',
     name: '酷玩爆米花',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/119.webp',
+    imageUrl: '/images/cardpools/119.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -686,7 +686,7 @@ export const cardPools = {
   xinyuan: {
     type: '心愿',
     name: '心愿自选',
-    imageUrl: '/images/cardpools-icon/1000.webp',
+    imageUrl: '/images/cardpools/1000.webp',
     challengeDisabled: true,
     rates: {
       [SP]: SP_BASE_RATE,
@@ -770,7 +770,7 @@ export const cardPools = {
   chunianglaila: {
     type: '限定',
     name: '厨娘来啦！',
-    imageUrl: '/images/cardpools-icon/10122.webp',
+    imageUrl: '/images/cardpools/10122.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -812,7 +812,7 @@ export const cardPools = {
   chaopingniudanji: {
     type: '联动',
     name: '超频扭蛋机',
-    imageUrl: '/images/cardpools-icon/10112.webp',
+    imageUrl: '/images/cardpools/10112.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -856,7 +856,7 @@ export const cardPools = {
   mengguirenkezhen: {
     type: '限定',
     name: '萌鬼认可证',
-    imageUrl: '/images/cardpools-icon/10102.webp',
+    imageUrl: '/images/cardpools/10102.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -899,7 +899,7 @@ export const cardPools = {
     type: '联动',
     name: '暮色邀请函',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/10092.webp',
+    imageUrl: '/images/cardpools/10092.webp',
 
     rates: {
       [SP]: SP_BASE_RATE,
@@ -947,7 +947,7 @@ export const cardPools = {
   youyaunyaoqing: {
     type: '限定',
     name: '游园邀请',
-    imageUrl: '/images/cardpools-icon/49.webp',
+    imageUrl: '/images/cardpools/49.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -992,7 +992,7 @@ export const cardPools = {
   qiyuanmanghe1: {
     type: '祈愿盲盒',
     name: '祈愿盲盒-烧烤大师',
-    imageUrl: '/images/cardpools-icon/47.webp',
+    imageUrl: '/images/cardpools/47.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1033,7 +1033,7 @@ export const cardPools = {
   dixiacheshouzhaomu: {
     type: '限定',
     name: '地下车手招募',
-    imageUrl: '/images/cardpools-icon/10012.webp',
+    imageUrl: '/images/cardpools/10012.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1077,7 +1077,7 @@ export const cardPools = {
   niudandazuozhan: {
     type: '限定',
     name: '扭蛋大作战',
-    imageUrl: '/images/cardpools-icon/10062.webp',
+    imageUrl: '/images/cardpools/10062.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1122,7 +1122,7 @@ export const cardPools = {
   zaodaoji: {
     type: '联动',
     name: '早稻叽',
-    imageUrl: '/images/cardpools-icon/10051.webp',
+    imageUrl: '/images/cardpools/10051.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1166,7 +1166,7 @@ export const cardPools = {
   yugangdazuozhan: {
     type: '限定',
     name: '浴缸大作战',
-    imageUrl: '/images/cardpools-icon/10042.webp',
+    imageUrl: '/images/cardpools/10042.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1211,7 +1211,7 @@ export const cardPools = {
   tonghuaguomangheji: {
     type: '限定',
     name: '童话国盲盒机',
-    imageUrl: '/images/cardpools-icon/10032.webp',
+    imageUrl: '/images/cardpools/10032.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1256,7 +1256,7 @@ export const cardPools = {
   wangyoukachi: {
     type: '联动',
     name: '塔菲扭蛋',
-    imageUrl: '/images/cardpools-icon/108.webp',
+    imageUrl: '/images/cardpools/108.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1299,7 +1299,7 @@ export const cardPools = {
   cheshoumangheji: {
     type: '限定',
     name: '车手盲盒机',
-    imageUrl: '/images/cardpools-icon/29.webp',
+    imageUrl: '/images/cardpools/29.webp',
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
@@ -1344,7 +1344,7 @@ export const cardPools = {
     type: '常驻',
     name: '常驻扭蛋',
     isAvailable: true,
-    imageUrl: '/images/cardpools-icon/9.webp',
+    imageUrl: '/images/cardpools/9.webp',
     challengeDisabled: true,
     rates: {
       [SSR]: 0.08,
@@ -1360,43 +1360,43 @@ export const cardPools = {
           {
             id: '1',
             name: '甜品派对',
-            image_url: '/images/cardpools-icon/1.webp',
+            image_url: '/images/cardpools/1.webp',
             cards: ['卷卷战士', '甜甜圈推车', '甜蜜迫击炮', '裱花千竹'],
           },
           {
             id: '2',
             name: '梦境守护',
-            image_url: '/images/cardpools-icon/2.webp',
+            image_url: '/images/cardpools/2.webp',
             cards: ['星星法师', '深睡千竹', '琉璃治疗师', '航天娃娃'],
           },
           {
             id: '3',
             name: '电玩大战',
-            image_url: '/images/cardpools-icon/3.webp',
+            image_url: '/images/cardpools/3.webp',
             cards: ['充电千竹', '首席护盾', '佩宝宝', '电玩少女'],
           },
           {
             id: '4',
             name: '电音国度',
-            image_url: '/images/cardpools-icon/4.webp',
+            image_url: '/images/cardpools/4.webp',
             cards: ['电音琉璃', '底鼓坦克', '歌姬小喵', '重金属吉他'],
           },
           {
             id: '6',
             name: '冰雪世界',
-            image_url: '/images/cardpools-icon/6.webp',
+            image_url: '/images/cardpools/6.webp',
             cards: ['制冰机', '寒冰战士', '织夜超可爱', '球球射手'],
           },
           {
             id: '5',
             name: '火焰国度',
-            image_url: '/images/cardpools-icon/5.webp',
+            image_url: '/images/cardpools/5.webp',
             cards: ['火焰魔女', '油瓶射手', '棉花糖战士', '椒椒射手'],
           },
           {
             id: '8',
             name: '水流世界',
-            image_url: '/images/cardpools-icon/8.webp',
+            image_url: '/images/cardpools/8.webp',
             cards: ['竹子水车', '功夫沙袋', '水枪普拉斯', '强力消防栓'],
           },
         ],
@@ -1456,7 +1456,7 @@ export const cardPools = {
   gaojichangzhu: {
     type: '高级常驻',
     name: '高级常驻扭蛋',
-    imageUrl: '/images/cardpools-icon/10000.webp',
+    imageUrl: '/images/cardpools/10000.webp',
     isAvailable: true,
     rates: {
       [SP]: SP_BASE_RATE,

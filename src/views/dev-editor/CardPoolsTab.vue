@@ -67,7 +67,7 @@
             <label>封面图 URL</label>
             <div>
               <input v-model="form.imageUrl" class="de-input" style="width: 100%;"
-                placeholder="/images/cardpools-icon/10212.webp" @blur="fixWebp('imageUrl')" />
+                placeholder="/images/cardpools/10212.webp" @blur="fixWebp('imageUrl')" />
               <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
             </div>
 
@@ -265,7 +265,7 @@ function emptyForm() {
     poolId: '',
     type: '限定',
     name: '',
-    imageUrl: '/images/cardpools-icon/',
+    imageUrl: '/images/cardpools/',
     isAvailable: true,
     rates: { SP: 0.0125, SSR: 0.06, SR: 0.2 },
     rulesSP: { pity: 60, boostAfter: 40, boost: 0.02, UpTrigger: true, SelectUpCards: false, UpCards: [] },
