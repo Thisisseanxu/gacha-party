@@ -391,16 +391,8 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  qiYuanGachaData: {
-    type: Array,
-    required: true,
-  },
-  wishGachaData: {
-    type: Array,
-    required: true,
-  },
-  newYearGachaData: {
-    type: Array,
+  otherGachaData: {
+    type: Object,
     required: true,
   },
   eventGachaData: {
@@ -428,6 +420,13 @@ const props = defineProps({
   FUKE_CARD_POOLS_ID: {
     type: Array,
   },
+  OTHER_CARD_POOLS_ID: {
+    type: Array,
+  },
+  SPECIAL_OUTSIDE_POOLS: {
+    type: Array,
+    default: () => [],
+  },
   CARDPOOLS_NAME_MAP: {
     type: Object,
   },
@@ -450,9 +449,6 @@ const CARDPOOLS_NAME_MAP = {
   Event: '联动扭蛋',
   Fuke: '复刻扭蛋',
   AdvanceNormal: '高级常驻扭蛋',
-  QiYuan: '祈愿盲盒',
-  Wish: '心愿自选',
-  NewYear: '新春自选',
 }
 
 // 抽数小于字典键值时显示对应称号
@@ -476,76 +472,72 @@ const NORMALPOOL_TITLE_MAP = {
 } // 区间：0-8.75，8.75-9.75，9.75-10.5，10.5-11.5，11.5-12.25，12.25-13.25，13.25+
 
 const CurrentSelectedPool = ref('AllLimited') // 控制显示哪个卡池
-// 合成下拉框的选项，并进行分组
-const cardPoolOptions = ref([
-  // 默认展开的顶级选项
-  { id: 'AllLimited', name: CARDPOOLS_NAME_MAP['AllLimited'] },
-  { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
-  { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
-  { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
-  { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
-  { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
-  // 可折叠的分组
-  { id: '---', name: '限定扭蛋机' }, // 分隔符
-  ...props.LIMITED_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 单卡池，反转以确保新的在上
-  { id: '---', name: '联动扭蛋机' }, // 分隔符
-  ...props.EVENT_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 联动单卡池
-  { id: '---', name: '复刻扭蛋机' }, // 分隔符
-  ...props.FUKE_CARD_POOLS_ID.map((id) => ({ id, name: CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
-  { id: '---', name: '其他扭蛋机' }, // 分隔符
-  { id: 'QiYuan', name: CARDPOOLS_NAME_MAP['QiYuan'] }, // 祈愿盲盒卡池
-  { id: 'NewYear', name: CARDPOOLS_NAME_MAP['NewYear'] }, // 新春自选卡池
-  { id: 'Wish', name: CARDPOOLS_NAME_MAP['Wish'] }, // 心愿自选卡池
-])
 
-// 删除抽数为0的卡池
-cardPoolOptions.value = cardPoolOptions.value.filter((option) => {
-  if (option.id === 'AllLimited') {
-    return (
-      [
-        ...props.limitGachaData,
-        ...props.eventGachaData,
-        ...props.fukeGachaData,
-        ...props.qiYuanGachaData,
-        ...props.wishGachaData,
-        ...props.newYearGachaData,
-      ].length > 0
-    )
-  }
-  if (option.id === 'Limited') {
-    return props.limitGachaData.length > 0
-  }
-  if (option.id === 'Event') {
-    return props.eventGachaData.length > 0
-  }
-  if (option.id === 'Fuke') {
-    return props.fukeGachaData.length > 0
-  }
-  if (option.id === 'Normal') {
-    return props.normalGachaData.length > 0
-  }
-  if (option.id === 'AdvanceNormal') {
-    return props.advancedNormalGachaData.length > 0
-  }
-  if (option.id === 'QiYuan') {
-    return props.qiYuanGachaData.length > 0
-  }
-  if (option.id === 'Wish') {
-    return props.wishGachaData.length > 0
-  }
-  if (option.id === 'NewYear') {
-    return props.newYearGachaData.length > 0
-  }
-  if (option.id === '---') {
-    return true // 保留分隔符
-  }
-  // 单卡池判断：限定池数据中有该gacha_id的记录才保留
-  const allLimitedPoolsData = [
-    ...props.limitGachaData,
-    ...props.eventGachaData,
-    ...props.fukeGachaData,
+// 合成下拉框的选项，并进行分组
+const cardPoolOptions = computed(() => {
+  const options = [
+    // 默认展开的顶级选项
+    { id: 'AllLimited', name: CARDPOOLS_NAME_MAP['AllLimited'] },
+    { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
+    { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
+    { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
+    ...props.SPECIAL_OUTSIDE_POOLS.map((id) => ({ id, name: props.CARDPOOLS_NAME_MAP[id] || id })), // 手动置顶的特殊卡池
+    { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
+    { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
+    // 可折叠的分组
+    { id: '---', name: '限定扭蛋机' }, // 分隔符
+    ...props.LIMITED_CARD_POOLS_ID.map((id) => ({
+      id,
+      name: props.CARDPOOLS_NAME_MAP[id],
+    })).reverse(), // 单卡池，反转以确保新的在上
+    { id: '---', name: '联动扭蛋机' }, // 分隔符
+    ...props.EVENT_CARD_POOLS_ID.map((id) => ({
+      id,
+      name: props.CARDPOOLS_NAME_MAP[id],
+    })).reverse(), // 联动单卡池
+    { id: '---', name: '复刻扭蛋机' }, // 分隔符
+    ...props.FUKE_CARD_POOLS_ID.map((id) => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
+    { id: '---', name: '其他扭蛋机' }, // 分隔符
   ]
-  return allLimitedPoolsData.some((r) => r.gacha_id === Number(option.id))
+
+  // 动态加入其他未被提取的分类外的特殊卡池
+  props.OTHER_CARD_POOLS_ID.forEach((id) => {
+    if (!props.SPECIAL_OUTSIDE_POOLS.includes(id)) {
+      options.push({ id, name: props.CARDPOOLS_NAME_MAP[id] || id })
+    }
+  })
+
+  return options.filter((option) => {
+    if (option.id === 'AllLimited') {
+      return (
+        [
+          ...props.limitGachaData,
+          ...props.eventGachaData,
+          ...props.fukeGachaData,
+          ...Object.values(props.otherGachaData).flat(),
+        ].length > 0
+      )
+    }
+    if (option.id === 'Limited') return props.limitGachaData.length > 0
+    if (option.id === 'Event') return props.eventGachaData.length > 0
+    if (option.id === 'Fuke') return props.fukeGachaData.length > 0
+    if (option.id === 'Normal') return props.normalGachaData.length > 0
+    if (option.id === 'AdvanceNormal') return props.advancedNormalGachaData.length > 0
+    if (option.id === '---') return true // 保留分隔符
+
+    // 其他动态特殊池的显示判断
+    if (props.OTHER_CARD_POOLS_ID.includes(option.id)) {
+      return (props.otherGachaData[option.id] || []).length > 0
+    }
+
+    // 单卡池判断：限定池数据中有该gacha_id的记录才保留
+    const allLimitedPoolsData = [
+      ...props.limitGachaData,
+      ...props.eventGachaData,
+      ...props.fukeGachaData,
+    ]
+    return allLimitedPoolsData.some((r) => r.gacha_id === Number(option.id))
+  })
 })
 
 const isSinglePool = computed(
@@ -554,12 +546,10 @@ const isSinglePool = computed(
       'Limited',
       'Normal',
       'AdvanceNormal',
-      'QiYuan',
-      'Wish',
-      'NewYear',
       'Event',
       'Fuke',
       'AllLimited',
+      ...props.OTHER_CARD_POOLS_ID,
     ].includes(CurrentSelectedPool.value),
 )
 
@@ -625,23 +615,11 @@ const activeAdvancedNormalData = computed(() =>
     : props.advancedNormalGachaData,
 )
 
-const activeQiYuanData = computed(() =>
-  isReviewing.value && CurrentSelectedPool.value === 'QiYuan'
+// 动态获取其他类型的当前状态记录
+const getActiveOtherData = (id) =>
+  isReviewing.value && CurrentSelectedPool.value === id
     ? reviewRecords.value
-    : props.qiYuanGachaData,
-)
-
-const activeWishData = computed(() =>
-  isReviewing.value && CurrentSelectedPool.value === 'Wish'
-    ? reviewRecords.value
-    : props.wishGachaData,
-)
-
-const activeNewYearData = computed(() =>
-  isReviewing.value && CurrentSelectedPool.value === 'NewYear'
-    ? reviewRecords.value
-    : props.newYearGachaData,
-)
+    : props.otherGachaData[id] || []
 
 // 计算列表平均值的通用函数
 const calculateAverage = (arr) => (arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0)
@@ -809,25 +787,14 @@ const AdvanceNormalAnalysis = computed(() =>
   calculatePoolStats(activeAdvancedNormalData.value, 'AdvanceNormal'),
 )
 
-// 祈愿盲盒卡池分析逻辑
-const qiYuanAnalysis = computed(() => calculatePoolStats(activeQiYuanData.value, 'QiYuan'))
-
-// 心愿自选卡池分析逻辑（与祈愿盲盒相同）
-const wishAnalysis = computed(() => calculatePoolStats(activeWishData.value, 'Wish'))
-
-// 新春自选卡池分析逻辑
-const newYearAnalysis = computed(() => calculatePoolStats(activeNewYearData.value, 'NewYear'))
-
 // 所有卡池总览分析逻辑
 const allLimitedAnalysis = computed(() => {
-  const analyses = [
-    limitAnalysis.value,
-    eventAnalysis.value,
-    fukeAnalysis.value,
-    qiYuanAnalysis.value,
-    wishAnalysis.value,
-    newYearAnalysis.value,
-  ]
+  const analyses = [limitAnalysis.value, eventAnalysis.value, fukeAnalysis.value]
+
+  // 将动态生成的其他未分类卡池也合并计算
+  props.OTHER_CARD_POOLS_ID.forEach((id) => {
+    analyses.push(calculatePoolStats(getActiveOtherData(id), id))
+  })
 
   let totalPulls = 0
   let SP = 0
@@ -891,12 +858,17 @@ const normalAnalysis = computed(() => {
 const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'AllLimited') return allLimitedAnalysis.value
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value
-  if (CurrentSelectedPool.value === 'QiYuan') return qiYuanAnalysis.value
-  if (CurrentSelectedPool.value === 'Wish') return wishAnalysis.value
-  if (CurrentSelectedPool.value === 'NewYear') return newYearAnalysis.value
   if (CurrentSelectedPool.value === 'Event') return eventAnalysis.value
   if (CurrentSelectedPool.value === 'Fuke') return fukeAnalysis.value
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value
+
+  // 动态处理配置外的杂类卡池
+  if (props.OTHER_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+    return calculatePoolStats(
+      getActiveOtherData(CurrentSelectedPool.value),
+      CurrentSelectedPool.value,
+    )
+  }
 
   if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value))
     return singleEventAnalysis.value
@@ -1104,19 +1076,12 @@ const quantityStatistics = computed(() => {
     const ssrStats = generateStats(AdvanceNormalAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
-  if (pool === 'QiYuan') {
-    const spStats = generateStats(qiYuanAnalysis.value?.SPHistory, SP)
-    const ssrStats = generateStats(qiYuanAnalysis.value?.SSRHistory, SSR)
-    return [...spStats, ...ssrStats]
-  }
-  if (pool === 'Wish') {
-    const spStats = generateStats(wishAnalysis.value?.SPHistory, SP)
-    const ssrStats = generateStats(wishAnalysis.value?.SSRHistory, SSR)
-    return [...spStats, ...ssrStats]
-  }
-  if (pool === 'NewYear') {
-    const spStats = generateStats(newYearAnalysis.value?.SPHistory, SP)
-    const ssrStats = generateStats(newYearAnalysis.value?.SSRHistory, SSR)
+
+  // 针对特殊的其他卡池聚合逻辑
+  if (props.OTHER_CARD_POOLS_ID.includes(pool)) {
+    const analysis = calculatePoolStats(getActiveOtherData(pool), pool)
+    const spStats = generateStats(analysis?.SPHistory, SP)
+    const ssrStats = generateStats(analysis?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
   if (pool === 'Event') {
@@ -1176,24 +1141,19 @@ const fullHistory = computed(() => {
       ...props.limitGachaData,
       ...props.eventGachaData,
       ...props.fukeGachaData,
-      ...props.qiYuanGachaData,
-      ...props.wishGachaData,
-      ...props.newYearGachaData,
+      ...Object.values(props.otherGachaData).flat(),
     ]
   } else if (CurrentSelectedPool.value === 'AdvanceNormal') {
     data = [...props.advancedNormalGachaData]
-  } else if (CurrentSelectedPool.value === 'QiYuan') {
-    data = [...props.qiYuanGachaData]
-  } else if (CurrentSelectedPool.value === 'Wish') {
-    data = [...props.wishGachaData]
-  } else if (CurrentSelectedPool.value === 'NewYear') {
-    data = [...props.newYearGachaData]
   } else if (CurrentSelectedPool.value === 'Event') {
     data = [...props.eventGachaData]
   } else if (CurrentSelectedPool.value === 'Fuke') {
     data = [...props.fukeGachaData]
   } else if (CurrentSelectedPool.value === 'Limited') {
     data = [...props.limitGachaData]
+  } else if (props.OTHER_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+    // 获取非限定联动复刻的特殊杂类卡池原始数据
+    data = [...(props.otherGachaData[CurrentSelectedPool.value] || [])]
   } else {
     // 适用于所有单卡池，包括限定、联动和复刻
     data = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(
@@ -1489,18 +1449,14 @@ const startReviewAnimation = () => {
     sourceData = [...props.normalGachaData]
   } else if (poolId === 'AdvanceNormal') {
     sourceData = [...props.advancedNormalGachaData]
-  } else if (poolId === 'QiYuan') {
-    sourceData = [...props.qiYuanGachaData]
-  } else if (poolId === 'Wish') {
-    sourceData = [...props.wishGachaData]
-  } else if (poolId === 'NewYear') {
-    sourceData = [...props.newYearGachaData]
   } else if (poolId === 'Event') {
     sourceData = [...props.eventGachaData]
   } else if (poolId === 'Fuke') {
     sourceData = [...props.fukeGachaData]
   } else if (poolId === 'Limited') {
     sourceData = [...props.limitGachaData]
+  } else if (props.OTHER_CARD_POOLS_ID.includes(poolId)) {
+    sourceData = [...(props.otherGachaData[poolId] || [])]
   } else {
     // 适用于所有单卡池，包括限定、联动和复刻
     sourceData = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(

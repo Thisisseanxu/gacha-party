@@ -115,14 +115,14 @@
       :fuke-gacha-data="FukeGachaData"
       :normal-gacha-data="NormalGachaData"
       :advanced-normal-gacha-data="AdvanceNormalGachaData"
-      :qi-yuan-gacha-data="QiYuanGachaData"
-      :wish-gacha-data="WishGachaData"
+      :other-gacha-data="OtherGachaData"
       :player-id="playerId"
       :json-input="jsonInput"
       :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID"
       :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
-      :new-year-gacha-data="NewYearGachaData"
       :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID"
+      :OTHER_CARD_POOLS_ID="OTHER_CARD_POOLS_ID"
+      :SPECIAL_OUTSIDE_POOLS="SPECIAL_OUTSIDE_POOLS"
       :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
       @reset-view="resetView"
     />
@@ -211,9 +211,9 @@ const EventGachaData = ref([]) // 存储联动卡池抽卡记录
 const FukeGachaData = ref([]) // 存储复刻卡池抽卡记录
 const NormalGachaData = ref([]) // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]) // 存储高级常驻卡池抽卡记录
-const QiYuanGachaData = ref([]) // 存储祈愿盲盒卡池抽卡记录
-const WishGachaData = ref([]) // 存储心愿自选卡池抽卡记录
-const NewYearGachaData = ref([]) // 存储新春自选卡池抽卡记录
+const OtherGachaData = ref({}) // 存储其他所有未分类特殊卡池抽卡记录
+const OTHER_CARD_POOLS_ID = ref([]) // 其他未分类特殊卡池ID列表
+const SPECIAL_OUTSIDE_POOLS = ref(['1002']) // 手动临时放到外面的特殊卡池ID列表（比如填入 '1002' 就会单独置顶显示春日自选扩招）
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示
@@ -282,6 +282,7 @@ const DEFAULT_POOLS_DATA = {
     65: '扭蛋大作战-复刻1',
     1000: '心愿自选',
     1001: '新春自选',
+    1002: '春日自选扩招',
     10000: '高级常驻扭蛋',
   },
 }
@@ -349,6 +350,18 @@ onMounted(async () => {
     EVENT_CARD_POOLS_ID.value = data.event || []
     FUKE_CARD_POOLS_ID.value = data.fuke || []
     CARDPOOLS_NAME_MAP.value = data.names || {}
+
+    // 动态计算除了已知类型之外的其他所有卡池ID
+    const knownIds = [
+      '9',
+      '10000',
+      ...LIMITED_CARD_POOLS_ID.value,
+      ...EVENT_CARD_POOLS_ID.value,
+      ...FUKE_CARD_POOLS_ID.value,
+    ]
+    OTHER_CARD_POOLS_ID.value = Object.keys(CARDPOOLS_NAME_MAP.value).filter(
+      (id) => !knownIds.includes(id),
+    )
   }
 
   if (
@@ -486,25 +499,21 @@ const handleJsonAnalysis = () => {
   const FukeGachaRecords = []
   const NormalGachaRecords = []
   const AdvanceNormalRecords = [] // 用于存储高级常驻卡池的记录
-  const QiYuanGachaRecords = [] // 用于存储祈愿盲盒卡池的记录
-  const WishGachaRecords = [] // 用于存储心愿自选卡池的记录
-  const NewYearGachaRecords = [] // 用于存储新春自选卡池的记录
+  const OtherGachaRecords = {} // 存储其他所有卡池记录的对象映射
   for (const [gachaId, records] of Object.entries(playerData)) {
     if (gachaId === '9')
       NormalGachaRecords.push(...records) // 常驻卡池ID固定为9
     else if (gachaId === '10000') {
       AdvanceNormalRecords.push(...records)
     } // 高级常驻卡池ID固定为10000
-    else if (gachaId === '47')
-      QiYuanGachaRecords.push(...records) // 目前祈愿盲盒卡池ID固定为47
-    else if (gachaId === '1000')
-      WishGachaRecords.push(...records) // 心愿自选卡池ID固定为1000
-    else if (gachaId === '1001')
-      NewYearGachaRecords.push(...records) // 新春自选卡池ID固定为1001
     else if (LIMITED_CARD_POOLS_ID.value.includes(gachaId)) LimitGachaRecords.push(...records)
     else if (EVENT_CARD_POOLS_ID.value.includes(gachaId)) EventGachaRecords.push(...records)
     else if (FUKE_CARD_POOLS_ID.value.includes(gachaId)) FukeGachaRecords.push(...records)
-    else logger.warn(`检测到未知的卡池ID ${gachaId}，已跳过该卡池的数据。`)
+    else {
+      // 未分类的全部归为其他卡池
+      if (!OtherGachaRecords[gachaId]) OtherGachaRecords[gachaId] = []
+      OtherGachaRecords[gachaId].push(...records)
+    }
   }
 
   // 验证抽卡记录格式
@@ -534,16 +543,9 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：部分高级常驻卡池抽卡记录缺少必须字段。'
     return
   }
-  if (!QiYuanGachaData.value.every(isValidRecord)) {
-    errorMessage.value = '数据格式错误：部分祈愿盲盒卡池抽卡记录缺少必须字段。'
-    return
-  }
-  if (!WishGachaData.value.every(isValidRecord)) {
-    errorMessage.value = '数据格式错误：部分心愿自选卡池抽卡记录缺少必须字段。'
-    return
-  }
-  if (!NewYearGachaRecords.every(isValidRecord)) {
-    errorMessage.value = '数据格式错误：部分新春自选卡池抽卡记录缺少必须字段。'
+  const otherRecordsFlat = Object.values(OtherGachaRecords).flat()
+  if (otherRecordsFlat.length > 0 && !otherRecordsFlat.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分其他卡池抽卡记录缺少必须字段。'
     return
   }
 
@@ -552,9 +554,7 @@ const handleJsonAnalysis = () => {
   FukeGachaData.value = FukeGachaRecords
   NormalGachaData.value = NormalGachaRecords
   AdvanceNormalGachaData.value = AdvanceNormalRecords
-  QiYuanGachaData.value = QiYuanGachaRecords
-  WishGachaData.value = WishGachaRecords
-  NewYearGachaData.value = NewYearGachaRecords
+  OtherGachaData.value = OtherGachaRecords
   viewState.value = 'analysis' // 切换到分析视图
 }
 
@@ -916,7 +916,7 @@ const resetView = () => {
   jsonInput.value = ''
   LimitGachaData.value = []
   NormalGachaData.value = []
-  NewYearGachaData.value = []
+  OtherGachaData.value = {}
   errorMessage.value = ''
   playerId.value = ''
   cloudErrorMessage.value = ''
