@@ -8,8 +8,11 @@
     <div v-if="isOpen" class="options-dropdown">
       <ul v-if="!collapsible">
         <li v-for="option in options" :key="option[optionValueKey]">
-          <div v-if="option[optionValueKey] !== '---'" @click="selectOption(option)"
-            :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+          <div
+            v-if="option[optionValueKey] !== '---'"
+            @click="selectOption(option)"
+            :class="{ 'is-selected': modelValue === option[optionValueKey] }"
+          >
             {{ option[optionTextKey] }}
           </div>
           <div v-else class="option-divider">
@@ -23,8 +26,12 @@
         <template v-for="(group, index) in groupedOptions" :key="index">
           <!-- 如果是顶级分组，直接渲染选项 -->
           <template v-if="group.isUngrouped">
-            <li v-for="option in group.options" :key="option[optionValueKey]" @click="selectOption(option)"
-              :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+            <li
+              v-for="option in group.options"
+              :key="option[optionValueKey]"
+              @click="selectOption(option)"
+              :class="{ 'is-selected': modelValue === option[optionValueKey] }"
+            >
               <div>{{ option[optionTextKey] }}</div>
             </li>
           </template>
@@ -32,11 +39,18 @@
           <template v-else>
             <li class="option-divider" @click="toggleGroup(group.name)">
               <span>{{ group.name }}</span>
-              <span class="group-arrow-indicator" :class="{ 'is-open': expandedGroups[group.name] }"></span>
+              <span
+                class="group-arrow-indicator"
+                :class="{ 'is-open': expandedGroups[group.name] }"
+              ></span>
             </li>
             <template v-if="expandedGroups[group.name]">
-              <li v-for="option in group.options" :key="option[optionValueKey]" @click="selectOption(option)"
-                :class="{ 'is-selected': modelValue === option[optionValueKey] }">
+              <li
+                v-for="option in group.options"
+                :key="option[optionValueKey]"
+                @click="selectOption(option)"
+                :class="{ 'is-selected': modelValue === option[optionValueKey] }"
+              >
                 <div>{{ option[optionTextKey] }}</div>
               </li>
             </template>
@@ -253,7 +267,7 @@ const colorScrollbar = colors.scrollbar
   color: v-bind(colorOptionText);
 }
 
-.options-dropdown li>div {
+.options-dropdown li > div {
   padding: 2px 2px;
 }
 

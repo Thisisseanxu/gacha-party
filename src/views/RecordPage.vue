@@ -12,10 +12,22 @@
         <p class="input-description highlight">
           小程序码和教程请见下方（PC端在右侧）<br />织夜工具箱所有工具均使用同一个激活码
         </p>
-        <input type="text" v-model="fetchPlayerIdInput" class="cloud-input" placeholder="请输入您的玩家ID" />
-        <input type="text" v-model="fetchLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
+        <input
+          type="text"
+          v-model="fetchPlayerIdInput"
+          class="cloud-input"
+          placeholder="请输入您的玩家ID"
+        />
+        <input
+          type="text"
+          v-model="fetchLicenseInput"
+          class="cloud-input"
+          placeholder="请输入您的激活码（与导出工具相同）"
+        />
         <p class="input-description">
-          使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云服务用户协议》</a>
+          使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#"
+            >《织夜云服务用户协议》</a
+          >
           <br />
           上传记录可能会有延迟，如果没更新请稍后查询
         </p>
@@ -35,8 +47,12 @@
         <p class="input-description">
           请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。
         </p>
-        <textarea v-model="jsonInput" id="jsonInput" class="json-textarea"
-          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'></textarea>
+        <textarea
+          v-model="jsonInput"
+          id="jsonInput"
+          class="json-textarea"
+          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'
+        ></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">
             开始分析
@@ -44,8 +60,13 @@
           <button @click="triggerFileUpload" class="action-button" :disabled="isFetchingOnline">
             上传文件
           </button>
-          <input type="file" ref="fileUploader" @change="handleFileUpload" accept=".json,application/json"
-            style="display: none" />
+          <input
+            type="file"
+            ref="fileUploader"
+            @change="handleFileUpload"
+            accept=".json,application/json"
+            style="display: none"
+          />
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </div>
@@ -53,46 +74,74 @@
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
       <div class="mp-weixin">
         <p>
-          使用小程序获取抽卡记录<br /><span class="highlight">微信搜索“织夜工具箱”或扫描小程序码</span>
+          使用小程序获取抽卡记录<br /><span class="highlight"
+            >微信搜索“织夜工具箱”或扫描小程序码</span
+          >
         </p>
         <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
         <p>使用教程</p>
         <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
           <iframe
             src="//player.bilibili.com/player.html?isOutside=true&aid=115698315563965&bvid=BV1YomKBsEP5&cid=34650522191&p=1&autoplay=0"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%" scrolling="no" border="0"
-            frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+            scrolling="no"
+            border="0"
+            frameborder="no"
+            framespacing="0"
+            allowfullscreen="true"
+          ></iframe>
         </div>
       </div>
 
       <p class="input-description">
         <span class="highlight"></span><br />
         需要帮助？加入
-        <a class="highlight"
+        <a
+          class="highlight"
           href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
-          target="_blank">
-          Q群1049576192</a>
+          target="_blank"
+        >
+          Q群1049576192</a
+        >
         愉快交流吧
       </p>
       <p class="input-description">当前版本：v{{ appVersion }}</p>
     </div>
 
-    <GachaAnalysis v-if="viewState === 'analysis'" :limit-gacha-data="LimitGachaData" :event-gacha-data="EventGachaData"
-      :fuke-gacha-data="FukeGachaData" :normal-gacha-data="NormalGachaData"
-      :advanced-normal-gacha-data="AdvanceNormalGachaData" :qi-yuan-gacha-data="QiYuanGachaData"
-      :wish-gacha-data="WishGachaData" :player-id="playerId" :json-input="jsonInput"
-      :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID" :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
-      :new-year-gacha-data="NewYearGachaData" :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID"
-      :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP" @reset-view="resetView" />
+    <GachaAnalysis
+      v-if="viewState === 'analysis'"
+      :limit-gacha-data="LimitGachaData"
+      :event-gacha-data="EventGachaData"
+      :fuke-gacha-data="FukeGachaData"
+      :normal-gacha-data="NormalGachaData"
+      :advanced-normal-gacha-data="AdvanceNormalGachaData"
+      :qi-yuan-gacha-data="QiYuanGachaData"
+      :wish-gacha-data="WishGachaData"
+      :player-id="playerId"
+      :json-input="jsonInput"
+      :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID"
+      :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
+      :new-year-gacha-data="NewYearGachaData"
+      :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID"
+      :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
+      @reset-view="resetView"
+    />
 
     <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
         <p class="input-description">手动将当前的抽卡记录上传至云端</p>
         <p class="input-description highlight">普通用户每24小时在所有工具内只能上传一次！</p>
-        <input type="text" v-model="uploadLicenseInput" class="cloud-input" placeholder="请输入您的激活码（与导出工具相同）" />
+        <input
+          type="text"
+          v-model="uploadLicenseInput"
+          class="cloud-input"
+          placeholder="请输入您的激活码（与导出工具相同）"
+        />
         <p class="input-description">
-          使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜云用户协议》</a>
+          使用本服务则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#"
+            >《织夜云用户协议》</a
+          >
         </p>
         <button @click="handleUploadRecord" :disabled="isUploading" class="action-button">
           {{ isUploading ? '正在上传...' : '上传抽卡记录' }}
@@ -101,7 +150,11 @@
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
       </div>
     </div>
-    <PopUp :display="showAgreementPopUp" title="《织夜云服务用户协议》" @close="closeAgreementPopUp">
+    <PopUp
+      :display="showAgreementPopUp"
+      title="《织夜云服务用户协议》"
+      @close="closeAgreementPopUp"
+    >
       <p>欢迎使用织夜云服务！<br />在使用前，请您仔细阅读以下用户协议：</p>
       <ol class="agreement-list">
         <li>
@@ -174,42 +227,62 @@ const CARDPOOLS_NAME_MAP = ref({}) // 卡池名称映射
 // 默认卡池配置（作为兜底初始值，防止首次加载失败）
 const DEFAULT_POOLS_DATA = {
   limited: [
-    '29', '40', '41', '42', '43', '44', '46', '107', '48', '49', '50', '51',
-    '52', '53', '54', '55', '59', '58', '60', '61', '63', '64'
+    '29',
+    '40',
+    '41',
+    '42',
+    '43',
+    '44',
+    '46',
+    '107',
+    '48',
+    '49',
+    '50',
+    '51',
+    '52',
+    '53',
+    '54',
+    '55',
+    '59',
+    '58',
+    '60',
+    '61',
+    '63',
+    '64',
   ],
   event: ['57', '62'],
   fuke: ['65'],
   names: {
-    "9": "常驻扭蛋",
-    "29": "车手盲盒机",
-    "40": "塔菲扭蛋",
-    "41": "童话国盲盒机",
-    "42": "扭蛋大作战",
-    "43": "早稻叽",
-    "44": "仲夏扭蛋",
-    "46": "车手盲盒机-复刻1",
-    "47": "祈愿盲盒",
-    "107": "地下车手招募",
-    "48": "童话国盲盒机-复刻1",
-    "49": "游园邀请",
-    "50": "暮色邀请函",
-    "51": "塔菲扭蛋-复刻1",
-    "52": "车手盲盒机-复刻2",
-    "53": "萌鬼认可证",
-    "54": "早稻叽-复刻1",
-    "55": "超频扭蛋机",
-    "59": "仲夏扭蛋-复刻1",
-    "58": "厨娘来啦",
-    "57": "酷玩爆米花",
-    "60": "圣诞邀约",
-    "61": "相约嘉年华",
-    "62": "鹅崽召唤器",
-    "63": "织梦旅行团",
-    "64": "青玉之锋",
-    "65": "扭蛋大作战-复刻1",
-    "1000": "心愿自选",
-    "1001": "新春自选",
-    "10000": "高级常驻扭蛋"
+    9: '常驻扭蛋',
+    29: '车手盲盒机',
+    40: '塔菲扭蛋',
+    41: '童话国盲盒机',
+    42: '扭蛋大作战',
+    43: '早稻叽',
+    44: '仲夏扭蛋',
+    46: '车手盲盒机-复刻1',
+    47: '祈愿盲盒',
+    107: '地下车手招募',
+    48: '童话国盲盒机-复刻1',
+    49: '游园邀请',
+    50: '暮色邀请函',
+    51: '塔菲扭蛋-复刻1',
+    52: '车手盲盒机-复刻2',
+    53: '萌鬼认可证',
+    54: '早稻叽-复刻1',
+    55: '超频扭蛋机',
+    59: '仲夏扭蛋-复刻1',
+    58: '厨娘来啦',
+    57: '酷玩爆米花',
+    60: '圣诞邀约',
+    61: '相约嘉年华',
+    62: '鹅崽召唤器',
+    63: '织梦旅行团',
+    64: '青玉之锋',
+    65: '扭蛋大作战-复刻1',
+    1000: '心愿自选',
+    1001: '新春自选',
+    10000: '高级常驻扭蛋',
   },
 }
 
@@ -278,7 +351,10 @@ onMounted(async () => {
     CARDPOOLS_NAME_MAP.value = data.names || {}
   }
 
-  if (localStorage.getItem('gachaPoolConfig') && localStorage.getItem('gachaPoolConfigTimestamp') > Date.now() - 2 * 60 * 60 * 1000) {
+  if (
+    localStorage.getItem('gachaPoolConfig') &&
+    localStorage.getItem('gachaPoolConfigTimestamp') > Date.now() - 2 * 60 * 60 * 1000
+  ) {
     // 使用2小时内的缓存
     try {
       const cached = localStorage.getItem('gachaPoolConfig')

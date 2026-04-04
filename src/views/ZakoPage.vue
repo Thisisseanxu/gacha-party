@@ -7,8 +7,12 @@
     </video>
     <div class="content-overlay">
       <TransitionGroup name="fly-up" tag="div" class="text-container">
-        <div v-for="textItem in floatingTexts" :key="textItem.id" class="floating-text"
-          :style="getFloatingTextStyle(textItem)">
+        <div
+          v-for="textItem in floatingTexts"
+          :key="textItem.id"
+          class="floating-text"
+          :style="getFloatingTextStyle(textItem)"
+        >
           {{ textItem.text }}
         </div>
       </TransitionGroup>

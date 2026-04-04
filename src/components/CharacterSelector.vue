@@ -4,45 +4,85 @@
     <p v-if="subTitle" class="selection-description">{{ subTitle }}</p>
 
     <!-- 筛选栏 -->
-    <div class="filter-bar"
-      v-if="(!hideThemeFilter && availableThemes.length > 0) || (!hideRarityFilter && availableRarities.length > 0) || (!hideQbanToggle && hasAnyQban) || showRealNameToggle">
+    <div
+      class="filter-bar"
+      v-if="
+        (!hideThemeFilter && availableThemes.length > 0) ||
+        (!hideRarityFilter && availableRarities.length > 0) ||
+        (!hideQbanToggle && hasAnyQban) ||
+        showRealNameToggle
+      "
+    >
       <!-- 第一行：主题筛选 -->
       <div class="filter-row" v-if="!hideThemeFilter && availableThemes.length > 0">
         <div class="theme-chips">
-          <button v-for="theme in availableThemes" :key="theme.id" class="filter-chip theme-chip"
-            :class="{ active: activeThemeFilter === theme.id }" @click="toggleThemeFilter(theme.id)">
+          <button
+            v-for="theme in availableThemes"
+            :key="theme.id"
+            class="filter-chip theme-chip"
+            :class="{ active: activeThemeFilter === theme.id }"
+            @click="toggleThemeFilter(theme.id)"
+          >
             <img v-if="theme.icon" :src="theme.icon" class="theme-chip-icon" :alt="theme.name" />
             <span>{{ theme.name }}</span>
           </button>
         </div>
       </div>
       <!-- 第二行：稀有度筛选 + 功能切换按钮 -->
-      <div class="filter-row"
-        v-if="(!hideRarityFilter && availableRarities.length > 0) || (!hideQbanToggle && hasAnyQban) || showRealNameToggle">
+      <div
+        class="filter-row"
+        v-if="
+          (!hideRarityFilter && availableRarities.length > 0) ||
+          (!hideQbanToggle && hasAnyQban) ||
+          showRealNameToggle
+        "
+      >
         <div v-if="!hideRarityFilter" class="rarity-chips">
-          <button v-for="rarity in availableRarities" :key="rarity" class="filter-chip rarity-chip"
-            :class="[rarity, { active: activeRarityFilter === rarity }]" @click="toggleRarityFilter(rarity)">
+          <button
+            v-for="rarity in availableRarities"
+            :key="rarity"
+            class="filter-chip rarity-chip"
+            :class="[rarity, { active: activeRarityFilter === rarity }]"
+            @click="toggleRarityFilter(rarity)"
+          >
             {{ rarity }}
           </button>
         </div>
-        <button v-if="showRealNameToggle" class="image-toggle-btn" :class="{ active: internalShowRealName }"
-          @click="internalShowRealName = !internalShowRealName">
+        <button
+          v-if="showRealNameToggle"
+          class="image-toggle-btn"
+          :class="{ active: internalShowRealName }"
+          @click="internalShowRealName = !internalShowRealName"
+        >
           真名
         </button>
-        <button v-if="!hideQbanToggle && hasAnyQban" class="image-toggle-btn" :class="{ active: useQban }"
-          @click="useQban = !useQban">
+        <button
+          v-if="!hideQbanToggle && hasAnyQban"
+          class="image-toggle-btn"
+          :class="{ active: useQban }"
+          @click="useQban = !useQban"
+        >
           {{ useQban ? '立绘' : 'Q版' }}
         </button>
       </div>
     </div>
 
     <div class="card-selector-grid">
-      <div v-for="card in filteredCards" :key="card.id" :class="[
-        'card-option',
-        card.rarity ? card.rarity : '',
-        { selected: isSelected(card.id), disabled: isDisabled(card) },
-      ]" @click="toggleCharacterSelection(card)">
-        <button v-if="card.isCustom" class="delete-custom-char-btn" @click.stop="deleteCustomCharacter(card.id)">
+      <div
+        v-for="card in filteredCards"
+        :key="card.id"
+        :class="[
+          'card-option',
+          card.rarity ? card.rarity : '',
+          { selected: isSelected(card.id), disabled: isDisabled(card) },
+        ]"
+        @click="toggleCharacterSelection(card)"
+      >
+        <button
+          v-if="card.isCustom"
+          class="delete-custom-char-btn"
+          @click.stop="deleteCustomCharacter(card.id)"
+        >
           &times;
         </button>
         <img :src="getDisplayImage(card)" :alt="card.name" class="card-image" />
@@ -57,7 +97,11 @@
         </div>
         <div class="checkmark">✔</div>
       </div>
-      <div v-if="showAddCustomButton" class="card-option add-custom-btn" @click="emit('add-custom')">
+      <div
+        v-if="showAddCustomButton"
+        class="card-option add-custom-btn"
+        @click="emit('add-custom')"
+      >
         <div class="add-custom-icon">+</div>
         <div class="card-name">创建角色</div>
       </div>
@@ -206,7 +250,9 @@ const showAddCustomButton = computed(() => {
   if (!props.showAddCustom) return false
   if (props.addCustomAlwaysVisible) return true
   // 仅在无筛选或选中"自定义"主题时显示
-  return !activeRarityFilter.value && (!activeThemeFilter.value || activeThemeFilter.value === 'custom')
+  return (
+    !activeRarityFilter.value && (!activeThemeFilter.value || activeThemeFilter.value === 'custom')
+  )
 })
 
 const filteredCards = computed(() => {
@@ -430,19 +476,19 @@ const deleteCustomCharacter = (characterId) => {
   background-color: v-bind('colors.background.light');
 }
 
-.card-option.SP>.card-image {
+.card-option.SP > .card-image {
   background: linear-gradient(180deg, v-bind('colors.rarity.sp'), v-bind('colors.rarity.ssr'));
 }
 
-.card-option.SSR>.card-image {
+.card-option.SSR > .card-image {
   background-color: v-bind('colors.rarity.ssr');
 }
 
-.card-option.SR>.card-image {
+.card-option.SR > .card-image {
   background-color: v-bind('colors.rarity.sr');
 }
 
-.card-option.R>.card-image {
+.card-option.R > .card-image {
   background-color: v-bind('colors.rarity.r');
 }
 

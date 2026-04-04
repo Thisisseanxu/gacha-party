@@ -7,8 +7,14 @@
         <p class="login-sub">输入管理员密码以继续</p>
         <div class="form-row">
           <label class="form-label">管理员密码</label>
-          <input type="password" v-model="password" class="form-input" placeholder="••••••••" @keyup.enter="handleLogin"
-            autocomplete="current-password" />
+          <input
+            type="password"
+            v-model="password"
+            class="form-input"
+            placeholder="••••••••"
+            @keyup.enter="handleLogin"
+            autocomplete="current-password"
+          />
         </div>
         <div v-if="loginError" class="feedback-msg error-msg">{{ loginError }}</div>
         <button class="primary-btn full-btn" @click="handleLogin" :disabled="loginLoading">
@@ -26,8 +32,13 @@
 
       <!-- Tab 切换 -->
       <div class="tab-bar">
-        <button v-for="tab in tabs" :key="tab.key" class="tab-btn" :class="{ active: currentTab === tab.key }"
-          @click="switchTab(tab.key)">
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="tab-btn"
+          :class="{ active: currentTab === tab.key }"
+          @click="switchTab(tab.key)"
+        >
           {{ tab.label }}
           <span v-if="tab.key === 'pending' && totalPending > 0" class="tab-badge">
             {{ totalPending }}
@@ -63,8 +74,12 @@
                   <td class="td-time">{{ formatTime(item.submitted_at) }}</td>
                   <td class="td-actions">
                     <button class="action-btn info-btn" @click="openPreview(item)">预览</button>
-                    <button class="action-btn edit-btn" @click="openEditItem(item, 'pending')">编辑</button>
-                    <button class="action-btn approve-btn" @click="approveItem(item.id)">通过</button>
+                    <button class="action-btn edit-btn" @click="openEditItem(item, 'pending')">
+                      编辑
+                    </button>
+                    <button class="action-btn approve-btn" @click="approveItem(item.id)">
+                      通过
+                    </button>
                     <button class="action-btn danger-btn" @click="rejectItem(item.id)">拒绝</button>
                   </td>
                 </tr>
@@ -72,11 +87,26 @@
             </table>
           </div>
           <div class="pagination">
-            <button class="page-btn" :disabled="pendingPage <= 1" @click="loadPending(pendingPage - 1)">← 上一页</button>
-            <span class="page-info">第 {{ pendingPage }} 页 / 共 {{ Math.ceil(totalPending / 20) }} 页（{{ totalPending }}
-              条）</span>
-            <button class="page-btn" :disabled="pendingPage * 20 >= totalPending"
-              @click="loadPending(pendingPage + 1)">下一页 →</button>
+            <button
+              class="page-btn"
+              :disabled="pendingPage <= 1"
+              @click="loadPending(pendingPage - 1)"
+            >
+              ← 上一页
+            </button>
+            <span class="page-info"
+              >第 {{ pendingPage }} 页 / 共 {{ Math.ceil(totalPending / 20) }} 页（{{
+                totalPending
+              }}
+              条）</span
+            >
+            <button
+              class="page-btn"
+              :disabled="pendingPage * 20 >= totalPending"
+              @click="loadPending(pendingPage + 1)"
+            >
+              下一页 →
+            </button>
           </div>
         </div>
       </div>
@@ -112,24 +142,45 @@
                     </span>
                   </td>
                   <td class="td-actions">
-                    <button class="action-btn edit-btn" @click="openEditItem(item, 'guide')">编辑</button>
-                    <button class="action-btn" :class="item.is_featured ? 'warn-btn' : 'approve-btn'"
-                      @click="toggleFeature(item)">
+                    <button class="action-btn edit-btn" @click="openEditItem(item, 'guide')">
+                      编辑
+                    </button>
+                    <button
+                      class="action-btn"
+                      :class="item.is_featured ? 'warn-btn' : 'approve-btn'"
+                      @click="toggleFeature(item)"
+                    >
                       {{ item.is_featured ? '取消精选' : '设为精选' }}
                     </button>
-                    <button class="action-btn danger-btn" @click="confirmDeleteGuide(item.id)">删除</button>
+                    <button class="action-btn danger-btn" @click="confirmDeleteGuide(item.id)">
+                      删除
+                    </button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="pagination">
-            <button class="page-btn" :disabled="approvedPage <= 1" @click="loadApproved(approvedPage - 1)">←
-              上一页</button>
-            <span class="page-info">第 {{ approvedPage }} 页 / 共 {{ Math.ceil(totalApproved / 20) }} 页（{{ totalApproved }}
-              条）</span>
-            <button class="page-btn" :disabled="approvedPage * 20 >= totalApproved"
-              @click="loadApproved(approvedPage + 1)">下一页 →</button>
+            <button
+              class="page-btn"
+              :disabled="approvedPage <= 1"
+              @click="loadApproved(approvedPage - 1)"
+            >
+              ← 上一页
+            </button>
+            <span class="page-info"
+              >第 {{ approvedPage }} 页 / 共 {{ Math.ceil(totalApproved / 20) }} 页（{{
+                totalApproved
+              }}
+              条）</span
+            >
+            <button
+              class="page-btn"
+              :disabled="approvedPage * 20 >= totalApproved"
+              @click="loadApproved(approvedPage + 1)"
+            >
+              下一页 →
+            </button>
           </div>
         </div>
       </div>
@@ -140,10 +191,22 @@
         <div class="ban-form-card">
           <h3 class="ban-form-title">封禁玩家</h3>
           <div class="ban-inputs">
-            <input v-model="banUserId" class="form-input ban-id-input" placeholder="玩家ID（数字）" inputmode="numeric" />
-            <input v-model="banReason" class="form-input ban-reason-input" placeholder="封禁原因（可选）" />
-            <button class="action-btn danger-btn ban-submit-btn" :disabled="!banUserId.trim() || banLoading"
-              @click="banUser">
+            <input
+              v-model="banUserId"
+              class="form-input ban-id-input"
+              placeholder="玩家ID（数字）"
+              inputmode="numeric"
+            />
+            <input
+              v-model="banReason"
+              class="form-input ban-reason-input"
+              placeholder="封禁原因（可选）"
+            />
+            <button
+              class="action-btn danger-btn ban-submit-btn"
+              :disabled="!banUserId.trim() || banLoading"
+              @click="banUser"
+            >
               {{ banLoading ? '处理中…' : '封禁' }}
             </button>
           </div>
@@ -168,7 +231,9 @@
                 <td class="td-time">{{ formatTime(item.banned_at) }}</td>
                 <td class="td-title">{{ item.reason || '—' }}</td>
                 <td class="td-actions">
-                  <button class="action-btn approve-btn" @click="unbanUser(item.user_id)">解封</button>
+                  <button class="action-btn approve-btn" @click="unbanUser(item.user_id)">
+                    解封
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -199,8 +264,12 @@
             <tbody>
               <tr v-for="(item, index) in statsItems" :key="item.user_id">
                 <td class="td-rank">{{ index + 1 }}</td>
-                <td class="td-userid"><span class="userid-text">{{ item.user_id }}</span></td>
-                <td class="td-count"><strong>{{ item.approved_count }}</strong></td>
+                <td class="td-userid">
+                  <span class="userid-text">{{ item.user_id }}</span>
+                </td>
+                <td class="td-count">
+                  <strong>{{ item.approved_count }}</strong>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -212,9 +281,7 @@
           <strong>⚠ 注意：</strong>此操作将把静态攻略文件中的所有数据批量导入数据库，
           <strong>仅应执行一次</strong>。重复执行将产生重复数据。
         </div>
-        <div v-if="seedDone" class="feedback-msg success-msg seed-result">
-          ✓ {{ seedResult }}
-        </div>
+        <div v-if="seedDone" class="feedback-msg success-msg seed-result">✓ {{ seedResult }}</div>
         <div v-if="seedError" class="feedback-msg error-msg">{{ seedError }}</div>
         <button class="primary-btn" :disabled="seedLoading || seedDone" @click="handleSeed">
           {{ seedDone ? '已完成' : seedLoading ? '迁移中…' : '开始迁移静态数据' }}
@@ -233,8 +300,12 @@
           <span>标题：{{ previewItem.title || '（无标题）' }}</span>
           <span>作者：{{ previewItem.author_name || '—' }}</span>
         </div>
-        <HuizhangLiveCard v-if="previewItem && previewStrategy" :strategy="previewStrategy"
-          :charConfig="getCharConfig(previewItem.char_id)" :scale="previewScale" />
+        <HuizhangLiveCard
+          v-if="previewItem && previewStrategy"
+          :strategy="previewStrategy"
+          :charConfig="getCharConfig(previewItem.char_id)"
+          :scale="previewScale"
+        />
         <p v-else class="preview-error">无法解析攻略代码</p>
       </div>
     </div>
@@ -244,8 +315,17 @@
       <div class="confirm-dialog">
         <p class="confirm-msg">{{ confirmState.message }}</p>
         <div class="confirm-actions">
-          <button class="primary-btn danger-primary"
-            @click="() => { confirmState.onConfirm(); confirmState = null }">确认</button>
+          <button
+            class="primary-btn danger-primary"
+            @click="
+              () => {
+                confirmState.onConfirm()
+                confirmState = null
+              }
+            "
+          >
+            确认
+          </button>
           <button class="cancel-btn" @click="confirmState = null">取消</button>
         </div>
       </div>
@@ -255,16 +335,33 @@
     <div v-if="editItem" class="overlay" @click.self="editItem = null">
       <div class="edit-dialog">
         <div class="preview-header">
-          <span>编辑攻略 #{{ editItem.id }}（{{ editSource === 'pending' ? '待审核' : '已发布' }}）</span>
+          <span
+            >编辑攻略 #{{ editItem.id }}（{{
+              editSource === 'pending' ? '待审核' : '已发布'
+            }}）</span
+          >
           <button class="close-btn" @click="editItem = null">✕</button>
         </div>
         <div class="edit-form">
           <label class="edit-label">标题</label>
-          <input v-model="editForm.title" class="form-input" placeholder="攻略名称（留空则无标题）" />
+          <input
+            v-model="editForm.title"
+            class="form-input"
+            placeholder="攻略名称（留空则无标题）"
+          />
           <label class="edit-label">作者署名</label>
-          <input v-model="editForm.author_name" class="form-input" placeholder="作者名（留空则不显示）" />
+          <input
+            v-model="editForm.author_name"
+            class="form-input"
+            placeholder="作者名（留空则不显示）"
+          />
           <label class="edit-label">攻略码</label>
-          <textarea v-model="editForm.code" class="form-input code-textarea" rows="4" placeholder="粘贴新的攻略码（不修改则留原值）" />
+          <textarea
+            v-model="editForm.code"
+            class="form-input code-textarea"
+            rows="4"
+            placeholder="粘贴新的攻略码（不修改则留原值）"
+          />
           <div v-if="editError" class="feedback-msg error-msg">{{ editError }}</div>
           <div class="confirm-actions">
             <button class="primary-btn" :disabled="editLoading" @click="saveEdit">
@@ -387,7 +484,10 @@ async function loadPending(page = 1) {
     const res = await fetch(`${base}/api/hz/admin/pending?page=${page}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-    if (res.status === 401) { handleLogout(); return }
+    if (res.status === 401) {
+      handleLogout()
+      return
+    }
     const data = await res.json()
     pendingItems.value = data.items || []
     totalPending.value = data.total || 0
@@ -406,7 +506,10 @@ async function approveItem(id) {
       method: 'POST',
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-    if (res.status === 401) { handleLogout(); return }
+    if (res.status === 401) {
+      handleLogout()
+      return
+    }
     const data = await res.json()
     if (res.ok) {
       showToast('审核通过！', 'success')
@@ -456,7 +559,10 @@ async function loadApproved(page = 1) {
     const res = await fetch(`${base}/api/hz/admin/guides?page=${page}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-    if (res.status === 401) { handleLogout(); return }
+    if (res.status === 401) {
+      handleLogout()
+      return
+    }
     const data = await res.json()
     approvedItems.value = data.items || []
     totalApproved.value = data.total || 0
@@ -530,7 +636,10 @@ async function loadBans() {
     const res = await fetch(`${base}/api/hz/admin/bans`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-    if (res.status === 401) { handleLogout(); return }
+    if (res.status === 401) {
+      handleLogout()
+      return
+    }
     const data = await res.json()
     banItems.value = data.items || []
   } catch {
@@ -604,7 +713,10 @@ async function loadStats() {
     const res = await fetch(`${base}/api/hz/admin/user-stats`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-    if (res.status === 401) { handleLogout(); return }
+    if (res.status === 401) {
+      handleLogout()
+      return
+    }
     const data = await res.json()
     statsItems.value = data.items || []
   } catch {
@@ -615,8 +727,8 @@ async function loadStats() {
 }
 
 // ── 编辑攻略 ──────────────────────────────────────────────
-const editItem = ref(null)   // 被编辑的条目原始数据
-const editSource = ref('')   // 'pending' | 'guide'
+const editItem = ref(null) // 被编辑的条目原始数据
+const editSource = ref('') // 'pending' | 'guide'
 const editForm = ref({ title: '', author_name: '', code: '' })
 const editLoading = ref(false)
 const editError = ref('')
@@ -638,9 +750,10 @@ async function saveEdit() {
   editLoading.value = true
   try {
     const base = getWorkerBase()
-    const endpoint = editSource.value === 'pending'
-      ? `/api/hz/admin/pending/${editItem.value.id}`
-      : `/api/hz/admin/guide/${editItem.value.id}`
+    const endpoint =
+      editSource.value === 'pending'
+        ? `/api/hz/admin/pending/${editItem.value.id}`
+        : `/api/hz/admin/guide/${editItem.value.id}`
     const res = await fetch(`${base}${endpoint}`, {
       method: 'PATCH',
       headers: {
@@ -770,7 +883,9 @@ function showToast(msg, type = 'success') {
   toastMsg.value = msg
   toastType.value = type
   if (toastTimer) clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { toastMsg.value = '' }, 2500)
+  toastTimer = setTimeout(() => {
+    toastMsg.value = ''
+  }, 2500)
 }
 
 // ── 工具函数 ──────────────────────────────────────────────

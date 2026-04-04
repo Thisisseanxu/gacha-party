@@ -1,8 +1,12 @@
 <template>
   <div class="dev-editor-page">
     <div class="tab-bar">
-      <button v-for="t in tabs" :key="t.key" :class="['tab-btn', { active: activeTab === t.key }]"
-        @click="activeTab = t.key">
+      <button
+        v-for="t in tabs"
+        :key="t.key"
+        :class="['tab-btn', { active: activeTab === t.key }]"
+        @click="activeTab = t.key"
+      >
         {{ t.label }}
       </button>
     </div>
@@ -21,7 +25,7 @@ import CardsTab from './dev-editor/CardsTab.vue'
 import CardPoolsTab from './dev-editor/CardPoolsTab.vue'
 import HuizhangTab from './dev-editor/HuizhangTab.vue'
 import GachaPoolsTab from './dev-editor/GachaPoolsTab.vue'
-import './dev-editor/dev-shared.css'; // 公共样式
+import './dev-editor/dev-shared.css' // 公共样式
 
 const tabs = [
   { key: 'cards', label: '角色数据' },

@@ -12,7 +12,11 @@
         <div class="star-label">适配星级</div>
         <div class="stars-row">
           <div v-for="star in sortedStars" :key="star" class="star-item-img-wrapper">
-            <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star" />
+            <img
+              :src="`/images/huizhang/contract_star_${star}.webp`"
+              class="star-img-lg"
+              alt="star"
+            />
           </div>
         </div>
       </div>
@@ -60,7 +64,9 @@
                   <g v-if="slot.rarityId === '0'">
                     <circle
                       v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE"
-                      cx="50" cy="50" r="45"
+                      cx="50"
+                      cy="50"
+                      r="45"
                       fill="rgba(200, 200, 200, 0.3)"
                     />
                     <polygon
@@ -80,8 +86,10 @@
                     v-else
                     :xlink:href="HUIZHANG_TYPES[slot.typeId]?.icon"
                     :href="HUIZHANG_TYPES[slot.typeId]?.icon"
-                    x="-12.5" y="-12.5"
-                    width="125" height="125"
+                    x="-12.5"
+                    y="-12.5"
+                    width="125"
+                    height="125"
                     preserveAspectRatio="xMidYMid slice"
                     :clip-path="`url(#badge-clip-${uid}-${index})`"
                   />

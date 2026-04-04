@@ -47,26 +47,30 @@ onUnmounted(() => {
   document.removeEventListener('fullscreenchange', checkFullscreen)
 })
 
-watch(() => route.path, (newPath) => {
-  if (newPath === '/') {
-    showHint.value = false
-    return
-  }
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/') {
+      showHint.value = false
+      return
+    }
 
-  showHint.value = true
-  const lastTime = Number(localStorage.getItem('home_btn_hint_last_time') || 0)
-  const now = Date.now()
-  if (now - lastTime > 180000) {
-    localStorage.setItem('home_btn_hint_last_time', String(now))
-    setTimeout(() => {
-      showHint.value = false
-    }, 3000)
-  } else {
-    setTimeout(() => {
-      showHint.value = false
-    }, 1000)
-  }
-}, { immediate: true })
+    showHint.value = true
+    const lastTime = Number(localStorage.getItem('home_btn_hint_last_time') || 0)
+    const now = Date.now()
+    if (now - lastTime > 180000) {
+      localStorage.setItem('home_btn_hint_last_time', String(now))
+      setTimeout(() => {
+        showHint.value = false
+      }, 3000)
+    } else {
+      setTimeout(() => {
+        showHint.value = false
+      }, 1000)
+    }
+  },
+  { immediate: true },
+)
 
 const goToHome = () => {
   router.push('/')

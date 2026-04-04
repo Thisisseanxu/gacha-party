@@ -5,7 +5,10 @@
       <h2 class="subtitle" :class="{ 'smooth-transition': isReady }">盲盒派对小助手</h2>
 
       <div class="button-group">
-        <router-link :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }" class="btn chouka">
+        <router-link
+          :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
+          class="btn chouka"
+        >
           <img src="/images/icons/chouka.webp" class="btn-icon" alt="icon" />
           <span>抽卡模拟器</span>
         </router-link>
@@ -32,14 +35,22 @@
       </div>
 
       <div class="info-footer">
-        <a href="https://github.com/Thisisseanxu/gacha-party" rel="noopener noreferrer" target="_blank"
-          class="footer-link">
+        <a
+          href="https://github.com/Thisisseanxu/gacha-party"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="footer-link"
+        >
           <github-one theme="outline" size="20" />
           <span>开源地址</span>
         </a>
 
-        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
-          target="_blank" rel="noopener noreferrer" class="footer-link">
+        <a
+          href="https://qm.qq.com/cgi-bin/qm/qr?k=PD3VWuDfxO_hAVZQBreK1CjvWORTkNN2&jump_from=webapi&authKey=c4Sos3R4opf3VqerCwpPX+IOmwZUDm4hqkyT7qDGhta2fAhdUETlxFZ9wDrcRu1z"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link"
+        >
           <tencent-qq theme="outline" size="20" />
           <span>加入Q群</span>
         </a>
@@ -64,13 +75,27 @@
     </button>
 
     <div class="social-buttons" :class="{ retracted: isRetracted }">
-      <a href="https://space.bilibili.com/33809083" target="_blank" rel="noopener noreferrer" class="social-btn"
-        :class="btnStates[0]" @mouseenter="onBtnEnter(0)" @mouseleave="onBtnLeave(0)">
+      <a
+        href="https://space.bilibili.com/33809083"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="social-btn"
+        :class="btnStates[0]"
+        @mouseenter="onBtnEnter(0)"
+        @mouseleave="onBtnLeave(0)"
+      >
         <img src="/images/bili_avatar.webp" class="social-icon" alt="bilibili" />
         <span>关注</span>
       </a>
-      <a href="https://boxparty.aojiaostudio.com" target="_blank" rel="noopener noreferrer" class="social-btn"
-        :class="btnStates[1]" @mouseenter="onBtnEnter(1)" @mouseleave="onBtnLeave(1)">
+      <a
+        href="https://boxparty.aojiaostudio.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="social-btn"
+        :class="btnStates[1]"
+        @mouseenter="onBtnEnter(1)"
+        @mouseleave="onBtnLeave(1)"
+      >
         <img src="/images/manghe_icon.webp" class="social-icon" alt="官网" />
         <span>官网</span>
       </a>

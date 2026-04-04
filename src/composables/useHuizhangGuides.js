@@ -119,7 +119,9 @@ function isAdminLoggedIn() {
     const dotIdx = token.lastIndexOf('.')
     if (dotIdx === -1) return false
     const payloadB64 = token.slice(0, dotIdx)
-    const padded = payloadB64.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (payloadB64.length % 4)) % 4)
+    const padded =
+      payloadB64.replace(/-/g, '+').replace(/_/g, '/') +
+      '='.repeat((4 - (payloadB64.length % 4)) % 4)
     const { exp } = JSON.parse(atob(padded))
     return Date.now() < exp
   } catch {

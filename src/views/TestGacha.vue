@@ -5,7 +5,13 @@
 
       <div class="config-item">
         <label for="pull-count">模拟抽卡次数:</label>
-        <input id="pull-count" v-model.number="pullCount" type="number" min="1" placeholder="例如: 1000" />
+        <input
+          id="pull-count"
+          v-model.number="pullCount"
+          type="number"
+          min="1"
+          placeholder="例如: 1000"
+        />
       </div>
 
       <div class="advanced-config">
@@ -14,17 +20,32 @@
         <div class="config-grid">
           <div class="config-item">
             <label for="pool-id">卡池ID:</label>
-            <input id="pool-id" v-model.trim="poolIdInput" type="text" placeholder="例如: standard" />
+            <input
+              id="pool-id"
+              v-model.trim="poolIdInput"
+              type="text"
+              placeholder="例如: standard"
+            />
           </div>
 
           <div class="config-item">
             <label for="up-group-id">UP组ID:</label>
-            <input id="up-group-id" v-model.trim="upGroupIdInput" type="text" placeholder="例如: group_a" />
+            <input
+              id="up-group-id"
+              v-model.trim="upGroupIdInput"
+              type="text"
+              placeholder="例如: group_a"
+            />
           </div>
 
           <div class="config-item">
             <label for="up-card-id">自选UP卡牌ID:</label>
-            <input id="up-card-id" v-model.trim="upCardIdInput" type="text" placeholder="例如: 1001 (需要卡池支持)" />
+            <input
+              id="up-card-id"
+              v-model.trim="upCardIdInput"
+              type="text"
+              placeholder="例如: 1001 (需要卡池支持)"
+            />
           </div>
         </div>
       </div>
@@ -38,7 +59,11 @@
           模拟结果 (池: {{ activePoolIdForDisplay }}, 共 {{ totalResultPulls }} 抽)
         </h2>
         <ul class="results-list">
-          <li v-for="(count, rarity) in simulationResult" :key="rarity" :class="`rarity-text-${rarity}`">
+          <li
+            v-for="(count, rarity) in simulationResult"
+            :key="rarity"
+            :class="`rarity-text-${rarity}`"
+          >
             <span class="rarity-label">{{ rarity }}</span>
             <div class="bar-container">
               <div class="bar" :style="{ width: calculatePercentage(count) }"></div>

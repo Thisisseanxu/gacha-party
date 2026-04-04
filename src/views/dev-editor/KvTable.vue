@@ -3,9 +3,9 @@
     <table class="kv-table">
       <thead>
         <tr>
-          <th style="width: 70px;">ID (key)</th>
+          <th style="width: 70px">ID (key)</th>
           <th>名称 (value)</th>
-          <th style="width: 60px;"></th>
+          <th style="width: 60px"></th>
         </tr>
       </thead>
       <tbody>
@@ -22,7 +22,7 @@
         </tr>
       </tbody>
     </table>
-    <button class="de-btn small" style="margin-top: 6px;" @click="addRow">+ 新增行</button>
+    <button class="de-btn small" style="margin-top: 6px" @click="addRow">+ 新增行</button>
   </div>
 </template>
 

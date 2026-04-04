@@ -1,10 +1,19 @@
 <template>
   <div class="page-container">
     <div v-if="isSelectionMode" class="selector-container">
-      <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
-        :disabledCharacterIds="disabledCharacterIds" title="选择角色" :subTitle="null" :show-qban="true"
-        :show-add-custom="true" :add-custom-always-visible="true" @confirm="isSelectionMode = false"
-        @add-custom="openCustomCharModal" />
+      <CharacterSelector
+        v-model="selectedCharId"
+        mode="single"
+        :characterList="displayCharacterList"
+        :disabledCharacterIds="disabledCharacterIds"
+        title="选择角色"
+        :subTitle="null"
+        :show-qban="true"
+        :show-add-custom="true"
+        :add-custom-always-visible="true"
+        @confirm="isSelectionMode = false"
+        @add-custom="openCustomCharModal"
+      />
     </div>
     <div v-else class="strategy-editor">
       <div class="controls-panel card">
@@ -23,8 +32,13 @@
         <div class="control-group">
           <label>适配星级 (点击切换)</label>
           <div class="star-selector">
-            <span v-for="i in 6" :key="i - 1" class="star-btn" :class="{ active: recommendedStars.includes(i - 1) }"
-              @click="toggleStar(i - 1)">
+            <span
+              v-for="i in 6"
+              :key="i - 1"
+              class="star-btn"
+              :class="{ active: recommendedStars.includes(i - 1) }"
+              @click="toggleStar(i - 1)"
+            >
               {{ i - 1 }}★
             </span>
           </div>
@@ -47,9 +61,15 @@
                 {{ r.name }}
               </option>
             </select>
-            <div class="mini-input level-btn" @mousedown="handleLevelStart(slot)"
-              @touchstart.prevent="handleLevelStart(slot)" @mouseup="handleLevelEnd(slot)"
-              @touchend="handleLevelEnd(slot)" @mouseleave="handleLevelCancel" title="点击+1，长按重置">
+            <div
+              class="mini-input level-btn"
+              @mousedown="handleLevelStart(slot)"
+              @touchstart.prevent="handleLevelStart(slot)"
+              @mouseup="handleLevelEnd(slot)"
+              @touchend="handleLevelEnd(slot)"
+              @mouseleave="handleLevelCancel"
+              title="点击+1，长按重置"
+            >
               {{ slot.level }}
             </div>
             <select v-model="slot.typeId" class="mini-select">
@@ -66,25 +86,41 @@
           <input v-model="customTitle" class="input-select" placeholder="攻略名称" />
         </div>
         <div class="control-group">
-          <textarea v-model="recommendText" rows="4" placeholder="注释（可以写推荐理由等）"></textarea>
+          <textarea
+            v-model="recommendText"
+            rows="4"
+            placeholder="注释（可以写推荐理由等）"
+          ></textarea>
           <input v-model="authorName" class="input-select" placeholder="作者署名" />
         </div>
         <div class="control-group"></div>
 
         <div class="action-buttons">
           <button @click="generateImage" class="generate-btn">导出图片</button>
-          <button v-if="overwriteId && isAdminLoggedIn()" @click="overwriteSave" class="export-btn overwrite-save-btn"
-            :disabled="overwriteSaving">
+          <button
+            v-if="overwriteId && isAdminLoggedIn()"
+            @click="overwriteSave"
+            class="export-btn overwrite-save-btn"
+            :disabled="overwriteSaving"
+          >
             {{ overwriteSaving ? '保存中…' : `覆盖保存 #${overwriteId}` }}
           </button>
           <button v-else @click="openSubmitDialog" class="export-btn" :disabled="isCustomChar">
             投稿攻略
           </button>
         </div>
-        <div v-if="overwriteResult === 'success'" class="feedback-msg success-msg" style="margin-top:0.4rem">
+        <div
+          v-if="overwriteResult === 'success'"
+          class="feedback-msg success-msg"
+          style="margin-top: 0.4rem"
+        >
           ✓ 已覆盖保存，正在返回…
         </div>
-        <div v-if="overwriteResult === 'error'" class="feedback-msg error-msg" style="margin-top:0.4rem">
+        <div
+          v-if="overwriteResult === 'error'"
+          class="feedback-msg error-msg"
+          style="margin-top: 0.4rem"
+        >
           {{ overwriteError }}
         </div>
         <p v-if="!overwriteId && isCustomChar" class="custom-char-hint">自定义角色暂不支持投稿</p>
@@ -101,57 +137,110 @@
             <div class="star-label">适配星级</div>
             <div class="stars-row">
               <div v-for="star in sortedStars" :key="star" class="star-item-img-wrapper">
-                <img :src="`/images/huizhang/contract_star_${star}.webp`" class="star-img-lg" alt="star" />
+                <img
+                  :src="`/images/huizhang/contract_star_${star}.webp`"
+                  class="star-img-lg"
+                  alt="star"
+                />
               </div>
             </div>
           </div>
 
           <div class="character-display">
-            <img :src="currentCharConfig?.image_url || selectedCardInfo.imageUrl" class="char-img" />
+            <img
+              :src="currentCharConfig?.image_url || selectedCardInfo.imageUrl"
+              class="char-img"
+            />
           </div>
 
           <div class="badges-container">
             <div class="badges-grid" :class="`grid-${currentSlots.length}`">
               <div v-for="(slot, index) in currentSlots" :key="index" class="badge-item">
                 <div class="badge-main-visual">
-                  <img v-if="slot.rarityId !== '0'" :src="getHuizhangBgUrl(slot.rarityId, slot.shape)"
-                    class="badge-bg-img" alt="bg" />
+                  <img
+                    v-if="slot.rarityId !== '0'"
+                    :src="getHuizhangBgUrl(slot.rarityId, slot.shape)"
+                    class="badge-bg-img"
+                    alt="bg"
+                  />
 
                   <div class="badge-icon-container">
-                    <svg class="badge-icon-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <svg
+                      class="badge-icon-svg"
+                      viewBox="0 0 100 100"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
                       <defs>
                         <clipPath :id="`badge-clip-${index}`">
-                          <circle v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE" cx="50" cy="50" r="45" />
-                          <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.DIAMOND" points="50,5 95,50 50,95 5,50" />
-                          <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.SHIELD"
-                            points="12,6 88,6 88,70 50,95 12,70" />
+                          <circle
+                            v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE"
+                            cx="50"
+                            cy="50"
+                            r="45"
+                          />
+                          <polygon
+                            v-else-if="slot.shape === HUIZHANG_SHAPES.DIAMOND"
+                            points="50,5 95,50 50,95 5,50"
+                          />
+                          <polygon
+                            v-else-if="slot.shape === HUIZHANG_SHAPES.SHIELD"
+                            points="12,6 88,6 88,70 50,95 12,70"
+                          />
                         </clipPath>
                       </defs>
                       <g v-if="slot.rarityId === '0'">
-                        <circle v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE" cx="50" cy="50" r="45"
-                          fill="rgba(200, 200, 200, 0.3)" />
-                        <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.DIAMOND" points="50,5 95,50 50,95 5,50"
-                          fill="rgba(200, 200, 200, 0.3)" />
-                        <polygon v-else-if="slot.shape === HUIZHANG_SHAPES.SHIELD" points="12,6 88,6 88,70 50,95 12,70"
-                          fill="rgba(200, 200, 200, 0.3)" />
+                        <circle
+                          v-if="slot.shape === HUIZHANG_SHAPES.CIRCLE"
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="rgba(200, 200, 200, 0.3)"
+                        />
+                        <polygon
+                          v-else-if="slot.shape === HUIZHANG_SHAPES.DIAMOND"
+                          points="50,5 95,50 50,95 5,50"
+                          fill="rgba(200, 200, 200, 0.3)"
+                        />
+                        <polygon
+                          v-else-if="slot.shape === HUIZHANG_SHAPES.SHIELD"
+                          points="12,6 88,6 88,70 50,95 12,70"
+                          fill="rgba(200, 200, 200, 0.3)"
+                        />
                       </g>
-                      <image v-else :xlink:href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon"
-                        :href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon" x="-12.5" y="-12.5"
-                        width="125" height="125" preserveAspectRatio="xMidYMid slice"
-                        :clip-path="`url(#badge-clip-${index})`" />
+                      <image
+                        v-else
+                        :xlink:href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon"
+                        :href="iconBase64Map[slot.typeId] || HUIZHANG_TYPES[slot.typeId].icon"
+                        x="-12.5"
+                        y="-12.5"
+                        width="125"
+                        height="125"
+                        preserveAspectRatio="xMidYMid slice"
+                        :clip-path="`url(#badge-clip-${index})`"
+                      />
                     </svg>
                   </div>
 
                   <div class="badge-sub-icon">
-                    <img v-if="currentCharConfig?.theme?.icon" :src="currentCharConfig.theme.icon" class="sub-icon-img"
-                      alt="theme" />
+                    <img
+                      v-if="currentCharConfig?.theme?.icon"
+                      :src="currentCharConfig.theme.icon"
+                      class="sub-icon-img"
+                      alt="theme"
+                    />
                   </div>
                 </div>
 
                 <div class="badge-stars-container" v-if="slot.rarityId !== '0'">
                   <div class="badge-stars-row">
-                    <img v-for="n in 5" :key="n" :src="getStarImage(slot.level, n)" class="level-star-img" alt="★" />
+                    <img
+                      v-for="n in 5"
+                      :key="n"
+                      :src="getStarImage(slot.level, n)"
+                      class="level-star-img"
+                      alt="★"
+                    />
                   </div>
                 </div>
               </div>
@@ -174,7 +263,9 @@
       </div>
     </div>
     <p class="agreement">
-      使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+      使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#"
+        >《织夜工具箱创作条款》</a
+      >
     </p>
   </div>
 
@@ -215,7 +306,11 @@
       <h3 class="submit-title">投稿攻略</h3>
       <p class="submit-sub">投稿审核通过后将显示在攻略列表中</p>
 
-      <div v-if="submitHint" class="feedback-msg" :class="submitHint.blocking ? 'error-msg' : 'warn-msg'">
+      <div
+        v-if="submitHint"
+        class="feedback-msg"
+        :class="submitHint.blocking ? 'error-msg' : 'warn-msg'"
+      >
         {{ submitHint.blocking ? '⚠' : '💡' }} {{ submitHint.message }}
       </div>
 
@@ -234,13 +329,23 @@
 
       <div class="form-row">
         <label>玩家ID <span class="required">*</span></label>
-        <input v-model="submitPlayerId" class="input-select" placeholder="游戏内的数字玩家ID" autocomplete="off"
-          inputmode="numeric" />
+        <input
+          v-model="submitPlayerId"
+          class="input-select"
+          placeholder="游戏内的数字玩家ID"
+          autocomplete="off"
+          inputmode="numeric"
+        />
       </div>
 
       <div class="form-row">
         <label>激活码 <span class="required">*</span></label>
-        <input v-model="submitLicenseKey" class="input-select" placeholder="与抽卡记录功能的相同" autocomplete="off" />
+        <input
+          v-model="submitLicenseKey"
+          class="input-select"
+          placeholder="与抽卡记录功能的相同"
+          autocomplete="off"
+        />
         <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱并联系客服</span>
         <label class="checkbox-row">
           <input type="checkbox" v-model="saveKey" />
@@ -252,7 +357,11 @@
       <div v-if="submitSuccess" class="feedback-msg success-msg">{{ submitSuccess }}</div>
 
       <div class="form-actions">
-        <button class="action-button" :disabled="submitLoading || !!submitHint?.blocking" @click="handleSubmit">
+        <button
+          class="action-button"
+          :disabled="submitLoading || !!submitHint?.blocking"
+          @click="handleSubmit"
+        >
           {{ submitLoading ? '提交中…' : '提交审核' }}
         </button>
         <button class="action-button cancel" @click="showSubmitDialog = false">取消</button>
@@ -272,10 +381,19 @@
             <button @click="triggerCustomCharUpload" class="action-button" style="flex: 1">
               {{ customCharForm.image ? '更换' : '上传' }}
             </button>
-            <img v-if="customCharForm.image" :src="customCharForm.image" class="avatar-preview-small" />
+            <img
+              v-if="customCharForm.image"
+              :src="customCharForm.image"
+              class="avatar-preview-small"
+            />
           </div>
-          <input type="file" ref="customCharInputRef" @change="handleCustomCharImage" accept="image/*"
-            style="display: none" />
+          <input
+            type="file"
+            ref="customCharInputRef"
+            @change="handleCustomCharImage"
+            accept="image/*"
+            style="display: none"
+          />
         </div>
         <div class="form-row compact-col">
           <label>所属系列</label>
@@ -291,7 +409,11 @@
       <div class="compact-row">
         <div class="form-row compact-col">
           <label>徽章数量</label>
-          <select v-model="customCharForm.count" class="input-select" @change="updateCustomCharShapes">
+          <select
+            v-model="customCharForm.count"
+            class="input-select"
+            @change="updateCustomCharShapes"
+          >
             <option :value="2">2个</option>
             <option :value="4">4个</option>
             <option :value="6">6个</option>
@@ -376,12 +498,12 @@ const overwriteId = computed(() => {
   return isNaN(v) ? null : v
 })
 const overwriteSaving = ref(false)
-const overwriteResult = ref('')  // 'success' | 'error' | ''
+const overwriteResult = ref('') // 'success' | 'error' | ''
 const overwriteError = ref('')
 
 // 自定义角色相关
 const tempCustomChar = ref(null)
-const _customCharBlobUrl = ref(null)  // 追踪当前 blob URL，用于释放内存
+const _customCharBlobUrl = ref(null) // 追踪当前 blob URL，用于释放内存
 const showCustomCharForm = ref(false)
 const customCharForm = ref({
   image: null,
@@ -634,9 +756,10 @@ const submitHint = computed(() => {
   const recLen = recommendText.value.trim().length
   if (recLen < 20)
     return {
-      message: recLen === 0
-        ? '未填写推荐理由，超过20字的详细说明更有机会入选'
-        : `推荐理由仅 ${recLen} 字，超过20字的详细说明更有机会入选`,
+      message:
+        recLen === 0
+          ? '未填写推荐理由，超过20字的详细说明更有机会入选'
+          : `推荐理由仅 ${recLen} 字，超过20字的详细说明更有机会入选`,
       blocking: false,
     }
 
@@ -889,7 +1012,6 @@ const updatePreviewScale = () => {
   if (!previewWrapper.value) return
   const wrapperWidth = previewWrapper.value.clientWidth
   const targetWidth = 820 // 800px + 左右留白
-
 
   if (wrapperWidth < targetWidth) {
     previewScale.value = wrapperWidth / targetWidth

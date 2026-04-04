@@ -2,8 +2,11 @@
   <div class="custom-gacha-page-background">
     <div class="config-container">
       <div class="button-group">
-        <router-link :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
-          class="back-home-button-config">返回</router-link>
+        <router-link
+          :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
+          class="back-home-button-config"
+          >返回</router-link
+        >
         <button @click="resetConfiguration" class="reset-button-config">重置配置</button>
       </div>
       <h1 class="config-title">创建自定义卡池</h1>
@@ -13,7 +16,12 @@
         <h2 class="section-title">1. 基础信息</h2>
         <div class="form-group">
           <label for="poolName">卡池名称</label>
-          <input id="poolName" type="text" v-model="customPool.name" placeholder="例如：我的梦想卡池" />
+          <input
+            id="poolName"
+            type="text"
+            v-model="customPool.name"
+            placeholder="例如：我的梦想卡池"
+          />
         </div>
       </div>
 
@@ -22,9 +30,13 @@
         <div v-for="rarity in rarities" :key="rarity" class="rarity-section">
           <h3 :class="`text-rarity-${rarity.toLowerCase()}`">{{ rarity }} 卡池</h3>
           <div class="card-selector-grid">
-            <div v-for="card in groupedCards[rarity]" :key="card.id" class="card-option"
+            <div
+              v-for="card in groupedCards[rarity]"
+              :key="card.id"
+              class="card-option"
               :class="{ selected: selectedCardIds[rarity].includes(card.id) }"
-              @click="toggleCardSelection(rarity, card.id)">
+              @click="toggleCardSelection(rarity, card.id)"
+            >
               <img :src="card.imageUrl" :alt="card.name" class="card-image" />
               <div class="card-name">{{ card.name }}</div>
               <div class="checkmark">✔</div>
@@ -38,15 +50,36 @@
         <div class="form-grid-rates">
           <div class="form-group">
             <label for="spRate">SP 基础概率 (%)</label>
-            <input id="spRate" type="number" v-model.number="customPool.rates.SP" min="0" max="100" step="0.01" />
+            <input
+              id="spRate"
+              type="number"
+              v-model.number="customPool.rates.SP"
+              min="0"
+              max="100"
+              step="0.01"
+            />
           </div>
           <div class="form-group">
             <label for="ssrRate">SSR 基础概率 (%)</label>
-            <input id="ssrRate" type="number" v-model.number="customPool.rates.SSR" min="0" max="100" step="0.1" />
+            <input
+              id="ssrRate"
+              type="number"
+              v-model.number="customPool.rates.SSR"
+              min="0"
+              max="100"
+              step="0.1"
+            />
           </div>
           <div class="form-group">
             <label for="srRate">SR 基础概率 (%)</label>
-            <input id="srRate" type="number" v-model.number="customPool.rates.SR" min="0" max="100" step="1" />
+            <input
+              id="srRate"
+              type="number"
+              v-model.number="customPool.rates.SR"
+              min="0"
+              max="100"
+              step="1"
+            />
           </div>
         </div>
 
@@ -54,9 +87,18 @@
           <div v-if="selectedCardIds.SP.length > 0">
             <h3 class="subsection-title">SP角色UP候选 (可多选，将在抽卡页进行N选1)</h3>
             <div class="card-selector-grid-small">
-              <div v-for="cardId in selectedCardIds.SP" :key="cardId" class="card-option-small"
-                :class="{ selected: upCandidateIds.includes(cardId) }" @click="toggleUpCandidate(cardId)">
-                <img :src="cardMap.get(cardId)?.imageUrl" :alt="cardMap.get(cardId)?.name" class="card-image" />
+              <div
+                v-for="cardId in selectedCardIds.SP"
+                :key="cardId"
+                class="card-option-small"
+                :class="{ selected: upCandidateIds.includes(cardId) }"
+                @click="toggleUpCandidate(cardId)"
+              >
+                <img
+                  :src="cardMap.get(cardId)?.imageUrl"
+                  :alt="cardMap.get(cardId)?.name"
+                  class="card-image"
+                />
                 <div class="checkmark">✔</div>
               </div>
             </div>
@@ -65,9 +107,18 @@
           <div v-if="selectedCardIds.SSR.length > 0">
             <h3 class="subsection-title">SSR角色双倍概率 (可多选)</h3>
             <div class="card-selector-grid-small">
-              <div v-for="cardId in selectedCardIds.SSR" :key="cardId" class="card-option-small"
-                :class="{ selected: doubleRateSSRIds.includes(cardId) }" @click="toggleDoubleRateSSR(cardId)">
-                <img :src="cardMap.get(cardId)?.imageUrl" :alt="cardMap.get(cardId)?.name" class="card-image" />
+              <div
+                v-for="cardId in selectedCardIds.SSR"
+                :key="cardId"
+                class="card-option-small"
+                :class="{ selected: doubleRateSSRIds.includes(cardId) }"
+                @click="toggleDoubleRateSSR(cardId)"
+              >
+                <img
+                  :src="cardMap.get(cardId)?.imageUrl"
+                  :alt="cardMap.get(cardId)?.name"
+                  class="card-image"
+                />
                 <div class="checkmark">✔</div>
               </div>
             </div>

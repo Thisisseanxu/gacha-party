@@ -43,9 +43,16 @@
             <span>特别鸣谢</span>
           </h2>
           <div class="thanks-grid">
-            <component :is="item.link ? 'a' : 'div'" v-for="(item, index) in specialThanks" :key="index"
-              class="thank-card" :class="{ 'has-link': !!item.link }" :href="item.link"
-              :target="item.link ? '_blank' : undefined" :rel="item.link ? 'noopener noreferrer' : undefined">
+            <component
+              :is="item.link ? 'a' : 'div'"
+              v-for="(item, index) in specialThanks"
+              :key="index"
+              class="thank-card"
+              :class="{ 'has-link': !!item.link }"
+              :href="item.link"
+              :target="item.link ? '_blank' : undefined"
+              :rel="item.link ? 'noopener noreferrer' : undefined"
+            >
               <div class="thank-content">
                 <span class="supporter">{{ item.supporter }}</span>
                 <span class="contribution">{{ item.contribution }}</span>
@@ -60,12 +67,19 @@
             <span>联系与反馈</span>
           </h2>
           <div class="contact-group">
-            <a href="https://github.com/Thisisseanxu/gacha-party/issues" target="_blank" class="contact-btn github">
+            <a
+              href="https://github.com/Thisisseanxu/gacha-party/issues"
+              target="_blank"
+              class="contact-btn github"
+            >
               <github-one theme="outline" size="24" />
               <span>Github Issue</span>
             </a>
-            <a href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
-              target="_blank" class="contact-btn qq">
+            <a
+              href="https://qm.qq.com/cgi-bin/qm/qr?k=ntxYu3FuRWgafpUguLeKdaFSt06y-TiO&jump_from=webapi&authKey=8LzsxinzBKbO6rvvvtQ4JSzXsBJDmv/1SGhBQhmoDqI8XHekcmVNpqDkE+MbzbBw"
+              target="_blank"
+              class="contact-btn qq"
+            >
               <tencent-qq theme="outline" size="24" />
               <span>加入QQ群</span>
             </a>
@@ -88,7 +102,16 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
-import { Return, ThumbsUp, Comment, GithubOne, TencentQq, Mail, Moon, SunOne } from '@icon-park/vue-next'
+import {
+  Return,
+  ThumbsUp,
+  Comment,
+  GithubOne,
+  TencentQq,
+  Mail,
+  Moon,
+  SunOne,
+} from '@icon-park/vue-next'
 
 const startDate = new Date('2025-07-02T16:00:00') // 项目运行时间计算
 const contactEmail = ref('thisisseanxu@qq.com') // 邮箱地址

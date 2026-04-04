@@ -16,8 +16,12 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div v-for="card in filteredCards" :key="card.id" :class="['list-item', { active: form.id === card.id }]"
-          @click="selectCard(card)">
+        <div
+          v-for="card in filteredCards"
+          :key="card.id"
+          :class="['list-item', { active: form.id === card.id }]"
+          @click="selectCard(card)"
+        >
           <span class="rarity-tag" :data-rarity="card.rarity">{{ card.rarity }}</span>
           <span class="item-name">{{ card.name }}</span>
           <span class="item-id">#{{ card.id }}</span>
@@ -32,11 +36,19 @@
       </div>
       <template v-else>
         <div class="form-title">{{ isNew ? '新增角色' : `编辑角色 #${form.id}` }}</div>
-        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
+        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">
+          {{ saveMsg.text }}
+        </div>
 
         <div class="form-grid">
           <label>ID</label>
-          <input v-model="form.id" class="de-input" :disabled="!isNew" placeholder="如 1110" @blur="autofillImageUrl" />
+          <input
+            v-model="form.id"
+            class="de-input"
+            :disabled="!isNew"
+            placeholder="如 1110"
+            @blur="autofillImageUrl"
+          />
 
           <label>名称</label>
           <input v-model="form.name" class="de-input" placeholder="如 贪吃天使" />
@@ -48,8 +60,13 @@
 
           <label>卡面图 URL</label>
           <div>
-            <input v-model="form.imageUrl" class="de-input" style="width: 100%;"
-              placeholder="/images/characters/1110.webp" @blur="fixWebp('imageUrl')" />
+            <input
+              v-model="form.imageUrl"
+              class="de-input"
+              style="width: 100%"
+              placeholder="/images/characters/1110.webp"
+              @blur="fixWebp('imageUrl')"
+            />
             <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
           </div>
 
@@ -63,8 +80,13 @@
 
           <label>Q版图 URL</label>
           <div>
-            <input v-model="form.qban_url" class="de-input" style="width: 100%;" placeholder="/images/qban/1110.webp"
-              @blur="fixWebp('qban_url')" />
+            <input
+              v-model="form.qban_url"
+              class="de-input"
+              style="width: 100%"
+              placeholder="/images/qban/1110.webp"
+              @blur="fixWebp('qban_url')"
+            />
             <img v-if="form.qban_url" :src="form.qban_url" class="img-preview" />
           </div>
 

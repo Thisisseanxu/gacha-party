@@ -4,10 +4,20 @@
       <h1 class="page-title">导演模式</h1>
 
       <div v-if="isSelectionMode" class="selection-mode-container">
-        <CharacterSelector v-model="selectedCharacterIds" v-model:customCharacters="customCharacters"
-          :characterList="displayableCharacterList" mode="multiple" :show-real-name-toggle="true"
-          :show-add-custom="true" @add-custom="openCreateCharModal" />
-        <button @click="confirmSelection" class="finalize-button" :disabled="selectedCharacterIds.length === 0">
+        <CharacterSelector
+          v-model="selectedCharacterIds"
+          v-model:customCharacters="customCharacters"
+          :characterList="displayableCharacterList"
+          mode="multiple"
+          :show-real-name-toggle="true"
+          :show-add-custom="true"
+          @add-custom="openCreateCharModal"
+        />
+        <button
+          @click="confirmSelection"
+          class="finalize-button"
+          :disabled="selectedCharacterIds.length === 0"
+        >
           开始创作 →
         </button>
       </div>
@@ -19,24 +29,53 @@
           <div class="editor-row">
             <select v-model="newMessage.cardId" class="editor-select" style="flex: 1">
               <option :value="null" disabled>选择聊天角色</option>
-              <option v-for="card in cardOptions" :key="card.id" :value="card.id" class="option-text">
+              <option
+                v-for="card in cardOptions"
+                :key="card.id"
+                :value="card.id"
+                class="option-text"
+              >
                 {{ card.name }}
               </option>
             </select>
-            <SwitchComponent v-if="
-              newMessage?.cardId && newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'
-            " v-model="isRightSide" label="右侧" style="margin-left: 10px" />
+            <SwitchComponent
+              v-if="
+                newMessage?.cardId && newMessage.cardId !== '_旁白' && newMessage.cardId !== '_班长'
+              "
+              v-model="isRightSide"
+              label="右侧"
+              style="margin-left: 10px"
+            />
           </div>
           <div class="editor-row">
-            <input v-model="customName" type="text" class="editor-input" placeholder="自定义名称 (可选，会覆盖角色名)" />
+            <input
+              v-model="customName"
+              type="text"
+              class="editor-input"
+              placeholder="自定义名称 (可选，会覆盖角色名)"
+            />
           </div>
           <div class="editor-row">
-            <textarea v-model="newMessage.text" class="editor-textarea" placeholder="输入对话内容..."
-              :disabled="chatLog[editingIndex]?.type === 'image'"></textarea>
-            <button v-if="editingIndex === null" @click="triggerImageUpload" class="editor-button image-button">
+            <textarea
+              v-model="newMessage.text"
+              class="editor-textarea"
+              placeholder="输入对话内容..."
+              :disabled="chatLog[editingIndex]?.type === 'image'"
+            ></textarea>
+            <button
+              v-if="editingIndex === null"
+              @click="triggerImageUpload"
+              class="editor-button image-button"
+            >
               添加图片
             </button>
-            <input type="file" ref="imageInputRef" @change="onImageSelected" accept="image/*" style="display: none" />
+            <input
+              type="file"
+              ref="imageInputRef"
+              @change="onImageSelected"
+              accept="image/*"
+              style="display: none"
+            />
           </div>
           <div class="editor-row editor-action-row">
             <button @click="handleFormSubmit" class="editor-button">
@@ -51,7 +90,11 @@
             <button v-if="editingIndex !== null" @click="exitEditing" class="editor-button cancel">
               取消修改
             </button>
-            <button v-if="insertingIndex !== null" @click="exitInserting" class="editor-button cancel">
+            <button
+              v-if="insertingIndex !== null"
+              @click="exitInserting"
+              class="editor-button cancel"
+            >
               取消插入
             </button>
           </div>
@@ -78,52 +121,87 @@
             <button @click="generateImage" class="action-button export-btn">导出图片</button>
             <button @click="enterSelectionMode" class="action-button">重选角色</button>
             <button @click="openSaveLoadMenu" class="action-button">存档/读档</button>
-            <input type="file" ref="fileInput" @change="handleImportFile" accept=".json" style="display: none" />
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleImportFile"
+              accept=".json"
+              style="display: none"
+            />
           </div>
         </div>
 
         <div class="preview-wrapper" ref="previewWrapper">
           <p class="preview-hint">↓ 预览区域 (可滚动) ↓</p>
-          <button v-if="!isFullscreen" class="fullscreen-btn" @click="toggleFullScreen" title="全屏预览">
+          <button
+            v-if="!isFullscreen"
+            class="fullscreen-btn"
+            @click="toggleFullScreen"
+            title="全屏预览"
+          >
             <full-screen-one theme="outline" size="20" fill="#fff" />
           </button>
           <div class="capture-area-wrapper" :style="previewStyle">
-            <div class="chat-log-container" ref="captureRef" :style="{
-              width: previewConfig.width + 'px',
-              height: previewConfig.height + 'px',
-              borderRadius: previewConfig.radius + 'px',
-            }">
+            <div
+              class="chat-log-container"
+              ref="captureRef"
+              :style="{
+                width: previewConfig.width + 'px',
+                height: previewConfig.height + 'px',
+                borderRadius: previewConfig.radius + 'px',
+              }"
+            >
               <div class="chat-log">
-                <div v-for="(message, index) in chatLog" :key="index" class="chat-message" :class="{
-                  'editing-highlight': index === editingIndex,
-                  'insert-highlight-after': index === insertingIndex,
-                  [message.position]: true,
-                }" @click="openEditMenu(index)">
+                <div
+                  v-for="(message, index) in chatLog"
+                  :key="index"
+                  class="chat-message"
+                  :class="{
+                    'editing-highlight': index === editingIndex,
+                    'insert-highlight-after': index === insertingIndex,
+                    [message.position]: true,
+                  }"
+                  @click="openEditMenu(index)"
+                >
                   <template v-if="message.position === 'center'">
                     <div class="bubble center">{{ message.text }}</div>
                   </template>
 
                   <template v-else>
-                    <div v-if="
-                      message.position === 'left' &&
-                      message.cardId !== '_班长' &&
-                      isCardMissing(message.cardId)
-                    " class="avatar missing-avatar"
-                      @click.stop="openRepairCharModal(message.cardId, message.displayName)">
+                    <div
+                      v-if="
+                        message.position === 'left' &&
+                        message.cardId !== '_班长' &&
+                        isCardMissing(message.cardId)
+                      "
+                      class="avatar missing-avatar"
+                      @click.stop="openRepairCharModal(message.cardId, message.displayName)"
+                    >
                       丢失<br /><span style="font-size: 0.8em">点击修复</span>
                     </div>
-                    <img v-else-if="message.position === 'left' && message.cardId !== '_班长'"
-                      :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'" class="avatar" />
+                    <img
+                      v-else-if="message.position === 'left' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)"
+                      :alt="message.displayName + '头像'"
+                      class="avatar"
+                    />
                     <div class="message-content">
                       <div v-if="message.displayName" class="character-name">
                         {{ message.displayName }}
                       </div>
-                      <div :class="{
-                        'image-bubble': message.type === 'image',
-                        bubble: message.type !== 'image',
-                      }">
+                      <div
+                        :class="{
+                          'image-bubble': message.type === 'image',
+                          bubble: message.type !== 'image',
+                        }"
+                      >
                         <template v-if="message.type === 'image'">
-                          <img v-if="message.text" :src="message.text" class="message-image" alt="图片消息" />
+                          <img
+                            v-if="message.text"
+                            :src="message.text"
+                            class="message-image"
+                            alt="图片消息"
+                          />
                           <div v-else class="image-placeholder">
                             图片数据丢失<br />点击编辑重新上传
                           </div>
@@ -131,17 +209,23 @@
                         <span v-else>{{ message.text }}</span>
                       </div>
                     </div>
-                    <div v-if="
-                      message.position === 'right' &&
-                      message.cardId !== '_班长' &&
-                      isCardMissing(message.cardId)
-                    " class="avatar right-avatar missing-avatar"
-                      @click.stop="openRepairCharModal(message.cardId, message.displayName)">
+                    <div
+                      v-if="
+                        message.position === 'right' &&
+                        message.cardId !== '_班长' &&
+                        isCardMissing(message.cardId)
+                      "
+                      class="avatar right-avatar missing-avatar"
+                      @click.stop="openRepairCharModal(message.cardId, message.displayName)"
+                    >
                       丢失<br /><span style="font-size: 0.8em">点击修复</span>
                     </div>
-                    <img v-else-if="message.position === 'right' && message.cardId !== '_班长'"
-                      :src="getCardAvatar(message.cardId)" :alt="message.displayName + '头像'"
-                      class="avatar right-avatar" />
+                    <img
+                      v-else-if="message.position === 'right' && message.cardId !== '_班长'"
+                      :src="getCardAvatar(message.cardId)"
+                      :alt="message.displayName + '头像'"
+                      class="avatar right-avatar"
+                    />
                   </template>
                 </div>
               </div>
@@ -151,7 +235,9 @@
       </div>
 
       <p class="agreement">
-        使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#">《织夜工具箱创作条款》</a>
+        使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#"
+          >《织夜工具箱创作条款》</a
+        >
       </p>
     </div>
   </div>
@@ -161,7 +247,11 @@
       <button class="close-menu-top-right" @click="closeEditMenu">&times;</button>
       <h3 class="edit-menu-title">编辑消息</h3>
       <button class="edit-menu-button" @click="startEditing">编辑这条消息</button>
-      <button v-if="chatLog[editMenu.index].type === 'image'" class="edit-menu-button" @click="triggerImageReplace">
+      <button
+        v-if="chatLog[editMenu.index].type === 'image'"
+        class="edit-menu-button"
+        @click="triggerImageReplace"
+      >
         重新上传图片
       </button>
       <button class="edit-menu-button" @click="startInserting">在此后插入消息</button>
@@ -200,14 +290,23 @@
             <span class="slot-time-small">{{
               slot.timestamp ? formatTime(slot.timestamp) : '空'
             }}</span>
-            <button class="delete-slot-btn" @click="clearSlot(index + 1)" title="删除存档" v-if="slot.timestamp">
+            <button
+              class="delete-slot-btn"
+              @click="clearSlot(index + 1)"
+              title="删除存档"
+              v-if="slot.timestamp"
+            >
               &times;
             </button>
           </div>
           <div class="slot-row-bottom">
             <button class="action-button save-btn" @click="saveToSlot(index + 1)">保存</button>
             <button class="action-button" @click="loadFromSlot(index + 1)">读取</button>
-            <button class="action-button" @click="exportSlot(index + 1)" :disabled="!slot.timestamp">
+            <button
+              class="action-button"
+              @click="exportSlot(index + 1)"
+              :disabled="!slot.timestamp"
+            >
               导出文件
             </button>
             <button class="action-button" @click="triggerImportToSlot(index + 1)">导入文件</button>
@@ -230,8 +329,13 @@
         <button @click="triggerCharAvatarUpload" class="action-button">
           {{ charForm.avatar ? '更换图片' : '上传图片' }}
         </button>
-        <input type="file" ref="charFormAvatarInputRef" @change="handleCharAvatarSelected" accept="image/*"
-          style="display: none" />
+        <input
+          type="file"
+          ref="charFormAvatarInputRef"
+          @change="handleCharAvatarSelected"
+          accept="image/*"
+          style="display: none"
+        />
       </div>
       <div v-if="charForm.avatar" class="avatar-preview-container">
         <p>头像预览：</p>

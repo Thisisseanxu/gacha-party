@@ -8,7 +8,12 @@
       <div class="update-dialog">
         <!-- 添加一个标题和图标，让弹窗更醒目 -->
         <div class="dialog-header">
-          <UpdateRotation theme="outline" size="32" fill="#333" :class="{ 'icon-spin': isUpdating }" />
+          <UpdateRotation
+            theme="outline"
+            size="32"
+            fill="#333"
+            :class="{ 'icon-spin': isUpdating }"
+          />
           <h3 class="dialog-title">{{ isUpdating ? '正在更新...' : '发现新版本！' }}</h3>
         </div>
 

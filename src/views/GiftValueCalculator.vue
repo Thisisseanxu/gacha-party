@@ -11,15 +11,30 @@
         </div>
         <div class="input-group">
           <label for="premium-currency">炫彩水晶数量</label>
-          <input id="premium-currency" type="number" v-model.number="premiumCurrency" placeholder="例如：1000" />
+          <input
+            id="premium-currency"
+            type="number"
+            v-model.number="premiumCurrency"
+            placeholder="例如：1000"
+          />
         </div>
         <div class="input-group">
           <label for="standard-currency">水晶数量</label>
-          <input id="standard-currency" type="number" v-model.number="standardCurrency" placeholder="例如：1000" />
+          <input
+            id="standard-currency"
+            type="number"
+            v-model.number="standardCurrency"
+            placeholder="例如：1000"
+          />
         </div>
         <div class="input-group">
           <label for="gacha-tokens">扭蛋数量</label>
-          <input id="gacha-tokens" type="number" v-model.number="gachaTokens" placeholder="例如：20" />
+          <input
+            id="gacha-tokens"
+            type="number"
+            v-model.number="gachaTokens"
+            placeholder="例如：20"
+          />
         </div>
         <div class="input-group">
           <label for="token-value">扭蛋价值（水晶）</label>

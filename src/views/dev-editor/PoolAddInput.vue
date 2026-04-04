@@ -9,7 +9,12 @@
       </select>
     </template>
     <template v-else>
-      <input v-model="val" class="de-input pai-select" placeholder="卡池 ID…" @keydown.enter="add" />
+      <input
+        v-model="val"
+        class="de-input pai-select"
+        placeholder="卡池 ID…"
+        @keydown.enter="add"
+      />
     </template>
     <button class="de-btn primary small pai-btn" @click="add">+</button>
   </div>

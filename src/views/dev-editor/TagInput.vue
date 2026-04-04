@@ -4,8 +4,14 @@
       {{ tag }}
       <span class="tag-remove" @click.stop="remove(idx)">✕</span>
     </span>
-    <input ref="inputRef" v-model="newVal" class="tag-new-input" placeholder="输入 ID 后回车添加…" @keydown.enter.prevent="add"
-      @keydown.backspace="onBackspace" />
+    <input
+      ref="inputRef"
+      v-model="newVal"
+      class="tag-new-input"
+      placeholder="输入 ID 后回车添加…"
+      @keydown.enter.prevent="add"
+      @keydown.backspace="onBackspace"
+    />
   </div>
 </template>
 

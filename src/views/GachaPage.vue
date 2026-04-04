@@ -1,25 +1,45 @@
 <template>
   <div class="gacha-bg-fill" :style="bgFillStyle">
-
     <!-- 返回主页按钮：屏幕左上角，不随画布缩放，点击退出全屏并返回主页 -->
-    <button v-if="!showGachaResultOverlay" class="back-to-home-btn" @click="HandleFloatingButton" title="返回主页">
+    <button
+      v-if="!showGachaResultOverlay"
+      class="back-to-home-btn"
+      @click="HandleFloatingButton"
+      title="返回主页"
+    >
       <BackOne v-if="isFullscreen" theme="outline" :size="26" :fill="colors.text.primary" />
       <FullScreenOne v-else theme="outline" :size="26" :fill="colors.text.primary" />
     </button>
 
-    <div class="gacha-landscape-root" :style="canvasStyle" :class="{ 'overlay-active': showGachaResultOverlay }">
-
+    <div
+      class="gacha-landscape-root"
+      :style="canvasStyle"
+      :class="{ 'overlay-active': showGachaResultOverlay }"
+    >
       <!-- 左侧卡池列表 -->
       <aside class="pool-panel" v-show="!showGachaResultOverlay">
         <nav class="pool-list">
-          <div v-for="[id, pool] in sortedPools" :key="id" class="pool-item radius-8"
-            :class="{ active: route.params.poolId === id }" @click="navigateToPool(id)">
-            <img v-if="pool.imageUrl" :src="pool.imageUrl" :alt="pool.name" class="pool-item-image" />
+          <div
+            v-for="[id, pool] in sortedPools"
+            :key="id"
+            class="pool-item radius-8"
+            :class="{ active: route.params.poolId === id }"
+            @click="navigateToPool(id)"
+          >
+            <img
+              v-if="pool.imageUrl"
+              :src="pool.imageUrl"
+              :alt="pool.name"
+              class="pool-item-image"
+            />
             <span v-else class="pool-item-name">{{ pool.name }}</span>
           </div>
 
-          <div class="pool-item pool-item--custom radius-8" :class="{ active: route.params.poolId === 'custom' }"
-            @click="navigateToCustomPool">
+          <div
+            class="pool-item pool-item--custom radius-8"
+            :class="{ active: route.params.poolId === 'custom' }"
+            @click="navigateToCustomPool"
+          >
             <span class="custom-pool-icon">＋</span>
             <span class="custom-pool-label">自定义卡池</span>
           </div>
@@ -28,10 +48,8 @@
 
       <!-- 右侧主内容区 -->
       <main class="main-panel" v-if="currentPool" v-show="!showGachaResultOverlay">
-
         <!-- 左侧内容列 -->
         <div class="content-col">
-
           <!-- 顶部栏：卡池名 -->
           <div class="top-bar">
             <div class="top-bar__title">
@@ -40,11 +58,23 @@
                 <button class="pool-info-btn" @click="showProbabilityPopup = true" title="概率公示">
                   <Info theme="outline" :size="18" :fill="colors.text.secondary" />
                 </button>
-                <button v-if="isCustomPool" @click="shareCustomPool" class="gacha-button btn-confirm">分享卡池</button>
-                <button v-if="isCustomPool" @click="goBackToEdit" class="gacha-button btn-primary">重新编辑</button>
+                <button
+                  v-if="isCustomPool"
+                  @click="shareCustomPool"
+                  class="gacha-button btn-confirm"
+                >
+                  分享卡池
+                </button>
+                <button v-if="isCustomPool" @click="goBackToEdit" class="gacha-button btn-primary">
+                  重新编辑
+                </button>
               </div>
-              <button v-if="poolSsrCards.length > 0" @click="showSsrPopup = true" class="button btn-secondary"
-                style="font-size: 1.25rem;">
+              <button
+                v-if="poolSsrCards.length > 0"
+                @click="showSsrPopup = true"
+                class="button btn-secondary"
+                style="font-size: 1.25rem"
+              >
                 卡池SSR一览 ({{ poolSsrCards.length }})
               </button>
             </div>
@@ -52,13 +82,21 @@
 
           <!-- 选择区：UP选卡 / 心愿自选（横向滚动，UP组另置于底部） -->
           <div class="selection-area">
-
             <div v-if="isSelectableUpPool" class="up-select-group">
-              <span class="selection-label">{{ upCardDetails.length > 1 ? '选择UP角色：' : '当前UP：' }}</span>
+              <span class="selection-label">{{
+                upCardDetails.length > 1 ? '选择UP角色：' : '当前UP：'
+              }}</span>
               <div class="selection-scroll">
-                <div v-for="card in upCardDetails" :key="card.id"
-                  :class="['up-card-option', `rarity-border-${card.rarity.toLowerCase()}`, { selected: selectedUpCard === card.id }]"
-                  @click="selectUpCard(card.id)">
+                <div
+                  v-for="card in upCardDetails"
+                  :key="card.id"
+                  :class="[
+                    'up-card-option',
+                    `rarity-border-${card.rarity.toLowerCase()}`,
+                    { selected: selectedUpCard === card.id },
+                  ]"
+                  @click="selectUpCard(card.id)"
+                >
                   <img :src="card.imageUrl" :alt="card.name" class="up-card-image" />
                   <span class="up-card-name">{{ card.name }}</span>
                 </div>
@@ -68,8 +106,13 @@
             <div v-else-if="isWishPool" class="wish-select-group">
               <span class="selection-label">心愿角色 ({{ selectedWishCards.length }}/4)：</span>
               <div class="selection-scroll">
-                <div v-for="card in selectableWishCards" :key="card.id" class="wish-card-option"
-                  :class="{ selected: selectedWishCards.includes(card.id) }" @click="toggleWishCard(card.id)">
+                <div
+                  v-for="card in selectableWishCards"
+                  :key="card.id"
+                  class="wish-card-option"
+                  :class="{ selected: selectedWishCards.includes(card.id) }"
+                  @click="toggleWishCard(card.id)"
+                >
                   <div class="image-wrapper">
                     <img :src="card.imageUrl" :alt="card.name" class="wish-card-image" />
                     <div v-if="selectedWishCards.includes(card.id)" class="wish-badge">
@@ -81,7 +124,6 @@
                 </div>
               </div>
             </div>
-
           </div>
 
           <!-- 底部操作栏（无分隔线，靠右对齐） -->
@@ -91,10 +133,18 @@
               <div v-if="isSelectableUpGroupPool" class="up-group-in-controls">
                 <span class="selection-label-sm">选择UP组：</span>
                 <div class="up-group-scroll">
-                  <div v-for="group in selectableUpGroup" :key="group.id"
+                  <div
+                    v-for="group in selectableUpGroup"
+                    :key="group.id"
                     :class="['up-group-item', { selected: group.id === selectedUpGroup?.id }]"
-                    @click="setSelectedUpGroup(group)">
-                    <img v-if="group.image_url" :src="group.image_url" :alt="group.name" class="up-group-image" />
+                    @click="setSelectedUpGroup(group)"
+                  >
+                    <img
+                      v-if="group.image_url"
+                      :src="group.image_url"
+                      :alt="group.name"
+                      class="up-group-image"
+                    />
                     <span v-else class="up-group-name">{{ group.name }}</span>
                   </div>
                 </div>
@@ -113,40 +163,55 @@
                   <button @click="checkAndPull(1)" class="gacha-button single-pull">单抽</button>
                   <button @click="checkAndPull(10)" class="gacha-button ten-pull">十抽</button>
                 </div>
-                <div v-else class="wish-incomplete-warning">
-                  必须选择 4 个角色才能抽卡
-                </div>
+                <div v-else class="wish-incomplete-warning">必须选择 4 个角色才能抽卡</div>
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- 右侧历史记录悬浮列 -->
         <div class="history-float">
           <!-- 稀有度统计 -->
           <div class="rarity-counts" v-if="gachaHistory.length > 0">
-            <span v-if="rarityCounts[SP]" class="rarity-count-item text-rarity-sp">限定×{{ rarityCounts[SP] }}</span>
-            <span v-if="rarityCounts[SSR]" class="rarity-count-item text-rarity-ssr">SSR×{{ rarityCounts[SSR]
-            }}</span>
-            <span v-if="rarityCounts[SR]" class="rarity-count-item text-rarity-sr">SR×{{ rarityCounts[SR] }}</span>
-            <span v-if="rarityCounts[R]" class="rarity-count-item text-rarity-r">R×{{ rarityCounts[R] }}</span>
+            <span v-if="rarityCounts[SP]" class="rarity-count-item text-rarity-sp"
+              >限定×{{ rarityCounts[SP] }}</span
+            >
+            <span v-if="rarityCounts[SSR]" class="rarity-count-item text-rarity-ssr"
+              >SSR×{{ rarityCounts[SSR] }}</span
+            >
+            <span v-if="rarityCounts[SR]" class="rarity-count-item text-rarity-sr"
+              >SR×{{ rarityCounts[SR] }}</span
+            >
+            <span v-if="rarityCounts[R]" class="rarity-count-item text-rarity-r"
+              >R×{{ rarityCounts[R] }}</span
+            >
           </div>
           <!-- 历史记录列表（竖排，10条/页） -->
           <div class="history-list">
             <p v-if="gachaHistory.length === 0" class="history-empty">暂无记录</p>
-            <div v-for="(card, index) in paginatedHistory" :key="card.id + '_' + index"
-              :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]">{{ card.name }}</div>
+            <div
+              v-for="(card, index) in paginatedHistory"
+              :key="card.id + '_' + index"
+              :class="['history-item', `text-rarity-${card.rarity.toLowerCase()}`]"
+            >
+              {{ card.name }}
+            </div>
           </div>
           <!-- 翻页按钮 -->
           <div class="history-pagination" v-if="totalHistoryPages > 1">
-            <button class="hist-page-btn" @click="prevHistoryPage" :disabled="historyPage === 1">上一页</button>
+            <button class="hist-page-btn" @click="prevHistoryPage" :disabled="historyPage === 1">
+              上一页
+            </button>
             <span class="hist-page-info">{{ historyPage }}/{{ totalHistoryPages }}</span>
-            <button class="hist-page-btn" @click="nextHistoryPage"
-              :disabled="historyPage === totalHistoryPages">下一页</button>
+            <button
+              class="hist-page-btn"
+              @click="nextHistoryPage"
+              :disabled="historyPage === totalHistoryPages"
+            >
+              下一页
+            </button>
           </div>
         </div>
-
       </main>
 
       <p v-else class="loading-text">卡池加载中或不存在...</p>
@@ -156,27 +221,47 @@
         <div class="overlay-content">
           <h2 class="overlay-title">恭喜获得</h2>
           <div class="pulled-cards-container" ref="cardsContainerRef">
-            <transition-group name="card-reveal" tag="div" class="pulled-cards-grid"
-              :class="{ 'grid-ten-pull': lastPullCount === 10 }">
-              <div v-for="(card, index) in displayedCards" :key="card.id + '_' + index"
-                :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]">
-                <div :class="[
-                  'card-image-wrapper',
-                  `rarity-border-${card.rarity.toLowerCase()}`,
-                  { 'highlight-rarity': isHighlightRarity(card.rarity) },
-                ]">
-                  <img :src="card.imageUrl || '/images/characters/1101.webp'" :alt="`${card.name}的立绘图`"
-                    class="card-image" />
+            <transition-group
+              name="card-reveal"
+              tag="div"
+              class="pulled-cards-grid"
+              :class="{ 'grid-ten-pull': lastPullCount === 10 }"
+            >
+              <div
+                v-for="(card, index) in displayedCards"
+                :key="card.id + '_' + index"
+                :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]"
+              >
+                <div
+                  :class="[
+                    'card-image-wrapper',
+                    `rarity-border-${card.rarity.toLowerCase()}`,
+                    { 'highlight-rarity': isHighlightRarity(card.rarity) },
+                  ]"
+                >
+                  <img
+                    :src="card.imageUrl || '/images/characters/1101.webp'"
+                    :alt="`${card.name}的立绘图`"
+                    class="card-image"
+                  />
                 </div>
                 <p class="card-name">{{ card.name }}</p>
               </div>
             </transition-group>
           </div>
           <div class="result-actions">
-            <button @click="checkAndPull(lastPullCount)" class="confirm-button single-pull" :disabled="isAnimating">
+            <button
+              @click="checkAndPull(lastPullCount)"
+              class="confirm-button single-pull"
+              :disabled="isAnimating"
+            >
               {{ isAnimating ? '...' : `再来${lastPullCount}抽` }}
             </button>
-            <button @click="confirmGachaResult" class="confirm-button ten-pull" :disabled="isAnimating">
+            <button
+              @click="confirmGachaResult"
+              class="confirm-button ten-pull"
+              :disabled="isAnimating"
+            >
               {{ isAnimating ? '...' : '确定' }}
             </button>
           </div>
@@ -187,17 +272,27 @@
       <PopUp :display="showSharePopUp" title="分享你的卡池" @close="closeSharePopUp">
         <p class="share-modal-text-info">长按二维码保存或点击下方链接复制分享</p>
         <div class="qr-code-container">
-          <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="卡池分享二维码" class="share-modal-qr-code" />
+          <img
+            v-if="qrCodeDataUrl"
+            :src="qrCodeDataUrl"
+            alt="卡池分享二维码"
+            class="share-modal-qr-code"
+          />
           <p v-else>二维码生成中...</p>
         </div>
-        <textarea readonly class="share-modal-textarea" @click="copyShareText" v-model="shareText"></textarea>
+        <textarea
+          readonly
+          class="share-modal-textarea"
+          @click="copyShareText"
+          v-model="shareText"
+        ></textarea>
         <p v-if="copyStatusMessage" class="copy-status-message">{{ copyStatusMessage }}</p>
       </PopUp>
 
       <!-- 卡池类型不一致警告 -->
       <PopUp :display="showPoolTypeMismatch" title="切换不同类型卡池" @close="cancelPoolSwitch">
         <p class="pool-type-warning-text">
-          正在从「{{ currentPool?.type }}」切换到「{{ pendingPoolType }}」，<br>
+          正在从「{{ currentPool?.type }}」切换到「{{ pendingPoolType }}」，<br />
           两者类型不同，继续切换将会<strong>重置所有保底信息</strong>。
         </p>
         <div class="button-group">
@@ -222,33 +317,50 @@
         <div class="probability-popup-content">
           <p>本模拟器使用1.25%的基础概率来拟合游戏内的2%的综合概率</p>
           <p>
-            <strong>常驻卡池：</strong>抽到SSR的概率为8%，SR为20%。连续59次未出UP组SSR，第60抽必为UP组中的SSR角色。获取SSR时，有50%概率为UP组中的SSR角色，若"歪"，则下次抽到SSR必为UP组中的SSR角色。
+            <strong>常驻卡池：</strong
+            >抽到SSR的概率为8%，SR为20%。连续59次未出UP组SSR，第60抽必为UP组中的SSR角色。获取SSR时，有50%概率为UP组中的SSR角色，若"歪"，则下次抽到SSR必为UP组中的SSR角色。
           </p>
           <p>
-            <strong>限定卡池：</strong>抽到限定的综合概率为2%，40抽未出则之后的每抽概率额外提升2%。SSR为6%，SR为20%。60抽必出限定角色。获取限定角色时，有50%概率为UP的限定角色，若"歪"，则下次抽到限定必为UP限定角色。
+            <strong>限定卡池：</strong
+            >抽到限定的综合概率为2%，40抽未出则之后的每抽概率额外提升2%。SSR为6%，SR为20%。60抽必出限定角色。获取限定角色时，有50%概率为UP的限定角色，若"歪"，则下次抽到限定必为UP限定角色。
           </p>
-          <p class="probability-footer">本项目完全开源，欢迎前往<a href="https://github.com/Thisisseanxu/gacha-party"
-              target="_blank">Github</a>参与开发，或加入Q群 1049576192 交流。</p>
+          <p class="probability-footer">
+            本项目完全开源，欢迎前往<a
+              href="https://github.com/Thisisseanxu/gacha-party"
+              target="_blank"
+              >Github</a
+            >参与开发，或加入Q群 1049576192 交流。
+          </p>
         </div>
       </PopUp>
-
     </div>
-
-  </div><!-- /.gacha-bg-fill -->
+  </div>
+  <!-- /.gacha-bg-fill -->
 
   <!-- 全屏提示：Teleport 到 body，确保竖屏时不随画布旋转 -->
   <Teleport to="body">
-    <div v-if="showOrientationPrompt" class="gacha-orient-overlay" @click.self="showOrientationPrompt = false"
-      :style="{ backgroundColor: colors.background.overlay }">
-      <div class="gacha-orient-box" :style="{
-        backgroundColor: colors.background.content,
-        border: `1px solid ${colors.border.primary}`,
-        color: colors.text.primary,
-      }">
-        <p style="font-size:1rem; margin:0; line-height:1.5;">建议进入全屏横屏模式以获得最佳体验</p>
+    <div
+      v-if="showOrientationPrompt"
+      class="gacha-orient-overlay"
+      @click.self="showOrientationPrompt = false"
+      :style="{ backgroundColor: colors.background.overlay }"
+    >
+      <div
+        class="gacha-orient-box"
+        :style="{
+          backgroundColor: colors.background.content,
+          border: `1px solid ${colors.border.primary}`,
+          color: colors.text.primary,
+        }"
+      >
+        <p style="font-size: 1rem; margin: 0; line-height: 1.5">
+          建议进入全屏横屏模式以获得最佳体验
+        </p>
         <div class="button-group">
           <button @click="enterFullscreen" class="button btn-confirm">进入全屏</button>
-          <button @click="showOrientationPrompt = false" class="button btn-secondary">稍后再说</button>
+          <button @click="showOrientationPrompt = false" class="button btn-secondary">
+            稍后再说
+          </button>
         </div>
       </div>
     </div>
@@ -306,7 +418,7 @@ const enterFullscreen = async () => {
   try {
     await document.documentElement.requestFullscreen()
     if (screen.orientation?.lock) {
-      await screen.orientation.lock('landscape').catch(() => { })
+      await screen.orientation.lock('landscape').catch(() => {})
     }
     isFullscreen.value = true
   } catch {
@@ -316,10 +428,13 @@ const enterFullscreen = async () => {
 
 const HandleFloatingButton = async () => {
   if (document.fullscreenElement) {
-    try { await document.exitFullscreen() } catch { /* 忽略 */ }
+    try {
+      await document.exitFullscreen()
+    } catch {
+      /* 忽略 */
+    }
     router.push({ name: '主页' })
-  }
-  else {
+  } else {
     await enterFullscreen()
   }
 }
@@ -332,8 +447,12 @@ const canvasStyle = ref({})
 // 抽卡时背景填充层切换为背景图，延伸到画布外的黑边区域
 const bgFillStyle = computed(() =>
   showGachaResultOverlay.value
-    ? { backgroundImage: "url('/images/gacha_bg.webp')", backgroundSize: 'cover', backgroundPosition: 'center' }
-    : {}
+    ? {
+        backgroundImage: "url('/images/gacha_bg.webp')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : {},
 )
 
 const updateLayout = () => {
@@ -441,9 +560,7 @@ const cancelPoolSwitch = () => {
 
 const lastPullCount = ref(1)
 // 卡池类型判断
-const isSelectableUpPool = computed(
-  () => currentPool.value?.rules?.[SP]?.SelectUpCards === true,
-)
+const isSelectableUpPool = computed(() => currentPool.value?.rules?.[SP]?.SelectUpCards === true)
 const isSelectableUpGroupPool = computed(
   () => currentPool.value?.rules?.[SSR]?.SelectUpCardsGroup === true,
 )
@@ -474,9 +591,12 @@ const isHighlightRarity = (rarity) => rarity === SP || rarity === SSR
 
 const getDelayTime = (rarity) => {
   switch (rarity) {
-    case SP: return 1000
-    case SSR: return 500
-    default: return 100
+    case SP:
+      return 1000
+    case SSR:
+      return 500
+    default:
+      return 100
   }
 }
 
@@ -554,9 +674,18 @@ const paginatedHistory = computed(() => {
   const start = (historyPage.value - 1) * HISTORY_PER_PAGE
   return reversed.slice(start, start + HISTORY_PER_PAGE)
 })
-const prevHistoryPage = () => { if (historyPage.value > 1) historyPage.value-- }
-const nextHistoryPage = () => { if (historyPage.value < totalHistoryPages.value) historyPage.value++ }
-watch(() => gachaHistory.value.length, () => { historyPage.value = 1 })
+const prevHistoryPage = () => {
+  if (historyPage.value > 1) historyPage.value--
+}
+const nextHistoryPage = () => {
+  if (historyPage.value < totalHistoryPages.value) historyPage.value++
+}
+watch(
+  () => gachaHistory.value.length,
+  () => {
+    historyPage.value = 1
+  },
+)
 
 // UP卡详情
 const upCardDetails = computed(() => {
@@ -565,16 +694,20 @@ const upCardDetails = computed(() => {
   return upCardIds.map((id) => cardMap.get(id)).filter(Boolean)
 })
 
-watch(upCardDetails, (list) => {
-  if (list.length > 0) {
-    const exists = list.find((c) => c.id === selectedUpCard.value)
-    if (!exists) {
-      selectedUpCard.value = list[0].id
+watch(
+  upCardDetails,
+  (list) => {
+    if (list.length > 0) {
+      const exists = list.find((c) => c.id === selectedUpCard.value)
+      if (!exists) {
+        selectedUpCard.value = list[0].id
+      }
+    } else {
+      selectedUpCard.value = null
     }
-  } else {
-    selectedUpCard.value = null
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 // UP SSR ID集合
 const upSsrIds = computed(() => {
@@ -696,7 +829,9 @@ const copyShareText = async (event) => {
     copyStatusMessage.value = '复制失败，请手动复制。'
     logger.error('复制失败: ', err)
   }
-  setTimeout(() => { copyStatusMessage.value = '' }, 2000)
+  setTimeout(() => {
+    copyStatusMessage.value = ''
+  }, 2000)
 }
 </script>
 
@@ -723,7 +858,9 @@ const copyShareText = async (event) => {
   background-color: v-bind('colors.background.content');
   cursor: pointer;
   opacity: 0.75;
-  transition: opacity 0.2s, transform 0.15s;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
   line-height: 0;
 }
 
@@ -781,7 +918,10 @@ const copyShareText = async (event) => {
   overflow: hidden;
   border: 2px solid transparent;
   opacity: 0.7;
-  transition: opacity 0.2s, border-color 0.2s, transform 0.15s;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s,
+    transform 0.15s;
   flex-shrink: 0;
 }
 
@@ -821,9 +961,11 @@ const copyShareText = async (event) => {
   padding: 12px 8px;
   gap: 4px;
   min-height: 65px;
-  background: linear-gradient(135deg,
-      v-bind('colors.brand.primaryBackground'),
-      v-bind('colors.background.lighter'));
+  background: linear-gradient(
+    135deg,
+    v-bind('colors.brand.primaryBackground'),
+    v-bind('colors.background.lighter')
+  );
   border: 1.5px dashed v-bind('colors.brand.primary');
   text-decoration: none;
   border-radius: 6px;
@@ -908,7 +1050,9 @@ const copyShareText = async (event) => {
   background-color: v-bind('colors.background.content');
   cursor: pointer;
   opacity: 0.65;
-  transition: opacity 0.2s, transform 0.15s;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
   flex-shrink: 0;
   line-height: 0;
 }
@@ -1026,7 +1170,6 @@ const copyShareText = async (event) => {
   /* 不使用 overflow:hidden，否则会裁切卡片 scale 动画 */
 }
 
-
 .up-select-group,
 .wish-select-group {
   display: flex;
@@ -1080,7 +1223,10 @@ const copyShareText = async (event) => {
   padding: 4px;
   border-radius: 10px;
   border: 3px solid transparent;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1442,7 +1588,7 @@ const copyShareText = async (event) => {
   width: 100%;
   overflow-y: auto;
   padding: 1rem;
-  margin: auto
+  margin: auto;
 }
 
 .pulled-cards-grid {
@@ -1685,20 +1831,31 @@ const copyShareText = async (event) => {
 }
 
 .rarity-bg-sp {
-  background: radial-gradient(ellipse at center, rgba(222, 33, 30, 0.3) 0%, rgba(222, 33, 30, 0) 70%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(222, 33, 30, 0.3) 0%,
+    rgba(222, 33, 30, 0) 70%
+  );
 }
 
 .rarity-bg-ssr {
-  background: radial-gradient(ellipse at center, rgba(232, 119, 33, 0.3) 0%, rgba(232, 119, 33, 0) 70%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(232, 119, 33, 0.3) 0%,
+    rgba(232, 119, 33, 0) 70%
+  );
 }
 
 .rarity-bg-sr {
-  background: radial-gradient(ellipse at center, rgba(178, 30, 251, 0.25) 0%, rgba(178, 30, 251, 0) 70%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(178, 30, 251, 0.25) 0%,
+    rgba(178, 30, 251, 0) 70%
+  );
 }
 
 /* ===== 高光动画 ===== */
 @keyframes highlight-flash-sp {
-
   0%,
   100% {
     box-shadow: 0 0 10px 2px v-bind('colors.rarity.sp');
@@ -1712,7 +1869,6 @@ const copyShareText = async (event) => {
 }
 
 @keyframes highlight-flash-ssr {
-
   0%,
   100% {
     box-shadow: 0 0 10px 2px v-bind('colors.rarity.ssr');

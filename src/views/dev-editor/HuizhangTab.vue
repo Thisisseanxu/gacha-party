@@ -12,9 +12,15 @@
       <div v-if="loading" class="hint">加载中…</div>
       <div v-else-if="error" class="hint error">{{ error }}</div>
       <div v-else class="item-list">
-        <div v-for="{ charId, isMissing } in filteredEntries" :key="charId"
-          :class="['list-item', { active: form.charId === String(charId), 'missing-config': isMissing }]"
-          @click="selectEntry(charId)">
+        <div
+          v-for="{ charId, isMissing } in filteredEntries"
+          :key="charId"
+          :class="[
+            'list-item',
+            { active: form.charId === String(charId), 'missing-config': isMissing },
+          ]"
+          @click="selectEntry(charId)"
+        >
           <span class="item-id">#{{ charId }}</span>
           <span class="item-name">{{ charNameMap?.[charId] ?? '' }}</span>
           <span v-if="isMissing" class="missing-warn" title="缺少徽章槽位配置">⚠</span>
@@ -31,28 +37,39 @@
         <div class="form-title">
           {{ form.charId ? `角色 #${form.charId} 徽章槽位` : '选择或新增角色' }}
         </div>
-        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</div>
+        <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">
+          {{ saveMsg.text }}
+        </div>
 
-        <div class="form-grid" style="margin-bottom: 12px;">
+        <div class="form-grid" style="margin-bottom: 12px">
           <label>角色 ID</label>
-          <input v-model="form.charId" class="de-input" :disabled="!isNew" placeholder="如 1110" type="text" />
+          <input
+            v-model="form.charId"
+            class="de-input"
+            :disabled="!isNew"
+            placeholder="如 1110"
+            type="text"
+          />
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">
-            Shape 槽位配置（{{ form.shapes.length }} 个槽位）
-          </div>
-          <div v-for="(shape, idx) in form.shapes" :key="idx"
-            style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <span style="color: #888; font-size: 11px; width: 48px;">槽位 {{ idx + 1 }}</span>
-            <select v-model="form.shapes[idx]" class="de-select" style="max-width: 220px;">
+          <div class="form-section-title">Shape 槽位配置（{{ form.shapes.length }} 个槽位）</div>
+          <div
+            v-for="(shape, idx) in form.shapes"
+            :key="idx"
+            style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px"
+          >
+            <span style="color: #888; font-size: 11px; width: 48px">槽位 {{ idx + 1 }}</span>
+            <select v-model="form.shapes[idx]" class="de-select" style="max-width: 220px">
               <option value="defence">SHIELD（生命 defence）</option>
               <option value="attack">DIAMOND（攻击 attack）</option>
               <option value="support">CIRCLE（支援 support）</option>
             </select>
-            <button class="de-btn small danger" @click="removeSlot(idx)" title="删除此槽位">✕</button>
+            <button class="de-btn small danger" @click="removeSlot(idx)" title="删除此槽位">
+              ✕
+            </button>
           </div>
-          <button class="de-btn small" style="margin-top: 4px;" @click="addSlot">+ 添加槽位</button>
+          <button class="de-btn small" style="margin-top: 4px" @click="addSlot">+ 添加槽位</button>
         </div>
 
         <div class="form-actions">
@@ -102,9 +119,7 @@ const form = ref({ charId: '', shapes: [] })
 const missingConfigIds = computed(() => {
   if (!hzData.value) return []
   const configured = new Set(Object.keys(hzData.value).map(String))
-  return Object.keys(charNameMap.value).filter(
-    (id) => !configured.has(id),
-  )
+  return Object.keys(charNameMap.value).filter((id) => !configured.has(id))
 })
 
 // 所有列表条目：缺失配置的置顶高亮 + 已配置的
@@ -145,7 +160,10 @@ function selectEntry(charId) {
 function newEntry() {
   isNew.value = true
   saveMsg.value = null
-  form.value = { charId: '', shapes: ['defence', 'defence', 'defence', 'attack', 'attack', 'defence'] }
+  form.value = {
+    charId: '',
+    shapes: ['defence', 'defence', 'defence', 'attack', 'attack', 'defence'],
+  }
 }
 
 function addSlot() {

@@ -5,36 +5,55 @@
       <div class="gp-bar-left">
         <button class="de-btn primary small" @click="toggleNewPoolForm">+ 新建卡池</button>
         <template v-if="showNewPoolForm">
-          <input v-model="newPoolId" class="de-input gp-new-input" placeholder="卡池 ID…" @keydown.enter="addPool" />
+          <input
+            v-model="newPoolId"
+            class="de-input gp-new-input"
+            placeholder="卡池 ID…"
+            @keydown.enter="addPool"
+          />
           <button class="de-btn primary small" @click="addPool">确定</button>
         </template>
       </div>
       <div class="gp-bar-right">
-        <span v-if="saveMsg" :class="['gp-save-msg', saveMsg.ok ? 'ok' : 'err']">{{ saveMsg.text }}</span>
+        <span v-if="saveMsg" :class="['gp-save-msg', saveMsg.ok ? 'ok' : 'err']">{{
+          saveMsg.text
+        }}</span>
         <button class="de-btn" :disabled="saving" @click="reloadAll">重新加载</button>
-        <button class="de-btn primary" :disabled="saving" @click="saveAll">{{ saving ? '保存中…' : '保存' }}</button>
+        <button class="de-btn primary" :disabled="saving" @click="saveAll">
+          {{ saving ? '保存中…' : '保存' }}
+        </button>
       </div>
     </div>
 
-    <div v-if="anyLoading" class="hint" style="padding: 16px 0;">加载中…</div>
-    <div v-else-if="anyError" class="hint error" style="padding: 16px 0;">{{ anyError }}</div>
+    <div v-if="anyLoading" class="hint" style="padding: 16px 0">加载中…</div>
+    <div v-else-if="anyError" class="hint error" style="padding: 16px 0">{{ anyError }}</div>
     <template v-else>
       <!-- ── 卡池分类（4 列，宽度不足时自动换行）── -->
       <div class="gp-cats">
         <div class="form-section gp-cat">
-          <div class="form-section-title">限定 <span class="count-hint">{{ pools.limited.length }}</span></div>
-          <PoolList :ids="pools.limited" :name-map="nameMap" @remove="removeFrom('limited', $event)" />
+          <div class="form-section-title">
+            限定 <span class="count-hint">{{ pools.limited.length }}</span>
+          </div>
+          <PoolList
+            :ids="pools.limited"
+            :name-map="nameMap"
+            @remove="removeFrom('limited', $event)"
+          />
           <PoolAddInput :options="otherPoolOptions" @add="addTo('limited', $event)" />
         </div>
 
         <div class="form-section gp-cat">
-          <div class="form-section-title">联动 <span class="count-hint">{{ pools.event.length }}</span></div>
+          <div class="form-section-title">
+            联动 <span class="count-hint">{{ pools.event.length }}</span>
+          </div>
           <PoolList :ids="pools.event" :name-map="nameMap" @remove="removeFrom('event', $event)" />
           <PoolAddInput :options="otherPoolOptions" @add="addTo('event', $event)" />
         </div>
 
         <div class="form-section gp-cat">
-          <div class="form-section-title">复刻 <span class="count-hint">{{ pools.fuke.length }}</span></div>
+          <div class="form-section-title">
+            复刻 <span class="count-hint">{{ pools.fuke.length }}</span>
+          </div>
           <PoolList :ids="pools.fuke" :name-map="nameMap" @remove="removeFrom('fuke', $event)" />
           <PoolAddInput :options="otherPoolOptions" @add="addTo('fuke', $event)" />
         </div>
@@ -43,8 +62,13 @@
           <div class="form-section-title">
             其他（未分类）<span class="count-hint">{{ otherPools.length }}</span>
           </div>
-          <PoolList v-if="otherPools.length" :ids="otherPools" :name-map="nameMap" :readonly="true" />
-          <div v-else class="hint" style="font-size: 11px;">均已分类</div>
+          <PoolList
+            v-if="otherPools.length"
+            :ids="otherPools"
+            :name-map="nameMap"
+            :readonly="true"
+          />
+          <div v-else class="hint" style="font-size: 11px">均已分类</div>
         </div>
       </div>
 
@@ -59,7 +83,9 @@
         </div>
 
         <div class="form-section gp-row3-side">
-          <div class="form-section-title">未结束 <span class="count-hint">{{ activePools.length }}</span></div>
+          <div class="form-section-title">
+            未结束 <span class="count-hint">{{ activePools.length }}</span>
+          </div>
           <div class="gp-row3-scroll">
             <div v-for="id in activePools" :key="id" class="active-pool-row">
               <span class="pool-id">{{ id }}</span>
@@ -98,8 +124,18 @@ import PoolList from './PoolList.vue'
 import PoolAddInput from './PoolAddInput.vue'
 
 // ── API ──────────────────────────────────────────────
-const { data: poolsData, loading: loadingPools, error: errorPools, load: loadPools } = useEditorApi('gacha-pools')
-const { data: infoData, loading: loadingInfo, error: errorInfo, load: loadInfo } = useEditorApi('database36')
+const {
+  data: poolsData,
+  loading: loadingPools,
+  error: errorPools,
+  load: loadPools,
+} = useEditorApi('gacha-pools')
+const {
+  data: infoData,
+  loading: loadingInfo,
+  error: errorInfo,
+  load: loadInfo,
+} = useEditorApi('database36')
 const { save: savePools } = useEditorApi('gacha-pools')
 const { save: saveInfo } = useEditorApi('database36')
 

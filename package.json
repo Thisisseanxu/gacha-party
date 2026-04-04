@@ -13,7 +13,7 @@
     "previewhost": "vite preview --host",
     "lint": "eslint . --fix",
     "lint:fix": "eslint \"src/**/*.{vue,js,ts,jsx,tsx}\" --fix",
-    "format": "prettier --write src/",
+    "format": "prettier --write \"**/*.{js,json,vue}\"",
     "patch": "npm version patch -m \"docs: 更新补丁版本号v%s\"",
     "minor": "npm version minor -m \"docs: 更新次要版本号v%s\"",
     "major": "npm version major -m \"docs: 更新主要版本号v%s\""

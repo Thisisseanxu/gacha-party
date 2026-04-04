@@ -13,29 +13,47 @@
             <h2 class="section-title">精选攻略</h2>
           </div>
           <div class="featured-list">
-            <div v-for="item in featuredItems" :key="item.charId + item.strategy.customTitle" class="strategy-card"
-              @click="goToChar(item.charId, item.code)">
+            <div
+              v-for="item in featuredItems"
+              :key="item.charId + item.strategy.customTitle"
+              class="strategy-card"
+              @click="goToChar(item.charId, item.code)"
+            >
               <div class="strategy-card-header">
                 <!-- Q版头像 -->
-                <img v-if="item.card?.qban_url" :src="item.card.qban_url" class="card-qban" :alt="item.card.name" />
+                <img
+                  v-if="item.card?.qban_url"
+                  :src="item.card.qban_url"
+                  class="card-qban"
+                  :alt="item.card.name"
+                />
                 <div v-else class="card-qban-placeholder"></div>
                 <!-- 文字信息 -->
                 <div class="strategy-card-body">
                   <div class="card-char-name">{{ item.card?.name }}</div>
                   <div class="strategy-title-text">{{ item.strategy.customTitle || '攻略' }}</div>
-                  <div class="strategy-author">by {{ item.strategy.authorName || '神秘的班长' }}</div>
-
+                  <div class="strategy-author">
+                    by {{ item.strategy.authorName || '神秘的班长' }}
+                  </div>
                 </div>
               </div>
               <div class="strategy-stars" v-if="item.strategy.stars?.length">
                 <span class="stars-label">适配星级</span>
-                <span v-for="s in [...(item.strategy.stars || [])].sort((a, b) => a - b)" :key="s" class="star-chip">{{
-                  s }}★</span>
+                <span
+                  v-for="s in [...(item.strategy.stars || [])].sort((a, b) => a - b)"
+                  :key="s"
+                  class="star-chip"
+                  >{{ s }}★</span
+                >
               </div>
               <!-- 徽章搭配摘要 -->
               <div class="badge-summary" v-if="item.strategy.slots?.length">
-                <span v-for="(g, i) in summarizeSlots(item.strategy.slots)" :key="i" class="badge-chip-item"
-                  :style="{ color: badgeRarityColors[g.rarityId] }">
+                <span
+                  v-for="(g, i) in summarizeSlots(item.strategy.slots)"
+                  :key="i"
+                  class="badge-chip-item"
+                  :style="{ color: badgeRarityColors[g.rarityId] }"
+                >
                   {{ HUIZHANG_TYPES[g.typeId]?.name || g.typeId }}
                   <template v-if="g.count > 1">&times;{{ g.count }}</template>
                   <span class="badge-chip-lv">Lv.{{ g.level }}</span>
@@ -51,10 +69,19 @@
             <h2 class="section-title">浏览角色攻略</h2>
             <p class="section-sub">选择角色查看她的所有徽章攻略</p>
           </div>
-          <CharacterSelector v-model="selectedCharId" mode="single" :characterList="displayCharacterList"
-            :disabledCharacterIds="disabledCharacterIds" title="选择角色查看攻略" :subTitle="null" :show-qban="true"
-            :show-add-custom="true" :add-custom-always-visible="true" @confirm="onCharConfirm"
-            @add-custom="openCustomCharModal" />
+          <CharacterSelector
+            v-model="selectedCharId"
+            mode="single"
+            :characterList="displayCharacterList"
+            :disabledCharacterIds="disabledCharacterIds"
+            title="选择角色查看攻略"
+            :subTitle="null"
+            :show-qban="true"
+            :show-add-custom="true"
+            :add-custom-always-visible="true"
+            @confirm="onCharConfirm"
+            @add-custom="openCustomCharModal"
+          />
         </section>
       </div>
     </div>
@@ -72,10 +99,19 @@
             <button @click="triggerCustomCharUpload" class="form-btn" style="flex: 1">
               {{ customCharForm.image ? '更换' : '上传' }}
             </button>
-            <img v-if="customCharForm.image" :src="customCharForm.image" class="avatar-preview-small" />
+            <img
+              v-if="customCharForm.image"
+              :src="customCharForm.image"
+              class="avatar-preview-small"
+            />
           </div>
-          <input type="file" ref="customCharInputRef" @change="handleCustomCharImage" accept="image/*"
-            style="display: none" />
+          <input
+            type="file"
+            ref="customCharInputRef"
+            @change="handleCustomCharImage"
+            accept="image/*"
+            style="display: none"
+          />
         </div>
         <div class="form-row compact-col">
           <label>所属系列</label>
@@ -91,7 +127,11 @@
       <div class="compact-row">
         <div class="form-row compact-col">
           <label>徽章数量</label>
-          <select v-model="customCharForm.count" class="form-select" @change="updateCustomCharShapes">
+          <select
+            v-model="customCharForm.count"
+            class="form-select"
+            @change="updateCustomCharShapes"
+          >
             <option :value="2">2个</option>
             <option :value="4">4个</option>
             <option :value="6">6个</option>
@@ -150,7 +190,7 @@ const displayCharacterList = computed(() => {
 })
 
 const disabledCharacterIds = computed(() =>
-  baseCharacterList.value.filter((c) => !getCharConfig(c.id)).map((c) => c.id)
+  baseCharacterList.value.filter((c) => !getCharConfig(c.id)).map((c) => c.id),
 )
 
 const availableThemes = computed(() => {
@@ -275,11 +315,11 @@ const saveCustomChar = () => {
 // 徽章摘要：合并相同稀有度+类型+等级的槽位
 // 颜色从 colors.badgeRarity 取，随主题切换自动更新
 const badgeRarityColors = computed(() => ({
-  '0': colors.badgeRarity.empty,
-  '1': colors.badgeRarity.blue,
-  '2': colors.badgeRarity.purple,
-  '3': colors.badgeRarity.gold,
-  '4': colors.badgeRarity.red,
+  0: colors.badgeRarity.empty,
+  1: colors.badgeRarity.blue,
+  2: colors.badgeRarity.purple,
+  3: colors.badgeRarity.gold,
+  4: colors.badgeRarity.red,
 }))
 
 const summarizeSlots = (slots) => {

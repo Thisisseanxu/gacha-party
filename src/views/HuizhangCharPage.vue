@@ -7,7 +7,11 @@
       <!-- 角色头部信息 -->
       <div class="char-header" v-if="card">
         <div class="char-avatar-wrap">
-          <img :src="charConfig?.image_url || card.qban_url || card.imageUrl" class="char-avatar" :alt="card.name" />
+          <img
+            :src="charConfig?.image_url || card.qban_url || card.imageUrl"
+            class="char-avatar"
+            :alt="card.name"
+          />
         </div>
         <div class="char-info">
           <div class="char-realname">{{ card.realname || card.name }}</div>
@@ -30,8 +34,17 @@
 
       <!-- 导入代码输入 -->
       <div v-if="showImportInput" class="import-code-section">
-        <textarea v-model="importCodeInput" class="code-input" rows="3" placeholder="粘贴攻略代码（由编辑器导出）"></textarea>
-        <button class="action-btn primary" :disabled="!importCodeInput.trim()" @click="openFromCode">
+        <textarea
+          v-model="importCodeInput"
+          class="code-input"
+          rows="3"
+          placeholder="粘贴攻略代码（由编辑器导出）"
+        ></textarea>
+        <button
+          class="action-btn primary"
+          :disabled="!importCodeInput.trim()"
+          @click="openFromCode"
+        >
           用此代码打开编辑器
         </button>
         <div v-if="importCodeError" class="import-error">{{ importCodeError }}</div>
@@ -45,10 +58,16 @@
         </div>
 
         <div v-if="loading" class="empty-msg">加载中…</div>
-        <div v-else-if="strategies.length === 0" class="empty-msg">暂无攻略，快来创建第一个吧！</div>
+        <div v-else-if="strategies.length === 0" class="empty-msg">
+          暂无攻略，快来创建第一个吧！
+        </div>
 
-        <div v-for="(item, idx) in strategies" :key="idx" class="strategy-card"
-          :class="{ 'featured-card': item.isFeatured }">
+        <div
+          v-for="(item, idx) in strategies"
+          :key="idx"
+          class="strategy-card"
+          :class="{ 'featured-card': item.isFeatured }"
+        >
           <div class="strategy-card-header">
             <span class="strategy-title">
               <span v-if="item.isFeatured" class="featured-badge">精选</span>
@@ -56,16 +75,25 @@
             </span>
             <div class="card-btn-group">
               <template v-if="isAdmin">
-                <button class="card-action-btn feature-btn" @click.stop="doToggleFeature(item)"
-                  :disabled="adminLoadingId === item.id">
+                <button
+                  class="card-action-btn feature-btn"
+                  @click.stop="doToggleFeature(item)"
+                  :disabled="adminLoadingId === item.id"
+                >
                   {{ item.isFeatured ? '取消精选' : '设精选' }}
                 </button>
-                <button class="card-action-btn overwrite-btn" @click.stop="editOverwrite(item)"
-                  :disabled="adminLoadingId === item.id">
+                <button
+                  class="card-action-btn overwrite-btn"
+                  @click.stop="editOverwrite(item)"
+                  :disabled="adminLoadingId === item.id"
+                >
                   覆盖编辑
                 </button>
-                <button class="card-action-btn delete-btn" @click.stop="doDelete(item)"
-                  :disabled="adminLoadingId === item.id">
+                <button
+                  class="card-action-btn delete-btn"
+                  @click.stop="doDelete(item)"
+                  :disabled="adminLoadingId === item.id"
+                >
                   删除
                 </button>
               </template>
@@ -89,15 +117,23 @@
     <div class="preview-container">
       <!-- 图片区域（含导航热区） -->
       <div class="preview-image-area">
-        <HuizhangLiveCard v-if="previewStrategy" :strategy="previewStrategy.data" :charConfig="charConfig"
-          :scale="fullscreenScale" />
+        <HuizhangLiveCard
+          v-if="previewStrategy"
+          :strategy="previewStrategy.data"
+          :charConfig="charConfig"
+          :scale="fullscreenScale"
+        />
 
         <!-- 左右导航热区：固定在图片区域底部，不遮挡主体 -->
         <div class="nav-zone left" v-if="previewIndex > 0" @click.stop="prevStrategy">
           <span class="nav-arrow">&lt;</span>
           <span class="nav-text">上一个</span>
         </div>
-        <div class="nav-zone right" v-if="previewIndex < strategies.length - 1" @click.stop="nextStrategy">
+        <div
+          class="nav-zone right"
+          v-if="previewIndex < strategies.length - 1"
+          @click.stop="nextStrategy"
+        >
           <span class="nav-arrow">&gt;</span>
           <span class="nav-text">下一个</span>
         </div>
@@ -132,7 +168,8 @@ const showImportInput = ref(false)
 const importCodeInput = ref('')
 const importCodeError = ref('')
 
-const { init, getGuidesForChar, loading, isAdminLoggedIn, adminDeleteGuide, adminToggleFeature } = useHuizhangGuides()
+const { init, getGuidesForChar, loading, isAdminLoggedIn, adminDeleteGuide, adminToggleFeature } =
+  useHuizhangGuides()
 
 // 管理员模式：有有效 token 时开启
 const isAdmin = computed(() => isAdminLoggedIn())
@@ -220,11 +257,16 @@ const adminToastTimer = ref(null)
 function showAdminToast(msg) {
   adminToast.value = msg
   clearTimeout(adminToastTimer.value)
-  adminToastTimer.value = setTimeout(() => { adminToast.value = '' }, 2500)
+  adminToastTimer.value = setTimeout(() => {
+    adminToast.value = ''
+  }, 2500)
 }
 
 async function doDelete(item) {
-  if (!window.confirm(`确认删除攻略「${item.data.customTitle || '#' + item.id}」？此操作不可撤销。`)) return
+  if (
+    !window.confirm(`确认删除攻略「${item.data.customTitle || '#' + item.id}」？此操作不可撤销。`)
+  )
+    return
   adminLoadingId.value = item.id
   try {
     await adminDeleteGuide(item.id)
@@ -288,14 +330,18 @@ const onKeyup = (e) => {
 }
 
 // 监听路由参数，自动打开对应攻略
-watch([strategies, () => route.query.viewCode], ([list, code]) => {
-  if (code && list.length && !showPreview.value) {
-    const idx = list.findIndex(s => s.code === code)
-    if (idx !== -1) {
-      openPreview(idx)
+watch(
+  [strategies, () => route.query.viewCode],
+  ([list, code]) => {
+    if (code && list.length && !showPreview.value) {
+      const idx = list.findIndex((s) => s.code === code)
+      if (idx !== -1) {
+        openPreview(idx)
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
@@ -629,7 +675,6 @@ watch([strategies, () => route.query.viewCode], ([list, code]) => {
   justify-content: center;
   overflow: hidden;
 }
-
 
 /* 导航热区：只占图片区域下半部分，不遮挡图片主体 */
 .nav-zone {

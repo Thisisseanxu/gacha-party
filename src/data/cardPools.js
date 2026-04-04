@@ -48,6 +48,56 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 定义卡池配置
 // 注意：推荐使用可视化编辑器进行修改，在本地运行npm run dev后访问地址/dev在模拟器配置一栏进行编辑
 export const cardPools = {
+  zhuirumianruantianmi: {
+    type: '限定',
+    name: '坠入绵软甜蜜',
+    isAvailable: true,
+    imageUrl: '/images/cardpools/130.webp',
+
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2,
+    },
+
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        UpCards: ['茶歇补给站', '棉花糖天使'],
+      },
+
+      [SSR]: {
+        doubleRateCards: ['甜甜圈医师'],
+      },
+    },
+
+    cardNames: {
+      [SP]: ['茶歇补给站', '棉花糖天使'],
+      [SSR]: ['卷卷战士', '甜甜圈医师', '甜甜圈推车', '甜蜜迫击炮', '裱花千竹'],
+
+      [SR]: [
+        '珍珠射手',
+        '雪球投掷姬',
+        '饼干骑士',
+        '家用喷火枪',
+        '浅睡千竹',
+        '消防栓',
+        '梦游月兔',
+        '劈咔灯泡',
+        '弹幕发射姬',
+        '拳头礼盒',
+        '电音射手',
+        '贝斯战士',
+        '液氮喷射器',
+      ],
+
+      [R]: ['纸杯千竹', '转转咖啡杯', '铁头娃娃', '迷你风扇', '闪耀灯球', '火柴女孩'],
+    },
+  },
+
   // 春日自选扩招
   chunrizixuankuozhao: {
     type: '春日自选',

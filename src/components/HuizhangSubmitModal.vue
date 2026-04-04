@@ -52,12 +52,7 @@
         </div>
         <div class="form-row compact-col">
           <label class="form-label">署名（可选）</label>
-          <input
-            v-model="authorName"
-            class="form-input"
-            maxlength="100"
-            placeholder="你的昵称"
-          />
+          <input v-model="authorName" class="form-input" maxlength="100" placeholder="你的昵称" />
         </div>
       </div>
 
@@ -67,11 +62,7 @@
 
       <!-- 操作按钮 -->
       <div class="form-actions">
-        <button
-          class="form-btn primary"
-          :disabled="submitting"
-          @click="handleSubmit"
-        >
+        <button class="form-btn primary" :disabled="submitting" @click="handleSubmit">
           {{ submitting ? '提交中…' : '提交审核' }}
         </button>
         <button class="form-btn cancel" @click="emit('close')">取消</button>

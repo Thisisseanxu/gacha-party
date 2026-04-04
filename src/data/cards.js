@@ -433,7 +433,7 @@ export const allCards = [
     realname: '黑木 幸',
     theme: THEMES.cake,
     qban_url: '/images/qban/1102.webp',
-  },
+  }, // 浅睡和梦境的图片地址相反
   {
     id: '1105',
     name: '甜甜圈医师',
@@ -469,7 +469,7 @@ export const allCards = [
     realname: '千竹',
     theme: THEMES.cake,
     qban_url: '/images/qban/1109.webp',
-  }, // 浅睡和梦境的图片地址相反
+  },
   {
     id: '1201',
     name: '星星法师',
@@ -505,7 +505,7 @@ export const allCards = [
     realname: '伦茨',
     theme: THEMES.dream,
     qban_url: '/images/qban/1210.webp',
-  },
+  }, // 新版的指路奈奈，但是图片地址为旧版
   {
     id: '1206',
     name: '嫦娥娃娃',
@@ -541,7 +541,7 @@ export const allCards = [
     realname: '佩特里夏',
     theme: THEMES.elec,
     qban_url: '/images/qban/1305.webp',
-  }, // 新版的指路奈奈，但是图片地址为旧版
+  },
   {
     id: '1310',
     name: '电玩少女',
@@ -640,7 +640,7 @@ export const allCards = [
     realname: '诺诺妮娅',
     theme: THEMES.fire,
     qban_url: '/images/qban/1601.webp',
-  },
+  }, // 新版的强力消防栓，图片地址为1804
   {
     id: '1602',
     name: '油瓶射手',
@@ -676,7 +676,7 @@ export const allCards = [
     realname: '柳生 薰',
     theme: THEMES.water,
     qban_url: '/images/qban/1801.webp',
-  }, // 新版的强力消防栓，图片地址为1804
+  },
   {
     id: '1803',
     name: '水枪普拉斯',
@@ -712,7 +712,7 @@ export const allCards = [
     realname: '伊文捷琳',
     theme: THEMES.music,
     qban_url: '/images/qban/1407.webp',
-  },
+  }, // 浅睡和梦境的图片地址相反
   {
     id: '1706',
     name: '冰匙娃娃',
@@ -744,7 +744,7 @@ export const allCards = [
     realname: '爱丽丝',
     theme: THEMES.cake,
     qban_url: '/images/qban/1103.webp',
-  }, // 浅睡和梦境的图片地址相反
+  },
   {
     id: '1104',
     name: '饼干骑士',
@@ -933,6 +933,24 @@ export const allCards = [
     realname: '艾莉卡',
     theme: THEMES.elec,
     qban_url: '/images/qban/11104.webp',
+  },
+  {
+    id: '1114',
+    name: '茶歇补给站',
+    rarity: SP,
+    imageUrl: '/images/characters/1114.webp',
+    realname: '海盐',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1114.webp',
+  },
+  {
+    id: '1115',
+    name: '棉花糖天使',
+    rarity: SP,
+    imageUrl: '/images/characters/1115.webp',
+    realname: '玛洛薇特',
+    theme: THEMES.cake,
+    qban_url: '/images/qban/1115.webp',
   },
 ]
 
