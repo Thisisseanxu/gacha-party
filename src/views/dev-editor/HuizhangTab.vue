@@ -146,7 +146,7 @@ function selectEntry(charId) {
     isNew.value = true
     form.value = {
       charId: String(charId),
-      shapes: ['defence', 'defence', 'defence', 'attack', 'attack', 'defence'],
+      shapes: ['attack', 'attack', 'attack', 'attack', 'attack', 'attack'],
     }
   } else {
     isNew.value = false
@@ -162,7 +162,7 @@ function newEntry() {
   saveMsg.value = null
   form.value = {
     charId: '',
-    shapes: ['defence', 'defence', 'defence', 'attack', 'attack', 'defence'],
+    shapes: ['attack', 'attack', 'attack', 'attack', 'attack', 'attack'],
   }
 }
 

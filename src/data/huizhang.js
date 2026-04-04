@@ -1065,6 +1065,28 @@ export const CHAR_HUIZHANG_CONFIG = {
       HUIZHANG_SHAPES.SHIELD,
     ],
   },
+
+  1114: {
+    shape: [
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE
+    ]
+  },
+
+  1115: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD
+    ]
+  }
 }
 
 // 获取角色的配置（theme 和 qban_url 从 cards.js 读取，合并后返回）
