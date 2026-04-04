@@ -76,28 +76,18 @@
 
     <div class="social-buttons" :class="{ retracted: isRetracted }">
       <a
-        href="https://space.bilibili.com/33809083"
+        v-for="(link, index) in socialLinks"
+        :key="index"
+        :href="link.url"
         target="_blank"
         rel="noopener noreferrer"
         class="social-btn"
-        :class="btnStates[0]"
-        @mouseenter="onBtnEnter(0)"
-        @mouseleave="onBtnLeave(0)"
+        :class="link.state"
+        @mouseenter="onBtnEnter(link)"
+        @mouseleave="onBtnLeave(link)"
       >
-        <img src="/images/bili_avatar.webp" class="social-icon" alt="bilibili" />
-        <span>关注</span>
-      </a>
-      <a
-        href="https://boxparty.aojiaostudio.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="social-btn"
-        :class="btnStates[1]"
-        @mouseenter="onBtnEnter(1)"
-        @mouseleave="onBtnLeave(1)"
-      >
-        <img src="/images/manghe_icon.webp" class="social-icon" alt="官网" />
-        <span>官网</span>
+        <img :src="link.icon" class="social-icon" :alt="link.label" />
+        <span>{{ link.label }}</span>
       </a>
     </div>
   </div>
@@ -119,23 +109,44 @@ let retractTimer = null
 // 获取最新的卡池ID（取第一个key）
 const latestPoolId = Object.keys(cardPools)[0]
 
-// 收起状态下每个按钮的子状态：'' = 收起 | 'resting' = 悬浮离开后停留 | 'extended' = 悬浮中
-const btnStates = ref(['', ''])
-const btnTimers = [null, null]
+// 友情链接配置数据
+const socialLinks = ref([
+  {
+    url: 'https://space.bilibili.com/33809083',
+    icon: '/images/bili_avatar.webp',
+    label: '关注',
+    state: '',
+    timer: null,
+  },
+  {
+    url: 'https://boxparty.aojiaostudio.com',
+    icon: '/images/manghe_icon.webp',
+    label: '官网',
+    state: '',
+    timer: null,
+  },
+  {
+    url: 'https://wiki.biligame.com/gachaparty/',
+    icon: '/images/bwiki_icon.webp',
+    label: '攻略',
+    state: '',
+    timer: null,
+  },
+])
 
-function onBtnEnter(idx) {
+function onBtnEnter(item) {
   if (!isRetracted.value) return
-  clearTimeout(btnTimers[idx])
-  btnTimers[idx] = null
-  btnStates.value[idx] = 'extended'
+  clearTimeout(item.timer)
+  item.timer = null
+  item.state = 'extended'
 }
 
-function onBtnLeave(idx) {
+function onBtnLeave(item) {
   if (!isRetracted.value) return
-  btnStates.value[idx] = 'resting'
-  btnTimers[idx] = setTimeout(() => {
-    btnStates.value[idx] = ''
-    btnTimers[idx] = null
+  item.state = 'resting'
+  item.timer = setTimeout(() => {
+    item.state = ''
+    item.timer = null
   }, 2000)
 }
 
@@ -165,7 +176,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('beforeinstallprompt', captureInstallPrompt)
   if (retractTimer) clearTimeout(retractTimer)
-  btnTimers.forEach((t) => clearTimeout(t))
+  socialLinks.value.forEach((link) => clearTimeout(link.timer))
 })
 
 const handleInstallClick = async () => {
@@ -415,7 +426,7 @@ const handleComingSoon = () => {
 
 .social-buttons {
   position: fixed;
-  bottom: 80px;
+  bottom: 2rem;
   left: 0;
   z-index: 100;
   display: flex;
