@@ -89,14 +89,16 @@ watch(needRefresh, (newValue) => {
 })
 
 function confirmUpdate() {
-  updateServiceWorker()
   isUpdating.value = true
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload()
+  })
+  updateServiceWorker(true)
   const timer = setInterval(() => {
     if (updateProgress.value < 99) {
-      updateProgress.value += Math.floor(Math.random() * 5) + 1
-      updateProgress.value = Math.min(updateProgress.value, 99)
+      updateProgress.value += 1
     } else {
-      // 在进度达到99%时调用浏览器刷新页面功能
+      // 在30秒后强制刷新页面
       clearInterval(timer)
       window.location.reload()
     }

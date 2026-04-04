@@ -43,7 +43,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,json}'],
+        skipWaiting: true, // 强制处于等待状态的 SW 立即激活
+        clientsClaim: true, // 让已经打开的页面使用新的 SW
+        globPatterns: ['**/*.{js,css,html,ico,json,webp,png}'],
         runtimeCaching: [
           // 匹配 *.onmicrosoft.cn 的 CDN 资源
           {
@@ -91,30 +93,6 @@ export default defineConfig({
               },
             },
           },
-          {
-            // 匹配常见的字体格式
-            urlPattern: /\.(?:ttf|otf|woff2|woff)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts-cache',
-              expiration: {
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 缓存有效期 365 天
-              },
-              // 允许跨域缓存
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          // JS、CSS 和 HTML 文件在有更新时立即获取最新内容
-          {
-            urlPattern: /\.(?:js|css|html)$/,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'assets-cache',
-            },
-          },
-          //
         ],
       },
     }),
