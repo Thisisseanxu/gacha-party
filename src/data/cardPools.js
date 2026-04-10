@@ -48,6 +48,57 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 定义卡池配置
 // 注意：推荐使用可视化编辑器进行修改，在本地运行npm run dev后访问地址/dev在模拟器配置一栏进行编辑
 export const cardPools = {
+  shikongzhuiliezhe: {
+    type: "联动",
+    name: "时空追猎者",
+    isAvailable: true,
+    imageUrl: "/images/cardpools/131.webp",
+
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2
+    },
+
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
+        UpCards: ["梦魔猎手"]
+      },
+
+      [SSR]: {
+        doubleRateCards: ["指路奈奈"]
+      }
+    },
+
+    cardNames: {
+      [SP]: ["梦魔猎手"],
+      [SSR]: ["指路奈奈", "充电千竹", "首席护盾", "佩宝宝", "电玩少女"],
+
+      [SR]: [
+        "珍珠射手",
+        "雪球投掷姬",
+        "家用喷火枪",
+        "饼干骑士",
+        "消防栓",
+        "浅睡千竹",
+        "梦游月兔",
+        "劈咔灯泡",
+        "弹幕发射姬",
+        "拳头礼盒",
+        "贝斯战士",
+        "电音射手",
+        "液氮喷射器"
+      ],
+
+      [R]: ["纸杯千竹", "转转咖啡杯", "铁头娃娃", "闪耀灯球", "火柴女孩", "迷你风扇"]
+    }
+  },
+
   zhuirumianruantianmi: {
     type: "限定",
     name: "坠入绵软甜蜜",
@@ -222,15 +273,17 @@ export const cardPools = {
 
   // 笔尖与四叶草
   bijianyusiyecao: {
-    type: '联动',
-    name: '笔尖与四叶草',
-    isAvailable: true,
-    imageUrl: '/images/cardpools/129.webp',
+    type: "联动",
+    name: "笔尖与四叶草",
+    isAvailable: false,
+    imageUrl: "/images/cardpools/129.webp",
+
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
-      [SR]: 0.2,
+      [SR]: 0.2
     },
+
     rules: {
       [SP]: {
         pity: 60,
@@ -238,29 +291,34 @@ export const cardPools = {
         boost: 0.02,
         UpTrigger: true,
         SelectUpCards: true,
-        UpCards: ['明珠星探', '妙笔创作家'],
+        UpCards: ["明珠星探", "妙笔创作家"]
       },
+
+      [SSR]: {}
     },
+
     cardNames: {
-      [SP]: ['明珠星探', '妙笔创作家'],
-      [SSR]: ['裱花千竹', '甜蜜迫击炮', '卷卷战士', '甜甜圈推车'],
+      [SP]: ["明珠星探", "妙笔创作家"],
+      [SSR]: ["裱花千竹", "甜蜜迫击炮", "卷卷战士", "甜甜圈推车"],
+
       [SR]: [
-        '珍珠射手',
-        '饼干骑士',
-        '劈咔灯泡',
-        '弹幕发射姬',
-        '电音射手',
-        '家用喷火枪',
-        '液氮喷射器',
-        '雪球投掷姬',
-        '梦游月兔',
-        '拳头礼盒',
-        '消防栓',
-        '浅睡千竹',
-        '贝斯战士',
+        "珍珠射手",
+        "饼干骑士",
+        "劈咔灯泡",
+        "弹幕发射姬",
+        "电音射手",
+        "家用喷火枪",
+        "液氮喷射器",
+        "雪球投掷姬",
+        "梦游月兔",
+        "拳头礼盒",
+        "消防栓",
+        "浅睡千竹",
+        "贝斯战士"
       ],
-      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
-    },
+
+      [R]: ["纸杯千竹", "铁头娃娃", "转转咖啡杯", "迷你风扇", "闪耀灯球", "火柴女孩"]
+    }
   },
 
   // 上元灯火
@@ -686,15 +744,15 @@ export const cardPools = {
 
   // 酷玩爆米花
   kuwanbaomihua: {
-    type: '联动',
-    name: '酷玩爆米花',
-    isAvailable: true,
-    imageUrl: '/images/cardpools/119.webp',
+    type: "联动",
+    name: "酷玩爆米花",
+    isAvailable: false,
+    imageUrl: "/images/cardpools/119.webp",
 
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
-      [SR]: 0.2,
+      [SR]: 0.2
     },
 
     rules: {
@@ -703,34 +761,34 @@ export const cardPools = {
         boostAfter: 40,
         boost: 0.02,
         SelectUpCards: true,
-        UpCards: ['次元加农炮'],
+        UpCards: ["次元加农炮"]
       },
 
-      [SSR]: {},
+      [SSR]: {}
     },
 
     cardNames: {
-      [SP]: ['次元加农炮'],
-      [SSR]: ['制冰机', '寒冰战士', '织夜超可爱', '球球射手'],
+      [SP]: ["次元加农炮"],
+      [SSR]: ["制冰机", "寒冰战士", "织夜超可爱", "球球射手"],
 
       [SR]: [
-        '珍珠射手',
-        '饼干骑士',
-        '劈咔灯泡',
-        '弹幕发射姬',
-        '电音射手',
-        '家用喷火枪',
-        '液氮喷射器',
-        '雪球投掷姬',
-        '梦游月兔',
-        '拳头礼盒',
-        '消防栓',
-        '浅睡千竹',
-        '贝斯战士',
+        "珍珠射手",
+        "饼干骑士",
+        "劈咔灯泡",
+        "弹幕发射姬",
+        "电音射手",
+        "家用喷火枪",
+        "液氮喷射器",
+        "雪球投掷姬",
+        "梦游月兔",
+        "拳头礼盒",
+        "消防栓",
+        "浅睡千竹",
+        "贝斯战士"
       ],
 
-      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
-    },
+      [R]: ["纸杯千竹", "铁头娃娃", "转转咖啡杯", "迷你风扇", "闪耀灯球", "火柴女孩"]
+    }
   },
 
   // 心愿自选
@@ -947,15 +1005,15 @@ export const cardPools = {
 
   // 暮色邀请函
   museyaoqinghan: {
-    type: '联动',
-    name: '暮色邀请函',
-    isAvailable: true,
-    imageUrl: '/images/cardpools/10092.webp',
+    type: "联动",
+    name: "暮色邀请函",
+    isAvailable: false,
+    imageUrl: "/images/cardpools/10092.webp",
 
     rates: {
       [SP]: SP_BASE_RATE,
       [SSR]: 0.06,
-      [SR]: 0.2,
+      [SR]: 0.2
     },
 
     rules: {
@@ -964,34 +1022,34 @@ export const cardPools = {
         boostAfter: 40,
         boost: 0.02,
         SelectUpCards: true,
-        UpCards: ['血族女王'],
+        UpCards: ["血族女王"]
       },
 
-      [SSR]: {},
+      [SSR]: {}
     },
 
     cardNames: {
-      [SP]: ['血族女王'],
-      [SSR]: ['火焰魔女', '油瓶射手', '棉花糖战士', '椒椒射手'],
+      [SP]: ["血族女王"],
+      [SSR]: ["火焰魔女", "油瓶射手", "棉花糖战士", "椒椒射手"],
 
       [SR]: [
-        '珍珠射手',
-        '饼干骑士',
-        '劈咔灯泡',
-        '弹幕发射姬',
-        '电音射手',
-        '家用喷火枪',
-        '液氮喷射器',
-        '雪球投掷姬',
-        '梦游月兔',
-        '拳头礼盒',
-        '消防栓',
-        '浅睡千竹',
-        '贝斯战士',
+        "珍珠射手",
+        "饼干骑士",
+        "劈咔灯泡",
+        "弹幕发射姬",
+        "电音射手",
+        "家用喷火枪",
+        "液氮喷射器",
+        "雪球投掷姬",
+        "梦游月兔",
+        "拳头礼盒",
+        "消防栓",
+        "浅睡千竹",
+        "贝斯战士"
       ],
 
-      [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
-    },
+      [R]: ["纸杯千竹", "铁头娃娃", "转转咖啡杯", "迷你风扇", "闪耀灯球", "火柴女孩"]
+    }
   },
 
   // 游园邀请
@@ -1573,7 +1631,7 @@ export const cardPools = {
       ],
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
-  },
+  }
 }
 
 /**
