@@ -43,7 +43,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        skipWaiting: true, // 强制处于等待状态的 SW 立即激活
+        skipWaiting: false, // 等待用户确认后再激活新 SW
         clientsClaim: true, // 让已经打开的页面使用新的 SW
         globPatterns: ['**/*.{js,css,html,ico,json,webp,png}'],
         runtimeCaching: [

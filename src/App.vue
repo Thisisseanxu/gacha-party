@@ -23,11 +23,9 @@
           </p>
           <button @click="confirmUpdate" class="update-button">立即刷新</button>
         </div>
-        <div v-else class="update-progress-container">
-          <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: updateProgress + '%' }"></div>
-          </div>
-          <p class="progress-text">更新进度: {{ updateProgress }}%</p>
+        <div v-else class="update-status-container">
+          <p class="update-status-text">{{ updateStatusMessage }}</p>
+          <p class="update-status-note">如果长时间没有响应，将自动刷新页面。</p>
         </div>
       </div>
     </div>
@@ -41,12 +39,11 @@ export default {
 </script>
 
 <script setup>
-import { watch } from 'vue'
+import { onBeforeUnmount, watch, ref } from 'vue'
 import { UpdateRotation } from '@icon-park/vue-next'
 import FloatingHomeButton from './components/FloatingHomeButton.vue'
 import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
-import { ref } from 'vue'
 import { colors } from '@/styles/colors.js'
 
 const isDownloading = ref(false)
@@ -76,34 +73,62 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({
 
 const showUpdateDialog = ref(false)
 const isUpdating = ref(false)
-const updateProgress = ref(0)
+const updateStatusMessage = ref('正在切换到新版本，请稍候...')
+let updateFallbackTimer = null
 
 watch(needRefresh, (newValue) => {
   if (newValue) {
     showUpdateDialog.value = true
+    updateStatusMessage.value = '发现新版本，准备开始更新。'
   } else {
     showUpdateDialog.value = false
     isUpdating.value = false
-    updateProgress.value = 0
+    clearUpdateFallbackTimer()
+    updateStatusMessage.value = '正在切换到新版本，请稍候...'
   }
 })
 
-function confirmUpdate() {
-  isUpdating.value = true
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload()
-  })
-  updateServiceWorker(true)
-  const timer = setInterval(() => {
-    if (updateProgress.value < 99) {
-      updateProgress.value += 1
-    } else {
-      // 在30秒后强制刷新页面
-      clearInterval(timer)
-      window.location.reload()
-    }
-  }, 300)
+function clearUpdateFallbackTimer() {
+  if (updateFallbackTimer) {
+    window.clearTimeout(updateFallbackTimer)
+    updateFallbackTimer = null
+  }
 }
+
+function confirmUpdate() {
+  if (isUpdating.value) return
+
+  if (!('serviceWorker' in navigator)) {
+    window.location.reload()
+    return
+  }
+
+  isUpdating.value = true
+  updateStatusMessage.value = '正在切换到新版本，请稍候...'
+
+  const handleControllerChange = () => {
+    clearUpdateFallbackTimer()
+    updateStatusMessage.value = '更新完成，正在刷新页面...'
+    window.setTimeout(() => {
+      window.location.reload()
+    }, 200)
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange, {
+    once: true,
+  })
+
+  updateServiceWorker(true)
+
+  updateFallbackTimer = window.setTimeout(() => {
+    updateStatusMessage.value = '更新超时，正在尝试刷新页面...'
+    window.location.reload()
+  }, 30000)
+}
+
+onBeforeUnmount(() => {
+  clearUpdateFallbackTimer()
+})
 </script>
 
 <style scoped>
@@ -193,29 +218,22 @@ function confirmUpdate() {
   transform: scale(0.98);
 }
 
-/* --- 进度条样式 --- */
-.update-progress-container {
+/* --- 更新状态样式 --- */
+.update-status-container {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.progress-bar {
-  width: 100%;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.progress-fill {
-  height: 8px;
-  background-color: #42b983;
-  transition: width 0.1s linear;
-}
-
-.progress-text {
+.update-status-text {
   font-size: 0.9rem;
   color: #666;
+  text-align: center;
+  margin: 0 0 6px 0;
+}
+
+.update-status-note {
+  font-size: 0.8rem;
+  color: #888;
   text-align: center;
   margin: 0;
 }
