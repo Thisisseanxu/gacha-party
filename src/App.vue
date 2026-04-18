@@ -3,31 +3,20 @@
     <router-view> </router-view>
     <FloatingHomeButton :is-updating="isDownloading" />
   </div>
-  <transition name="fade">
-    <div v-if="showUpdateDialog" class="update-overlay">
-      <div class="update-dialog">
-        <!-- 添加一个标题和图标，让弹窗更醒目 -->
-        <div class="dialog-header">
-          <UpdateRotation
-            theme="outline"
-            size="32"
-            fill="#333"
-            :class="{ 'icon-spin': isUpdating }"
-          />
-          <h3 class="dialog-title">{{ isUpdating ? '正在更新...' : '发现新版本！' }}</h3>
-        </div>
-
-        <div v-if="!isUpdating">
-          <p class="dialog-content">
-            网站已更新，点击“立即刷新”以体验最新功能，享受更流畅的浏览体验。
-          </p>
-          <button @click="confirmUpdate" class="update-button">立即刷新</button>
-        </div>
-        <div v-else class="update-status-container">
-          <p class="update-status-text">{{ updateStatusMessage }}</p>
-          <p class="update-status-note">如果长时间没有响应，将自动刷新页面。</p>
-        </div>
+  <transition name="slide-fade">
+    <div v-if="showUpdateDialog" class="update-notification">
+      <div class="notification-content">
+        <UpdateRotation
+          theme="outline"
+          size="20"
+          :fill="colors.text.primary"
+          :class="{ 'icon-spin': isUpdating }"
+        />
+        <span class="notification-text">{{
+          isUpdating ? updateStatusMessage : '发现新版本！'
+        }}</span>
       </div>
+      <button v-if="!isUpdating" @click="confirmUpdate" class="update-button">更新</button>
     </div>
   </transition>
 </template>
@@ -138,59 +127,33 @@ onBeforeUnmount(() => {
   min-height: 100dvh;
 }
 
-/* 覆盖整个屏幕并使背景变暗 */
-.update-overlay {
+/* 左上角悬浮更新提示 */
+.update-notification {
   position: fixed;
+  top: 16px;
+  left: 16px;
   z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  /* 添加毛玻璃效果 */
-}
-
-/* 弹窗本体 */
-.update-dialog {
-  background: #ffffff;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 360px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f0f0f0;
-  /* 添加一个细微的边框 */
-  text-align: left;
-  /* 弹窗内容左对齐更易读 */
-  transform: scale(1);
-  /* 初始状态为正常大小 */
-}
-
-/* 弹窗标题 */
-.dialog-header {
+  background-color: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  color: #2c3e50;
 }
 
-.dialog-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 0;
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: v-bind('colors.text.primary');
 }
 
-/* 弹窗内容文本 */
-.dialog-content {
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.6;
-  margin: 0 0 24px 0;
+.notification-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* 更新按钮 */
@@ -198,13 +161,11 @@ onBeforeUnmount(() => {
   background-color: #42b983;
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 400;
-  font-size: 1rem;
-  width: 100%;
-  /* 按钮横跨整个弹窗，操作更方便 */
+  font-weight: bold;
+  font-size: 0.9rem;
   transition:
     background-color 0.2s ease,
     transform 0.1s ease;
@@ -218,48 +179,16 @@ onBeforeUnmount(() => {
   transform: scale(0.98);
 }
 
-/* --- 更新状态样式 --- */
-.update-status-container {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.update-status-text {
-  font-size: 0.9rem;
-  color: #666;
-  text-align: center;
-  margin: 0 0 6px 0;
-}
-
-.update-status-note {
-  font-size: 0.8rem;
-  color: #888;
-  text-align: center;
-  margin: 0;
-}
-
 /* --- Vue Transition 动画 --- */
-/* 进入和离开动画的持续时间 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s cubic-bezier(0.5, 0, 0.25, 1);
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.5, 0, 0.25, 1);
 }
 
-/* 定义进入动画的起始状态和离开动画的结束状态 */
-.fade-enter-from,
-.fade-leave-to {
+.slide-fade-enter-from,
+.slide-fade-leave-to {
   opacity: 0;
-}
-
-/* 为弹窗主体添加入场动画 */
-.fade-enter-active .update-dialog,
-.fade-leave-active .update-dialog {
-  transition: transform 0.3s cubic-bezier(0.5, 0, 0.25, 1);
-}
-
-.fade-enter-from .update-dialog,
-.fade-leave-to .update-dialog {
-  transform: scale(0.95);
+  transform: translateX(-20px);
 }
 
 /* 图标旋转动画 */
