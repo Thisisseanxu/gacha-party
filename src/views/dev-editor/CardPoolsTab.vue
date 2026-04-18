@@ -135,6 +135,15 @@
               <div class="cp-roster-label">
                 <span class="rarity-tag" :data-rarity="rar">{{ rar }}</span>
                 <span style="color: #aaa">{{ form.cardNames[rar].length }} 人已选</span>
+                <button
+                  v-if="rar === 'SR' || rar === 'R'"
+                  class="de-btn"
+                  style="padding: 2px 8px; font-size: 12px; margin-left: auto"
+                  @click="autoSelectBaseCards(rar)"
+                  title="自动勾选所有不是非游戏内角色的角色"
+                >
+                  自动勾选
+                </button>
               </div>
               <CharacterSelector
                 v-model="form.cardNames[rar]"
@@ -218,7 +227,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 import CharacterSelector from '@/components/CharacterSelector.vue'
 
@@ -251,6 +260,11 @@ async function loadCards() {
       ...c,
       theme: typeof c.theme === 'string' ? { id: c.theme } : (c.theme ?? null),
     }))
+
+    if (isNew.value) {
+      if (form.value.cardNames.SR.length === 0) autoSelectBaseCards('SR')
+      if (form.value.cardNames.R.length === 0) autoSelectBaseCards('R')
+    }
   } catch {
     console.warn('[CardPoolsTab] 无法加载角色列表')
   } finally {
@@ -313,17 +327,28 @@ const ssrRosterCards = computed(() =>
   allCards.value.filter((c) => form.value.cardNames.SSR.includes(c.id)),
 )
 
-// SP 名单变化时清理不再存在的 UpCards
+const isSwitchingPool = ref(false)
+
+// SP 名单变化时清理不再存在的 UpCards，并自动勾选新加入且符合条件（游戏内）的角色
 watch(
-  () => form.value.cardNames.SP,
-  (newSP) => {
-    form.value.rulesSP.UpCards = form.value.rulesSP.UpCards.filter((id) => newSP.includes(id))
+  () => [...(form.value.cardNames.SP || [])],
+  (newSP, oldSP) => {
+    if (isSwitchingPool.value) return
+    const prev = oldSP || []
+    const added = newSP.filter((id) => !prev.includes(id))
+    const addedEligible = added.filter((id) => {
+      const card = allCards.value.find((c) => c.id === id)
+      return card && !card.notInGame
+    })
+    const validUpCards = form.value.rulesSP.UpCards.filter((id) => newSP.includes(id))
+    form.value.rulesSP.UpCards = Array.from(new Set([...validUpCards, ...addedEligible]))
   },
 )
 // SSR 名单变化时清理不再存在的 doubleRateCards
 watch(
   () => form.value.cardNames.SSR,
   (newSSR) => {
+    if (isSwitchingPool.value) return
     form.value.rulesSSR.doubleRateCards = form.value.rulesSSR.doubleRateCards.filter((id) =>
       newSSR.includes(id),
     )
@@ -351,7 +376,7 @@ function emptyForm() {
       boostAfter: 40,
       boost: 0.02,
       UpTrigger: true,
-      SelectUpCards: false,
+      SelectUpCards: true,
       UpCards: [],
     },
     rulesSSR: { doubleRateCards: [], _pity: null },
@@ -383,6 +408,7 @@ function detectUnsupported(pool) {
 }
 
 function selectPool(key, pool) {
+  isSwitchingPool.value = true
   isNew.value = false
   saveMsg.value = null
   isUnsupported.value = detectUnsupported(pool)
@@ -418,19 +444,37 @@ function selectPool(key, pool) {
       R: namesToIds(pool.cardNames?.R),
     },
   }
+  nextTick(() => {
+    isSwitchingPool.value = false
+  })
+}
+
+function autoSelectBaseCards(rar) {
+  if (!cardsByRarity.value[rar]) return
+  form.value.cardNames[rar] = cardsByRarity.value[rar].filter((c) => !c.notInGame).map((c) => c.id)
 }
 
 function newPool() {
+  isSwitchingPool.value = true
   isNew.value = true
   isUnsupported.value = false
   saveMsg.value = null
   form.value = emptyForm()
+
+  if (allCards.value.length > 0) {
+    autoSelectBaseCards('SR')
+    autoSelectBaseCards('R')
+  }
+
+  nextTick(() => {
+    isSwitchingPool.value = false
+  })
 }
 
 function resetForm() {
   saveMsg.value = null
   if (isNew.value) {
-    form.value = emptyForm()
+    newPool()
   } else {
     const pool = poolsData.value?.[form.value.poolId]
     if (pool) selectPool(form.value.poolId, pool)

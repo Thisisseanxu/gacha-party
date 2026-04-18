@@ -363,7 +363,8 @@ export const allCards = [{
   realname: '创创',
   theme: THEMES.eiji,
   qban_url: '/images/qban/11005.webp',
-}, {
+}, // 浅睡和梦境的图片地址相反
+{
   id: '11004',
   name: '明珠星探',
   rarity: SP,
@@ -377,8 +378,7 @@ export const allCards = [{
   rarity: SP,
   imageUrl: '/images/characters/1804.webp',
   notInGame: true,
-}, // 浅睡和梦境的图片地址相反
-{
+}, {
   id: '1102',
   name: '卷卷战士',
   rarity: SSR,
@@ -426,7 +426,8 @@ export const allCards = [{
   realname: '皮卡',
   theme: THEMES.dream,
   qban_url: '/images/qban/1201.webp',
-}, {
+}, // 新版的指路奈奈，但是图片地址为旧版
+{
   id: '1202',
   name: '深睡千竹',
   rarity: SSR,
@@ -442,8 +443,7 @@ export const allCards = [{
   realname: '琉璃',
   theme: THEMES.dream,
   qban_url: '/images/qban/1203.webp',
-}, // 新版的指路奈奈，但是图片地址为旧版
-{
+}, {
   id: '1210',
   name: '航天娃娃',
   rarity: SSR,
@@ -547,7 +547,8 @@ export const allCards = [{
   realname: '赛雅',
   theme: THEMES.ice,
   qban_url: '/images/qban/1703.webp',
-}, {
+}, // 新版的强力消防栓，图片地址为1804
+{
   id: '1704',
   name: '织夜超可爱',
   rarity: SSR,
@@ -563,8 +564,7 @@ export const allCards = [{
   realname: '球球',
   theme: THEMES.ice,
   qban_url: '/images/qban/1708.webp',
-}, // 新版的强力消防栓，图片地址为1804
-{
+}, {
   id: '1601',
   name: '火焰魔女',
   rarity: SSR,
@@ -612,7 +612,8 @@ export const allCards = [{
   realname: '拉普拉斯',
   theme: THEMES.water,
   qban_url: '/images/qban/1803.webp',
-}, {
+}, // 浅睡和梦境的图片地址相反
+{
   id: '1807',
   name: '强力消防栓',
   rarity: SSR,
@@ -628,8 +629,7 @@ export const allCards = [{
   realname: '麟',
   theme: THEMES.water,
   qban_url: '/images/qban/1806.webp',
-}, // 浅睡和梦境的图片地址相反
-{
+}, {
   id: '1407',
   name: '特别医护',
   rarity: SSR,
@@ -857,6 +857,22 @@ export const allCards = [{
   realname: "夜车",
   theme: THEMES.eiji,
   qban_url: "/images/qban/2101.webp"
+}, {
+  id: "1213",
+  name: "睡袋狙击手",
+  rarity: SP,
+  imageUrl: "/images/characters/1213.webp",
+  realname: "海伦娜",
+  theme: THEMES.dream,
+  qban_url: "/images/qban/1213.webp"
+}, {
+  id: "1214",
+  name: "手电筒",
+  rarity: SP,
+  imageUrl: "/images/characters/1214.webp",
+  realname: "夕照",
+  theme: THEMES.dream,
+  qban_url: "/images/qban/1214.webp"
 }]
 
 // 将角色ID和角色对象映射到一个Map中，方便通过ID快速查找角色
