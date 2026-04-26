@@ -78,7 +78,7 @@
             卡池名称映射 <span class="count-hint">{{ Object.keys(nameMap).length }} 条</span>
           </div>
           <div ref="namemapEl" class="gp-row3-scroll">
-            <KvTable ref="kvTableRef" v-model="nameMap" />
+            <KvTable ref="kvTableRef" v-model="nameMap" :highlight-colors="duplicateNameColors" />
           </div>
         </div>
 
@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 import KvTable from './KvTable.vue'
 import PoolList from './PoolList.vue'
@@ -164,6 +164,43 @@ const nameMap = computed({
     }
   },
 })
+
+// ── 重复名称高亮 ──
+const duplicateColorsPalette = [
+  '255, 80, 80',
+  '255, 170, 80',
+  '220, 220, 80',
+  '80, 255, 80',
+  '80, 200, 255',
+  '180, 80, 255',
+  '255, 80, 200',
+]
+const assignedColors = ref({})
+let nextColorIdx = 0
+const duplicateNameColors = ref({})
+
+function updateDuplicateColors() {
+  const counts = {}
+  for (const name of Object.values(nameMap.value)) {
+    if (!name) continue
+    counts[name] = (counts[name] || 0) + 1
+  }
+
+  const newColorMap = {}
+  for (const [name, count] of Object.entries(counts)) {
+    if (count > 1) {
+      if (!assignedColors.value[name]) {
+        assignedColors.value[name] =
+          duplicateColorsPalette[nextColorIdx % duplicateColorsPalette.length]
+        nextColorIdx++
+      }
+      newColorMap[name] = assignedColors.value[name]
+    }
+  }
+  duplicateNameColors.value = newColorMap
+}
+
+watch(nameMap, updateDuplicateColors, { deep: true, immediate: true })
 
 // ── 分类 ──────────────────────────────────────────────
 const pools = computed(() => poolsData.value ?? { limited: [], event: [], fuke: [] })
@@ -280,7 +317,23 @@ function scrollAllToBottom() {
   }
 }
 
-onMounted(reloadAll)
+function handleGlobalKeyDown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault() // 阻止浏览器默认的保存网页行为
+    if (!saving.value) {
+      saveAll()
+    }
+  }
+}
+
+onMounted(() => {
+  reloadAll()
+  window.addEventListener('keydown', handleGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeyDown)
+})
 </script>
 
 <style scoped>

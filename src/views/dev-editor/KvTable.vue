@@ -9,12 +9,33 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, idx) in rows" :key="idx">
+        <tr
+          v-for="(row, idx) in rows"
+          :key="idx"
+          :style="
+            highlightColors[row.val]
+              ? {
+                  backgroundColor: `rgba(${highlightColors[row.val]}, 0.2)`,
+                  boxShadow: `inset 4px 0 0 rgb(${highlightColors[row.val]})`,
+                }
+              : {}
+          "
+          class="kv-tr"
+        >
           <td>
             <input v-model="row.key" class="de-input" @input="emitChange" />
           </td>
           <td>
-            <input v-model="row.val" class="de-input" @input="emitChange" />
+            <div class="val-wrapper">
+              <input v-model="row.val" class="de-input" @input="emitChange" />
+              <span
+                v-if="highlightColors[row.val]"
+                class="dup-warn"
+                :style="{ color: `rgb(${highlightColors[row.val]})` }"
+              >
+                ⚠️ 重复
+              </span>
+            </div>
           </td>
           <td>
             <button class="de-btn small danger" @click="removeRow(idx)">删除</button>
@@ -29,7 +50,10 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-const props = defineProps({ modelValue: { type: Object, default: () => ({}) } })
+const props = defineProps({
+  modelValue: { type: Object, default: () => ({}) },
+  highlightColors: { type: Object, default: () => ({}) },
+})
 const emit = defineEmits(['update:modelValue'])
 
 const rows = ref(Object.entries(props.modelValue ?? {}).map(([key, val]) => ({ key, val })))
@@ -70,5 +94,31 @@ defineExpose({ appendRow })
 </script>
 
 <style scoped>
-/* KvTable */
+.kv-tr {
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.val-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dup-warn {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  animation: pulse-warn 1.2s infinite alternate;
+}
+@keyframes pulse-warn {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 5px currentColor;
+  }
+}
 </style>

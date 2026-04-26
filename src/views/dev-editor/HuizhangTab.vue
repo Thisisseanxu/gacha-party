@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 
 const { data: hzData, loading, error, load } = useEditorApi('huizhang')
@@ -206,8 +206,22 @@ async function save() {
   }
 }
 
+function handleGlobalKeyDown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault()
+    if (!saving.value && (isNew.value || form.value.charId)) {
+      save()
+    }
+  }
+}
+
 onMounted(async () => {
   await Promise.all([load(), loadCardNames()])
+  window.addEventListener('keydown', handleGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeyDown)
 })
 </script>
 

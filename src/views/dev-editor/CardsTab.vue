@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 
 const { data: cardsData, loading, error, load } = useEditorApi('cards')
@@ -223,7 +223,23 @@ async function save() {
   }
 }
 
-onMounted(load)
+function handleGlobalKeyDown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault()
+    if (!saving.value && (isNew.value || form.value.id)) {
+      save()
+    }
+  }
+}
+
+onMounted(() => {
+  load()
+  window.addEventListener('keydown', handleGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeyDown)
+})
 </script>
 
 <style scoped>

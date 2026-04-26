@@ -227,7 +227,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 import CharacterSelector from '@/components/CharacterSelector.vue'
 
@@ -537,7 +537,23 @@ async function save() {
   }
 }
 
-onMounted(() => Promise.all([load(), loadCards()]))
+function handleGlobalKeyDown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault()
+    if (!saving.value && (isNew.value || form.value.poolId)) {
+      save()
+    }
+  }
+}
+
+onMounted(() => {
+  Promise.all([load(), loadCards()])
+  window.addEventListener('keydown', handleGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeyDown)
+})
 </script>
 
 <style scoped>
