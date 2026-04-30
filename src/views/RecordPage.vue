@@ -213,7 +213,7 @@ const NormalGachaData = ref([]) // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]) // 存储高级常驻卡池抽卡记录
 const OtherGachaData = ref({}) // 存储其他所有未分类特殊卡池抽卡记录
 const OTHER_CARD_POOLS_ID = ref([]) // 其他未分类特殊卡池ID列表
-const SPECIAL_OUTSIDE_POOLS = ref(['1002']) // 手动临时放到外面的特殊卡池ID列表（比如填入 '1002' 就会单独置顶显示春日自选扩招）
+const SPECIAL_OUTSIDE_POOLS = ref([]) // 手动临时放到外面的特殊卡池ID列表（比如填入 '1002' 就会单独置顶显示春日自选扩招）
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示

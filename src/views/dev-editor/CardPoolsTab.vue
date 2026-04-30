@@ -234,6 +234,16 @@ import CharacterSelector from '@/components/CharacterSelector.vue'
 const { data: poolsData, loading, error, load } = useEditorApi('cardpools')
 const { save: saveApi } = useEditorApi('cardpools')
 
+const poolsEntries = computed(() => {
+  if (!poolsData.value) return []
+  if (Array.isArray(poolsData.value)) return poolsData.value
+  return Object.entries(poolsData.value)
+})
+
+const poolsObject = computed(() => {
+  return Object.fromEntries(poolsEntries.value)
+})
+
 const poolTypes = ['限定', '常驻', '自选', '祈愿盲盒', '联动', '心愿', '高级常驻']
 const allTypes = [...poolTypes, '其他']
 
@@ -355,6 +365,21 @@ watch(
   },
 )
 
+// 填写 poolId 时，如果封面图 url 未被用户手动修改偏离默认格式，则自动补全 default + poolid + .webp
+watch(
+  () => form.value.poolId,
+  (newId, oldId) => {
+    if (isSwitchingPool.value) return
+    if (isNew.value) {
+      const defaultPrefix = '/images/cardpools/'
+      const oldDefaultUrl = oldId ? `${defaultPrefix}${oldId}.webp` : defaultPrefix
+      if (form.value.imageUrl === oldDefaultUrl) {
+        form.value.imageUrl = newId ? `${defaultPrefix}${newId}.webp` : defaultPrefix
+      }
+    }
+  },
+)
+
 // ── 表单 ──────────────────────────────────────────────
 const typeFilter = ref('')
 const search = ref('')
@@ -391,7 +416,7 @@ function fixWebp(field) {
 
 const filteredPools = computed(() => {
   if (!poolsData.value) return []
-  return Object.entries(poolsData.value).filter(([key, pool]) => {
+  return poolsEntries.value.filter(([key, pool]) => {
     if (typeFilter.value && pool.type !== typeFilter.value) return false
     if (search.value) {
       const q = search.value.toLowerCase()
@@ -476,7 +501,7 @@ function resetForm() {
   if (isNew.value) {
     newPool()
   } else {
-    const pool = poolsData.value?.[form.value.poolId]
+    const pool = poolsObject.value?.[form.value.poolId]
     if (pool) selectPool(form.value.poolId, pool)
   }
 }

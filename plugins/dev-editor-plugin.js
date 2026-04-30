@@ -173,26 +173,42 @@ function buildCardNode(data) {
 // ── cardPools.js ──────────────────────────────────────────────────────────────
 function readCardPools() {
   const ast = parseFile(CARD_POOLS_FILE)
+  const entries = findCardPoolsEntries(ast)
+  return entries.elements.map((entry) => {
+    const [idNode, poolNode] = entry.elements
+    return [String(astToJson(idNode)), astToJson(poolNode)]
+  })
+}
+
+function findCardPoolsEntries(ast) {
+  const entries = findExportInit(ast, 'cardPoolsInOrder')
+  if (entries?.type === 'ArrayExpression') return entries
+
   const obj = findExportInit(ast, 'cardPools')
-  if (!obj) throw new Error('cardPools 未找到')
-  const result = {}
-  for (const prop of obj.properties) {
-    result[prop.key.name ?? prop.key.value] = astToJson(prop.value)
+  if (obj?.type === 'ObjectExpression') {
+    return b.arrayExpression(
+      obj.properties.map((prop) =>
+        b.arrayExpression([b.literal(String(prop.key.name ?? prop.key.value)), prop.value]),
+      ),
+    )
   }
-  return result
+
+  throw new Error('cardPoolsInOrder 未找到')
 }
 
 function writeCardPool(poolId, poolData) {
   const ast = parseFile(CARD_POOLS_FILE)
-  const obj = findExportInit(ast, 'cardPools')
-  if (!obj) throw new Error('cardPools 未找到')
+  const entries = findExportInit(ast, 'cardPoolsInOrder')
+  if (entries?.type !== 'ArrayExpression') throw new Error('cardPoolsInOrder 未找到')
 
-  const existing = obj.properties.find((p) => (p.key.name ?? p.key.value) === poolId)
+  const existing = entries.elements.find((entry) => {
+    if (entry?.type !== 'ArrayExpression') return false
+    return String(astToJson(entry.elements?.[0])) === String(poolId)
+  })
   if (existing) {
-    existing.value = buildPoolNode(poolData)
+    existing.elements[1] = buildPoolNode(poolData)
   } else {
-    const newProp = b.property('init', b.identifier(poolId), buildPoolNode(poolData))
-    obj.properties.unshift(newProp)
+    entries.elements.unshift(b.arrayExpression([b.literal(String(poolId)), buildPoolNode(poolData)]))
   }
   writeFileSync(CARD_POOLS_FILE, recast.print(ast).code, 'utf8')
 }

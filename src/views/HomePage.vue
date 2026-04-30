@@ -98,7 +98,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
 import { GithubOne, TencentQq, Install, Info, Moon, SunOne } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
-import { cardPools } from '@/data/cardPools'
+import { cardPoolsInOrder } from '@/data/cardPools'
 
 const appVersion = __VERSION__
 
@@ -107,7 +107,7 @@ const isRetracted = ref(false)
 let retractTimer = null
 
 // 获取最新的卡池ID（取第一个key）
-const latestPoolId = Object.keys(cardPools)[0]
+const latestPoolId = cardPoolsInOrder[0][0]
 
 // 友情链接配置数据
 const socialLinks = ref([

@@ -372,7 +372,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
 import { SP, SSR, SR, R } from '@/data/constant.js'
-import { cardPools } from '@/data/cardPools'
+import { cardPools, cardPoolsInOrder } from '@/data/cardPools'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'
@@ -568,7 +568,7 @@ const isWishPool = computed(() => currentPool.value?.rules?.[SP]?.WishSelection 
 
 // 根据 isAvailable 属性排序卡池列表
 const sortedPools = computed(() => {
-  return Object.entries(cardPools).sort(([, poolA], [, poolB]) => {
+  return [...cardPoolsInOrder].sort(([, poolA], [, poolB]) => {
     const isAvailableA = !!poolA.isAvailable
     const isAvailableB = !!poolB.isAvailable
     if (isAvailableA === isAvailableB) return 0
