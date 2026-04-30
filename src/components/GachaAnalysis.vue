@@ -32,6 +32,7 @@
                 option-value-key="id"
                 :disabled="isReviewing"
                 style="min-width: 10.9rem"
+                @click="hidePoolHint"
               >
                 <!-- 9字*1.1+1间距 -->
                 <template #trigger>
@@ -43,7 +44,9 @@
                 </template>
               </SelectorComponent>
               <Transition name="fade">
-                <div v-if="showPoolHint" class="pool-hint-bubble">↑点击这里可以切换不同的卡池</div>
+                <div v-if="showPoolHint" class="pool-hint-bubble" @click="hidePoolHint">
+                  ↑点击这里可以切换不同的卡池
+                </div>
               </Transition>
             </div>
 
@@ -558,6 +561,15 @@ const activeTab = ref('progressBar') // 切换显示进度条/角色一览/数�
 const progressBarButton = ref(null)
 const quantityStatisticsButton = ref(null)
 const showPoolHint = ref(true) // 是否显示卡池切换提示气泡
+let poolHintTimer = null
+
+const hidePoolHint = () => {
+  showPoolHint.value = false
+  if (poolHintTimer) {
+    clearTimeout(poolHintTimer)
+    poolHintTimer = null
+  }
+}
 const characterOverviewButton = ref(null)
 const underlineStyle = ref({})
 const statsActiveTab = ref('dataStats') // 切换显示数据统计/占比分析
@@ -1010,9 +1022,7 @@ watch(statsActiveTab, async () => {
 
 // 组件加载时挂载监听
 onMounted(() => {
-  setTimeout(() => {
-    showPoolHint.value = false
-  }, 5000)
+  poolHintTimer = setTimeout(hidePoolHint, 5000)
 
   nextTick(() => {
     updateUnderline()
@@ -1026,6 +1036,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateUnderline)
   window.removeEventListener('resize', updateStatsUnderline)
+  if (poolHintTimer) clearTimeout(poolHintTimer)
   stopReviewAnimation()
 })
 
@@ -1231,6 +1242,7 @@ const goToPage = () => {
 
 // 监听限定卡池选择变化，重置页码为1，停止动画
 watch(CurrentSelectedPool, () => {
+  hidePoolHint()
   currentPage.value = 1
   stopReviewAnimation()
   if (CurrentSelectedPool.value === 'AllLimited') {
@@ -1645,7 +1657,8 @@ const formatDateTime = (timestamp) => {
   font-size: 14px;
   white-space: nowrap;
   z-index: 10;
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .title-bar {

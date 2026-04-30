@@ -4,6 +4,9 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 
 // 路由组件
 import HomePage from './views/HomePage.vue'
+import { cardPoolsInOrder } from '@/data/cardPools'
+
+const latestPoolId = cardPoolsInOrder[0][0]
 
 // 定义路由
 const routes = [
@@ -22,6 +25,11 @@ const routes = [
     meta: {
       title: '关于 - 织夜工具箱',
     },
+  },
+  {
+    path: '/chouka',
+    alias: '/chouka/',
+    redirect: () => `/chouka/${latestPoolId}`,
   },
   {
     path: '/chouka/:poolId', // 动态路由参数:poolId 用于区分不同的卡池

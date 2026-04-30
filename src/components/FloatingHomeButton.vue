@@ -34,6 +34,9 @@ const router = useRouter()
 const route = useRoute()
 const showHint = ref(false)
 const isFullscreen = ref(false)
+const HOME_HINT_COOLDOWN_MS = 60 * 1000
+const HOME_HINT_DURATION_MS = 6000
+let hintTimer = null
 
 const checkFullscreen = () => {
   isFullscreen.value = !!document.fullscreenElement
@@ -46,29 +49,35 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', checkFullscreen)
+  if (hintTimer) clearTimeout(hintTimer)
 })
 
 watch(
   () => route.path,
   (newPath) => {
+    if (hintTimer) {
+      clearTimeout(hintTimer)
+      hintTimer = null
+    }
+
     if (newPath === '/') {
       showHint.value = false
       return
     }
 
-    showHint.value = true
     const lastTime = Number(localStorage.getItem('home_btn_hint_last_time') || 0)
     const now = Date.now()
-    if (now - lastTime > 180000) {
-      localStorage.setItem('home_btn_hint_last_time', String(now))
-      setTimeout(() => {
-        showHint.value = false
-      }, 3000)
-    } else {
-      setTimeout(() => {
-        showHint.value = false
-      }, 1000)
+    if (now - lastTime <= HOME_HINT_COOLDOWN_MS) {
+      showHint.value = false
+      return
     }
+
+    showHint.value = true
+    localStorage.setItem('home_btn_hint_last_time', String(now))
+    hintTimer = setTimeout(() => {
+      showHint.value = false
+      hintTimer = null
+    }, HOME_HINT_DURATION_MS)
   },
   { immediate: true },
 )
