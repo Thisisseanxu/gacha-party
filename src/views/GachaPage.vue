@@ -33,6 +33,13 @@
               class="pool-item-image"
             />
             <span v-else class="pool-item-name">{{ pool.name }}</span>
+            <span
+              v-if="pool.tag_type && pool.tag_name"
+              class="pool-item-tag"
+              :style="{ backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')` }"
+            >
+              <span class="pool-item-tag-text">{{ pool.tag_name }}</span>
+            </span>
           </div>
 
           <div
@@ -910,6 +917,7 @@ const copyShareText = async (event) => {
 }
 
 .pool-item {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -950,6 +958,33 @@ const copyShareText = async (event) => {
   text-align: center;
   color: v-bind('colors.text.secondary');
   background-color: v-bind('colors.background.content');
+}
+
+.pool-item-tag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 66px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #fff;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pool-item-tag-text {
+  display: block;
+  letter-spacing: 0.06em;
+  transform: translate(-1px, -1px);
 }
 
 /* 自定义卡池入口 */

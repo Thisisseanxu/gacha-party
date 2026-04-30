@@ -50,7 +50,15 @@
 
       <!-- 正常编辑表单 -->
       <template v-else>
-        <div class="form-title">{{ isNew ? '新增卡池' : `编辑卡池 "${form.name}"` }}</div>
+        <div class="cp-sticky-actions">
+          <div class="form-title">{{ isNew ? '新增卡池' : `编辑卡池 "${form.name}"` }}</div>
+          <div class="cp-sticky-buttons">
+            <button class="de-btn primary" :disabled="saving" @click="save">
+              {{ saving ? '保存中…' : '保存' }}
+            </button>
+            <button class="de-btn" @click="resetForm">重置</button>
+          </div>
+        </div>
         <div v-if="saveMsg" :class="['save-msg', saveMsg.ok ? 'ok' : 'err']">
           {{ saveMsg.text }}
         </div>
@@ -84,8 +92,32 @@
                 placeholder="/images/cardpools/10212.webp"
                 @blur="fixWebp('imageUrl')"
               />
-              <img v-if="form.imageUrl" :src="form.imageUrl" class="img-preview" />
+              <div v-if="form.imageUrl" class="cp-image-preview">
+                <img :src="form.imageUrl" class="img-preview" />
+                <span
+                  v-if="form.tag_type && form.tag_name"
+                  class="cp-preview-tag"
+                  :style="{
+                    backgroundImage: `url('/images/cardpools/tag_bg/${form.tag_type}.webp')`,
+                  }"
+                >
+                  <span class="cp-preview-tag-text">{{ form.tag_name }}</span>
+                </span>
+              </div>
             </div>
+
+            <label>标签类型</label>
+            <select v-model.number="form.tag_type" class="de-select">
+              <option :value="null">不显示</option>
+              <option :value="1">1 金色</option>
+              <option :value="2">2 红色（限定）</option>
+              <option :value="3">3 蓝色（复刻）</option>
+              <option :value="4">4 粉紫色（联动）</option>
+              <option :value="5">5 紫色</option>
+            </select>
+
+            <label>标签文字</label>
+            <input v-model="form.tag_name" class="de-input" placeholder="如 限定" />
 
             <label>是否置顶</label>
             <input type="checkbox" v-model="form.isAvailable" />
@@ -394,6 +426,8 @@ function emptyForm() {
     type: '限定',
     name: '',
     imageUrl: '/images/cardpools/',
+    tag_type: null,
+    tag_name: '',
     isAvailable: true,
     rates: { SP: 0.0125, SSR: 0.06, SR: 0.2 },
     rulesSP: {
@@ -444,6 +478,8 @@ function selectPool(key, pool) {
     type: pool.type ?? '限定',
     name: pool.name ?? '',
     imageUrl: pool.imageUrl ?? '',
+    tag_type: pool.tag_type ?? null,
+    tag_name: pool.tag_name ?? '',
     isAvailable: !!pool.isAvailable,
     rates: {
       SP: pool.rates?.SP ?? 0.0125,
@@ -532,7 +568,7 @@ function buildPayload() {
   if (sr.length) cardNames.SR = sr
   if (r.length) cardNames.R = r
 
-  return {
+  const payload = {
     type: f.type,
     name: f.name,
     isAvailable: f.isAvailable,
@@ -541,6 +577,9 @@ function buildPayload() {
     rules: { SP: rSP, SSR: rSSR },
     cardNames,
   }
+  if (f.tag_type) payload.tag_type = f.tag_type
+  if (f.tag_name) payload.tag_name = f.tag_name
+  return payload
 }
 
 async function save() {
@@ -582,6 +621,69 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.cp-sticky-actions {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 10px;
+  background: #222328;
+}
+
+.cp-sticky-actions .form-title {
+  margin-bottom: 0;
+}
+
+.cp-sticky-buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cp-image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  line-height: 0;
+}
+
+.cp-image-preview .img-preview {
+  display: block;
+  margin-top: 0;
+}
+
+.cp-preview-tag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 66px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #fff;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cp-preview-tag-text {
+  display: block;
+  letter-spacing: 0.04em;
+  transform: translate(-1px, -1px);
+}
+
 .cp-unsupported {
   margin-top: 24px;
   padding: 20px;

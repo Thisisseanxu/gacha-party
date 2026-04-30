@@ -20,6 +20,8 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  * - type: 卡池类型 (如 '限定', '常驻', '自选', '祈愿盲盒')
  * - name: 卡池显示名称
  * - imageUrl: 卡池封面图路径
+ * - tag_type: 卡池封面右下角标签背景类型，可选 1-5。1 金色，2 红色（限定），3 蓝色（复刻），4 粉紫色（联动），5 紫色。
+ * - tag_name: 卡池封面右下角标签文字。需与 tag_type 一起配置才会显示。
  *
  * - rates: 基础概率配置
  *   - [SP]: SP 基础概率
@@ -55,7 +57,8 @@ export const cardPoolsInOrder = [
       name: '电波盲订',
       isAvailable: true,
       imageUrl: '/images/cardpools/134.webp',
-
+      tag_type: 2,
+      tag_name: '电玩',
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,
@@ -103,15 +106,17 @@ export const cardPoolsInOrder = [
   [
     '132',
     {
-      type: '限定',
-      name: '聚光信弹',
+      type: "限定",
+      name: "聚光信弹",
       isAvailable: true,
-      imageUrl: '/images/cardpools/132.webp',
+      imageUrl: "/images/cardpools/132.webp",
+      tag_type: 2,
+      tag_name: "梦境",
 
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,
-        [SR]: 0.2,
+        [SR]: 0.2
       },
 
       rules: {
@@ -121,59 +126,53 @@ export const cardPoolsInOrder = [
           boost: 0.02,
           UpTrigger: true,
           SelectUpCards: true,
-          UpCards: ['睡袋狙击手', '手电筒'],
+          UpCards: ["睡袋狙击手", "手电筒"]
         },
 
         [SSR]: {
-          doubleRateCards: ['嫦娥娃娃'],
-        },
+          doubleRateCards: ["嫦娥娃娃"]
+        }
       },
 
       cardNames: {
-        [SP]: ['睡袋狙击手', '手电筒'],
-        [SSR]: ['星星法师', '深睡千竹', '琉璃治疗师', '嫦娥娃娃', '航天娃娃'],
+        [SP]: ["睡袋狙击手", "手电筒"],
+        [SSR]: ["星星法师", "深睡千竹", "琉璃治疗师", "嫦娥娃娃", "航天娃娃"],
 
         [SR]: [
-          '珍珠射手',
-          '饼干骑士',
-          '浅睡千竹',
-          '梦游月兔',
-          '劈咔灯泡',
-          '弹幕发射姬',
-          '拳头礼盒',
-          '贝斯战士',
-          '电音射手',
-          '液氮喷射器',
-          '雪球投掷姬',
-          '家用喷火枪',
-          '消防栓',
+          "珍珠射手",
+          "饼干骑士",
+          "浅睡千竹",
+          "梦游月兔",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "拳头礼盒",
+          "贝斯战士",
+          "电音射手",
+          "液氮喷射器",
+          "雪球投掷姬",
+          "家用喷火枪",
+          "消防栓"
         ],
 
-        [R]: [
-          '纸杯千竹',
-          '转转咖啡杯',
-          '铁头娃娃',
-          '迷你风扇',
-          '闪耀灯球',
-          '火柴女孩',
-          '弱力消防栓',
-        ],
-      },
+        [R]: ["纸杯千竹", "转转咖啡杯", "铁头娃娃", "迷你风扇", "闪耀灯球", "火柴女孩", "弱力消防栓"]
+      }
     },
   ],
 
   [
     '131',
     {
-      type: '联动',
-      name: '时空追猎者',
+      type: "联动",
+      name: "时空追猎者",
       isAvailable: true,
-      imageUrl: '/images/cardpools/131.webp',
+      imageUrl: "/images/cardpools/131.webp",
+      tag_type: 4,
+      tag_name: "联动",
 
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,
-        [SR]: 0.2,
+        [SR]: 0.2
       },
 
       rules: {
@@ -183,36 +182,36 @@ export const cardPoolsInOrder = [
           boost: 0.02,
           UpTrigger: true,
           SelectUpCards: true,
-          UpCards: ['梦魔猎手'],
+          UpCards: ["梦魔猎手"]
         },
 
         [SSR]: {
-          doubleRateCards: ['指路奈奈'],
-        },
+          doubleRateCards: ["指路奈奈"]
+        }
       },
 
       cardNames: {
-        [SP]: ['梦魔猎手'],
-        [SSR]: ['指路奈奈', '充电千竹', '首席护盾', '佩宝宝', '电玩少女'],
+        [SP]: ["梦魔猎手"],
+        [SSR]: ["指路奈奈", "充电千竹", "首席护盾", "佩宝宝", "电玩少女"],
 
         [SR]: [
-          '珍珠射手',
-          '雪球投掷姬',
-          '家用喷火枪',
-          '饼干骑士',
-          '消防栓',
-          '浅睡千竹',
-          '梦游月兔',
-          '劈咔灯泡',
-          '弹幕发射姬',
-          '拳头礼盒',
-          '贝斯战士',
-          '电音射手',
-          '液氮喷射器',
+          "珍珠射手",
+          "雪球投掷姬",
+          "家用喷火枪",
+          "饼干骑士",
+          "消防栓",
+          "浅睡千竹",
+          "梦游月兔",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "拳头礼盒",
+          "贝斯战士",
+          "电音射手",
+          "液氮喷射器"
         ],
 
-        [R]: ['纸杯千竹', '转转咖啡杯', '铁头娃娃', '闪耀灯球', '火柴女孩', '迷你风扇'],
-      },
+        [R]: ["纸杯千竹", "转转咖啡杯", "铁头娃娃", "闪耀灯球", "火柴女孩", "迷你风扇"]
+      }
     },
   ],
 
@@ -1227,15 +1226,17 @@ export const cardPoolsInOrder = [
   [
     '49',
     {
-      type: '限定',
-      name: '游园邀请',
+      type: "限定",
+      name: "游园邀请",
       isAvailable: true,
-      imageUrl: '/images/cardpools/49.webp',
+      imageUrl: "/images/cardpools/49.webp",
+      tag_type: 3,
+      tag_name: "复刻",
 
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,
-        [SR]: 0.2,
+        [SR]: 0.2
       },
 
       rules: {
@@ -1245,36 +1246,36 @@ export const cardPoolsInOrder = [
           boost: 0.02,
           UpTrigger: true,
           SelectUpCards: true,
-          UpCards: ['键盘乐手', '炽热射线'],
+          UpCards: ["键盘乐手", "炽热射线"]
         },
 
         [SSR]: {
-          doubleRateCards: ['嫦娥娃娃'],
-        },
+          doubleRateCards: ["嫦娥娃娃"]
+        }
       },
 
       cardNames: {
-        [SP]: ['键盘乐手', '炽热射线'],
-        [SSR]: ['嫦娥娃娃', '琉璃治疗师', '重金属吉他', '底鼓坦克', '歌姬小喵'],
+        [SP]: ["键盘乐手", "炽热射线"],
+        [SSR]: ["嫦娥娃娃", "琉璃治疗师", "重金属吉他", "底鼓坦克", "歌姬小喵"],
 
         [SR]: [
-          '珍珠射手',
-          '饼干骑士',
-          '劈咔灯泡',
-          '弹幕发射姬',
-          '电音射手',
-          '家用喷火枪',
-          '液氮喷射器',
-          '雪球投掷姬',
-          '梦游月兔',
-          '拳头礼盒',
-          '消防栓',
-          '浅睡千竹',
-          '贝斯战士',
+          "珍珠射手",
+          "饼干骑士",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "电音射手",
+          "家用喷火枪",
+          "液氮喷射器",
+          "雪球投掷姬",
+          "梦游月兔",
+          "拳头礼盒",
+          "消防栓",
+          "浅睡千竹",
+          "贝斯战士"
         ],
 
-        [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
-      },
+        [R]: ["纸杯千竹", "铁头娃娃", "转转咖啡杯", "迷你风扇", "闪耀灯球", "火柴女孩"]
+      }
     },
   ],
 

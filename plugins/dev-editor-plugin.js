@@ -214,7 +214,17 @@ function writeCardPool(poolId, poolData) {
 }
 
 function buildPoolNode(data) {
-  const fieldOrder = ['type', 'name', 'isAvailable', 'imageUrl', 'rates', 'rules', 'cardNames']
+  const fieldOrder = [
+    'type',
+    'name',
+    'isAvailable',
+    'imageUrl',
+    'tag_type',
+    'tag_name',
+    'rates',
+    'rules',
+    'cardNames',
+  ]
   const props = []
   for (const key of fieldOrder) {
     if (data[key] != null) {
