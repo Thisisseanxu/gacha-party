@@ -347,7 +347,8 @@ export const allCards = [{
   realname: '布露',
   theme: THEMES.water,
   qban_url: '/images/qban/1812.webp',
-}, {
+}, // 浅睡和梦境的图片地址相反
+{
   id: '1813',
   name: '魔弹射手',
   rarity: SP,
@@ -363,8 +364,7 @@ export const allCards = [{
   realname: '创创',
   theme: THEMES.eiji,
   qban_url: '/images/qban/11005.webp',
-}, // 浅睡和梦境的图片地址相反
-{
+}, {
   id: '11004',
   name: '明珠星探',
   rarity: SP,
@@ -410,7 +410,8 @@ export const allCards = [{
   realname: '爱丽丝',
   theme: THEMES.cake,
   qban_url: '/images/qban/1108.webp',
-}, {
+}, // 新版的指路奈奈，但是图片地址为旧版
+{
   id: '1109',
   name: '裱花千竹',
   rarity: SSR,
@@ -426,8 +427,7 @@ export const allCards = [{
   realname: '皮卡',
   theme: THEMES.dream,
   qban_url: '/images/qban/1201.webp',
-}, // 新版的指路奈奈，但是图片地址为旧版
-{
+}, {
   id: '1202',
   name: '深睡千竹',
   rarity: SSR,
@@ -531,7 +531,8 @@ export const allCards = [{
   realname: '火羽',
   theme: THEMES.music,
   qban_url: '/images/qban/1504.webp',
-}, {
+}, // 新版的强力消防栓，图片地址为1804
+{
   id: '1701',
   name: '制冰机',
   rarity: SSR,
@@ -547,8 +548,7 @@ export const allCards = [{
   realname: '赛雅',
   theme: THEMES.ice,
   qban_url: '/images/qban/1703.webp',
-}, // 新版的强力消防栓，图片地址为1804
-{
+}, {
   id: '1704',
   name: '织夜超可爱',
   rarity: SSR,
@@ -596,7 +596,8 @@ export const allCards = [{
   realname: '椒椒',
   theme: THEMES.fire,
   qban_url: '/images/qban/1608.webp',
-}, {
+}, // 浅睡和梦境的图片地址相反
+{
   id: '1801',
   name: '竹子水车',
   rarity: SSR,
@@ -612,8 +613,7 @@ export const allCards = [{
   realname: '拉普拉斯',
   theme: THEMES.water,
   qban_url: '/images/qban/1803.webp',
-}, // 浅睡和梦境的图片地址相反
-{
+}, {
   id: '1807',
   name: '强力消防栓',
   rarity: SSR,
@@ -873,6 +873,22 @@ export const allCards = [{
   realname: "夕照",
   theme: THEMES.dream,
   qban_url: "/images/qban/1214.webp"
+}, {
+  id: "1315",
+  name: "波能震荡",
+  rarity: SP,
+  imageUrl: "/images/characters/1315.webp",
+  realname: "薇薇娅",
+  theme: THEMES.elec,
+  qban_url: "/images/qban/1315.webp"
+}, {
+  id: "1316",
+  name: "跃动脉冲",
+  rarity: SP,
+  imageUrl: "/images/characters/1316.webp",
+  realname: "普露嘉",
+  theme: THEMES.elec,
+  qban_url: "/images/qban/1316.webp"
 }]
 
 // 将角色ID和角色对象映射到一个Map中，方便通过ID快速查找角色

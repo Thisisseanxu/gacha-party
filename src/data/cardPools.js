@@ -48,6 +48,55 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
 // 定义卡池配置
 // 注意：推荐使用可视化编辑器进行修改，在本地运行npm run dev后访问地址/dev在模拟器配置一栏进行编辑
 export const cardPools = {
+  134: {
+    type: "限定",
+    name: "电波盲订",
+    isAvailable: true,
+    imageUrl: "/images/cardpools/134.webp",
+
+    rates: {
+      [SP]: SP_BASE_RATE,
+      [SSR]: 0.06,
+      [SR]: 0.2
+    },
+
+    rules: {
+      [SP]: {
+        pity: 60,
+        boostAfter: 40,
+        boost: 0.02,
+        UpTrigger: true,
+        SelectUpCards: true,
+        UpCards: ["波能震荡", "跃动脉冲"]
+      },
+
+      [SSR]: {}
+    },
+
+    cardNames: {
+      [SP]: ["波能震荡", "跃动脉冲"],
+      [SSR]: ["充电千竹", "首席护盾", "佩宝宝", "电玩少女"],
+
+      [SR]: [
+        "珍珠射手",
+        "饼干骑士",
+        "浅睡千竹",
+        "梦游月兔",
+        "劈咔灯泡",
+        "弹幕发射姬",
+        "拳头礼盒",
+        "贝斯战士",
+        "电音射手",
+        "液氮喷射器",
+        "雪球投掷姬",
+        "家用喷火枪",
+        "消防栓"
+      ],
+
+      [R]: ["纸杯千竹", "转转咖啡杯", "铁头娃娃", "迷你风扇", "闪耀灯球", "火柴女孩"]
+    }
+  },
+
   132: {
     type: '限定',
     name: '聚光信弹',
@@ -1689,7 +1738,7 @@ export const cardPools = {
       ],
       [R]: ['纸杯千竹', '铁头娃娃', '转转咖啡杯', '迷你风扇', '闪耀灯球', '火柴女孩'],
     },
-  },
+  }
 }
 
 /**
