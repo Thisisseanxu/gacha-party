@@ -7,10 +7,10 @@
 
       <div class="cloud-section">
         <p class="input-description">
-          使用您的激活码读取云端的抽卡记录。<br />（请先使用小程序导出抽卡记录并上传！）
+          使用您的激活码分析云端的抽卡记录。<br />（请先使用小程序导出抽卡记录并上传！）
         </p>
         <p class="input-description highlight">
-          小程序码和教程请见下方（PC端在右侧）<br />织夜工具箱所有工具均使用同一个激活码
+          小程序码和教程请见下方（PC端在右侧）<br />可以长按小程序快捷登录按钮复制激活码
         </p>
         <input
           type="text"
