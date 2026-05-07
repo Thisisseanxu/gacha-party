@@ -402,7 +402,11 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  fukeGachaData: {
+  limitedFukeGachaData: {
+    type: Array,
+    required: true,
+  },
+  eventFukeGachaData: {
     type: Array,
     required: true,
   },
@@ -420,7 +424,10 @@ const props = defineProps({
   EVENT_CARD_POOLS_ID: {
     type: Array,
   },
-  FUKE_CARD_POOLS_ID: {
+  LIMITED_FUKE_CARD_POOLS_ID: {
+    type: Array,
+  },
+  EVENT_FUKE_CARD_POOLS_ID: {
     type: Array,
   },
   OTHER_CARD_POOLS_ID: {
@@ -450,7 +457,8 @@ const CARDPOOLS_NAME_MAP = {
   Normal: '常驻扭蛋',
   Limited: '限定扭蛋',
   Event: '联动扭蛋',
-  Fuke: '复刻扭蛋',
+  LimitedFuke: '限定复刻扭蛋',
+  EventFuke: '联动复刻扭蛋',
   AdvanceNormal: '高级常驻扭蛋',
 }
 
@@ -483,7 +491,8 @@ const cardPoolOptions = computed(() => {
     { id: 'AllLimited', name: CARDPOOLS_NAME_MAP['AllLimited'] },
     { id: 'Limited', name: CARDPOOLS_NAME_MAP['Limited'] },
     { id: 'Event', name: CARDPOOLS_NAME_MAP['Event'] },
-    { id: 'Fuke', name: CARDPOOLS_NAME_MAP['Fuke'] },
+    { id: 'LimitedFuke', name: CARDPOOLS_NAME_MAP['LimitedFuke'] },
+    { id: 'EventFuke', name: CARDPOOLS_NAME_MAP['EventFuke'] },
     ...props.SPECIAL_OUTSIDE_POOLS.map((id) => ({ id, name: props.CARDPOOLS_NAME_MAP[id] || id })), // 手动置顶的特殊卡池
     { id: 'Normal', name: CARDPOOLS_NAME_MAP['Normal'] }, // 常驻
     { id: 'AdvanceNormal', name: CARDPOOLS_NAME_MAP['AdvanceNormal'] }, // 高级常驻
@@ -498,8 +507,16 @@ const cardPoolOptions = computed(() => {
       id,
       name: props.CARDPOOLS_NAME_MAP[id],
     })).reverse(), // 联动单卡池
-    { id: '---', name: '复刻扭蛋机' }, // 分隔符
-    ...props.FUKE_CARD_POOLS_ID.map((id) => ({ id, name: props.CARDPOOLS_NAME_MAP[id] })).reverse(), // 复刻单卡池
+    { id: '---', name: '限定复刻扭蛋机' }, // 分隔符
+    ...props.LIMITED_FUKE_CARD_POOLS_ID.map((id) => ({
+      id,
+      name: props.CARDPOOLS_NAME_MAP[id],
+    })).reverse(), // 复刻单卡池
+    { id: '---', name: '联动复刻扭蛋机' }, // 分隔符
+    ...props.EVENT_FUKE_CARD_POOLS_ID.map((id) => ({
+      id,
+      name: props.CARDPOOLS_NAME_MAP[id],
+    })).reverse(), // 复刻单卡池
     { id: '---', name: '其他扭蛋机' }, // 分隔符
   ]
 
@@ -516,14 +533,16 @@ const cardPoolOptions = computed(() => {
         [
           ...props.limitGachaData,
           ...props.eventGachaData,
-          ...props.fukeGachaData,
+          ...props.limitedFukeGachaData,
+          ...props.eventFukeGachaData,
           ...Object.values(props.otherGachaData).flat(),
         ].length > 0
       )
     }
     if (option.id === 'Limited') return props.limitGachaData.length > 0
     if (option.id === 'Event') return props.eventGachaData.length > 0
-    if (option.id === 'Fuke') return props.fukeGachaData.length > 0
+    if (option.id === 'LimitedFuke') return props.limitedFukeGachaData.length > 0
+    if (option.id === 'EventFuke') return props.eventFukeGachaData.length > 0
     if (option.id === 'Normal') return props.normalGachaData.length > 0
     if (option.id === 'AdvanceNormal') return props.advancedNormalGachaData.length > 0
     if (option.id === '---') return true // 保留分隔符
@@ -537,7 +556,8 @@ const cardPoolOptions = computed(() => {
     const allLimitedPoolsData = [
       ...props.limitGachaData,
       ...props.eventGachaData,
-      ...props.fukeGachaData,
+      ...props.limitedFukeGachaData,
+      ...props.eventFukeGachaData,
     ]
     return allLimitedPoolsData.some((r) => r.gacha_id === Number(option.id))
   })
@@ -550,7 +570,8 @@ const isSinglePool = computed(
       'Normal',
       'AdvanceNormal',
       'Event',
-      'Fuke',
+      'LimitedFuke',
+      'EventFuke',
       'AllLimited',
       ...props.OTHER_CARD_POOLS_ID,
     ].includes(CurrentSelectedPool.value),
@@ -598,7 +619,7 @@ const isDev = import.meta.env.DEV
 const activeLimitData = computed(() =>
   isReviewing.value &&
   (props.LIMITED_CARD_POOLS_ID.includes(CurrentSelectedPool.value) ||
-    ['Limited', 'Event', 'Fuke'].includes(CurrentSelectedPool.value))
+    ['Limited', 'Event', 'LimitedFuke', 'EventFuke'].includes(CurrentSelectedPool.value))
     ? reviewRecords.value
     : props.limitGachaData,
 )
@@ -615,10 +636,16 @@ const activeEventData = computed(() =>
     : props.eventGachaData,
 )
 
-const activeFukeData = computed(() =>
-  isReviewing.value && CurrentSelectedPool.value === 'Fuke'
+const activeLimitedFukeData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'LimitedFuke'
     ? reviewRecords.value
-    : props.fukeGachaData,
+    : props.limitedFukeGachaData,
+)
+
+const activeEventFukeData = computed(() =>
+  isReviewing.value && CurrentSelectedPool.value === 'EventFuke'
+    ? reviewRecords.value
+    : props.eventFukeGachaData,
 )
 
 const activeAdvancedNormalData = computed(() =>
@@ -763,20 +790,38 @@ const singleEventAnalysis = computed(() => {
   return { ...eventAnalysis.value }
 })
 
-// 复刻卡池分析逻辑
-const fukeAnalysis = computed(() => calculatePoolStats(activeFukeData.value, 'Fuke'))
+// 限定复刻卡池分析逻辑
+const limitedFukeAnalysis = computed(() =>
+  calculatePoolStats(activeLimitedFukeData.value, 'LimitedFuke'),
+)
 
-// 复刻卡池单卡池分析逻辑
-const singleFukeAnalysis = computed(() => {
-  if (!fukeAnalysis.value) return null
-  if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+// 限定复刻卡池单卡池分析逻辑
+const singleLimitedFukeAnalysis = computed(() => {
+  if (!limitedFukeAnalysis.value) return null
+  if (props.LIMITED_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
     return calculateSinglePoolStats(
-      fukeAnalysis.value,
+      limitedFukeAnalysis.value,
       CurrentSelectedPool.value,
       fullHistory.value.length,
     )
   }
-  return { ...fukeAnalysis.value }
+  return { ...limitedFukeAnalysis.value }
+})
+
+// 联动复刻卡池分析逻辑
+const eventFukeAnalysis = computed(() => calculatePoolStats(activeEventFukeData.value, 'EventFuke'))
+
+// 联动复刻卡池单卡池分析逻辑
+const singleEventFukeAnalysis = computed(() => {
+  if (!eventFukeAnalysis.value) return null
+  if (props.EVENT_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+    return calculateSinglePoolStats(
+      eventFukeAnalysis.value,
+      CurrentSelectedPool.value,
+      fullHistory.value.length,
+    )
+  }
+  return { ...eventFukeAnalysis.value }
 })
 
 const SinglePoolPulls = computed(() => {
@@ -787,8 +832,11 @@ const SinglePoolPulls = computed(() => {
     if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
       return singleEventAnalysis.value.SinglePulls
     }
-    if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
-      return singleFukeAnalysis.value.SinglePulls
+    if (props.LIMITED_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+      return singleLimitedFukeAnalysis.value.SinglePulls
+    }
+    if (props.EVENT_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
+      return singleEventFukeAnalysis.value.SinglePulls
     }
   }
   return null
@@ -801,7 +849,12 @@ const AdvanceNormalAnalysis = computed(() =>
 
 // 所有卡池总览分析逻辑
 const allLimitedAnalysis = computed(() => {
-  const analyses = [limitAnalysis.value, eventAnalysis.value, fukeAnalysis.value]
+  const analyses = [
+    limitAnalysis.value,
+    eventAnalysis.value,
+    limitedFukeAnalysis.value,
+    eventFukeAnalysis.value,
+  ]
 
   // 将动态生成的其他未分类卡池也合并计算
   props.OTHER_CARD_POOLS_ID.forEach((id) => {
@@ -871,7 +924,8 @@ const CurrentSelectedPoolAnalysis = computed(() => {
   if (CurrentSelectedPool.value === 'AllLimited') return allLimitedAnalysis.value
   if (CurrentSelectedPool.value === 'AdvanceNormal') return AdvanceNormalAnalysis.value
   if (CurrentSelectedPool.value === 'Event') return eventAnalysis.value
-  if (CurrentSelectedPool.value === 'Fuke') return fukeAnalysis.value
+  if (CurrentSelectedPool.value === 'LimitedFuke') return limitedFukeAnalysis.value
+  if (CurrentSelectedPool.value === 'EventFuke') return eventFukeAnalysis.value
   if (CurrentSelectedPool.value === 'Normal') return normalAnalysis.value
 
   // 动态处理配置外的杂类卡池
@@ -884,7 +938,10 @@ const CurrentSelectedPoolAnalysis = computed(() => {
 
   if (props.EVENT_CARD_POOLS_ID.includes(CurrentSelectedPool.value))
     return singleEventAnalysis.value
-  if (props.FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) return singleFukeAnalysis.value
+  if (props.LIMITED_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value))
+    return singleLimitedFukeAnalysis.value
+  if (props.EVENT_FUKE_CARD_POOLS_ID.includes(CurrentSelectedPool.value))
+    return singleEventFukeAnalysis.value
 
   return singleLimitAnalysis.value
 })
@@ -1100,8 +1157,11 @@ const quantityStatistics = computed(() => {
     const ssrStats = generateStats(eventAnalysis.value?.SSRHistory, SSR)
     return [...spStats, ...ssrStats]
   }
-  if (pool === 'Fuke') {
-    return generateStats(fukeAnalysis.value?.SPHistory, SP)
+  if (pool === 'LimitedFuke') {
+    return generateStats(limitedFukeAnalysis.value?.SPHistory, SP)
+  }
+  if (pool === 'EventFuke') {
+    return generateStats(eventFukeAnalysis.value?.SPHistory, SP)
   }
   // 默认处理所有其他限定池
   const analysis = CurrentSelectedPoolAnalysis.value
@@ -1151,15 +1211,18 @@ const fullHistory = computed(() => {
     data = [
       ...props.limitGachaData,
       ...props.eventGachaData,
-      ...props.fukeGachaData,
+      ...props.limitedFukeGachaData,
+      ...props.eventFukeGachaData,
       ...Object.values(props.otherGachaData).flat(),
     ]
   } else if (CurrentSelectedPool.value === 'AdvanceNormal') {
     data = [...props.advancedNormalGachaData]
   } else if (CurrentSelectedPool.value === 'Event') {
     data = [...props.eventGachaData]
-  } else if (CurrentSelectedPool.value === 'Fuke') {
-    data = [...props.fukeGachaData]
+  } else if (CurrentSelectedPool.value === 'LimitedFuke') {
+    data = [...props.limitedFukeGachaData]
+  } else if (CurrentSelectedPool.value === 'EventFuke') {
+    data = [...props.eventFukeGachaData]
   } else if (CurrentSelectedPool.value === 'Limited') {
     data = [...props.limitGachaData]
   } else if (props.OTHER_CARD_POOLS_ID.includes(CurrentSelectedPool.value)) {
@@ -1167,9 +1230,12 @@ const fullHistory = computed(() => {
     data = [...(props.otherGachaData[CurrentSelectedPool.value] || [])]
   } else {
     // 适用于所有单卡池，包括限定、联动和复刻
-    data = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(
-      (r) => r.gacha_id === Number(CurrentSelectedPool.value),
-    )
+    data = [
+      ...props.limitGachaData,
+      ...props.eventGachaData,
+      ...props.limitedFukeGachaData,
+      ...props.eventFukeGachaData,
+    ].filter((r) => r.gacha_id === Number(CurrentSelectedPool.value))
   }
   return data
     .sort((a, b) => b.created_at - a.created_at || b.id - a.id)
@@ -1463,17 +1529,22 @@ const startReviewAnimation = () => {
     sourceData = [...props.advancedNormalGachaData]
   } else if (poolId === 'Event') {
     sourceData = [...props.eventGachaData]
-  } else if (poolId === 'Fuke') {
-    sourceData = [...props.fukeGachaData]
+  } else if (poolId === 'LimitedFuke') {
+    sourceData = [...props.limitedFukeGachaData]
+  } else if (poolId === 'EventFuke') {
+    sourceData = [...props.eventFukeGachaData]
   } else if (poolId === 'Limited') {
     sourceData = [...props.limitGachaData]
   } else if (props.OTHER_CARD_POOLS_ID.includes(poolId)) {
     sourceData = [...(props.otherGachaData[poolId] || [])]
   } else {
     // 适用于所有单卡池，包括限定、联动和复刻
-    sourceData = [...props.limitGachaData, ...props.eventGachaData, ...props.fukeGachaData].filter(
-      (r) => r.gacha_id === Number(poolId),
-    )
+    sourceData = [
+      ...props.limitGachaData,
+      ...props.eventGachaData,
+      ...props.limitedFukeGachaData,
+      ...props.eventFukeGachaData,
+    ].filter((r) => r.gacha_id === Number(poolId))
   }
 
   if (sourceData.length === 0) {

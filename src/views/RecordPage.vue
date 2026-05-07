@@ -112,7 +112,8 @@
       v-if="viewState === 'analysis'"
       :limit-gacha-data="LimitGachaData"
       :event-gacha-data="EventGachaData"
-      :fuke-gacha-data="FukeGachaData"
+      :limited-fuke-gacha-data="LimitedFukeGachaData"
+      :event-fuke-gacha-data="EventFukeGachaData"
       :normal-gacha-data="NormalGachaData"
       :advanced-normal-gacha-data="AdvanceNormalGachaData"
       :other-gacha-data="OtherGachaData"
@@ -120,7 +121,8 @@
       :json-input="jsonInput"
       :LIMITED_CARD_POOLS_ID="LIMITED_CARD_POOLS_ID"
       :EVENT_CARD_POOLS_ID="EVENT_CARD_POOLS_ID"
-      :FUKE_CARD_POOLS_ID="FUKE_CARD_POOLS_ID"
+      :LIMITED_FUKE_CARD_POOLS_ID="LIMITED_FUKE_CARD_POOLS_ID"
+      :EVENT_FUKE_CARD_POOLS_ID="EVENT_FUKE_CARD_POOLS_ID"
       :OTHER_CARD_POOLS_ID="OTHER_CARD_POOLS_ID"
       :SPECIAL_OUTSIDE_POOLS="SPECIAL_OUTSIDE_POOLS"
       :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
@@ -208,7 +210,8 @@ const jsonInput = ref('') // 存储用户输入的 JSON 数据
 const playerId = ref('') // 存储玩家ID
 const LimitGachaData = ref([]) // 存储限定卡池抽卡记录
 const EventGachaData = ref([]) // 存储联动卡池抽卡记录
-const FukeGachaData = ref([]) // 存储复刻卡池抽卡记录
+const LimitedFukeGachaData = ref([]) // 存储限定复刻卡池抽卡记录
+const EventFukeGachaData = ref([]) // 存储联动复刻卡池抽卡记录
 const NormalGachaData = ref([]) // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]) // 存储高级常驻卡池抽卡记录
 const OtherGachaData = ref({}) // 存储其他所有未分类特殊卡池抽卡记录
@@ -221,7 +224,8 @@ const isDev = import.meta.env.DEV
 
 const LIMITED_CARD_POOLS_ID = ref([]) // 限定卡池ID列表
 const EVENT_CARD_POOLS_ID = ref([]) // 联动卡池ID列表
-const FUKE_CARD_POOLS_ID = ref([]) // 复刻卡池ID列表
+const LIMITED_FUKE_CARD_POOLS_ID = ref([]) // 限定复刻卡池ID列表
+const EVENT_FUKE_CARD_POOLS_ID = ref([]) // 联动复刻卡池ID列表
 const CARDPOOLS_NAME_MAP = ref({}) // 卡池名称映射
 
 // 默认卡池配置（作为兜底初始值，防止首次加载失败）
@@ -249,9 +253,16 @@ const DEFAULT_POOLS_DATA = {
     '61',
     '63',
     '64',
+    '66',
+    '67',
+    '71',
+    '73',
+    '75',
+    '76',
   ],
-  event: ['57', '62'],
-  fuke: ['65'],
+  event: ['57', '62', '69', '74'],
+  limited_fuke: ['65', '77'],
+  event_fuke: ['68', '70', '72'],
   names: {
     9: '常驻扭蛋',
     29: '车手盲盒机',
@@ -262,7 +273,6 @@ const DEFAULT_POOLS_DATA = {
     44: '仲夏扭蛋',
     46: '车手盲盒机-复刻1',
     47: '祈愿盲盒',
-    107: '地下车手招募',
     48: '童话国盲盒机-复刻1',
     49: '游园邀请',
     50: '暮色邀请函',
@@ -271,15 +281,28 @@ const DEFAULT_POOLS_DATA = {
     53: '萌鬼认可证',
     54: '早稻叽-复刻1',
     55: '超频扭蛋机',
-    59: '仲夏扭蛋-复刻1',
-    58: '厨娘来啦',
     57: '酷玩爆米花',
+    58: '厨娘来啦！',
+    59: '仲夏扭蛋-复刻1',
     60: '圣诞邀约',
     61: '相约嘉年华',
     62: '鹅崽召唤器',
     63: '织梦旅行团',
     64: '青玉之锋',
     65: '扭蛋大作战-复刻1',
+    66: '焰烛火莲',
+    67: '上元灯火',
+    68: '鹅崽召唤器-复刻1',
+    69: '笔尖与四叶草',
+    70: '酷玩爆米花-复刻1',
+    71: '空陆菁英',
+    72: '暮色邀请函-复刻1',
+    73: '坠入绵软甜蜜',
+    74: '时空追猎者',
+    75: '聚光信弹',
+    76: '电波盲订',
+    77: '游园邀请-复刻1',
+    107: '地下车手招募',
     1000: '心愿自选',
     1001: '新春自选',
     1002: '春日自选扩招',
@@ -348,7 +371,8 @@ onMounted(async () => {
   const applyPoolConfig = (data) => {
     LIMITED_CARD_POOLS_ID.value = data.limited || []
     EVENT_CARD_POOLS_ID.value = data.event || []
-    FUKE_CARD_POOLS_ID.value = data.fuke || []
+    LIMITED_FUKE_CARD_POOLS_ID.value = data.limited_fuke || []
+    EVENT_FUKE_CARD_POOLS_ID.value = data.event_fuke || []
     CARDPOOLS_NAME_MAP.value = data.names || {}
 
     // 动态计算除了已知类型之外的其他所有卡池ID
@@ -357,7 +381,8 @@ onMounted(async () => {
       '10000',
       ...LIMITED_CARD_POOLS_ID.value,
       ...EVENT_CARD_POOLS_ID.value,
-      ...FUKE_CARD_POOLS_ID.value,
+      ...LIMITED_FUKE_CARD_POOLS_ID.value,
+      ...EVENT_FUKE_CARD_POOLS_ID.value,
     ]
     OTHER_CARD_POOLS_ID.value = Object.keys(CARDPOOLS_NAME_MAP.value).filter(
       (id) => !knownIds.includes(id),
@@ -365,13 +390,14 @@ onMounted(async () => {
   }
 
   if (
+    !isDev &&
     localStorage.getItem('gachaPoolConfig') &&
-    localStorage.getItem('gachaPoolConfigTimestamp') > Date.now() - 2 * 60 * 60 * 1000
+    localStorage.getItem('gachaPoolConfigTimestamp') > Date.now() - 30 * 60 * 1000
   ) {
-    // 使用2小时内的缓存
+    // 使用30分钟内的缓存
     try {
       const cached = localStorage.getItem('gachaPoolConfig')
-      logger.log('2小时内获取过卡池配置，使用本地缓存的卡池配置')
+      logger.log('30分钟内获取过卡池配置，使用本地缓存的卡池配置')
       applyPoolConfig(JSON.parse(cached))
     } catch (e) {
       logger.error('解析本地缓存配置失败:', e)
@@ -496,7 +522,8 @@ const handleJsonAnalysis = () => {
   // 分离限定卡池和常驻卡池数据
   const LimitGachaRecords = []
   const EventGachaRecords = []
-  const FukeGachaRecords = []
+  const LimitedFukeGachaRecords = []
+  const EventFukeGachaRecords = []
   const NormalGachaRecords = []
   const AdvanceNormalRecords = [] // 用于存储高级常驻卡池的记录
   const OtherGachaRecords = {} // 存储其他所有卡池记录的对象映射
@@ -508,7 +535,10 @@ const handleJsonAnalysis = () => {
     } // 高级常驻卡池ID固定为10000
     else if (LIMITED_CARD_POOLS_ID.value.includes(gachaId)) LimitGachaRecords.push(...records)
     else if (EVENT_CARD_POOLS_ID.value.includes(gachaId)) EventGachaRecords.push(...records)
-    else if (FUKE_CARD_POOLS_ID.value.includes(gachaId)) FukeGachaRecords.push(...records)
+    else if (LIMITED_FUKE_CARD_POOLS_ID.value.includes(gachaId))
+      LimitedFukeGachaRecords.push(...records)
+    else if (EVENT_FUKE_CARD_POOLS_ID.value.includes(gachaId))
+      EventFukeGachaRecords.push(...records)
     else {
       // 未分类的全部归为其他卡池
       if (!OtherGachaRecords[gachaId]) OtherGachaRecords[gachaId] = []
@@ -531,15 +561,19 @@ const handleJsonAnalysis = () => {
     errorMessage.value = '数据格式错误：部分联动卡池抽卡记录缺少必须字段。'
     return
   }
-  if (!FukeGachaRecords.every(isValidRecord)) {
-    errorMessage.value = '数据格式错误：部分复刻卡池抽卡记录缺少必须字段。'
+  if (!LimitedFukeGachaRecords.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分限定复刻卡池抽卡记录缺少必须字段。'
+    return
+  }
+  if (!EventFukeGachaRecords.every(isValidRecord)) {
+    errorMessage.value = '数据格式错误：部分联动复刻卡池抽卡记录缺少必须字段。'
     return
   }
   if (!NormalGachaRecords.every(isValidRecord)) {
     errorMessage.value = '数据格式错误：部分常驻卡池抽卡记录缺少必须字段。'
     return
   }
-  if (!AdvanceNormalGachaData.value.every(isValidRecord)) {
+  if (!AdvanceNormalRecords.every(isValidRecord)) {
     errorMessage.value = '数据格式错误：部分高级常驻卡池抽卡记录缺少必须字段。'
     return
   }
@@ -551,7 +585,8 @@ const handleJsonAnalysis = () => {
 
   LimitGachaData.value = LimitGachaRecords
   EventGachaData.value = EventGachaRecords
-  FukeGachaData.value = FukeGachaRecords
+  LimitedFukeGachaData.value = LimitedFukeGachaRecords
+  EventFukeGachaData.value = EventFukeGachaRecords
   NormalGachaData.value = NormalGachaRecords
   AdvanceNormalGachaData.value = AdvanceNormalRecords
   OtherGachaData.value = OtherGachaRecords
@@ -915,7 +950,11 @@ const resetView = () => {
   viewState.value = 'input'
   jsonInput.value = ''
   LimitGachaData.value = []
+  EventGachaData.value = []
+  LimitedFukeGachaData.value = []
+  EventFukeGachaData.value = []
   NormalGachaData.value = []
+  AdvanceNormalGachaData.value = []
   OtherGachaData.value = {}
   errorMessage.value = ''
   playerId.value = ''

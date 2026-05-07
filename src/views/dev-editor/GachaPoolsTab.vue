@@ -28,7 +28,7 @@
     <div v-if="anyLoading" class="hint" style="padding: 16px 0">加载中…</div>
     <div v-else-if="anyError" class="hint error" style="padding: 16px 0">{{ anyError }}</div>
     <template v-else>
-      <!-- ── 卡池分类（4 列，宽度不足时自动换行）── -->
+      <!-- ── 卡池分类（5 列，宽度不足时自动换行）── -->
       <div class="gp-cats">
         <div class="form-section gp-cat">
           <div class="form-section-title">
@@ -52,10 +52,26 @@
 
         <div class="form-section gp-cat">
           <div class="form-section-title">
-            复刻 <span class="count-hint">{{ pools.fuke.length }}</span>
+            限定复刻 <span class="count-hint">{{ pools.limited_fuke.length }}</span>
           </div>
-          <PoolList :ids="pools.fuke" :name-map="nameMap" @remove="removeFrom('fuke', $event)" />
-          <PoolAddInput :options="otherPoolOptions" @add="addTo('fuke', $event)" />
+          <PoolList
+            :ids="pools.limited_fuke"
+            :name-map="nameMap"
+            @remove="removeFrom('limited_fuke', $event)"
+          />
+          <PoolAddInput :options="otherPoolOptions" @add="addTo('limited_fuke', $event)" />
+        </div>
+
+        <div class="form-section gp-cat">
+          <div class="form-section-title">
+            联动复刻 <span class="count-hint">{{ pools.event_fuke.length }}</span>
+          </div>
+          <PoolList
+            :ids="pools.event_fuke"
+            :name-map="nameMap"
+            @remove="removeFrom('event_fuke', $event)"
+          />
+          <PoolAddInput :options="otherPoolOptions" @add="addTo('event_fuke', $event)" />
         </div>
 
         <div class="form-section gp-cat">
@@ -203,7 +219,9 @@ function updateDuplicateColors() {
 watch(nameMap, updateDuplicateColors, { deep: true, immediate: true })
 
 // ── 分类 ──────────────────────────────────────────────
-const pools = computed(() => poolsData.value ?? { limited: [], event: [], fuke: [] })
+const pools = computed(
+  () => poolsData.value ?? { limited: [], event: [], limited_fuke: [], event_fuke: [] },
+)
 
 function addTo(category, id) {
   const list = pools.value[category]
@@ -217,7 +235,13 @@ function removeFrom(category, id) {
 }
 
 const classifiedSet = computed(
-  () => new Set([...pools.value.limited, ...pools.value.event, ...pools.value.fuke]),
+  () =>
+    new Set([
+      ...pools.value.limited,
+      ...pools.value.event,
+      ...pools.value.limited_fuke,
+      ...pools.value.event_fuke,
+    ]),
 )
 
 const otherPools = computed(() => {
