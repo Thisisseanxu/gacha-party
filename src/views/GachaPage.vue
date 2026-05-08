@@ -20,7 +20,7 @@
       <aside class="pool-panel" v-show="!showGachaResultOverlay">
         <nav class="pool-list">
           <div
-            v-for="[id, pool] in sortedPools"
+            v-for="[id, pool] in availablePools"
             :key="id"
             class="pool-item radius-8"
             :class="{ active: route.params.poolId === id }"
@@ -38,8 +38,52 @@
               class="pool-item-tag"
               :style="{ backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')` }"
             >
-              <span class="pool-item-tag-text">{{ pool.tag_name }}</span>
+              <span
+                class="pool-item-tag-text"
+                :class="{ 'pool-item-tag-text--small': pool.tag_name.length === 3 }"
+              >
+                {{ pool.tag_name }}
+              </span>
             </span>
+          </div>
+
+          <!-- 已结束卡池 -->
+          <div v-if="endedPools.length > 0" class="ended-pools-section">
+            <div class="ended-pools-header" @click="showEndedPools = !showEndedPools">
+              <span class="ended-pools-title">已结束卡池</span>
+              <span class="ended-pools-icon" :class="{ 'is-open': showEndedPools }">▼</span>
+            </div>
+            <div v-show="showEndedPools" class="ended-pools-list">
+              <div
+                v-for="[id, pool] in endedPools"
+                :key="id"
+                class="pool-item radius-8"
+                :class="{ active: route.params.poolId === id }"
+                @click="navigateToPool(id)"
+              >
+                <img
+                  v-if="pool.imageUrl"
+                  :src="pool.imageUrl"
+                  :alt="pool.name"
+                  class="pool-item-image"
+                />
+                <span v-else class="pool-item-name">{{ pool.name }}</span>
+                <span
+                  v-if="pool.tag_type && pool.tag_name"
+                  class="pool-item-tag"
+                  :style="{
+                    backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')`,
+                  }"
+                >
+                  <span
+                    class="pool-item-tag-text"
+                    :class="{ 'pool-item-tag-text--small': pool.tag_name.length === 3 }"
+                  >
+                    {{ pool.tag_name }}
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
 
           <div
@@ -573,15 +617,25 @@ const isSelectableUpGroupPool = computed(
 )
 const isWishPool = computed(() => currentPool.value?.rules?.[SP]?.WishSelection === true)
 
-// 根据 isAvailable 属性排序卡池列表
-const sortedPools = computed(() => {
-  return [...cardPoolsInOrder].sort(([, poolA], [, poolB]) => {
-    const isAvailableA = !!poolA.isAvailable
-    const isAvailableB = !!poolB.isAvailable
-    if (isAvailableA === isAvailableB) return 0
-    return isAvailableA ? -1 : 1
-  })
+const availablePools = computed(() => {
+  return cardPoolsInOrder.filter(([, pool]) => pool.isAvailable)
 })
+
+const endedPools = computed(() => {
+  return cardPoolsInOrder.filter(([, pool]) => !pool.isAvailable)
+})
+
+const showEndedPools = ref(false)
+
+watch(
+  () => route.params.poolId,
+  (newId) => {
+    if (endedPools.value.some(([id]) => id === newId)) {
+      showEndedPools.value = true
+    }
+  },
+  { immediate: true },
+)
 
 // UP卡选择
 const selectedUpCard = ref(null)
@@ -985,6 +1039,51 @@ const copyShareText = async (event) => {
   display: block;
   letter-spacing: 0.06em;
   transform: translate(-1px, -1px);
+}
+
+.pool-item-tag-text--small {
+  font-size: 0.8rem;
+}
+
+/* 已结束卡池折叠区 */
+.ended-pools-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ended-pools-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: v-bind('colors.text.secondary');
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: 1px solid v-bind('colors.border.primary');
+  transition: background-color 0.2s;
+}
+
+.ended-pools-header:hover {
+  background-color: v-bind('colors.background.hover');
+}
+
+.ended-pools-icon {
+  font-size: 0.7rem;
+  transition: transform 0.3s ease;
+}
+
+.ended-pools-icon.is-open {
+  transform: rotate(180deg);
+}
+
+.ended-pools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 /* 自定义卡池入口 */
