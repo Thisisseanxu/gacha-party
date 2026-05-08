@@ -55,6 +55,8 @@ export const cardPoolsInOrder = [
       name: "小小确幸",
       isAvailable: true,
       imageUrl: "/images/cardpools/133.webp",
+      startTime: "2026-05-07 00:00:00",
+      finishTime: "2026-05-31 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -124,6 +126,8 @@ export const cardPoolsInOrder = [
       name: "电波盲订",
       isAvailable: true,
       imageUrl: "/images/cardpools/134.webp",
+      startTime: "2026-04-30 00:00:00",
+      finishTime: "2026-05-24 23:59:59",
       tag_type: 2,
       tag_name: "电玩",
       rates: {
@@ -190,6 +194,8 @@ export const cardPoolsInOrder = [
       name: "游园邀请-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/114.webp",
+      startTime: "2026-04-23 00:00:00",
+      finishTime: "2026-05-06 23:59:59",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -261,6 +267,8 @@ export const cardPoolsInOrder = [
       name: "聚光信弹",
       isAvailable: true,
       imageUrl: "/images/cardpools/132.webp",
+      startTime: "2026-04-16 00:00:00",
+      finishTime: "2026-05-10 23:59:59",
       tag_type: 2,
       tag_name: "梦境",
       rates: {
@@ -332,6 +340,8 @@ export const cardPoolsInOrder = [
       name: "时空追猎者",
       isAvailable: false,
       imageUrl: "/images/cardpools/131.webp",
+      startTime: "2026-04-09 00:00:00",
+      finishTime: "2026-05-05 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -401,6 +411,8 @@ export const cardPoolsInOrder = [
       name: "坠入绵软甜蜜",
       isAvailable: false,
       imageUrl: "/images/cardpools/130.webp",
+      startTime: "2026-04-02 15:59:59",
+      finishTime: "2026-04-26 23:59:59",
       tag_type: 2,
       tag_name: "甜品",
       rates: {
@@ -472,6 +484,8 @@ export const cardPoolsInOrder = [
       name: "春日自选扩招",
       isAvailable: false,
       imageUrl: "/images/cardpools/1002.webp",
+      startTime: "2026-03-26 00:00:00",
+      finishTime: "2026-04-26 23:59:59",
       tag_type: 2,
       tag_name: "自选",
       rates: {
@@ -551,6 +565,8 @@ export const cardPoolsInOrder = [
       name: "暮色邀请函-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/115.webp",
+      startTime: "2026-03-26 00:00:00",
+      finishTime: "2026-04-08 23:59:59",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -615,6 +631,8 @@ export const cardPoolsInOrder = [
       name: "空陆菁英",
       isAvailable: false,
       imageUrl: "/images/cardpools/128.webp",
+      startTime: "2026-03-24 00:00:00",
+      finishTime: "2026-04-12 23:59:59",
       tag_type: 2,
       tag_name: "空陆",
       rates: {
@@ -681,6 +699,8 @@ export const cardPoolsInOrder = [
       name: "酷玩爆米花-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/119.webp",
+      startTime: "2026-03-12 00:00:00",
+      finishTime: "2026-04-06 23:59:59",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -745,6 +765,8 @@ export const cardPoolsInOrder = [
       name: "笔尖与四叶草",
       isAvailable: false,
       imageUrl: "/images/cardpools/129.webp",
+      startTime: "2026-03-12 00:00:00",
+      finishTime: "2026-04-06 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -811,6 +833,8 @@ export const cardPoolsInOrder = [
       name: "鹅崽召唤器-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/122.webp",
+      startTime: "2026-03-05 00:00:00",
+      finishTime: "2026-03-17 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -875,6 +899,8 @@ export const cardPoolsInOrder = [
       name: "上元灯火",
       isAvailable: false,
       imageUrl: "/images/cardpools/127.webp",
+      startTime: "2026-02-27 00:00:00",
+      finishTime: "2026-03-22 23:59:59",
       tag_type: 2,
       tag_name: "元宵",
       rates: {
@@ -945,6 +971,8 @@ export const cardPoolsInOrder = [
       name: "焰竹火莲",
       isAvailable: false,
       imageUrl: "/images/cardpools/126.webp",
+      startTime: "2026-02-10 00:00:00",
+      finishTime: "2026-03-15 23:59:59",
       tag_type: 2,
       tag_name: "新春",
       rates: {
@@ -1011,6 +1039,8 @@ export const cardPoolsInOrder = [
       name: "新春自选",
       isAvailable: false,
       imageUrl: "/images/cardpools/1001.webp",
+      startTime: "2026-02-04 00:00:00",
+      finishTime: "2026-03-15 23:59:59",
       tag_type: 2,
       tag_name: "自选",
       rates: {
@@ -1134,6 +1164,8 @@ export const cardPoolsInOrder = [
       name: "青玉之锋",
       isAvailable: false,
       imageUrl: "/images/cardpools/124.webp",
+      startTime: "2026-01-29 00:00:00",
+      finishTime: "2026-02-28 23:59:59",
       tag_type: 2,
       tag_name: "簌雪",
       rates: {
@@ -1205,6 +1237,8 @@ export const cardPoolsInOrder = [
       name: "扭蛋大作战-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/109.webp",
+      startTime: "2026-01-22 00:00:00",
+      finishTime: "2026-02-05 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -1275,6 +1309,8 @@ export const cardPoolsInOrder = [
       name: "织梦旅行团",
       isAvailable: false,
       imageUrl: "/images/cardpools/123.webp",
+      startTime: "2026-01-15 00:00:00",
+      finishTime: "2026-02-08 23:59:59",
       tag_type: 2,
       tag_name: "梦境",
       rates: {
@@ -1346,6 +1382,8 @@ export const cardPoolsInOrder = [
       name: "鹅崽召唤器",
       isAvailable: false,
       imageUrl: "/images/cardpools/122.webp",
+      startTime: "2026-01-08 00:00:00",
+      finishTime: "2026-02-01 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -1410,6 +1448,8 @@ export const cardPoolsInOrder = [
       name: "相约嘉年华",
       isAvailable: false,
       imageUrl: "/images/cardpools/121.webp",
+      startTime: "2025-12-31 00:00:00",
+      finishTime: "2026-01-25 23:59:59",
       tag_type: 2,
       tag_name: "元旦",
       rates: {
@@ -1481,6 +1521,8 @@ export const cardPoolsInOrder = [
       name: "圣诞邀约",
       isAvailable: false,
       imageUrl: "/images/cardpools/120.webp",
+      startTime: "2025-12-18 00:00:00",
+      finishTime: "2026-01-11 23:59:59",
       tag_type: 2,
       tag_name: "圣诞",
       rates: {
@@ -1547,6 +1589,8 @@ export const cardPoolsInOrder = [
       name: "酷玩爆米花",
       isAvailable: false,
       imageUrl: "/images/cardpools/119.webp",
+      startTime: "2025-12-04 00:00:00",
+      finishTime: "2025-12-28 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -1611,6 +1655,8 @@ export const cardPoolsInOrder = [
       name: "半周年庆典自选池",
       isAvailable: false,
       imageUrl: "/images/cardpools/1000.webp",
+      startTime: "2025-11-27 00:00:00",
+      finishTime: "2025-12-28 23:59:59",
       tag_type: 2,
       tag_name: "半周年",
       rates: {
@@ -1726,6 +1772,8 @@ export const cardPoolsInOrder = [
       name: "厨娘来啦",
       isAvailable: false,
       imageUrl: "/images/cardpools/118.webp",
+      startTime: "2025-11-20 00:00:00",
+      finishTime: "2025-12-14 23:59:59",
       tag_type: 2,
       tag_name: "厨艺",
       rates: {
@@ -1792,6 +1840,8 @@ export const cardPoolsInOrder = [
       name: "仲夏扭蛋-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/112.webp",
+      startTime: "2025-11-14 00:00:00",
+      finishTime: "2025-12-01 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -1863,6 +1913,8 @@ export const cardPoolsInOrder = [
       name: "超频扭蛋机",
       isAvailable: false,
       imageUrl: "/images/cardpools/117.webp",
+      startTime: "2025-11-06 00:00:00",
+      finishTime: "2025-11-30 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -1932,6 +1984,8 @@ export const cardPoolsInOrder = [
       name: "早稻叽-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/111.webp",
+      startTime: "2025-10-31 00:00:00",
+      finishTime: "2025-11-17 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -2000,6 +2054,8 @@ export const cardPoolsInOrder = [
       name: "萌鬼认可证",
       isAvailable: false,
       imageUrl: "/images/cardpools/116.webp",
+      startTime: "2025-10-24 00:00:00",
+      finishTime: "2025-11-16 23:59:59",
       tag_type: 2,
       tag_name: "万圣",
       rates: {
@@ -2067,6 +2123,8 @@ export const cardPoolsInOrder = [
       name: "车手盲盒机-复刻2",
       isAvailable: false,
       imageUrl: "/images/cardpools/29.webp",
+      startTime: "2025-10-16 00:00:00",
+      finishTime: "2025-10-31 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -2138,6 +2196,8 @@ export const cardPoolsInOrder = [
       name: "暮色邀请函",
       isAvailable: false,
       imageUrl: "/images/cardpools/115.webp",
+      startTime: "2025-10-10 00:00:00",
+      finishTime: "2025-11-09 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -2202,6 +2262,8 @@ export const cardPoolsInOrder = [
       name: "永雏塔菲-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/108.webp",
+      startTime: "2025-10-01 00:00:00",
+      finishTime: "2025-10-16 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -2270,6 +2332,8 @@ export const cardPoolsInOrder = [
       name: "游园邀请",
       isAvailable: false,
       imageUrl: "/images/cardpools/114.webp",
+      startTime: "2025-09-27 00:00:00",
+      finishTime: "2025-10-19 23:59:59",
       tag_type: 2,
       tag_name: "中秋",
       rates: {
@@ -2341,6 +2405,8 @@ export const cardPoolsInOrder = [
       name: "祈愿盲盒",
       isAvailable: false,
       imageUrl: "/images/cardpools/47.webp",
+      startTime: "2025-09-23 00:00:00",
+      finishTime: "2025-10-07 23:59:59",
       tag_type: 3,
       tag_name: "限时",
       rates: {
@@ -2405,6 +2471,8 @@ export const cardPoolsInOrder = [
       name: "入梦童话国-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/110.webp",
+      startTime: "2025-09-19 00:00:00",
+      finishTime: "2025-10-01 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -2476,6 +2544,8 @@ export const cardPoolsInOrder = [
       name: "地下车手招募",
       isAvailable: false,
       imageUrl: "/images/cardpools/107.webp",
+      startTime: "2025-09-11 00:00:00",
+      finishTime: "2025-10-07 23:59:59",
       tag_type: 2,
       tag_name: "赛车",
       rates: {
@@ -2547,6 +2617,8 @@ export const cardPoolsInOrder = [
       name: "车手盲盒机-复刻1",
       isAvailable: false,
       imageUrl: "/images/cardpools/29.webp",
+      startTime: "2025-08-21 00:00:00",
+      finishTime: "2025-09-08 00:00:00",
       tag_type: 3,
       tag_name: "复刻",
       rates: {
@@ -2618,6 +2690,8 @@ export const cardPoolsInOrder = [
       name: "仲夏扭蛋",
       isAvailable: false,
       imageUrl: "/images/cardpools/112.webp",
+      startTime: "2025-08-14 00:00:00",
+      finishTime: "2025-09-14 23:59:59",
       tag_type: 2,
       tag_name: "夏日",
       rates: {
@@ -2689,6 +2763,8 @@ export const cardPoolsInOrder = [
       name: "早稻叽",
       isAvailable: false,
       imageUrl: "/images/cardpools/111.webp",
+      startTime: "2025-07-31 00:00:00",
+      finishTime: "2025-09-07 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -2757,6 +2833,8 @@ export const cardPoolsInOrder = [
       name: "扭蛋大作战",
       isAvailable: false,
       imageUrl: "/images/cardpools/109.webp",
+      startTime: "2025-07-11 00:00:00",
+      finishTime: "2025-09-14 23:59:59",
       tag_type: 2,
       tag_name: "夏日",
       rates: {
@@ -2827,6 +2905,8 @@ export const cardPoolsInOrder = [
       name: "入梦童话国",
       isAvailable: false,
       imageUrl: "/images/cardpools/110.webp",
+      startTime: "2025-06-26 16:00:00",
+      finishTime: "2025-07-17 00:00:00",
       tag_type: 2,
       tag_name: "童话",
       rates: {
@@ -2898,6 +2978,8 @@ export const cardPoolsInOrder = [
       name: "永雏塔菲",
       isAvailable: false,
       imageUrl: "/images/cardpools/108.webp",
+      startTime: "2025-06-13 16:00:00",
+      finishTime: "2025-07-20 23:59:59",
       tag_type: 4,
       tag_name: "联动",
       rates: {
@@ -2966,6 +3048,8 @@ export const cardPoolsInOrder = [
       name: "车手盲盒机",
       isAvailable: false,
       imageUrl: "/images/cardpools/29.webp",
+      startTime: "2025-05-07 00:00:00",
+      finishTime: "2025-06-26 00:00:00",
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,
@@ -3034,6 +3118,8 @@ export const cardPoolsInOrder = [
       name: "高级常驻池",
       isAvailable: true,
       imageUrl: "/images/cardpools/10000.webp",
+      startTime: "2025-08-08 00:00:00",
+      finishTime: null,
       rates: {
         [SP]: SP_BASE_RATE,
         [SSR]: 0.06,

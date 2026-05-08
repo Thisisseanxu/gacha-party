@@ -65,10 +65,6 @@
 
         <!-- 浏览角色攻略 -->
         <section class="selector-panel">
-          <div class="section-header">
-            <h2 class="section-title">浏览角色攻略</h2>
-            <p class="section-sub">选择角色查看她的所有徽章攻略</p>
-          </div>
           <CharacterSelector
             v-model="selectedCharId"
             mode="single"

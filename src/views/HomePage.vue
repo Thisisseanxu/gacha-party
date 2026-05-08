@@ -4,35 +4,59 @@
       <h1 class="title" :class="{ 'smooth-transition': isReady }">织夜工具箱</h1>
       <h2 class="subtitle" :class="{ 'smooth-transition': isReady }">盲盒派对小助手</h2>
 
-      <div class="button-group">
+      <section class="primary-actions">
+        <router-link to="fenxi" class="btn btn-primary fenxi">
+          <img src="/images/icons/fenxi.webp" class="btn-icon" alt="icon" />
+          <span class="btn-label">抽卡记录分析</span>
+        </router-link>
         <router-link
           :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
-          class="btn chouka"
+          class="btn btn-primary chouka"
         >
           <img src="/images/icons/chouka.webp" class="btn-icon" alt="icon" />
-          <span>抽卡模拟器</span>
+          <span class="btn-label">抽卡模拟器</span>
         </router-link>
+      </section>
 
-        <router-link to="fenxi" class="btn fenxi">
-          <img src="/images/icons/fenxi.webp" class="btn-icon" alt="icon" />
-          <span>抽卡数据分析</span>
-        </router-link>
+      <h3 class="section-divider"><span>更多功能</span></h3>
 
-        <router-link to="daoyan" class="btn daoyan">
+      <section class="secondary-actions">
+        <router-link to="daoyan" class="btn btn-secondary">
           <img src="/images/icons/daoyan.webp" class="btn-icon" alt="icon" />
-          <span>导演模式</span>
+          <div class="btn-text">
+            <span class="btn-title">导演模式</span>
+            <span class="btn-subtitle">自己当导演！创作角色聊天</span>
+          </div>
         </router-link>
 
-        <router-link to="huizhang" class="btn huizhang">
+        <router-link to="huizhang" class="btn btn-secondary">
           <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
-          <span>徽章助手<sup class="beta-tag">BETA</sup></span>
+          <div class="btn-text">
+            <span class="btn-title">徽章助手<sup class="beta-tag">BETA</sup></span>
+            <span class="btn-subtitle">查看角色合适的徽章搭配</span>
+          </div>
         </router-link>
 
-        <button @click="handleComingSoon" :disabled="isComingSoonClicked" class="btn coming-soon">
+        <router-link to="fuke" class="btn btn-secondary">
+          <img src="/images/icons/fuke.webp" class="btn-icon" alt="icon" />
+          <div class="btn-text">
+            <span class="btn-title">复刻计时器</span>
+            <span class="btn-subtitle">看看你喜欢的角色多久没复刻了</span>
+          </div>
+        </router-link>
+
+        <button
+          @click="handleComingSoon"
+          :disabled="isComingSoonClicked"
+          class="btn btn-secondary coming-soon"
+        >
           <img src="/images/icons/placeholder.webp" class="btn-icon" alt="icon" />
-          <span>{{ comingSoonText }}</span>
+          <div class="btn-text">
+            <span class="btn-title">{{ comingSoonText }}</span>
+            <span class="btn-subtitle">有建议可以加Q群或在github提出噢</span>
+          </div>
         </button>
-      </div>
+      </section>
 
       <div class="info-footer">
         <a
@@ -162,14 +186,11 @@ onMounted(() => {
 // 创建一个 ref 保存 'beforeinstallprompt' 事件
 const deferredPrompt = ref(null)
 const captureInstallPrompt = (e) => {
-  // 阻止浏览器默认的、自动弹出的安装提示
   e.preventDefault()
-  // 保存事件对象，以便后续手动触发
   deferredPrompt.value = e
   logger.log('PWA 安装提示已被捕获，等待用户手动触发。')
 }
 
-// 设置一个监听器来捕获 'beforeinstallprompt' 事件
 onMounted(() => {
   window.addEventListener('beforeinstallprompt', captureInstallPrompt)
 })
@@ -183,14 +204,9 @@ const handleInstallClick = async () => {
   if (!deferredPrompt.value) {
     return
   }
-  // 调用保存的事件对象的 prompt() 方法，会弹出浏览器标准的安装窗口
   deferredPrompt.value.prompt()
-
-  // 等待用户做出选择
   const { outcome } = await deferredPrompt.value.userChoice
   logger.log(`PWA 安装提示的用户选择: ${outcome}`)
-
-  // 无论用户选择什么，这个事件都无法再次使用，清空保存的对象。
   deferredPrompt.value = null
 }
 
@@ -200,14 +216,9 @@ const comingSoonText = ref(originalComingSoonText)
 const isComingSoonClicked = ref(false)
 
 const handleComingSoon = () => {
-  // 如果按钮已经被点击，则不执行任何操作
   if (isComingSoonClicked.value) return
-
-  // 更新文本并禁用按钮
   comingSoonText.value = '正在努力更新'
   isComingSoonClicked.value = true
-
-  // 3秒后恢复按钮
   setTimeout(() => {
     comingSoonText.value = originalComingSoonText
     isComingSoonClicked.value = false
@@ -249,7 +260,7 @@ const handleComingSoon = () => {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 1.5rem;
+  padding: 1rem;
   background-color: v-bind('colors.background.content');
   border-radius: 12px;
   display: flex;
@@ -259,6 +270,7 @@ const handleComingSoon = () => {
   box-sizing: border-box;
   max-width: min(100dvw, 700px);
   min-width: 0;
+  max-height: 95dvh;
 }
 
 .home-container.smooth-transition {
@@ -270,6 +282,7 @@ const handleComingSoon = () => {
   font-weight: bold;
   color: v-bind('colors.text.primary');
   margin: 0;
+  flex-shrink: 0;
 }
 
 .title.smooth-transition {
@@ -282,6 +295,7 @@ const handleComingSoon = () => {
   color: v-bind('colors.text.secondary');
   margin-top: 0;
   margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
 .subtitle.smooth-transition {
@@ -292,42 +306,64 @@ const handleComingSoon = () => {
   font-size: 1rem;
   color: v-bind('colors.text.tertiary');
   transition: color 0.3s ease;
+  flex-shrink: 0;
 }
 
-.button-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  width: 100%;
-  max-width: 100vw;
-}
-
+/* --- 按钮通用样式 --- */
 .btn {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  padding: 0.4rem;
-  border-radius: 8px;
   text-decoration: none;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  border: none;
-  color: white;
-  font-size: 1.1rem;
+  border-radius: 10px;
   cursor: pointer;
-  /* 为所有按钮添加指针手势 */
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease,
+    filter 0.25s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  filter: brightness(1.1);
 }
 
 .btn-icon {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* --- 主要按钮：保留渐变填充，每行最多 4 个，纵向布局 --- */
+.primary-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.btn-primary {
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.25rem;
+  min-height: 60px;
+  border: none;
+  color: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-primary .btn-label {
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 .chouka {
@@ -338,12 +374,64 @@ const handleComingSoon = () => {
   background: linear-gradient(145deg, #f9a8d4, #ec4899);
 }
 
-.daoyan {
-  background: linear-gradient(145deg, #10b981, #059669);
+/* --- 次要按钮：无填充，统一边框，一行一个，icon 左 + 文本右 --- */
+.secondary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
+  box-sizing: border-box;
+  scrollbar-width: thin;
 }
 
-.huizhang {
-  background: linear-gradient(145deg, #3b82f6, #2563eb);
+.secondary-actions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.secondary-actions::-webkit-scrollbar-thumb {
+  background-color: v-bind('colors.border.primary');
+  border-radius: 3px;
+}
+
+.btn-secondary {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: 1px solid v-bind('colors.border.primary');
+  color: v-bind('colors.text.primary');
+}
+
+.btn-secondary:hover {
+  border-color: v-bind('colors.brand.primary');
+  background-color: v-bind('colors.brand.primaryBackground');
+}
+
+.btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
+}
+
+.btn-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: v-bind('colors.text.primary');
+}
+
+.btn-subtitle {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: v-bind('colors.text.tertiary');
+  margin-top: 2px;
 }
 
 .beta-tag {
@@ -352,23 +440,36 @@ const handleComingSoon = () => {
   vertical-align: super;
 }
 
-/* --- 开发中功能的按钮 --- */
-.coming-soon {
-  background: linear-gradient(145deg, #6b7280, #4b5563);
-  color: #d1d5db;
-  grid-column: 1 / -1;
-  justify-content: center;
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 1.25rem 0 0.75rem 0;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: v-bind('colors.text.tertiary');
+  flex-shrink: 0;
 }
 
-/* 按钮被禁用时的样式 */
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: v-bind('colors.border.primary');
+}
+
 .coming-soon:disabled {
-  background: linear-gradient(145deg, #4b5563, #374151);
-  color: #9ca3af;
+  opacity: 0.6;
   cursor: not-allowed;
-  /* 禁用时显示“不可用”光标 */
   transform: none;
-  /* 禁用时移除悬浮效果 */
-  filter: none;
+}
+
+@media (max-width: 480px) {
+  .primary-actions {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .info-footer {
@@ -382,6 +483,7 @@ const handleComingSoon = () => {
   padding-top: 1rem;
   border-top: 1px solid rgba(58, 59, 64, 0.5);
   width: 100%;
+  flex-shrink: 0;
 }
 
 .footer-link {
@@ -444,7 +546,6 @@ const handleComingSoon = () => {
   border: 1px solid v-bind('colors.border.primary');
   border-left: none;
   border-radius: 0 8px 8px 0;
-  /* 向左延伸 20px 至视口外，确保向右滑出时左侧无空隙 */
   margin-left: -20px;
   padding: 6px 6px 6px 26px;
   text-decoration: none;
@@ -467,17 +568,14 @@ const handleComingSoon = () => {
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* 5秒后自动收起：整体向左 3rem，仅露出部分 logo 与文字 */
 .social-buttons.retracted .social-btn {
-  transform: translateX(-3rem);
+  transform: translateX(-3.2rem);
 }
 
-/* 收起状态：悬停离开后先回到静止位置，2秒后再收起 */
 .social-buttons.retracted .social-btn.resting {
   transform: translateX(0);
 }
 
-/* 收起状态：悬停中完整弹出 */
 .social-buttons.retracted .social-btn.extended {
   transform: translateX(8px);
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35);

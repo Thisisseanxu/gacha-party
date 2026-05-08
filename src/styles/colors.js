@@ -155,7 +155,7 @@ const light = {
     black: '#000000',
     disabled: '#9ca3af',
     light: '#4b5563',
-    highlight: '#c9a218',
+    highlight: '#083f77',
     white: '#ffffff',
   },
   brand: {

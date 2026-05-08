@@ -114,6 +114,14 @@ const routes = [
     },
   },
   {
+    path: '/fuke',
+    name: '复刻计时器',
+    component: () => import('./views/RoleAppearancePage.vue'),
+    meta: {
+      title: '复刻计时器 - 织夜工具箱',
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('./views/NotFound.vue'),
