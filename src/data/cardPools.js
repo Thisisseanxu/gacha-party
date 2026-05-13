@@ -49,6 +49,77 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  */
 export const cardPoolsInOrder = [
   [
+    "117-1",
+    {
+      type: "联动复刻",
+      name: "超频扭蛋机-复刻1",
+      isAvailable: true,
+      imageUrl: "/images/cardpools/117.webp",
+      startTime: "2026-05-11 00:00:00",
+      finishTime: "2026-05-17 23:59:59",
+      tag_type: 3,
+      tag_name: "复刻",
+      rates: {
+        [SP]: SP_BASE_RATE,
+        [SSR]: 0.06,
+        [SR]: 0.2,
+      },
+      rules: {
+        [SP]: {
+          pity: 60,
+          boostAfter: 40,
+          boost: 0.02,
+          UpTrigger: true,
+          SelectUpCards: true,
+          UpCards: [
+            "超频游戏姬"
+          ],
+        },
+        [SSR]: {
+          doubleRateCards: [
+            "指路奈奈"
+          ],
+        },
+      },
+      cardNames: {
+        [SP]: [
+          "超频游戏姬"
+        ],
+        [SSR]: [
+          "指路奈奈",
+          "充电千竹",
+          "首席护盾",
+          "佩宝宝",
+          "电玩少女"
+        ],
+        [SR]: [
+          "珍珠射手",
+          "饼干骑士",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "电音射手",
+          "家用喷火枪",
+          "液氮喷射器",
+          "雪球投掷姬",
+          "梦游月兔",
+          "拳头礼盒",
+          "消防栓",
+          "浅睡千竹",
+          "贝斯战士"
+        ],
+        [R]: [
+          "铁头娃娃",
+          "纸杯千竹",
+          "转转咖啡杯",
+          "迷你风扇",
+          "闪耀灯球",
+          "火柴女孩"
+        ],
+      },
+    },
+  ],
+
+  [
     "133",
     {
       type: "联动",
@@ -265,7 +336,7 @@ export const cardPoolsInOrder = [
     {
       type: "限定",
       name: "聚光信弹",
-      isAvailable: true,
+      isAvailable: false,
       imageUrl: "/images/cardpools/132.webp",
       startTime: "2026-04-16 00:00:00",
       finishTime: "2026-05-10 23:59:59",

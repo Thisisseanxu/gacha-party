@@ -21,11 +21,11 @@
       <h3 class="section-divider"><span>更多功能</span></h3>
 
       <section class="secondary-actions">
-        <router-link to="daoyan" class="btn btn-secondary">
-          <img src="/images/icons/daoyan.webp" class="btn-icon" alt="icon" />
+        <router-link to="fuke" class="btn btn-secondary">
+          <img src="/images/icons/fuke.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
-            <span class="btn-title">导演模式</span>
-            <span class="btn-subtitle">自己当导演！创作角色聊天</span>
+            <span class="btn-title">复刻计时器</span>
+            <span class="btn-subtitle">看看你喜欢的角色有多久没复刻了</span>
           </div>
         </router-link>
 
@@ -33,15 +33,15 @@
           <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
             <span class="btn-title">徽章助手<sup class="beta-tag">BETA</sup></span>
-            <span class="btn-subtitle">查看角色合适的徽章搭配</span>
+            <span class="btn-subtitle">查看角色最合适的徽章搭配，加速角色养成</span>
           </div>
         </router-link>
 
-        <router-link to="fuke" class="btn btn-secondary">
-          <img src="/images/icons/fuke.webp" class="btn-icon" alt="icon" />
+        <router-link to="daoyan" class="btn btn-secondary">
+          <img src="/images/icons/daoyan.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
-            <span class="btn-title">复刻计时器</span>
-            <span class="btn-subtitle">看看你喜欢的角色多久没复刻了</span>
+            <span class="btn-title">导演模式</span>
+            <span class="btn-subtitle">自己当导演！自由创作角色和班长的聊天</span>
           </div>
         </router-link>
 
@@ -383,9 +383,10 @@ const handleComingSoon = () => {
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
-  padding-right: 4px;
+  padding-top: 0.25rem;
   box-sizing: border-box;
   scrollbar-width: thin;
+  scrollbar-color: v-bind('colors.border.primary') transparent;
 }
 
 .secondary-actions::-webkit-scrollbar {
@@ -445,7 +446,7 @@ const handleComingSoon = () => {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  margin: 1.25rem 0 0.75rem 0;
+  margin: 1rem 0 0.5rem 0;
   font-size: 0.85rem;
   font-weight: normal;
   color: v-bind('colors.text.tertiary');

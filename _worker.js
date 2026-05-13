@@ -864,7 +864,6 @@ mainApp.use(
   cors({
     origin: (origin) => {
       // 检查请求来源 (origin) 是否是允许的
-      // 生产域名 (请务必替换为您自己的域名)
       const productionDomain = '.gacha-party.fans'
       const devDomain = '-gacha-party.thisisseanxu.workers.dev'
 

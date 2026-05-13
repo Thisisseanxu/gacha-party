@@ -9,7 +9,6 @@
     <div class="fuke-container" :class="{ 'smooth-transition': isReady }">
       <header class="page-header">
         <h1 class="title">复刻计时器</h1>
-        <p class="subtitle">角色出场与复刻间隔统计</p>
       </header>
 
       <div class="rarity-toggle">
