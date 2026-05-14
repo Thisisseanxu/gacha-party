@@ -53,8 +53,7 @@ export function optionsResponse() {
 }
 
 export function getGachaKv(env) {
-  const kv =
-    typeof gacha_data !== 'undefined' ? gacha_data : env?.gacha_data || globalThis.gacha_data
+  const kv = env.gacha_data
   if (!kv) {
     throw new Error('EdgeOne KV 变量 gacha_data 未绑定。')
   }
@@ -206,8 +205,8 @@ export async function generateActivationKey(uid, base64PrivateKey) {
   if (!Number.isSafeInteger(uidInt) || uidInt < 0 || uidInt > 0xffffffff) {
     throw new Error('UID 超出 uint32 范围')
   }
-
-  const expiry = BigInt(Math.floor(Date.now() / 1000) + 100 * 365 * 24 * 3600)
+  // 激活码有效期45天
+  const expiry = BigInt(Math.floor(Date.now() / 1000) + 45 * 24 * 3600)
   const payload = new Uint8Array(12)
   const dataView = new DataView(payload.buffer)
   dataView.setUint32(0, uidInt, true)
@@ -271,8 +270,11 @@ export function verifyLicenseForEdgeOne(licenseKey, base64PublicKey) {
   const userId = dataView.getUint32(0, true)
   const expiryTimestamp = Number(dataView.getBigUint64(4, true))
 
+  if (expiryTimestamp < Math.floor(Date.now() / 1000)) {
+    throw new Error('激活码已过期')
+  }
+
   return {
     userId,
-    isExpired: expiryTimestamp < Math.floor(Date.now() / 1000),
   }
 }

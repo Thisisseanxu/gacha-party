@@ -20,7 +20,7 @@ export async function onRequestGet({ request, env }) {
       return textResponse('请求头中缺少 X-License-Key 或 X-Player-Id', 400)
     }
 
-    const { userId } = await verifyLicenseForEdgeOne(licenseKey, env.PUBLIC_KEY)
+    const { userId } = verifyLicenseForEdgeOne(licenseKey, env.PUBLIC_KEY)
 
     if (!canAccessPlayer(playerId, userId)) {
       return textResponse('查询记录的玩家ID和激活码不匹配', 403)
