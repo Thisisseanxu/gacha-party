@@ -864,14 +864,14 @@ mainApp.use(
   cors({
     origin: (origin) => {
       // 检查请求来源 (origin) 是否是允许的
-      const productionDomain = '.gacha-party.fans'
+      const productionDomain = '.mhpd.fans'
       const devDomain = '-gacha-party.thisisseanxu.workers.dev'
 
       // 使用 URL 对象来解析来源，这样更可靠
       try {
         const url = new URL(origin)
 
-        // 允许 *.gacha-party.fans
+        // 允许 *.mhpd.fans
         if (url.hostname.endsWith(productionDomain)) {
           return origin
         }
