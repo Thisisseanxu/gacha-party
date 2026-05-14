@@ -91,6 +91,14 @@
       </div>
 
       <span class="version">当前版本：v{{ appVersion }}</span>
+      <a
+        href="https://beian.miit.gov.cn/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="beian-link"
+      >
+        沪ICP备2025139421号-2
+      </a>
     </div>
 
     <button @click="toggleTheme" class="theme-toggle-btn" title="切换主题">
@@ -307,6 +315,27 @@ const handleComingSoon = () => {
   color: v-bind('colors.text.tertiary');
   transition: color 0.3s ease;
   flex-shrink: 0;
+}
+
+.beian-link {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: v-bind('colors.text.tertiary');
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.beian-link:hover {
+  color: v-bind('colors.text.highlight');
+  text-decoration: underline;
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* --- 按钮通用样式 --- */
