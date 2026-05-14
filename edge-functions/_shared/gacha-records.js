@@ -136,6 +136,28 @@ function jsonResponseFromGameFailure(data) {
   return data.msg || data.message || '游戏账号验证未通过'
 }
 
+function extractEd25519SeedFromPkcs8(pkcs8Bytes) {
+  const bytes = pkcs8Bytes instanceof Uint8Array ? pkcs8Bytes : new Uint8Array(pkcs8Bytes)
+  const oid = [0x06, 0x03, 0x2b, 0x65, 0x70]
+  let hasEd25519Oid = false
+  for (let start = 0; start <= bytes.length - oid.length; start += 1) {
+    if (oid.every((value, index) => bytes[start + index] === value)) {
+      hasEd25519Oid = true
+      break
+    }
+  }
+
+  if (!hasEd25519Oid) {
+    throw new Error('PRIVATE_KEY 不是 Ed25519 PKCS#8 DER base64 格式。')
+  }
+
+  if (bytes.length < 32) {
+    throw new Error('PRIVATE_KEY 长度不正确。')
+  }
+
+  return bytes.slice(bytes.length - 32)
+}
+
 async function callGameMailApi(payload) {
   const response = await fetch(GAME_MAIL_URL, {
     method: 'POST',
@@ -191,14 +213,9 @@ export async function generateActivationKey(uid, base64PrivateKey) {
   dataView.setUint32(0, uidInt, true)
   dataView.setBigUint64(4, expiry, true)
 
-  const privateKey = await crypto.subtle.importKey(
-    'pkcs8',
-    base64ToBytes(base64PrivateKey),
-    { name: 'Ed25519' },
-    false,
-    ['sign'],
-  )
-  const signature = new Uint8Array(await crypto.subtle.sign('Ed25519', privateKey, payload))
+  const seed = extractEd25519SeedFromPkcs8(base64ToBytes(base64PrivateKey))
+  const keyPair = nacl.sign.keyPair.fromSeed(seed)
+  const signature = nacl.sign.detached(payload, keyPair.secretKey)
   const fullData = new Uint8Array(payload.length + signature.length)
   fullData.set(payload, 0)
   fullData.set(signature, payload.length)
@@ -212,8 +229,16 @@ function base64UrlToStandard(base64url) {
   return base64 + padding
 }
 
+function normalizePemBase64(value) {
+  return String(value || '')
+    .replace(/-----BEGIN [^-]+-----/g, '')
+    .replace(/-----END [^-]+-----/g, '')
+    .replace(/\s+/g, '')
+}
+
 function base64ToBytes(base64) {
-  const binary = atob(base64)
+  const normalized = normalizePemBase64(base64)
+  const binary = atob(normalized)
   const bytes = new Uint8Array(binary.length)
   for (let i = 0; i < binary.length; i += 1) {
     bytes[i] = binary.charCodeAt(i)
