@@ -109,10 +109,9 @@ export async function enforceUploadRateLimit(kv, playerId, userId, isExpired) {
   }
 }
 
-export async function saveRecordMeta(kv, playerId, existingMeta = {}) {
+export async function saveRecordMeta(kv, playerId) {
   const nextMeta = {
     lastUpdated: Date.now(),
-    lastCloudUpdated: existingMeta.lastCloudUpdated || null,
   }
 
   await kv.put(recordMetaKey(playerId), JSON.stringify(nextMeta))

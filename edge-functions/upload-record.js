@@ -53,7 +53,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     await kv.put(recordKey(playerId), payload)
-    await saveRecordMeta(kv, playerId, limit.meta)
+    await saveRecordMeta(kv, playerId)
 
     responseBody.message = '抽卡记录上传成功！'
     return jsonResponse(responseBody)
