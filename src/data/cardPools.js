@@ -49,6 +49,74 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  */
 export const cardPoolsInOrder = [
   [
+    "135",
+    {
+      type: "限定",
+      name: "音律共鸣",
+      isAvailable: true,
+      imageUrl: "/images/cardpools/135.webp",
+      startTime: "2026-05-15 00:00:00",
+      finishTime: "2026-06-07 23:59:59",
+      tag_type: 2,
+      tag_name: "电音",
+      rates: {
+        [SP]: SP_BASE_RATE,
+        [SSR]: 0.06,
+        [SR]: 0.2,
+      },
+      rules: {
+        [SP]: {
+          pity: 60,
+          boostAfter: 40,
+          boost: 0.02,
+          UpTrigger: true,
+          SelectUpCards: true,
+          UpCards: [
+            "音律全开",
+            "最终舞台"
+          ],
+        },
+        [SSR]: {},
+      },
+      cardNames: {
+        [SP]: [
+          "音律全开",
+          "最终舞台"
+        ],
+        [SSR]: [
+          "电音琉璃",
+          "底鼓坦克",
+          "歌姬小喵",
+          "重金属吉他"
+        ],
+        [SR]: [
+          "珍珠射手",
+          "饼干骑士",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "电音射手",
+          "家用喷火枪",
+          "液氮喷射器",
+          "雪球投掷姬",
+          "梦游月兔",
+          "拳头礼盒",
+          "消防栓",
+          "浅睡千竹",
+          "贝斯战士"
+        ],
+        [R]: [
+          "铁头娃娃",
+          "纸杯千竹",
+          "转转咖啡杯",
+          "迷你风扇",
+          "闪耀灯球",
+          "火柴女孩"
+        ],
+      },
+    },
+  ],
+
+  [
     "117-1",
     {
       type: "联动复刻",

@@ -5,6 +5,24 @@ import { THEMES } from '@/data/constant.js'
 // 本文件由 盲盒派对数据自动化/update_gacha_party_data.py 生成。
 export const allCards = [
 {
+  id: "1412",
+  name: "音律全开",
+  rarity: SP,
+  imageUrl: "/images/characters/1412.webp",
+  realname: "阿加莎",
+  theme: THEMES.music,
+  qban_url: "/images/qban/1412.webp",
+},
+{
+  id: "1413",
+  name: "最终舞台",
+  rarity: SP,
+  imageUrl: "/images/characters/1413.webp",
+  realname: "贝蒂",
+  theme: THEMES.music,
+  qban_url: "/images/qban/1413.webp",
+},
+{
   id: "2102",
   name: "幸福天使",
   rarity: SP,

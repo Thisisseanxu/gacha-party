@@ -163,17 +163,39 @@ function extractEd25519SeedFromPkcs8(pkcs8Bytes) {
 }
 
 async function callGameMailApi(payload) {
-  const response = await fetch(GAME_MAIL_URL, {
-    method: 'POST',
-    headers: GAME_MAIL_HEADERS,
-    body: JSON.stringify(payload),
-  })
+  const maxAttempts = 2
+  let lastError = null
 
-  if (!response.ok) {
-    throw new Error(`游戏邮件服务请求失败：${response.status}`)
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+
+    try {
+      const response = await fetch(GAME_MAIL_URL, {
+        method: 'POST',
+        headers: GAME_MAIL_HEADERS,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        const message = `游戏邮件服务请求失败：${response.status}`
+        lastError = new Error(message)
+        if (response.status >= 500 && attempt < maxAttempts) continue
+        throw lastError
+      }
+
+      return response.json()
+    } catch (error) {
+      lastError = error
+      if (attempt >= maxAttempts) break
+    } finally {
+      clearTimeout(timer)
+    }
   }
 
-  return response.json()
+  const isTimeout = lastError && lastError.name === 'AbortError'
+  throw new Error(isTimeout ? '游戏邮件服务响应超时，请稍后重试' : lastError?.message || '游戏邮件服务请求失败')
 }
 
 export async function verifyGameMailCodeOnServer(uid, mailCode) {
