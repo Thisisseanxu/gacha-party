@@ -22,7 +22,7 @@
           type="text"
           v-model="fetchLicenseInput"
           class="cloud-input"
-          placeholder="请输入您的激活码（与导出工具相同）"
+          placeholder="请输入您的激活码（小程序内复制）"
         />
         <p class="input-description">
           使用则代表您同意<a class="highlight" @click="openAgreementPopUp" href="#"
@@ -748,6 +748,47 @@ const loadLocalRecord = (userID) => {
   return null
 }
 
+const RECORD_FETCH_RETRY_DELAYS = [800, 2000]
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const shouldRetryGetRecord = (response, message) => {
+  if (!response) return true
+  return response.status === 429 || response.status >= 500 || message.includes('error return from script')
+}
+
+const fetchRecordWithRetry = async (url, headers) => {
+  let lastError = null
+
+  for (let attempt = 0; attempt <= RECORD_FETCH_RETRY_DELAYS.length; attempt += 1) {
+    cloudMessage.value = `正在查询中...（第 ${attempt + 1} / ${RECORD_FETCH_RETRY_DELAYS.length + 1} 次）`
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      })
+      const text = await response.text()
+
+      if (response.ok) return text
+
+      lastError = new Error(text || `服务器错误: ${response.status}`)
+      if (!shouldRetryGetRecord(response, lastError.message)) {
+        lastError.noRetry = true
+        throw lastError
+      }
+    } catch (error) {
+      if (error.noRetry) throw error
+      lastError = error
+    }
+
+    const delay = RECORD_FETCH_RETRY_DELAYS[attempt]
+    if (delay === undefined) break
+    await sleep(delay)
+  }
+
+  throw lastError || new Error('查询抽卡记录失败')
+}
+
 // 处理云端获取抽卡记录的函数
 const handleGetRecord = async () => {
   cloudMessage.value = ''
@@ -797,23 +838,22 @@ const handleGetRecord = async () => {
     }
     logger.log(`客户端验证成功`)
 
-    cloudMessage.value = '正在查询中...'
     // 验证通过后，将激活码发送给Worker进行最终验证和数据获取
-    const response = await fetch(`${WorkerUrl.value}/get-record`, {
-      method: 'GET',
-      headers: { 'X-License-Key': licenseKey, 'X-Player-ID': fetchPlayerId },
-    })
-    if (response.ok) {
+    let compressedString = ''
+    try {
+      compressedString = await fetchRecordWithRetry(`${WorkerUrl.value}/get-record`, {
+        'X-License-Key': licenseKey,
+        'X-Player-ID': fetchPlayerId,
+      })
       saveInputData(licenseKey, fetchPlayerId) // 保存激活码和玩家ID
       // 使用统一的冷却时间设置函数
       setCooldown('getRecord', isAdmin, result.isExpired)
-    } else {
+    } catch (error) {
       // 即使请求失败，也设置一个较短的冷却时间，防止恶意请求
       setCooldown('getRecord', isAdmin, result.isExpired, 60 * 1000) // 失败时锁定1分钟
-      throw new Error((await response.text()) || `服务器错误: ${response.status}`)
+      throw error
     }
 
-    const compressedString = await response.text()
     saveFetchedRecord(fetchPlayerId, compressedString) // 保存到本地存储
     const wrappedJson = { cloud: true, compressed: true, data: compressedString }
     jsonInput.value = JSON.stringify(wrappedJson)

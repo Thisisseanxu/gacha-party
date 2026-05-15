@@ -335,11 +335,7 @@
           placeholder="与抽卡记录功能的相同"
           autocomplete="off"
         />
-        <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱登录后重启点击复制</span>
-        <label class="checkbox-row">
-          <input type="checkbox" v-model="saveKey" />
-          <span>保存激活码到本地（下次自动填充）</span>
-        </label>
+        <span class="submit-sub">若无激活码，请小程序搜索织夜工具箱在快捷登录处复制</span>
       </div>
 
       <div v-if="submitError" class="feedback-msg error-msg">{{ submitError }}</div>
@@ -469,7 +465,6 @@ const showAgreementPopUp = ref(false)
 // 投稿攻略相关
 const showSubmitDialog = ref(false)
 const submitLicenseKey = ref('')
-const saveKey = ref(true)
 const submitLoading = ref(false)
 const submitError = ref('')
 const submitSuccess = ref('')
@@ -819,7 +814,6 @@ const getStarImage = (level, starIndex) => {
 const openSubmitDialog = () => {
   const savedKey = localStorage.getItem('hz_license_key')
   if (savedKey) submitLicenseKey.value = savedKey
-  if (savedKey) saveKey.value = true
   submitError.value = ''
   submitSuccess.value = ''
   showSubmitDialog.value = true
@@ -845,10 +839,6 @@ const handleSubmit = async () => {
   if (!licenseResult.success) {
     submitError.value = `激活码无效：${licenseResult.message}`
     return
-  }
-
-  if (saveKey.value) {
-    localStorage.setItem('hz_license_key', inputKey)
   }
 
   let code
@@ -892,6 +882,8 @@ const handleSubmit = async () => {
       }
     } else {
       submitSuccess.value = resData.message || '提交成功！攻略将在审核通过后显示。'
+      // 上传成功后自动覆盖保存激活码到本地
+      localStorage.setItem('hz_license_key', inputKey)
       setTimeout(() => {
         showSubmitDialog.value = false
         submitSuccess.value = ''

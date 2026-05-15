@@ -4,6 +4,8 @@ import nacl from 'tweetnacl'
 import { Buffer } from 'buffer'
 import pako from 'pako'
 
+// 此文件为cloudflare worker的入口文件，现在已停止使用。
+
 // const ALL_GACHA_IDS = ['9', '28', '29', '40', '41', '42', '43', '10000'] // 卡池列表
 // const CARDPOOLS_NAME_MAP = {
 //   9: '常驻扭蛋',
