@@ -40,3 +40,9 @@ dev-dist
 
 # .claude目录
 .claude/
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+
+hz-guides-export.json

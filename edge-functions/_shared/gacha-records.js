@@ -23,8 +23,9 @@ const jsonHeaders = {
 export function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type,X-License-Key,X-Player-Id,X-Player-ID',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers':
+      'Content-Type,Authorization,X-License-Key,X-Player-Id,X-Player-ID',
   }
 }
 
@@ -52,8 +53,12 @@ export function optionsResponse() {
   })
 }
 
-export function getGachaKv(env) {
-  const kv = env.gacha_data
+export function getGachaKv(env = {}) {
+  const kv =
+    env.gacha_data ||
+    globalThis.gacha_data ||
+    // eslint-disable-next-line no-undef
+    (typeof gacha_data !== 'undefined' ? gacha_data : null)
   if (!kv) {
     throw new Error('EdgeOne KV 变量 gacha_data 未绑定。')
   }

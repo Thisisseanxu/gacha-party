@@ -48,7 +48,6 @@ function formatGuide(g) {
     authorName: g.author_name || '',
     userId: g.user_id,
     isFeatured: Boolean(g.is_featured),
-    createdAt: g.created_at,
     approvedAt: g.approved_at,
     data: safeDecodeStrategy(g.code),
   }
@@ -275,7 +274,7 @@ export function useHuizhangGuides() {
     /**
      * 获取指定角色的所有攻略（已解码）
      * @param {string} charId
-     * @returns {{ id, charId, code, title, authorName, userId, isFeatured, createdAt, approvedAt, data }[]}
+     * @returns {{ id, charId, code, title, authorName, userId, isFeatured, approvedAt, data }[]}
      */
     getGuidesForChar(charId) {
       return _guides.value.filter((g) => g.char_id === String(charId)).map(formatGuide)
@@ -283,7 +282,7 @@ export function useHuizhangGuides() {
 
     /**
      * 获取所有精选攻略（is_featured = 1）
-     * @returns {{ id, charId, code, title, authorName, userId, isFeatured, createdAt, approvedAt, data }[]}
+     * @returns {{ id, charId, code, title, authorName, userId, isFeatured, approvedAt, data }[]}
      */
     getFeaturedGuides() {
       return _guides.value.filter((g) => g.is_featured).map(formatGuide)

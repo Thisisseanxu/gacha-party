@@ -328,17 +328,6 @@
       </div>
 
       <div class="form-row">
-        <label>玩家ID <span class="required">*</span></label>
-        <input
-          v-model="submitPlayerId"
-          class="input-select"
-          placeholder="游戏内的数字玩家ID"
-          autocomplete="off"
-          inputmode="numeric"
-        />
-      </div>
-
-      <div class="form-row">
         <label>激活码 <span class="required">*</span></label>
         <input
           v-model="submitLicenseKey"
@@ -346,10 +335,10 @@
           placeholder="与抽卡记录功能的相同"
           autocomplete="off"
         />
-        <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱并联系客服</span>
+        <span class="submit-sub">若没有激活码，请小程序搜索织夜工具箱登录后重启点击复制</span>
         <label class="checkbox-row">
           <input type="checkbox" v-model="saveKey" />
-          <span>保存玩家ID和激活码到本地（下次自动填充）</span>
+          <span>保存激活码到本地（下次自动填充）</span>
         </label>
       </div>
 
@@ -479,7 +468,6 @@ const showAgreementPopUp = ref(false)
 
 // 投稿攻略相关
 const showSubmitDialog = ref(false)
-const submitPlayerId = ref('')
 const submitLicenseKey = ref('')
 const saveKey = ref(true)
 const submitLoading = ref(false)
@@ -494,8 +482,8 @@ const { getWorkerBase, isAdminLoggedIn, adminSaveGuideCode } = useHuizhangGuides
 
 // 覆盖编辑模式（从角色页点"覆盖编辑"进入时携带 overwriteId）
 const overwriteId = computed(() => {
-  const v = parseInt(route.query.overwriteId)
-  return isNaN(v) ? null : v
+  const v = route.query.overwriteId
+  return v === undefined || v === null || String(v).trim() === '' ? null : String(v)
 })
 const overwriteSaving = ref(false)
 const overwriteResult = ref('') // 'success' | 'error' | ''
@@ -829,11 +817,9 @@ const getStarImage = (level, starIndex) => {
 
 // 打开投稿确认框
 const openSubmitDialog = () => {
-  const savedId = localStorage.getItem('hz_player_id')
   const savedKey = localStorage.getItem('hz_license_key')
-  if (savedId) submitPlayerId.value = savedId
   if (savedKey) submitLicenseKey.value = savedKey
-  if (savedId || savedKey) saveKey.value = true
+  if (savedKey) saveKey.value = true
   submitError.value = ''
   submitSuccess.value = ''
   showSubmitDialog.value = true
@@ -847,13 +833,8 @@ const handleSubmit = async () => {
   // 内容安全兜底
   if (submitHint.value?.blocking) return
 
-  const inputId = submitPlayerId.value.trim()
   const inputKey = submitLicenseKey.value.trim()
 
-  if (!inputId) {
-    submitError.value = '请输入玩家ID'
-    return
-  }
   if (!inputKey) {
     submitError.value = '请输入激活码'
     return
@@ -866,21 +847,7 @@ const handleSubmit = async () => {
     return
   }
 
-  const licenseUserId = String(licenseResult.userId)
-
-  // 支持管理员账号省略 "33" 前缀：先尝试精确匹配，再尝试自动补全
-  let actualPlayerId
-  if (inputId === licenseUserId) {
-    actualPlayerId = inputId
-  } else if ('33' + inputId === licenseUserId) {
-    actualPlayerId = licenseUserId // 管理员：自动补全前缀后与激活码中的 ID 完全一致
-  } else {
-    submitError.value = '玩家ID与激活码不匹配，请确认填写正确'
-    return
-  }
-
   if (saveKey.value) {
-    localStorage.setItem('hz_player_id', inputId) // 保存用户输入的原始ID（无需带33）
     localStorage.setItem('hz_license_key', inputKey)
   }
 
@@ -907,7 +874,6 @@ const handleSubmit = async () => {
       headers: {
         'Content-Type': 'application/json',
         'X-License-Key': submitLicenseKey.value.trim(),
-        'X-Player-Id': actualPlayerId,
       },
       body: JSON.stringify({
         charId: selectedCharId.value,
