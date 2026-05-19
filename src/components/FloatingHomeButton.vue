@@ -104,7 +104,7 @@ const goToHome = () => {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-image: url('/favicon.ico');
+  background-image: url('/images/icon.webp');
   background-size: cover;
   background-position: center;
   cursor: pointer;
