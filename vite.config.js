@@ -45,7 +45,8 @@ export default defineConfig({
       workbox: {
         skipWaiting: false, // 等待用户确认后再激活新 SW
         clientsClaim: true, // 让已经打开的页面使用新的 SW
-        globPatterns: ['**/*.{js,css,html,ico,json,webp,png}'],
+        // 只预缓存应用骨架。图片交给 runtime cache，在用户真正访问到对应页面时再缓存。
+        globPatterns: ['**/*.{js,css,html,json}'],
         runtimeCaching: [
           // 匹配 *.onmicrosoft.cn 的 CDN 资源
           {

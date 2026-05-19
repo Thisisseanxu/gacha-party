@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view> </router-view>
-    <FloatingHomeButton :is-updating="isDownloading" />
+    <FloatingHomeButton :is-updating="needRefresh" />
   </div>
   <transition name="slide-fade">
     <div v-if="showUpdateDialog" class="update-notification">
@@ -35,29 +35,7 @@ import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { colors } from '@/styles/colors.js'
 
-const isDownloading = ref(false)
-
-const { needRefresh, updateServiceWorker } = useRegisterSW({
-  onRegistered(r) {
-    if (r) {
-      const handleInstalling = (worker) => {
-        isDownloading.value = true
-        worker.addEventListener('statechange', () => {
-          if (worker.state === 'installed' || worker.state === 'redundant') {
-            isDownloading.value = false
-          }
-        })
-      }
-
-      if (r.installing) handleInstalling(r.installing)
-
-      r.onupdatefound = () => {
-        const newWorker = r.installing
-        if (newWorker) handleInstalling(newWorker)
-      }
-    }
-  },
-})
+const { needRefresh, updateServiceWorker } = useRegisterSW()
 // 使用 watch 监听是否有新版本
 
 const showUpdateDialog = ref(false)
