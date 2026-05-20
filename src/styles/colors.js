@@ -24,7 +24,7 @@ const dark = {
     disabled: 'rgba(102, 102, 102, 1)', // 禁用状态的文字
     light: 'rgba(221, 221, 221, 1)', // 亮灰色文字
     highlight: 'rgb(235, 201, 80)', // 高亮文字
-    white: '#ffffff', // 纯白文字
+    white: '#ffffff', // 一直为白色的文字
   },
   // --- 品牌/功能色 ---
   brand: {
