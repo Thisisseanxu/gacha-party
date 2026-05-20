@@ -129,7 +129,7 @@
       @reset-view="resetView"
     />
 
-    <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
+    <!-- <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
         <p class="input-description">手动将当前的抽卡记录上传至云端</p>
@@ -151,7 +151,7 @@
         <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
       </div>
-    </div>
+    </div> -->
     <PopUp
       :display="showAgreementPopUp"
       title="《织夜云服务用户协议》"
@@ -753,15 +753,18 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const shouldRetryGetRecord = (response, message) => {
   if (!response) return true
-  return response.status === 429 || response.status >= 500 || message.includes('error return from script')
+  return (
+    response.status === 429 ||
+    response.status >= 500 ||
+    message.includes('error return from script')
+  )
 }
 
 const fetchRecordWithRetry = async (url, headers) => {
   let lastError = null
+  cloudMessage.value = `正在查询中...`
 
   for (let attempt = 0; attempt <= RECORD_FETCH_RETRY_DELAYS.length; attempt += 1) {
-    cloudMessage.value = `正在查询中...（第 ${attempt + 1} / ${RECORD_FETCH_RETRY_DELAYS.length + 1} 次）`
-
     try {
       const response = await fetch(url, {
         method: 'GET',
