@@ -268,7 +268,7 @@
               <div v-else class="pool-not-pulled">未抽取</div>
             </header>
             <p v-if="pool.spCount" class="pool-sp-summary">
-              <b :style="pool.titleStyle">{{ pool.title }}</b>
+              <b v-if="pool.title" :style="pool.titleStyle">{{ pool.title }}</b>
               该卡池平均<span>{{ pool.avgSpText }}</span
               >抽出SP
             </p>
@@ -387,11 +387,20 @@ const countSameTimeTenPulls = (records, predicate = () => true) => {
 const ACHIEVEMENT_RULES = [
   {
     key: 'triple-sp',
-    name: '三红',
+    name: '十连四红！！！',
     count: ({ records }) =>
       countSameTimeTenPulls(
         records,
-        (group) => group.filter((item) => item.rarity === SP).length >= 3,
+        (group) => group.filter((item) => item.rarity === SP).length >= 4,
+      ),
+  },
+  {
+    key: 'triple-sp',
+    name: '十连三红！',
+    count: ({ records }) =>
+      countSameTimeTenPulls(
+        records,
+        (group) => group.filter((item) => item.rarity === SP).length === 3,
       ),
   },
   {
@@ -745,7 +754,7 @@ const selectedSummaryTimeline = computed(() =>
   isNormalSummary.value ? selectedSummary.value.ssrHistory : selectedSummary.value.spHistory,
 )
 const summaryEmptyText = computed(() =>
-  isNormalSummary.value ? '暂无SSR记录。' : '暂无SP记录，SSR统计可在卡片模式查看',
+  isNormalSummary.value ? '暂无SSR记录。' : '暂无SP记录，SSR统计可在卡池详情查看',
 )
 
 const totalOverview = computed(() => {
@@ -793,11 +802,13 @@ const appendPoolSuffix = (name) => (String(name).endsWith('池') ? name : `${nam
 const cardModePools = computed(() =>
   groupList.value.map((group) => {
     const isNormal = group.key === 'normal'
+    const shouldShowTitle = group.key !== 'advancedNormal'
     const history = isNormal ? group.ssrHistory : group.spHistory
     const average = isNormal ? group.avgSsr : group.avgSp
-    const title = average
-      ? titleForValue(average, isNormal ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP)
-      : null
+    const title =
+      shouldShowTitle && average
+        ? titleForValue(average, isNormal ? NORMALPOOL_TITLE_MAP : LIMITPOOL_TITLE_MAP)
+        : null
     const visibleCount = expandedCardPools.value[group.key] || CARD_MODE_PAGE_SIZE
     return {
       ...group,
@@ -972,7 +983,7 @@ const recentPools = computed(() => {
       const permanent = isNormal || isAdvancedNormal || !time.finish
       const spHistory = getPoolDetailSpHistory(poolId, analysis)
       const avgSp = calculateAverage(spHistory.map((item) => item.count))
-      const title = titleForValue(avgSp)
+      const title = isAdvancedNormal ? null : titleForValue(avgSp)
       return {
         id: poolId,
         name: getPoolName(id),
@@ -986,10 +997,10 @@ const recentPools = computed(() => {
         spCount: spHistory.length,
         ssrCount: analysis.ssrCount,
         avgSpText: avgSp.toFixed(2),
-        title: title.title,
+        title: title?.title || '',
         titleStyle: {
-          backgroundColor: title.background,
-          color: title.text_color || colors.text.primary,
+          backgroundColor: title?.background,
+          color: title?.text_color || colors.text.primary,
         },
         spCards: buildCharacterCards(spHistory),
         ssrCards: analysis.ssrCards,
@@ -1690,20 +1701,11 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   padding: 3px 0 0;
   border-radius: 6px;
   text-align: center;
-  transition:
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-}
-
-.overview-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
 }
 
 .overview-avatar {
   width: 52px;
   height: 52px;
-  margin-bottom: 3px;
   border-radius: 6px;
   background-color: v-bind('colors.shadow.white');
   object-fit: cover;
@@ -1711,6 +1713,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .overview-pull-count {
   color: v-bind('colors.text.highlight');
+  margin: 1px 0;
   font-size: 0.95rem;
   font-weight: 900;
   line-height: 1.1;
@@ -1917,14 +1920,6 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   border: 0;
   border-radius: 6px;
   text-align: center;
-  transition:
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-}
-
-.mini-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
 }
 
 .mini-card.sp-card {
@@ -1961,7 +1956,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .empty-text {
-  margin: 0;
+  margin: 4px 0;
   text-align: center;
 }
 

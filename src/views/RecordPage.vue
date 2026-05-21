@@ -7,10 +7,9 @@
 
       <div class="cloud-section">
         <p class="input-description">
-          使用您的激活码分析云端的抽卡记录。<br />（请先使用小程序导出抽卡记录并上传！）
-        </p>
-        <p class="input-description highlight">
-          小程序码和教程请见下方（PC端在右侧）<br />可以长按小程序快捷登录按钮复制激活码
+          使用您的激活码查看抽卡记录<br /><b class="highlight"
+            >请先使用小程序导出抽卡记录并上传！</b
+          >
         </p>
         <input
           type="text"
@@ -45,13 +44,13 @@
 
       <div class="input-section split">
         <p class="input-description">
-          请在下方文本框粘贴您的抽卡记录数据<br />或点击按钮上传导出的json文件。
+          请在下方文本框粘贴您的抽卡记录数据<br />或上传旧版本json文件。
         </p>
         <textarea
           v-model="jsonInput"
           id="jsonInput"
           class="json-textarea"
-          placeholder='请在此处粘贴小程序复制的数据... 例如：{"cloud":true,"compressed":true,"data":"H4sIAAAAAAAAA53dya7s...99vsvX//3t//537//9399/Tr9/v9asS3vop0CAA=="}'
+          placeholder='请在此处粘贴小程序复制的数据，注意输入法有时会截断，建议长按粘贴，正确格式为：{"cloud":true,"compressed":true,"data":"XXXXXXXXXXXXXXXX...XXXXXXXXXXXX"}'
         ></textarea>
         <div class="button-group">
           <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">
@@ -70,29 +69,6 @@
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </div>
-    </div>
-    <div v-if="viewState === 'input'" class="gacha-analysis-container">
-      <div class="mp-weixin">
-        <p>
-          使用小程序获取抽卡记录<br /><span class="highlight"
-            >微信搜索“织夜工具箱”或扫描小程序码</span
-          >
-        </p>
-        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
-        <p>使用教程</p>
-        <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
-          <iframe
-            src="//player.bilibili.com/player.html?isOutside=true&aid=115698315563965&bvid=BV1YomKBsEP5&cid=34650522191&p=1&autoplay=0"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-            scrolling="no"
-            border="0"
-            frameborder="no"
-            framespacing="0"
-            allowfullscreen="true"
-          ></iframe>
-        </div>
-      </div>
-
       <p class="input-description">
         <span class="highlight"></span><br />
         需要帮助？加入
@@ -106,6 +82,27 @@
         愉快交流吧
       </p>
       <p class="input-description">当前版本：v{{ appVersion }}</p>
+    </div>
+    <div v-if="viewState === 'input'" class="gacha-analysis-container">
+      <div class="mp-weixin">
+        <p>
+          使用小程序获取抽卡记录<br /><span class="highlight"
+            >微信搜索“织夜工具箱”或扫描小程序码</span
+          >
+        </p>
+        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
+        <p>使用教程</p>
+        <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
+          <iframe
+            :src="tutorialVideoSrc"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+            scrolling="no"
+            frameborder="no"
+            framespacing="0"
+            allowfullscreen="true"
+          ></iframe>
+        </div>
+      </div>
     </div>
 
     <GachaAnalysis
@@ -128,6 +125,17 @@
       :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
       @reset-view="resetView"
     />
+
+    <div v-if="viewState === 'input'" class="record-floating-buttons">
+      <button class="record-floating-btn" type="button" @click="openTutorialPopUp">
+        <img src="/images/bili_avatar.webp" class="record-floating-icon" alt="视频教程" />
+        <span>视频教程</span>
+      </button>
+      <button class="record-floating-btn" type="button" @click="openMpPopUp">
+        <img src="/images/mp_weixin.webp" class="record-floating-icon" alt="小程序码" />
+        <span>小程序码</span>
+      </button>
+    </div>
 
     <!-- <div class="gacha-analysis-container" v-if="viewState === 'analysis'">
       <div class="cloud-section">
@@ -190,6 +198,40 @@
       </ol>
       <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
     </PopUp>
+    <PopUp
+      :display="showTutorialPopUp"
+      :title="tutorialPopUpTitle"
+      :show-close-button="!isFirstUseTutorialPopUp"
+      @close="closeTutorialPopUp"
+    >
+      <div class="tutorial-modal-video">
+        <iframe
+          :src="tutorialVideoSrc"
+          class="tutorial-iframe"
+          scrolling="no"
+          frameborder="no"
+          framespacing="0"
+          allowfullscreen="true"
+        ></iframe>
+      </div>
+      <button
+        v-if="isFirstUseTutorialPopUp"
+        class="action-button tutorial-confirm-button"
+        @click="confirmFirstUseTutorial"
+      >
+        我知道了
+      </button>
+    </PopUp>
+    <PopUp :display="showMpPopUp" title="小程序码" @close="closeMpPopUp">
+      <div class="mp-weixin mp-weixin-modal">
+        <p>
+          使用小程序获取抽卡记录<br /><span class="highlight"
+            >微信搜索“织夜工具箱”或扫描小程序码</span
+          >
+        </p>
+        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
+      </div>
+    </PopUp>
   </div>
 </template>
 
@@ -220,7 +262,14 @@ const SPECIAL_OUTSIDE_POOLS = ref([]) // 手动临时放到外面的特殊卡池
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示
+const showTutorialPopUp = ref(false)
+const tutorialPopUpTitle = ref('视频教程')
+const isFirstUseTutorialPopUp = ref(false)
+const showMpPopUp = ref(false)
 const isDev = import.meta.env.DEV
+const tutorialVideoSrc =
+  '//player.bilibili.com/player.html?isOutside=true&aid=116613999238069&bvid=BV1TALY65Ezd&cid=38512034542&p=1&autoplay=0'
+const FIRST_USE_TUTORIAL_KEY = 'gachaRecordFirstUseTutorialSeen'
 
 const LIMITED_CARD_POOLS_ID = ref([]) // 限定卡池ID列表
 const EVENT_CARD_POOLS_ID = ref([]) // 联动卡池ID列表
@@ -365,6 +414,12 @@ const saveInputData = (key = null, playerId = null) => {
 }
 
 onMounted(async () => {
+  if (localStorage.getItem(FIRST_USE_TUTORIAL_KEY) !== 'true') {
+    tutorialPopUpTitle.value = '首次使用？请查看视频教程：'
+    isFirstUseTutorialPopUp.value = true
+    showTutorialPopUp.value = true
+  }
+
   // 页面加载时，尝试从localStorage加载已保存的激活码
   loadInputData()
 
@@ -446,7 +501,7 @@ const isFetchingOnline = ref(false) // 是否正在在线获取数据的状态
 
 // 上传抽卡记录相关的变量
 const uploadLicenseInput = ref('')
-const isUploading = ref(false)
+// const isUploading = ref(false)
 
 // 分析 JSON 数据
 const handleJsonAnalysis = () => {
@@ -872,121 +927,136 @@ const handleGetRecord = async () => {
   }
 }
 
-// 处理上传抽卡记录到云端
-const handleUploadRecord = async () => {
-  isUploading.value = true
-  cloudMessage.value = ''
-  cloudErrorMessage.value = ''
+// // 处理上传抽卡记录到云端
+// const handleUploadRecord = async () => {
+//   isUploading.value = true
+//   cloudMessage.value = ''
+//   cloudErrorMessage.value = ''
 
-  try {
-    const licenseKey = uploadLicenseInput.value.trim()
-    const localPlayerId = playerId.value.trim()
-    if (!licenseKey || !localPlayerId) {
-      throw new Error('玩家ID和激活码均不能为空。')
-    }
-    logger.log('正在本地验证激活码以进行上传...')
-    const validationResult = verifyLicense(licenseKey)
-    if (!validationResult.success) {
-      throw new Error(validationResult.message || '激活码无效。')
-    }
+//   try {
+//     const licenseKey = uploadLicenseInput.value.trim()
+//     const localPlayerId = playerId.value.trim()
+//     if (!licenseKey || !localPlayerId) {
+//       throw new Error('玩家ID和激活码均不能为空。')
+//     }
+//     logger.log('正在本地验证激活码以进行上传...')
+//     const validationResult = verifyLicense(licenseKey)
+//     if (!validationResult.success) {
+//       throw new Error(validationResult.message || '激活码无效。')
+//     }
 
-    const isAdmin =
-      String(validationResult.userId).length === 9 &&
-      String(validationResult.userId).startsWith('33')
-    const lockTime = getCooldown('uploadRecord')
-    if (lockTime.locked && lockTime.timeLeft > 0) {
-      cloudErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`
-      isUploading.value = false
-      return
-    } else if (lockTime.locked && lockTime.timeLeft === -1) {
-      cloudErrorMessage.value = '获取上传状态失败，请检查浏览器的本地存储设置。'
-      isUploading.value = false
-      return
-    }
-    if (!isAdmin && String(validationResult.userId) !== localPlayerId) {
-      throw new Error(`激活码与玩家ID不匹配！`)
-    }
-    logger.log(`本地验证成功`)
+//     const isAdmin =
+//       String(validationResult.userId).length === 9 &&
+//       String(validationResult.userId).startsWith('33')
+//     const lockTime = getCooldown('uploadRecord')
+//     if (lockTime.locked && lockTime.timeLeft > 0) {
+//       cloudErrorMessage.value = `上传次数已达上限，请在 ${milisecondsToTime(lockTime.timeLeft)} 后再试。`
+//       isUploading.value = false
+//       return
+//     } else if (lockTime.locked && lockTime.timeLeft === -1) {
+//       cloudErrorMessage.value = '获取上传状态失败，请检查浏览器的本地存储设置。'
+//       isUploading.value = false
+//       return
+//     }
+//     if (!isAdmin && String(validationResult.userId) !== localPlayerId) {
+//       throw new Error(`激活码与玩家ID不匹配！`)
+//     }
+//     logger.log(`本地验证成功`)
 
-    let dataToProcess
-    const parsedInput = JSON.parse(jsonInput.value)
+//     let dataToProcess
+//     const parsedInput = JSON.parse(jsonInput.value)
 
-    // 如果输入数据是压缩格式，则解压缩
-    if (parsedInput?.compressed) {
-      const binaryString = atob(parsedInput.data)
-      const bytes = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
-      dataToProcess = JSON.parse(pako.inflate(bytes, { to: 'string' }))
-    } else {
-      dataToProcess = parsedInput
-    }
+//     // 如果输入数据是压缩格式，则解压缩
+//     if (parsedInput?.compressed) {
+//       const binaryString = atob(parsedInput.data)
+//       const bytes = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i))
+//       dataToProcess = JSON.parse(pako.inflate(bytes, { to: 'string' }))
+//     } else {
+//       dataToProcess = parsedInput
+//     }
 
-    // 清洗数据，删除 gacha_id 字段
-    const playerData = dataToProcess[localPlayerId]
-    if (!playerData) {
-      throw new Error(`当前JSON数据中找不到玩家ID ${localPlayerId} 的记录。`)
-    }
+//     // 清洗数据，删除 gacha_id 字段
+//     const playerData = dataToProcess[localPlayerId]
+//     if (!playerData) {
+//       throw new Error(`当前JSON数据中找不到玩家ID ${localPlayerId} 的记录。`)
+//     }
 
-    for (const poolId in playerData) {
-      if (Array.isArray(playerData[poolId])) {
-        playerData[poolId].forEach((record) => {
-          // 删除 gacha_id 以节省空间
-          if ('gacha_id' in record && String(record.gacha_id) == poolId) {
-            delete record.gacha_id
-          }
-        })
-      }
-    }
-    logger.log('数据清洗完成，已移除所有 gacha_id。')
+//     for (const poolId in playerData) {
+//       if (Array.isArray(playerData[poolId])) {
+//         playerData[poolId].forEach((record) => {
+//           // 删除 gacha_id 以节省空间
+//           if ('gacha_id' in record && String(record.gacha_id) == poolId) {
+//             delete record.gacha_id
+//           }
+//         })
+//       }
+//     }
+//     logger.log('数据清洗完成，已移除所有 gacha_id。')
 
-    // 压缩数据
-    const cleanedJsonString = JSON.stringify(dataToProcess)
-    const compressedData = pako.gzip(cleanedJsonString)
-    const finalPayload = btoa(String.fromCharCode.apply(null, compressedData))
-    logger.log('数据已重新压缩并编码为Base64。')
+//     // 压缩数据
+//     const cleanedJsonString = JSON.stringify(dataToProcess)
+//     const compressedData = pako.gzip(cleanedJsonString)
+//     const finalPayload = btoa(String.fromCharCode.apply(null, compressedData))
+//     logger.log('数据已重新压缩并编码为Base64。')
 
-    // 上传数据到服务器
-    const response = await fetch(`${WorkerUrl.value}/upload-record`, {
-      method: 'POST',
-      headers: {
-        'X-License-Key': licenseKey,
-        'X-Player-ID': localPlayerId,
-        'Content-Type': 'text/plain',
-      },
-      body: finalPayload,
-    })
+//     // 上传数据到服务器
+//     const response = await fetch(`${WorkerUrl.value}/upload-record`, {
+//       method: 'POST',
+//       headers: {
+//         'X-License-Key': licenseKey,
+//         'X-Player-ID': localPlayerId,
+//         'Content-Type': 'text/plain',
+//       },
+//       body: finalPayload,
+//     })
 
-    const responseJson = await response.json() // 服务器返回的JSON响应中message为错误信息，timeLeft为剩余锁定时间（单位：毫秒）
-    if (response.ok) {
-      cloudMessage.value = `抽卡记录上传成功！`
-      saveInputData(licenseKey) // 保存激活码
-      setCooldown('uploadRecord', isAdmin, validationResult.isExpired)
-      // 上传成功后立即取消本地的读取锁定状态
-      setCooldown('getRecord', isAdmin, validationResult.isExpired, 0)
-    } else if (response.status === 429) {
-      // 后端返回“过于频繁”
-      cloudErrorMessage.value = responseJson.message
-      if (responseJson.timeLeft > 0) {
-        cloudErrorMessage.value += ` 请在 ${milisecondsToTime(responseJson.timeLeft)} 后再试。`
-        setCooldown('uploadRecord', isAdmin, validationResult.isExpired, responseJson.timeLeft)
-      } else {
-        throw new Error(cloudErrorMessage.value)
-      }
-    } else {
-      // 其他错误
-      throw new Error(responseJson.message || `服务器错误: ${response.status}`)
-    }
-  } catch (error) {
-    logger.error(error)
-    cloudErrorMessage.value = `上传记录时出错: ${error.message}`
-    cloudMessage.value = '' // Clear any pending messages
-  } finally {
-    isUploading.value = false
-  }
-}
+//     const responseJson = await response.json() // 服务器返回的JSON响应中message为错误信息，timeLeft为剩余锁定时间（单位：毫秒）
+//     if (response.ok) {
+//       cloudMessage.value = `抽卡记录上传成功！`
+//       saveInputData(licenseKey) // 保存激活码
+//       setCooldown('uploadRecord', isAdmin, validationResult.isExpired)
+//       // 上传成功后立即取消本地的读取锁定状态
+//       setCooldown('getRecord', isAdmin, validationResult.isExpired, 0)
+//     } else if (response.status === 429) {
+//       // 后端返回“过于频繁”
+//       cloudErrorMessage.value = responseJson.message
+//       if (responseJson.timeLeft > 0) {
+//         cloudErrorMessage.value += ` 请在 ${milisecondsToTime(responseJson.timeLeft)} 后再试。`
+//         setCooldown('uploadRecord', isAdmin, validationResult.isExpired, responseJson.timeLeft)
+//       } else {
+//         throw new Error(cloudErrorMessage.value)
+//       }
+//     } else {
+//       // 其他错误
+//       throw new Error(responseJson.message || `服务器错误: ${response.status}`)
+//     }
+//   } catch (error) {
+//     logger.error(error)
+//     cloudErrorMessage.value = `上传记录时出错: ${error.message}`
+//     cloudMessage.value = '' // Clear any pending messages
+//   } finally {
+//     isUploading.value = false
+//   }
+// }
 
 // 打开或关闭用户协议弹窗
 const openAgreementPopUp = () => (showAgreementPopUp.value = true)
 const closeAgreementPopUp = () => (showAgreementPopUp.value = false)
+const openTutorialPopUp = () => {
+  tutorialPopUpTitle.value = '视频教程'
+  isFirstUseTutorialPopUp.value = false
+  showTutorialPopUp.value = true
+}
+const closeTutorialPopUp = () => {
+  showTutorialPopUp.value = false
+  isFirstUseTutorialPopUp.value = false
+}
+const confirmFirstUseTutorial = () => {
+  localStorage.setItem(FIRST_USE_TUTORIAL_KEY, 'true')
+  closeTutorialPopUp()
+}
+const openMpPopUp = () => (showMpPopUp.value = true)
+const closeMpPopUp = () => (showMpPopUp.value = false)
 
 // 重置网页
 const resetView = () => {
@@ -1196,5 +1266,84 @@ const resetView = () => {
   padding: 12px;
   color: v-bind('colors.text.primary');
   font-size: 1rem;
+}
+
+.tutorial-modal-video {
+  width: 100%;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+}
+
+.tutorial-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tutorial-confirm-button {
+  margin-top: 0.75rem;
+}
+
+.mp-weixin-modal {
+  padding-top: 0;
+}
+
+.record-floating-buttons {
+  position: fixed;
+  right: 0;
+  bottom: 2rem;
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.record-floating-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  background: v-bind('colors.background.content');
+  border: 1px solid v-bind('colors.border.primary');
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  padding: 6px 26px 6px 6px;
+  margin-right: -20px;
+  text-decoration: none;
+  color: v-bind('colors.text.primary');
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.2s ease,
+    background-color 1s ease,
+    color 1s ease,
+    border-color 1s ease;
+  cursor: pointer;
+}
+
+.record-floating-btn:hover {
+  transform: translateX(-8px);
+  box-shadow: -3px 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+.record-floating-icon {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1099px) {
+  .record-floating-buttons {
+    display: flex;
+  }
 }
 </style>

@@ -2,7 +2,7 @@
   <transition name="modal-fade">
     <div v-if="display" class="share-modal-overlay" @click.self="close">
       <div class="share-modal-content card">
-        <button @click="close" class="close-modal-button">&times;</button>
+        <button v-if="showCloseButton" @click="close" class="close-modal-button">&times;</button>
 
         <h2 v-if="title">{{ title }}</h2>
 
@@ -22,6 +22,10 @@ defineProps({
   title: {
     type: String,
     default: '',
+  },
+  showCloseButton: {
+    type: Boolean,
+    default: true,
   },
 })
 
