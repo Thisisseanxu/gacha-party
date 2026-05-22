@@ -8,7 +8,7 @@
 
     <div class="fuke-container" :class="{ 'smooth-transition': isReady }">
       <header class="page-header">
-        <h1 class="title">复刻计时器</h1>
+        <h1 class="title">UP计时器</h1>
       </header>
 
       <div class="rarity-toggle">
@@ -37,9 +37,9 @@
       </div>
 
       <div class="panels-wrapper">
-        <!-- Panel: 最久未复刻 -->
+        <!-- Panel: 未UP计时 -->
         <section class="panel" v-show="isPanelVisible('daysSince')">
-          <h2 class="panel-title">最久未复刻</h2>
+          <h2 class="panel-title">未UP计时</h2>
           <div v-if="daysSinceList.length" class="panel-body">
             <div
               v-for="role in daysSinceList"
@@ -69,9 +69,9 @@
           <p v-else class="empty">暂无数据</p>
         </section>
 
-        <!-- Panel: 复刻次数排行 -->
+        <!-- Panel: UP次数排行 -->
         <section class="panel" v-show="isPanelVisible('count')">
-          <h2 class="panel-title">复刻次数</h2>
+          <h2 class="panel-title">UP次数</h2>
           <div v-if="countGroups.length" class="panel-body">
             <div v-for="group in countGroups" :key="group.count" class="count-row">
               <div class="count-label">
@@ -99,9 +99,9 @@
           <p v-else class="empty">暂无数据</p>
         </section>
 
-        <!-- Panel: 复刻间隔排行（仅 SP） -->
+        <!-- Panel: UP间隔排行（仅 SP） -->
         <section class="panel" v-show="isPanelVisible('interval')" v-if="rarity === 'SP'">
-          <h2 class="panel-title">复刻间隔排行</h2>
+          <h2 class="panel-title">UP间隔排行</h2>
           <div class="sub-toggle">
             <button
               v-for="m in intervalModes"
@@ -178,15 +178,15 @@
             </dd>
           </div>
           <div class="stat-row">
-            <dt>最快复刻间隔</dt>
+            <dt>最快UP间隔</dt>
             <dd>{{ popupRole.minInterval !== null ? popupRole.minInterval + ' 天' : '—' }}</dd>
           </div>
           <div class="stat-row">
-            <dt>最久复刻间隔</dt>
+            <dt>最久UP间隔</dt>
             <dd>{{ popupRole.maxInterval !== null ? popupRole.maxInterval + ' 天' : '—' }}</dd>
           </div>
           <div class="stat-row">
-            <dt>平均复刻间隔</dt>
+            <dt>平均UP间隔</dt>
             <dd>{{ popupRole.avgInterval !== null ? popupRole.avgInterval + ' 天' : '—' }}</dd>
           </div>
         </dl>
@@ -209,8 +209,8 @@ const intervalMode = ref('min')
 const popupRole = ref(null)
 
 const intervalModes = [
-  { value: 'min', label: '最快复刻' },
-  { value: 'max', label: '最久未复刻' },
+  { value: 'min', label: '最快UP' },
+  { value: 'max', label: '最久未UP' },
   { value: 'avg', label: '平均间隔' },
 ]
 
@@ -289,9 +289,17 @@ function buildRoleAppearances() {
     )
 
     const intervals = []
+    const startIntervals = []
     for (let i = 0; i < entry.appearances.length - 1; i++) {
+      const prevStart = parseTimeMs(entry.appearances[i].startTime)
       const prevFinish = parseTimeMs(entry.appearances[i].finishTime)
       const nextStart = parseTimeMs(entry.appearances[i + 1].startTime)
+      if (prevStart === null || nextStart === null) {
+        startIntervals.push(null)
+      } else {
+        startIntervals.push(Math.max(0, Math.floor((nextStart - prevStart) / 86400000)))
+      }
+
       if (prevFinish === null || nextStart === null) {
         intervals.push(null)
       } else {
@@ -299,11 +307,13 @@ function buildRoleAppearances() {
       }
     }
 
-    const validIntervals = intervals.filter((v) => v !== null)
-    const minInterval = validIntervals.length ? Math.min(...validIntervals) : null
-    const maxInterval = validIntervals.length ? Math.max(...validIntervals) : null
-    const avgInterval = validIntervals.length
-      ? Math.round((validIntervals.reduce((a, b) => a + b, 0) / validIntervals.length) * 10) / 10
+    const validStartIntervals = startIntervals.filter((v) => v !== null)
+    const minInterval = validStartIntervals.length ? Math.min(...validStartIntervals) : null
+    const maxInterval = validStartIntervals.length ? Math.max(...validStartIntervals) : null
+    const avgInterval = validStartIntervals.length
+      ? Math.round(
+          (validStartIntervals.reduce((a, b) => a + b, 0) / validStartIntervals.length) * 10,
+        ) / 10
       : null
 
     const last = entry.appearances[entry.appearances.length - 1]
@@ -316,6 +326,7 @@ function buildRoleAppearances() {
       lastPoolStartTime: last.startTime,
       lastPoolFinishTime: last.finishTime,
       intervals,
+      startIntervals,
       minInterval,
       maxInterval,
       avgInterval,
@@ -393,26 +404,26 @@ const daysSinceList = computed(() => {
 const intervalList = computed(() => {
   if (rarity.value !== 'SP') return []
   const eligible = filteredByRarity.value.filter(
-    (role) => role.appearanceCount >= 2 && Array.isArray(role.intervals),
+    (role) => role.appearanceCount >= 2 && Array.isArray(role.startIntervals),
   )
   const items = eligible
     .map((role) => {
-      const validIntervals = role.intervals.filter((v) => v !== null && v !== undefined)
-      if (!validIntervals.length && intervalMode.value !== 'avg') return null
-      let intervalValue = null
+      const validStartIntervals = role.startIntervals.filter((v) => v !== null && v !== undefined)
+      if (!validStartIntervals.length && intervalMode.value !== 'avg') return null
+      let intervalValue
       let fromPool = null
       let toPool = null
       let subtitle = ''
       if (intervalMode.value === 'min') {
         intervalValue = role.minInterval
-        const idx = role.intervals.indexOf(role.minInterval)
+        const idx = role.startIntervals.indexOf(role.minInterval)
         if (idx >= 0 && role.appearances[idx] && role.appearances[idx + 1]) {
           fromPool = role.appearances[idx].poolName
           toPool = role.appearances[idx + 1].poolName
         }
       } else if (intervalMode.value === 'max') {
         intervalValue = role.maxInterval
-        const idx = role.intervals.indexOf(role.maxInterval)
+        const idx = role.startIntervals.indexOf(role.maxInterval)
         if (idx >= 0 && role.appearances[idx] && role.appearances[idx + 1]) {
           fromPool = role.appearances[idx].poolName
           toPool = role.appearances[idx + 1].poolName
@@ -443,11 +454,11 @@ const intervalList = computed(() => {
 
 const availablePanels = computed(() => {
   const base = [
-    { id: 'daysSince', label: '最久未复刻' },
-    { id: 'count', label: '复刻次数' },
+    { id: 'daysSince', label: '最久未UP' },
+    { id: 'count', label: 'UP次数' },
   ]
   if (rarity.value === 'SP') {
-    base.push({ id: 'interval', label: '复刻间隔排行' })
+    base.push({ id: 'interval', label: 'UP间隔排行' })
   }
   return base
 })
@@ -804,7 +815,7 @@ function openRolePopup(role) {
   margin: 0;
 }
 
-/* --- 复刻次数榜 --- */
+/* --- UP次数榜 --- */
 .count-row {
   display: flex;
   align-items: center;
@@ -903,7 +914,7 @@ function openRolePopup(role) {
   white-space: nowrap;
 }
 
-/* --- row-card (用于最久未复刻 / 间隔排行) --- */
+/* --- row-card (用于最久未UP / 间隔排行) --- */
 .row-card {
   display: flex;
   align-items: center;

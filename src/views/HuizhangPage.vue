@@ -792,7 +792,7 @@ const getStarImage = (level, starIndex) => {
   // 2: 紫/彩 (icon_star_2)
   // 3: 红 (icon_star_3)
 
-  let typeIndex = 0 // 默认为灰
+  let typeIndex
 
   if (level === 0) {
     typeIndex = 0
@@ -1443,21 +1443,6 @@ textarea {
 
 .required {
   color: v-bind('colors.brand.cancel');
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
-  color: v-bind('colors.text.secondary');
-  cursor: pointer;
-  font-weight: normal;
-}
-
-.checkbox-row input[type='checkbox'] {
-  accent-color: v-bind('colors.brand.primary');
-  cursor: pointer;
 }
 
 .feedback-msg {

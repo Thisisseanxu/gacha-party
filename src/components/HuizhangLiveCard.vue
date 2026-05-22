@@ -193,7 +193,7 @@ const calculatedEffects = computed(() => {
 })
 
 function getStarImage(level, starIndex) {
-  let typeIndex = 0
+  let typeIndex
   if (level === 0) {
     typeIndex = 0
   } else if (level <= 5) {

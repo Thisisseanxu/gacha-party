@@ -401,21 +401,11 @@ const summarizeSlots = (slots) => {
   margin-bottom: 0.6rem;
 }
 
-.section-header {
-  margin-bottom: 0.6rem;
-}
-
 .section-title {
   font-size: 1.1rem;
   color: v-bind('colors.text.primary');
   margin: 0 0 0.1rem;
   padding-left: 0.6rem;
-}
-
-.section-sub {
-  color: v-bind('colors.text.secondary');
-  font-size: 0.82rem;
-  margin: 0.1rem 0 0 0.9rem;
 }
 
 /* 角色选择面板 */

@@ -24,8 +24,8 @@
         <router-link to="fuke" class="btn btn-secondary">
           <img src="/images/icons/fuke.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
-            <span class="btn-title">复刻计时器</span>
-            <span class="btn-subtitle">看看你喜欢的角色有多久没复刻了</span>
+            <span class="btn-title">UP计时器</span>
+            <span class="btn-subtitle">看看你喜欢的角色有多久没UP了</span>
           </div>
         </router-link>
 

@@ -1204,7 +1204,7 @@ const itemsPerPage = ref(10)
 const pageInput = ref(1)
 
 const fullHistory = computed(() => {
-  let data = []
+  let data
   if (CurrentSelectedPool.value === 'Normal') {
     data = [...props.normalGachaData]
   } else if (CurrentSelectedPool.value === 'AllLimited') {
@@ -1521,7 +1521,7 @@ const startReviewAnimation = () => {
   stopReviewAnimation()
 
   // 获取当前卡池的完整、原始数据
-  let sourceData = []
+  let sourceData
   const poolId = CurrentSelectedPool.value
   if (poolId === 'Normal') {
     sourceData = [...props.normalGachaData]

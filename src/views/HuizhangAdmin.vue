@@ -688,7 +688,7 @@ function unbanUser(item) {
 }
 
 function openEditItem(item, source) {
-  let recText = ''
+  let recText
   try {
     recText = decodeStrategy(item.code || '').recText || ''
   } catch {

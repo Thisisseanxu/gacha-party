@@ -689,7 +689,7 @@ const addMessage = () => {
     alert('请选择一个角色并输入对话内容。')
     return
   }
-  let displayName = null
+  let displayName
   // 如果自定义名称不为空，则优先使用自定义名称
   if (customName.value.trim()) {
     displayName = customName.value
@@ -750,7 +750,7 @@ const addImageMessage = (event) => {
   // 创建消息
   const displayName = customName.value || getCardName(newMessage.value.cardId)
 
-  let position = 'left'
+  let position
   if (newMessage.value.cardId === '_旁白') position = 'center'
   else position = isRightSide.value ? 'right' : 'left'
 
@@ -974,8 +974,8 @@ const closeEditMenu = () => {
 
 // 导出指定存档
 const exportSlot = async (slotIndex) => {
-  let dataToExport = null
-  let fileName = ''
+  let dataToExport
+  let fileName
 
   if (slotIndex === 'auto') {
     dataToExport = await loadFromDB(DB_KEYS.CHAT_LOG)

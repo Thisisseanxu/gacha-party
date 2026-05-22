@@ -272,7 +272,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
       ? currentPool.value.rules[selectedRarity]
       : undefined
 
-    let possibleCards = []
+    let possibleCards
 
     // 卡池自选限定和自选UP的逻辑
     if (rulesForRarity?.WishSelection) {
@@ -336,7 +336,7 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
       }
     }
 
-    let pulledCard = null
+    let pulledCard
     // 在该稀有度的角色中随机选择一张 (平分概率)
     // 如果possible cards当前有doubleRateCards，则这张卡的概率会翻倍
     if (possibleCards.length === 1) {
