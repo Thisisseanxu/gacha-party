@@ -1159,6 +1159,17 @@ export const CHAR_HUIZHANG_CONFIG = {
     ],
   },
 
+  1905: {
+    shape: [
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE,
+      HUIZHANG_SHAPES.CIRCLE
+    ],
+  },
+
   1906: {
     shape: [
       HUIZHANG_SHAPES.DIAMOND,

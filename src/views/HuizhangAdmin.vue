@@ -47,7 +47,11 @@
           <button class="action-btn" @click="reloadAll" :disabled="loading || saving">
             重新加载
           </button>
-          <button class="action-btn warn-btn" @click="discardChanges" :disabled="!isDirty || saving">
+          <button
+            class="action-btn warn-btn"
+            @click="discardChanges"
+            :disabled="!isDirty || saving"
+          >
             放弃更改
           </button>
           <button class="primary-btn" @click="saveAll" :disabled="!isDirty || saving">
@@ -123,6 +127,10 @@
         <div v-if="currentTab === 'approved'" class="tab-content">
           <div v-if="approvedItems.length === 0" class="empty-msg">暂无已发布攻略</div>
           <template v-else>
+            <div class="section-toolbar">
+              <span class="section-count">共 {{ approvedItems.length }} 篇已发布攻略</span>
+              <button class="action-btn info-btn" @click="downloadApprovedGuides">导出数据</button>
+            </div>
             <div class="table-wrap">
               <table class="data-table">
                 <thead>
@@ -281,7 +289,11 @@
     <div v-if="editItem" class="overlay" @click.self="editItem = null">
       <div class="edit-dialog">
         <div class="preview-header">
-          <span>编辑攻略 #{{ editItem.id }}（{{ editSource === 'pending' ? '待审核' : '已发布' }}）</span>
+          <span
+            >编辑攻略 #{{ editItem.id }}（{{
+              editSource === 'pending' ? '待审核' : '已发布'
+            }}）</span
+          >
           <button class="close-btn" @click="editItem = null">x</button>
         </div>
         <div class="edit-form">
@@ -342,7 +354,11 @@ const PaginationControls = defineComponent({
           },
           '< 上一页',
         ),
-        h('span', { class: 'page-info' }, `第 ${props.page} 页 / 共 ${totalPages} 页（${props.total} 条）`),
+        h(
+          'span',
+          { class: 'page-info' },
+          `第 ${props.page} 页 / 共 ${totalPages} 页（${props.total} 条）`,
+        ),
         h(
           'button',
           {
@@ -720,6 +736,24 @@ function openPreview(item) {
   previewItem.value = item
 }
 
+function downloadApprovedGuides() {
+  const payload = {
+    guides: approvedItems.value.map((item) => normalizeGuide(item)),
+  }
+  const json = JSON.stringify(payload, null, 2)
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  const date = new Date().toISOString().slice(0, 10)
+  link.href = url
+  link.download = `huizhang-guides-import-${date}.json`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+  showToast(`已导出 ${payload.guides.length} 篇攻略`, 'success')
+}
+
 function importGuides() {
   try {
     const parsed = JSON.parse(importText.value)
@@ -1037,6 +1071,15 @@ onUnmounted(() => {
 .section-count {
   color: v-bind('colors.text.tertiary');
   font-size: 0.82rem;
+}
+
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .ban-form-card {
