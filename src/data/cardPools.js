@@ -17,7 +17,7 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  * 2. 角色名称必须与 cards.js 中的 name 字段完全匹配。
  *
  * 配置项字段说明:
- * - type: 卡池类型 (如 '限定', '常驻', '自选', '祈愿盲盒')
+ * - type: 卡池类型 (如 '限定', '常驻', '心愿自选', '一周年自选', '祈愿盲盒')
  * - name: 卡池显示名称
  * - imageUrl: 卡池封面图路径
  * - tag_type: 卡池封面右下角标签背景类型，可选 1-5。1 金色，2 红色（限定），3 蓝色（复刻），4 粉紫色（联动），5 紫色。
@@ -40,6 +40,7 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  *     - doubleRateCards: 概率翻倍的角色名称列表 (通常用于 SSR)
  *     - WishSelection: (自选池) 是否启用心愿自选机制
  *     - MaximumSelection: (自选池) 最大可选心愿数量
+ *     - WishUpGuarantee: (一周年4up心愿池) 是否启用当前UP与歪后下次必中
  *     - pityUP: (常驻池) 触发保底时是否必定为 UP 角色
  *     - SelectUpCardsGroup: (常驻池) 是否为多组 UP 选择模式
  *     - UpGroups: (常驻池) UP 组配置列表，包含 id, name, image_url, cards
@@ -51,7 +52,7 @@ export const cardPoolsInOrder = [
   [
     "1003",
     {
-      type: "自选",
+      type: "一周年自选",
       name: "周年自选",
       isAvailable: true,
       imageUrl: "/images/cardpools/1003.webp",
@@ -71,6 +72,7 @@ export const cardPoolsInOrder = [
           boost: 0.02,
           WishSelection: true,
           MaximumSelection: 4,
+          WishUpGuarantee: true,
         },
         [SSR]: {
           doubleRateCards: [
@@ -768,7 +770,7 @@ export const cardPoolsInOrder = [
   [
     "1002",
     {
-      type: "自选",
+      type: "心愿自选",
       name: "春日自选扩招",
       isAvailable: false,
       imageUrl: "/images/cardpools/1002.webp",
@@ -1323,7 +1325,7 @@ export const cardPoolsInOrder = [
   [
     "1001",
     {
-      type: "自选",
+      type: "新春自选",
       name: "新春自选",
       isAvailable: false,
       imageUrl: "/images/cardpools/1001.webp",
@@ -1939,7 +1941,7 @@ export const cardPoolsInOrder = [
   [
     "1000",
     {
-      type: "自选",
+      type: "心愿自选",
       name: "半周年庆典自选池",
       isAvailable: false,
       imageUrl: "/images/cardpools/1000.webp",

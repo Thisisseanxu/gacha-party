@@ -277,12 +277,21 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
     // 卡池自选限定和自选UP的逻辑
     if (rulesForRarity?.WishSelection) {
       // 如果当前稀有度是配置了心愿规则的稀有度 (如SP)
-      // 则卡池对应稀有度的池子换成用户选择的那些卡
+      // 则卡池对应稀有度的池子换成用户选择的那些卡。若是 4up 心愿池且上次歪了，
+      // 则本次直接锁定当前选择的 UP 心愿角色。
       const wishIds = selectedWishList.value || []
-      // 过滤出用户选择的卡
+      const selectedWishUpId = selectedUpCard?.value
+      const shouldGuaranteeWishUp =
+        rulesForRarity.WishUpGuarantee && nextIsUP.value && wishIds.includes(selectedWishUpId)
+      const targetWishIds = shouldGuaranteeWishUp ? [selectedWishUpId] : wishIds
+
       possibleCards = currentPool.value.cards.filter(
-        (card) => card.rarity === selectedRarity && wishIds.includes(card.id),
+        (card) => card.rarity === selectedRarity && targetWishIds.includes(card.id),
       )
+      if (shouldGuaranteeWishUp) {
+        nextIsUP.value = false
+        logger.log(`触发心愿UP保底，当前UP角色：`, selectedWishUpId)
+      }
       // 遇到异常情况时，回退到该稀有度的所有卡
       if (possibleCards.length === 0) {
         logger.warn(`心愿池中没有可用的${selectedRarity}卡片，回退到该稀有度的全部卡片。`)
@@ -358,7 +367,12 @@ export function useGacha(poolSource, selectedUpCard = ref(null), selectedWishLis
       (rulesForRarity?.UpTrigger &&
         rulesForRarity.SelectUpCardsGroup &&
         selectedUpGroup.value &&
-        !selectedUpGroup.value.cards.includes(pulledCard.id))
+        !selectedUpGroup.value.cards.includes(pulledCard.id)) ||
+      // 如果是 4up 心愿池，抽到SP但不是当前UP，则下一次SP必定是当前UP
+      (rulesForRarity?.WishSelection &&
+        rulesForRarity.WishUpGuarantee &&
+        selectedUpCard?.value &&
+        pulledCard.id !== selectedUpCard.value)
     ) {
       nextIsUP.value = true // 下次抽卡必定是UP角色
     }

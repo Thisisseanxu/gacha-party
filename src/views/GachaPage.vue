@@ -155,13 +155,18 @@
             </div>
 
             <div v-else-if="isWishPool" class="wish-select-group">
-              <span class="selection-label">心愿角色 ({{ selectedWishCards.length }}/4)：</span>
+              <span class="selection-label"
+                >心愿角色 ({{ selectedWishCards.length }}/{{ maxWishSelection }})：</span
+              >
               <div class="selection-scroll">
                 <div
                   v-for="card in selectableWishCards"
                   :key="card.id"
                   class="wish-card-option"
-                  :class="{ selected: selectedWishCards.includes(card.id) }"
+                  :class="{
+                    selected: selectedWishCards.includes(card.id),
+                    'current-up': isWishUpPool && selectedUpCard === card.id,
+                  }"
                   @click="toggleWishCard(card.id)"
                 >
                   <div class="image-wrapper">
@@ -172,6 +177,20 @@
                     <div v-else class="wish-mask"></div>
                   </div>
                   <span class="wish-card-name">{{ card.name }}</span>
+                </div>
+              </div>
+              <div v-if="isWishUpPool && selectedWishCardDetails.length > 0" class="wish-up-panel">
+                <span class="selection-label-sm">当前UP：</span>
+                <div class="wish-up-options">
+                  <button
+                    v-for="card in selectedWishCardDetails"
+                    :key="card.id"
+                    class="wish-up-option"
+                    :class="{ selected: selectedUpCard === card.id }"
+                    @click="selectUpCard(card.id)"
+                  >
+                    {{ card.name }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -210,11 +229,11 @@
                   <span class="pity-number">{{ pityRemaining }}</span>
                   <span class="pity-label">{{ pityDisplayText }}</span>
                 </div>
-                <div class="pull-buttons" v-if="!isWishPool || selectedWishCards.length === 4">
+                <div class="pull-buttons" v-if="canPullCurrentPool">
                   <button @click="checkAndPull(1)" class="gacha-button single-pull">单抽</button>
                   <button @click="checkAndPull(10)" class="gacha-button ten-pull">十抽</button>
                 </div>
-                <div v-else class="wish-incomplete-warning">必须选择 4 个角色才能抽卡</div>
+                <div v-else class="wish-incomplete-warning">{{ wishPullWarning }}</div>
               </div>
             </div>
           </div>
@@ -616,6 +635,8 @@ const isSelectableUpGroupPool = computed(
   () => currentPool.value?.rules?.[SSR]?.SelectUpCardsGroup === true,
 )
 const isWishPool = computed(() => currentPool.value?.rules?.[SP]?.WishSelection === true)
+const isWishUpPool = computed(() => currentPool.value?.rules?.[SP]?.WishUpGuarantee === true)
+const maxWishSelection = computed(() => currentPool.value?.rules?.[SP]?.MaximumSelection || 4)
 
 const availablePools = computed(() => {
   return cardPoolsInOrder.filter(([, pool]) => pool.isAvailable)
@@ -644,9 +665,39 @@ const selectableUpGroup = computed(() => currentPool.value?.rules?.[SSR]?.UpGrou
 // 心愿卡选择
 const selectableWishCards = computed(() => {
   if (!isWishPool.value) return []
-  return currentPool.value.cardIds?.[SP]?.map((id) => cardMap.get(id))
+  return currentPool.value.cardIds?.[SP]?.map((id) => cardMap.get(id)).filter(Boolean) || []
 })
 const selectedWishCards = ref([])
+const selectedWishCardDetails = computed(() =>
+  selectedWishCards.value.map((id) => cardMap.get(id)).filter(Boolean),
+)
+const selectableWishCardIds = computed(() => new Set(selectableWishCards.value.map((card) => card.id)))
+const canPullCurrentPool = computed(() => {
+  if (!isWishPool.value) return true
+  if (selectedWishCards.value.length !== maxWishSelection.value) return false
+  return !isWishUpPool.value || selectedWishCards.value.includes(selectedUpCard.value)
+})
+const wishPullWarning = computed(() => {
+  if (!isWishPool.value) return ''
+  if (selectedWishCards.value.length !== maxWishSelection.value) {
+    return `必须选择 ${maxWishSelection.value} 个角色才能抽卡`
+  }
+  if (isWishUpPool.value && !selectedWishCards.value.includes(selectedUpCard.value)) {
+    return '请选择当前UP角色'
+  }
+  return ''
+})
+
+watch(
+  () => route.params.poolId,
+  (newId, oldId) => {
+    if (!oldId || newId === oldId) return
+    selectedWishCards.value = []
+    if (isWishPool.value) {
+      selectedUpCard.value = null
+    }
+  },
+)
 
 const isHighlightRarity = (rarity) => rarity === SP || rarity === SSR
 
@@ -712,6 +763,22 @@ const {
   pityValue,
 } = useGacha(gachaSource, selectedUpCard, selectedWishCards)
 
+watch(
+  selectableWishCardIds,
+  (validIds) => {
+    if (!isWishPool.value) {
+      selectedWishCards.value = []
+      return
+    }
+
+    const validSelected = selectedWishCards.value.filter((id) => validIds.has(id))
+    if (validSelected.length !== selectedWishCards.value.length) {
+      selectedWishCards.value = validSelected
+    }
+  },
+  { immediate: true },
+)
+
 // 保底剩余计算
 const pityRemaining = computed(() =>
   pityValue.value ? pityValue.value - pityCounters.value : null,
@@ -770,6 +837,21 @@ watch(
   { immediate: true },
 )
 
+watch(
+  selectedWishCards,
+  (list) => {
+    if (!isWishUpPool.value) return
+    if (list.length === 0) {
+      selectedUpCard.value = null
+      return
+    }
+    if (!list.includes(selectedUpCard.value)) {
+      selectedUpCard.value = list[0]
+    }
+  },
+  { deep: true },
+)
+
 // UP SSR ID集合
 const upSsrIds = computed(() => {
   const ids = new Set()
@@ -818,16 +900,19 @@ const toggleWishCard = (cardId) => {
   if (index > -1) {
     selectedWishCards.value.splice(index, 1)
   } else {
-    if (selectedWishCards.value.length >= 4) {
+    if (selectedWishCards.value.length >= maxWishSelection.value) {
       return
     }
     selectedWishCards.value.push(cardId)
+    if (isWishUpPool.value && !selectedUpCard.value) {
+      selectedUpCard.value = cardId
+    }
   }
 }
 
 const checkAndPull = (count) => {
   lastPullCount.value = count
-  if (isWishPool.value && selectedWishCards.value.length !== 4) {
+  if (!canPullCurrentPool.value) {
     return
   }
   if (count === 1) {
@@ -1431,6 +1516,24 @@ const copyShareText = async (event) => {
   transform: scale(1.05);
 }
 
+.wish-card-option.current-up .image-wrapper {
+  border-color: v-bind('colors.text.highlight');
+  box-shadow: 0 0 12px v-bind('colors.text.highlight');
+}
+
+.wish-card-option.current-up .image-wrapper::after {
+  content: 'UP';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 2px 6px;
+  border-top-right-radius: 8px;
+  background-color: v-bind('colors.text.highlight');
+  color: #1f1200;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
 .wish-badge {
   position: absolute;
   top: 0;
@@ -1470,6 +1573,44 @@ const copyShareText = async (event) => {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+}
+
+.wish-up-panel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wish-up-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wish-up-option {
+  cursor: pointer;
+  border: 1px solid v-bind('colors.border.primary');
+  border-radius: 6px;
+  background-color: v-bind('colors.background.content');
+  color: v-bind('colors.text.secondary');
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  white-space: nowrap;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.wish-up-option.selected {
+  border-color: v-bind('colors.text.highlight');
+  background-color: rgba(255, 196, 74, 0.18);
+  color: v-bind('colors.text.highlight');
 }
 
 /* UP组选项 */
