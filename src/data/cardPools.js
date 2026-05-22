@@ -121,7 +121,7 @@ export const cardPoolsInOrder = [
     {
       type: "联动复刻",
       name: "超频扭蛋机-复刻1",
-      isAvailable: true,
+      isAvailable: false,
       imageUrl: "/images/cardpools/117.webp",
       startTime: "2026-05-11 00:00:00",
       finishTime: "2026-05-17 23:59:59",
