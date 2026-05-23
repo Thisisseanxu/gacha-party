@@ -12,6 +12,7 @@
     </button>
 
     <div
+      ref="landscapeRootRef"
       class="gacha-landscape-root"
       :style="canvasStyle"
       :class="{ 'overlay-active': showGachaResultOverlay }"
@@ -478,9 +479,18 @@ const showProbabilityPopup = ref(false)
 // 全屏/横屏提示
 const showOrientationPrompt = ref(true)
 const isFullscreen = ref(false)
+const landscapeRootRef = ref(null)
+const touchScrollState = {
+  el: null,
+  startX: 0,
+  startY: 0,
+  startScrollTop: 0,
+}
+const TOUCH_SCROLL_FACTOR = 1.8
 
 const onFullscreenChange = () => {
   isFullscreen.value = !!document.fullscreenElement
+  touchScrollState.el = null
 }
 
 const enterFullscreen = async () => {
@@ -555,15 +565,80 @@ const updateLayout = () => {
   }
 }
 
+const isPortraitNonFullscreen = () =>
+  window.innerHeight > window.innerWidth && !document.fullscreenElement
+
+const findTouchScrollContainer = (target) => {
+  if (!(target instanceof Element)) return null
+
+  return target.closest('.pool-panel, .selection-scroll, .up-group-scroll')
+}
+
+const resetTouchScrollState = () => {
+  touchScrollState.el = null
+}
+
+const handleLandscapeTouchStart = (event) => {
+  if (!isPortraitNonFullscreen() || event.touches.length !== 1) {
+    resetTouchScrollState()
+    return
+  }
+
+  const scrollEl = findTouchScrollContainer(event.target)
+  if (!scrollEl || scrollEl.scrollHeight <= scrollEl.clientHeight + 1) {
+    resetTouchScrollState()
+    return
+  }
+
+  const touch = event.touches[0]
+  touchScrollState.el = scrollEl
+  touchScrollState.startX = touch.clientX
+  touchScrollState.startY = touch.clientY
+  touchScrollState.startScrollTop = scrollEl.scrollTop
+}
+
+const handleLandscapeTouchMove = (event) => {
+  const scrollEl = touchScrollState.el
+  if (!scrollEl || !isPortraitNonFullscreen() || event.touches.length !== 1) return
+
+  const touch = event.touches[0]
+  const deltaX = touch.clientX - touchScrollState.startX
+  const deltaY = touch.clientY - touchScrollState.startY
+  const dominantDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY
+
+  if (Math.abs(dominantDelta) < 3) return
+
+  const maxScrollTop = scrollEl.scrollHeight - scrollEl.clientHeight
+  const nextScrollTop = Math.max(
+    0,
+    Math.min(maxScrollTop, touchScrollState.startScrollTop + dominantDelta * TOUCH_SCROLL_FACTOR),
+  )
+
+  if (event.cancelable) event.preventDefault()
+  scrollEl.scrollTop = nextScrollTop
+}
+
 onMounted(() => {
   updateLayout()
   window.addEventListener('resize', updateLayout)
   document.addEventListener('fullscreenchange', onFullscreenChange)
+  landscapeRootRef.value?.addEventListener('touchstart', handleLandscapeTouchStart, {
+    passive: true,
+  })
+  landscapeRootRef.value?.addEventListener('touchmove', handleLandscapeTouchMove, {
+    passive: false,
+  })
+  landscapeRootRef.value?.addEventListener('touchend', resetTouchScrollState)
+  landscapeRootRef.value?.addEventListener('touchcancel', resetTouchScrollState)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateLayout)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
+  landscapeRootRef.value?.removeEventListener('touchstart', handleLandscapeTouchStart)
+  landscapeRootRef.value?.removeEventListener('touchmove', handleLandscapeTouchMove)
+  landscapeRootRef.value?.removeEventListener('touchend', resetTouchScrollState)
+  landscapeRootRef.value?.removeEventListener('touchcancel', resetTouchScrollState)
 })
 
 // 路由
@@ -671,7 +746,9 @@ const selectedWishCards = ref([])
 const selectedWishCardDetails = computed(() =>
   selectedWishCards.value.map((id) => cardMap.get(id)).filter(Boolean),
 )
-const selectableWishCardIds = computed(() => new Set(selectableWishCards.value.map((card) => card.id)))
+const selectableWishCardIds = computed(
+  () => new Set(selectableWishCards.value.map((card) => card.id)),
+)
 const canPullCurrentPool = computed(() => {
   if (!isWishPool.value) return true
   if (selectedWishCards.value.length !== maxWishSelection.value) return false
@@ -1333,7 +1410,7 @@ const copyShareText = async (event) => {
 }
 
 .history-item {
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
@@ -1421,7 +1498,7 @@ const copyShareText = async (event) => {
   scrollbar-width: thin;
   scrollbar-color: v-bind('colors.scrollbar') transparent;
   padding: 10px 4px;
-  max-height: 240px;
+  max-height: 210px;
   min-width: 0;
   align-items: flex-start;
   align-content: flex-start;

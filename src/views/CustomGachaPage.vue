@@ -1,19 +1,19 @@
 <template>
   <div class="custom-gacha-page-background">
+    <router-link
+      :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
+      class="back-home-button-config"
+    >
+      <Return theme="outline" size="24" />
+      <span class="back-text">返回抽卡</span>
+      <span class="back-text-short">返回</span>
+    </router-link>
+
     <div class="config-container">
-      <div class="button-group">
-        <router-link
-          :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
-          class="back-home-button-config"
-          >返回</router-link
-        >
-        <button @click="resetConfiguration" class="reset-button-config">重置配置</button>
-      </div>
       <h1 class="config-title">创建自定义卡池</h1>
       <p class="config-description">在这里创建你独一无二的梦想卡池！</p>
 
-      <div class="config-section">
-        <h2 class="section-title">1. 基础信息</h2>
+      <div class="config-section config-section-first">
         <div class="form-group">
           <label for="poolName">卡池名称</label>
           <input
@@ -26,27 +26,28 @@
       </div>
 
       <div class="config-section">
-        <h2 class="section-title">2. 选择卡牌加入卡池</h2>
-        <div v-for="rarity in rarities" :key="rarity" class="rarity-section">
-          <h3 :class="`text-rarity-${rarity.toLowerCase()}`">{{ rarity }} 卡池</h3>
-          <div class="card-selector-grid">
-            <div
-              v-for="card in groupedCards[rarity]"
-              :key="card.id"
-              class="card-option"
-              :class="{ selected: selectedCardIds[rarity].includes(card.id) }"
-              @click="toggleCardSelection(rarity, card.id)"
-            >
-              <img :src="card.imageUrl" :alt="card.name" class="card-image" />
-              <div class="card-name">{{ card.name }}</div>
-              <div class="checkmark">✔</div>
-            </div>
-          </div>
+        <CharacterSelector
+          v-model="allSelectedCardIds"
+          :character-list="allCards"
+          title="选择卡池角色"
+          sub-title="可用主题和稀有度筛选快速定位角色"
+          show-real-name-toggle
+          hide-qban-toggle
+          show-select-filtered
+        />
+        <div class="selected-summary">
+          <span
+            v-for="rarity in rarities"
+            :key="rarity"
+            class="summary-chip"
+            :class="`summary-chip-${rarity.toLowerCase()}`"
+          >
+            {{ rarity }} {{ selectedCardIds[rarity].length }}
+          </span>
         </div>
       </div>
 
       <div class="config-section">
-        <h2 class="section-title">3. 配置概率和规则</h2>
         <div class="form-grid-rates">
           <div class="form-group">
             <label for="spRate">SP 基础概率 (%)</label>
@@ -85,54 +86,71 @@
 
         <div class="advanced-rules">
           <div v-if="selectedCardIds.SP.length > 0">
-            <h3 class="subsection-title">SP角色UP候选 (可多选，将在抽卡页进行N选1)</h3>
-            <div class="card-selector-grid-small">
-              <div
-                v-for="cardId in selectedCardIds.SP"
-                :key="cardId"
-                class="card-option-small"
-                :class="{ selected: upCandidateIds.includes(cardId) }"
-                @click="toggleUpCandidate(cardId)"
+            <h3 class="subsection-title">SP规则</h3>
+            <div class="rule-mode-tabs">
+              <button
+                v-for="mode in spRuleModes"
+                :key="mode.value"
+                class="rule-mode-tab"
+                :class="{ active: spRuleMode === mode.value }"
+                @click="spRuleMode = mode.value"
               >
-                <img
-                  :src="cardMap.get(cardId)?.imageUrl"
-                  :alt="cardMap.get(cardId)?.name"
-                  class="card-image"
+                {{ mode.label }}
+              </button>
+            </div>
+            <p class="rule-hint">{{ activeSpRuleDescription }}</p>
+
+            <CharacterSelector
+              v-if="spRuleMode === 'select-up'"
+              v-model="upCandidateIds"
+              :character-list="selectedSpCards"
+              title="SP角色UP候选"
+              sub-title="抽卡页会从候选中选择当前UP角色"
+              hide-theme-filter
+              hide-rarity-filter
+              hide-qban-toggle
+            />
+
+            <div
+              v-else-if="spRuleMode === 'wish' || spRuleMode === 'wish-guarantee'"
+              class="wish-config"
+            >
+              <div class="form-group inline-form-group">
+                <label for="maxWishSelection">心愿数量</label>
+                <input
+                  id="maxWishSelection"
+                  type="number"
+                  v-model.number="maxWishSelection"
+                  min="1"
+                  step="1"
                 />
-                <div class="checkmark">✔</div>
               </div>
             </div>
           </div>
 
           <div v-if="selectedCardIds.SSR.length > 0">
             <h3 class="subsection-title">SSR角色双倍概率 (可多选)</h3>
-            <div class="card-selector-grid-small">
-              <div
-                v-for="cardId in selectedCardIds.SSR"
-                :key="cardId"
-                class="card-option-small"
-                :class="{ selected: doubleRateSSRIds.includes(cardId) }"
-                @click="toggleDoubleRateSSR(cardId)"
-              >
-                <img
-                  :src="cardMap.get(cardId)?.imageUrl"
-                  :alt="cardMap.get(cardId)?.name"
-                  class="card-image"
-                />
-                <div class="checkmark">✔</div>
-              </div>
-            </div>
+            <CharacterSelector
+              v-model="doubleRateSSRIds"
+              :character-list="selectedSsrCards"
+              title="SSR双倍概率角色"
+              sub-title="选中的SSR在同稀有度内权重翻倍"
+              hide-theme-filter
+              hide-rarity-filter
+              hide-qban-toggle
+            />
           </div>
         </div>
       </div>
 
       <button @click="navigateToGachaPage" class="finalize-button">创建卡池并开始抽卡</button>
     </div>
+    <button @click="resetConfiguration" class="reset-button-config">重置配置</button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardMap, allCards } from '@/data/cards.js'
@@ -140,6 +158,8 @@ import { colors } from '@/styles/colors.js'
 import pako from 'pako'
 import { logger } from '@/utils/logger'
 import { cardPools } from '@/data/cardPools'
+import CharacterSelector from '@/components/CharacterSelector.vue'
+import { Return } from '@icon-park/vue-next'
 
 const router = useRouter()
 const latestPoolId = Object.keys(cardPools)[0]
@@ -154,6 +174,8 @@ const getDefaultConfig = () => ({
   selectedCardIds: { [SP]: [], [SSR]: [], [SR]: [], [R]: [] },
   upCandidateIds: [],
   doubleRateSSRIds: [],
+  spRuleMode: 'select-up',
+  maxWishSelection: 4,
 })
 
 // 配置状态
@@ -165,15 +187,54 @@ const customPool = ref({
 const selectedCardIds = ref(getDefaultConfig().selectedCardIds)
 const upCandidateIds = ref(getDefaultConfig().upCandidateIds)
 const doubleRateSSRIds = ref(getDefaultConfig().doubleRateSSRIds)
+const spRuleMode = ref(getDefaultConfig().spRuleMode)
+const maxWishSelection = ref(getDefaultConfig().maxWishSelection)
 
 const rarities = [SP, SSR, SR, R]
-const groupedCards = rarities.reduce((acc, rarity) => {
-  acc[rarity] = allCards.filter((card) => card.rarity === rarity)
-  return acc
-}, {})
+const spRuleModes = [
+  { value: 'select-up', label: '多UP池' },
+  { value: 'wish', label: '心愿自选' },
+  { value: 'wish-guarantee', label: '带保底的心愿自选' },
+]
+
+const allSelectedCardIds = computed({
+  get() {
+    return Object.values(selectedCardIds.value).flat()
+  },
+  set(ids) {
+    const next = { [SP]: [], [SSR]: [], [SR]: [], [R]: [] }
+    ids.forEach((id) => {
+      const rarity = cardMap.get(id)?.rarity
+      if (next[rarity]) next[rarity].push(id)
+    })
+    selectedCardIds.value = next
+    upCandidateIds.value = upCandidateIds.value.filter((id) => next[SP].includes(id))
+    doubleRateSSRIds.value = doubleRateSSRIds.value.filter((id) => next[SSR].includes(id))
+  },
+})
+
+const selectedSpCards = computed(() =>
+  selectedCardIds.value[SP].map((id) => cardMap.get(id)).filter(Boolean),
+)
+const selectedSsrCards = computed(() =>
+  selectedCardIds.value[SSR].map((id) => cardMap.get(id)).filter(Boolean),
+)
+const activeSpRuleDescription = computed(() => {
+  if (spRuleMode.value === 'wish-guarantee') {
+    return '抽卡页选择心愿角色后，还要指定当前UP；若歪了，下次SP必定为当前UP。'
+  }
+  if (spRuleMode.value === 'wish') {
+    return '抽卡页从SP池中选择指定数量的心愿角色，SP结果只会在心愿角色中产生。'
+  }
+  return '抽卡页会在这里选中的候选角色中选择当前UP，歪后下次SP必定为当前UP。'
+})
 
 // 页面挂载时加载配置
 onMounted(() => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => {})
+  }
+
   const savedConfig = localStorage.getItem(storageKey)
   if (savedConfig) {
     try {
@@ -183,10 +244,12 @@ onMounted(() => {
       selectedCardIds.value = parsedConfig.selectedCardIds
       upCandidateIds.value = parsedConfig.upCandidateIds
       doubleRateSSRIds.value = parsedConfig.doubleRateSSRIds
+      spRuleMode.value = parsedConfig.spRuleMode || 'select-up'
+      maxWishSelection.value = parsedConfig.maxWishSelection || 4
     } catch (e) {
       logger.error('解析自定义卡池配置失败:', e)
       // 如果解析失败，重置为默认值
-      resetConfiguration()
+      resetConfiguration(false)
     }
   }
 })
@@ -199,52 +262,27 @@ const saveConfiguration = () => {
     selectedCardIds: selectedCardIds.value,
     upCandidateIds: upCandidateIds.value,
     doubleRateSSRIds: doubleRateSSRIds.value,
+    spRuleMode: spRuleMode.value,
+    maxWishSelection: maxWishSelection.value,
   }
   localStorage.setItem(storageKey, JSON.stringify(configToSave))
 }
 
 // 重置配置的函数
-const resetConfiguration = () => {
+const resetConfiguration = (shouldConfirm = true) => {
+  if (shouldConfirm && !window.confirm('确定要重置自定义卡池配置吗？当前选择和规则都会清空。')) {
+    return
+  }
   const defaultConfig = getDefaultConfig()
   customPool.value.name = defaultConfig.name
   customPool.value.rates = { ...defaultConfig.rates }
   selectedCardIds.value = defaultConfig.selectedCardIds
   upCandidateIds.value = defaultConfig.upCandidateIds
   doubleRateSSRIds.value = defaultConfig.doubleRateSSRIds
+  spRuleMode.value = defaultConfig.spRuleMode
+  maxWishSelection.value = defaultConfig.maxWishSelection
   localStorage.removeItem(storageKey)
   alert('配置已重置为默认值！')
-}
-
-const toggleCardSelection = (rarity, cardId) => {
-  const set = selectedCardIds.value[rarity]
-  const index = set.indexOf(cardId)
-  if (index > -1) {
-    set.splice(index, 1)
-    if (rarity === SP) toggleUpCandidate(cardId, true)
-    if (rarity === SSR) toggleDoubleRateSSR(cardId, true)
-  } else {
-    set.push(cardId)
-  }
-}
-
-const toggleUpCandidate = (cardId, forceRemove = false) => {
-  const index = upCandidateIds.value.indexOf(cardId)
-  if (forceRemove) {
-    if (index > -1) upCandidateIds.value.splice(index, 1)
-    return
-  }
-  if (index > -1) upCandidateIds.value.splice(index, 1)
-  else upCandidateIds.value.push(cardId)
-}
-
-const toggleDoubleRateSSR = (cardId, forceRemove = false) => {
-  const index = doubleRateSSRIds.value.indexOf(cardId)
-  if (forceRemove) {
-    if (index > -1) doubleRateSSRIds.value.splice(index, 1)
-    return
-  }
-  if (index > -1) doubleRateSSRIds.value.splice(index, 1)
-  else doubleRateSSRIds.value.push(cardId)
 }
 
 const navigateToGachaPage = () => {
@@ -254,7 +292,6 @@ const navigateToGachaPage = () => {
     alert('请至少向卡池中添加一张卡牌！')
     return
   }
-
   // 构建最小化的配置对象
   const minifiedConfig = {
     n: customPool.value.name,
@@ -278,6 +315,17 @@ const navigateToGachaPage = () => {
     minifiedConfig.u.s = {
       d: upCandidateIds.value,
       l: 1,
+    }
+  }
+
+  if (
+    selectedCardIds.value.SP.length > 0 &&
+    (spRuleMode.value === 'wish' || spRuleMode.value === 'wish-guarantee')
+  ) {
+    minifiedConfig.u.s = {
+      w: 1,
+      m: Math.max(1, Math.min(maxWishSelection.value || 4, selectedCardIds.value.SP.length)),
+      g: spRuleMode.value === 'wish-guarantee' ? 1 : 0,
     }
   }
 
@@ -319,48 +367,47 @@ const navigateToGachaPage = () => {
 <style scoped>
 /* 样式与之前版本保持一致 */
 .custom-gacha-page-background {
+  position: relative;
   background-color: v-bind('colors.background.primary');
   min-height: 100vh;
-  padding: 2rem 1rem;
+  padding: 0.75rem 1rem 5rem;
   color: v-bind('colors.text.primary');
 }
 
 .config-container {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   background-color: v-bind('colors.background.content');
-  padding: 1.5rem min(4vw, 2rem);
+  padding: 1rem min(4vw, 2rem) 1.5rem;
   border-radius: 12px;
   border: 1px solid v-bind('colors.border.primary');
 }
 
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
 .config-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   text-align: center;
   color: v-bind('colors.text.highlight');
+  margin: 0;
 }
 
 .config-description {
   text-align: center;
   color: v-bind('colors.text.secondary');
-  margin-top: -1.5rem;
+  margin: 0.25rem 0 0;
 }
 
 .config-section {
   border-top: 1px solid v-bind('colors.border.secondary');
+  margin-top: 1rem;
+  padding-top: 1rem;
 }
 
-.section-title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+.config-section-first {
+  border-top: none;
+  margin-top: 1rem;
+  padding-top: 0;
 }
 
 .form-group {
@@ -390,94 +437,6 @@ const navigateToGachaPage = () => {
   gap: 1rem;
 }
 
-.rarity-section {
-  margin-bottom: 1.5rem;
-}
-
-.rarity-section h3 {
-  border-bottom: 2px solid;
-  padding-bottom: 8px;
-  margin-bottom: 1rem;
-}
-
-.text-rarity-sp {
-  border-color: v-bind('colors.rarity.sp');
-  color: v-bind('colors.rarity.sp');
-}
-
-.text-rarity-ssr {
-  border-color: v-bind('colors.rarity.ssr');
-  color: v-bind('colors.rarity.ssr');
-}
-
-.text-rarity-sr {
-  border-color: v-bind('colors.rarity.sr');
-  color: v-bind('colors.rarity.sr');
-}
-
-.text-rarity-r {
-  border-color: v-bind('colors.rarity.r');
-  color: v-bind('colors.rarity.r');
-}
-
-.card-selector-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 86px);
-  gap: 1rem;
-  justify-content: center;
-}
-
-.card-option {
-  cursor: pointer;
-  position: relative;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.card-option .card-image {
-  width: 100%;
-  display: block;
-}
-
-.card-option .card-name {
-  font-size: 0.8rem;
-  text-align: center;
-  padding: 4px 0px;
-  background: v-bind('colors.shadow.primaryHover');
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-}
-
-.card-option .checkmark {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  background: v-bind('colors.shadow.primaryHover');
-  color: v-bind('colors.text.primary');
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.card-option.selected {
-  border-color: v-bind('colors.brand.primary');
-  transform: scale(1.05);
-}
-
-.card-option.selected .checkmark {
-  opacity: 1;
-}
-
 .advanced-rules {
   padding-top: 1rem;
   border-top: 1px solid v-bind('colors.border.secondary');
@@ -489,54 +448,7 @@ const navigateToGachaPage = () => {
   margin-bottom: 1rem;
 }
 
-.card-selector-grid-small {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 0.5rem;
-}
-
-.card-option-small {
-  cursor: pointer;
-  position: relative;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.card-option-small .card-image {
-  width: 100%;
-  display: block;
-}
-
-.card-option-small .checkmark {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 16px;
-  height: 16px;
-  font-size: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  color: v-bind('colors.text.primary');
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.card-option-small.selected {
-  border-color: v-bind('colors.brand.primary');
-}
-
-.card-option-small.selected .checkmark {
-  opacity: 1;
-}
-
-.finalize-button,
-.back-home-button-config,
-.reset-button-config {
+.finalize-button {
   margin-top: 1rem;
   cursor: pointer;
   border-radius: 8px;
@@ -556,22 +468,145 @@ const navigateToGachaPage = () => {
 }
 
 .back-home-button-config {
-  background-color: v-bind('colors.background.lighter');
-  font-size: 1rem;
-  display: block;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: v-bind('colors.text.primary');
+  text-decoration: none;
+  font-weight: bold;
+  background: v-bind('colors.background.content');
+  padding: 0.4rem 0.7rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid v-bind('colors.border.primary');
+  font-size: 0.85rem;
 }
 
 .back-home-button-config:hover {
+  transform: translateX(-2px);
   background-color: v-bind('colors.background.hover');
 }
 
+.back-text {
+  display: none;
+}
+
+.back-text-short {
+  display: inline;
+}
+
 .reset-button-config {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 20;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  border: none;
+  color: v-bind('colors.text.primary');
+  padding: 0.85rem 1.1rem;
   background-color: v-bind('colors.brand.primary');
-  font-size: 1rem;
-  display: block;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .reset-button-config:hover {
+  transform: translateY(-2px);
   background-color: v-bind('colors.brand.hover');
+}
+
+.selected-summary,
+.rule-mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.selected-summary {
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.summary-chip,
+.rule-mode-tab {
+  border: 1px solid v-bind('colors.border.primary');
+  background: v-bind('colors.background.light');
+  color: v-bind('colors.text.secondary');
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.summary-chip-sp {
+  color: v-bind('colors.rarity.sp');
+}
+
+.summary-chip-ssr {
+  color: v-bind('colors.rarity.ssr');
+}
+
+.summary-chip-sr {
+  color: v-bind('colors.rarity.sr');
+}
+
+.summary-chip-r {
+  color: v-bind('colors.rarity.r');
+}
+
+.rule-mode-tab {
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.rule-mode-tab.active {
+  background: v-bind('colors.brand.primary');
+  border-color: v-bind('colors.brand.primary');
+  color: v-bind('colors.text.black');
+}
+
+.rule-hint {
+  margin: 0.75rem 0 1rem;
+  color: v-bind('colors.text.tertiary');
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.inline-form-group {
+  max-width: 220px;
+}
+
+:deep(.character-selection-container) {
+  max-width: none;
+  margin-bottom: 0;
+  border-radius: 8px;
+}
+
+:deep(.selection-title) {
+  font-size: 1.15rem;
+}
+
+@media (min-width: 768px) {
+  .back-home-button-config {
+    top: 20px;
+    left: 20px;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+
+  .back-text {
+    display: inline;
+  }
+
+  .back-text-short {
+    display: none;
+  }
 }
 </style>

@@ -34,7 +34,8 @@
         v-if="
           (!hideRarityFilter && availableRarities.length > 0) ||
           (!hideQbanToggle && hasAnyQban) ||
-          showRealNameToggle
+          showRealNameToggle ||
+          showSelectFiltered
         "
       >
         <div v-if="!hideRarityFilter" class="rarity-chips">
@@ -63,6 +64,13 @@
           @click="useQban = !useQban"
         >
           {{ useQban ? '立绘' : 'Q版' }}
+        </button>
+        <button
+          v-if="showSelectFiltered"
+          class="image-toggle-btn select-filtered-btn"
+          @click="toggleFilteredCharacters"
+        >
+          {{ areFilteredCharactersSelected ? '取消' : '全选' }}
         </button>
       </div>
     </div>
@@ -183,6 +191,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showSelectFiltered: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'update:customCharacters', 'confirm', 'add-custom'])
@@ -291,6 +303,19 @@ const isDisabled = (card) => {
   return props.disabledCharacterIds.includes(card.id)
 }
 
+const isInGameCard = (card) =>
+  !card.notInGame && !card.isNotInGame && !card.isnotingame && !card.notingame
+
+const selectableFilteredCards = computed(() =>
+  filteredCards.value.filter((card) => !isDisabled(card) && isInGameCard(card)),
+)
+
+const areFilteredCharactersSelected = computed(() => {
+  if (props.mode !== 'multiple' || selectableFilteredCards.value.length === 0) return false
+  const currentSelection = Array.isArray(props.modelValue) ? props.modelValue : []
+  return selectableFilteredCards.value.every((card) => currentSelection.includes(card.id))
+})
+
 const toggleCharacterSelection = (card) => {
   if (isDisabled(card)) return
 
@@ -307,6 +332,18 @@ const toggleCharacterSelection = (card) => {
     }
     emit('update:modelValue', currentSelection)
   }
+}
+
+const toggleFilteredCharacters = () => {
+  if (props.mode !== 'multiple') return
+
+  const currentSelection = Array.isArray(props.modelValue) ? [...props.modelValue] : []
+  const selectionSet = new Set(currentSelection)
+  selectableFilteredCards.value.forEach((card) => {
+    if (areFilteredCharactersSelected.value) selectionSet.delete(card.id)
+    else selectionSet.add(card.id)
+  })
+  emit('update:modelValue', [...selectionSet])
 }
 
 const deleteCustomCharacter = (characterId) => {
@@ -456,6 +493,10 @@ const deleteCustomCharacter = (characterId) => {
   border-color: v-bind('colors.brand.primary');
   color: v-bind('colors.text.black');
   font-weight: bold;
+}
+
+.select-filtered-btn {
+  margin-left: 0;
 }
 
 .card-selector-grid {

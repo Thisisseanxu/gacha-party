@@ -38,6 +38,12 @@ export const getGachaSource = (route) => {
           ...(minifiedConfig.c.r || []).map((id) => cardMap.get(id)), // c.r -> SR
           ...(minifiedConfig.c.n || []).map((id) => cardMap.get(id)), // c.n -> R
         ].filter(Boolean), // 使用 .filter(Boolean) 移除任何可能因ID不存在而产生的undefined项
+        cardIds: {
+          SP: minifiedConfig.c.s || [],
+          SSR: minifiedConfig.c.x || [],
+          SR: minifiedConfig.c.r || [],
+          R: minifiedConfig.c.n || [],
+        },
         rules: {},
       }
 
@@ -47,9 +53,15 @@ export const getGachaSource = (route) => {
           pity: 60, // 硬编码的规则
           boostAfter: 40, // 硬编码的规则
           boost: 0.02, // 硬编码的规则
-          UpTrigger: true,
-          SelectUpCards: !!minifiedConfig.u.s.l,
-          UpCards: minifiedConfig.u.s.d,
+        }
+        if (minifiedConfig.u.s.w) {
+          finalPoolConfig.rules.SP.WishSelection = true
+          finalPoolConfig.rules.SP.MaximumSelection = minifiedConfig.u.s.m || 4
+          finalPoolConfig.rules.SP.WishUpGuarantee = !!minifiedConfig.u.s.g
+        } else {
+          finalPoolConfig.rules.SP.UpTrigger = true
+          finalPoolConfig.rules.SP.SelectUpCards = !!minifiedConfig.u.s.l
+          finalPoolConfig.rules.SP.UpCards = minifiedConfig.u.s.d
         }
       }
 
