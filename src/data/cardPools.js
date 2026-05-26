@@ -414,7 +414,7 @@ export const cardPoolsInOrder = [
     {
       type: "限定",
       name: "电波盲订",
-      isAvailable: true,
+      isAvailable: false,
       imageUrl: "/images/cardpools/134.webp",
       startTime: "2026-04-30 00:00:00",
       finishTime: "2026-05-24 23:59:59",

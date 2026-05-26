@@ -37,7 +37,7 @@ export const allCards = [
   rarity: SP,
   imageUrl: "/images/characters/2102.webp",
   realname: "薇拉",
-  theme: THEMES.cake,
+  theme: THEMES.eiji,
   qban_url: "/images/qban/2102.webp",
 },
 {
@@ -82,7 +82,7 @@ export const allCards = [
   rarity: SP,
   imageUrl: "/images/characters/2101.webp",
   realname: "夜车",
-  theme: THEMES.cake,
+  theme: THEMES.eiji,
   qban_url: "/images/qban/2101.webp",
 },
 {
@@ -109,7 +109,7 @@ export const allCards = [
   rarity: SP,
   imageUrl: "/images/characters/11103.webp",
   realname: "芸",
-  theme: THEMES.eiji,
+  theme: THEMES.elec,
   qban_url: "/images/qban/11103.webp",
 },
 {
@@ -118,7 +118,7 @@ export const allCards = [
   rarity: SP,
   imageUrl: "/images/characters/11104.webp",
   realname: "艾莉卡",
-  theme: THEMES.eiji,
+  theme: THEMES.elec,
   qban_url: "/images/qban/11104.webp",
 },
 {
