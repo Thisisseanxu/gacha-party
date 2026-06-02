@@ -16,6 +16,7 @@
       <CardPoolsTab v-else-if="activeTab === 'cardpools'" />
       <HuizhangTab v-else-if="activeTab === 'huizhang'" />
       <GachaPoolsTab v-else-if="activeTab === 'gachapools'" />
+      <AnnouncementsTab v-else-if="activeTab === 'announcements'" />
     </div>
   </div>
 </template>
@@ -26,6 +27,7 @@ import CardsTab from './dev-editor/CardsTab.vue'
 import CardPoolsTab from './dev-editor/CardPoolsTab.vue'
 import HuizhangTab from './dev-editor/HuizhangTab.vue'
 import GachaPoolsTab from './dev-editor/GachaPoolsTab.vue'
+import AnnouncementsTab from './dev-editor/AnnouncementsTab.vue'
 import NoFloatingButton from '@/components/NoFloatingButton.vue'
 import './dev-editor/dev-shared.css' // 公共样式
 
@@ -34,6 +36,7 @@ const tabs = [
   { key: 'cardpools', label: '模拟器配置' },
   { key: 'huizhang', label: '徽章槽位' },
   { key: 'gachapools', label: '卡池数据' },
+  { key: 'announcements', label: '公告' },
 ]
 
 const activeTab = ref('cards')

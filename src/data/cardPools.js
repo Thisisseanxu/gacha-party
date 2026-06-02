@@ -413,7 +413,7 @@ export const cardPoolsInOrder = [
     {
       type: "联动",
       name: "小小确幸",
-      isAvailable: true,
+      isAvailable: false,
       imageUrl: "/images/cardpools/133.webp",
       startTime: "2026-05-07 00:00:00",
       finishTime: "2026-05-31 23:59:59",

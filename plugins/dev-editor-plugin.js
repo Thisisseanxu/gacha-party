@@ -15,6 +15,7 @@ const CARD_POOLS_FILE = resolve(ROOT, 'src/data/cardPools.js')
 const HUIZHANG_FILE = resolve(ROOT, 'src/data/huizhang.js')
 const GACHA_POOLS_FILE = resolve(ROOT, 'public/data/gacha_pools.json')
 const DATABASE_FILE = resolve(ROOT, 'public/data/gacha_info.json')
+const ANNOUNCEMENTS_FILE = resolve(ROOT, 'public/data/announcements.json')
 
 // ── 符号映射：AST Identifier/MemberExpression → JSON 值 ────────────────────
 const SYMBOL_RESOLVE = {
@@ -208,7 +209,9 @@ function writeCardPool(poolId, poolData) {
   if (existing) {
     existing.elements[1] = buildPoolNode(poolData)
   } else {
-    entries.elements.unshift(b.arrayExpression([b.literal(String(poolId)), buildPoolNode(poolData)]))
+    entries.elements.unshift(
+      b.arrayExpression([b.literal(String(poolId)), buildPoolNode(poolData)]),
+    )
   }
   writeFileSync(CARD_POOLS_FILE, recast.print(ast).code, 'utf8')
 }
@@ -357,6 +360,13 @@ export function devEditorPlugin() {
             return respond(res, readJson(DATABASE_FILE))
           if (method === 'PUT' && url === '/database36') {
             writeJson(DATABASE_FILE, await readBody(req))
+            return respond(res, { ok: true })
+          }
+
+          if (method === 'GET' && url === '/announcements')
+            return respond(res, readJson(ANNOUNCEMENTS_FILE))
+          if (method === 'PUT' && url === '/announcements') {
+            writeJson(ANNOUNCEMENTS_FILE, await readBody(req))
             return respond(res, { ok: true })
           }
 

@@ -2,6 +2,12 @@
   <div id="app">
     <router-view> </router-view>
     <FloatingHomeButton :is-updating="needRefresh" />
+    <AnnouncementDialog
+      :announcement="currentAnnouncement"
+      :index="currentAnnouncementIndex"
+      :total="announcements.length"
+      @close="nextAnnouncement"
+    />
   </div>
   <transition name="slide-fade">
     <div v-if="showUpdateDialog" class="update-notification">
@@ -28,12 +34,14 @@ export default {
 </script>
 
 <script setup>
-import { onBeforeUnmount, watch, ref } from 'vue'
+import { onBeforeUnmount, onMounted, watch, ref } from 'vue'
 import { UpdateRotation } from '@icon-park/vue-next'
+import AnnouncementDialog from './components/AnnouncementDialog.vue'
 import FloatingHomeButton from './components/FloatingHomeButton.vue'
 import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { colors } from '@/styles/colors.js'
+import { getActiveWebAnnouncements, markWebAnnouncementShown } from '@/utils/announcements.js'
 
 const { needRefresh, updateServiceWorker } = useRegisterSW()
 // 使用 watch 监听是否有新版本
@@ -41,7 +49,16 @@ const { needRefresh, updateServiceWorker } = useRegisterSW()
 const showUpdateDialog = ref(false)
 const isUpdating = ref(false)
 const updateStatusMessage = ref('正在切换到新版本，请稍候...')
+const announcements = ref([])
+const currentAnnouncementIndex = ref(0)
+const currentAnnouncement = ref(null)
 let updateFallbackTimer = null
+
+onMounted(async () => {
+  announcements.value = await getActiveWebAnnouncements()
+  currentAnnouncementIndex.value = 0
+  currentAnnouncement.value = announcements.value[0] || null
+})
 
 watch(needRefresh, (newValue) => {
   if (newValue) {
@@ -91,6 +108,15 @@ function confirmUpdate() {
     updateStatusMessage.value = '更新超时，正在尝试刷新页面...'
     window.location.reload()
   }, 30000)
+}
+
+function nextAnnouncement() {
+  if (currentAnnouncement.value) {
+    markWebAnnouncementShown(currentAnnouncement.value)
+  }
+
+  currentAnnouncementIndex.value += 1
+  currentAnnouncement.value = announcements.value[currentAnnouncementIndex.value] || null
 }
 
 onBeforeUnmount(() => {
