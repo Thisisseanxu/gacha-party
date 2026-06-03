@@ -89,7 +89,7 @@ export default defineConfig({
               cacheName: 'images-cache',
               expiration: {
                 maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 缓存有效期 30 天
+                maxAgeSeconds: 60 * 60 * 24 * 90, // 缓存有效期 90 天
               },
               // 允许跨域图片缓存
               cacheableResponse: {
