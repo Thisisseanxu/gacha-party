@@ -1,0 +1,31 @@
+{
+  "headers": [
+    {
+      "source": "/images/characters/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=7776000"
+        }
+      ]
+    },
+    {
+      "source": "/images/qban/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=7776000"
+        }
+      ]
+    },
+    {
+      "source": "/images/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=7776000"
+        }
+      ]
+    }
+  ]
+}

@@ -96,7 +96,7 @@
 
         <div class="form-actions">
           <button class="de-btn primary" :disabled="saving" @click="save">
-            {{ saving ? '保存中…' : '保存到 cards.js' }}
+            {{ saving ? '保存中…' : '保存到 cards.json' }}
           </button>
           <button class="de-btn" @click="resetForm">重置</button>
         </div>
@@ -213,7 +213,7 @@ async function save() {
     if (!payload.notInGame) delete payload.notInGame
     if (!payload.qban_url) delete payload.qban_url
     await saveApi(payload)
-    saveMsg.value = { ok: true, text: '保存成功！cards.js 已更新' }
+    saveMsg.value = { ok: true, text: '保存成功！cards.json 已更新' }
     isNew.value = false
     await load()
   } catch (e) {

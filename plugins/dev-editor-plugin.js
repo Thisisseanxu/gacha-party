@@ -10,7 +10,7 @@ const babelParser = require('recast/parsers/babel')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
-const CARDS_FILE = resolve(ROOT, 'src/data/cards.js')
+const CARDS_FILE = resolve(ROOT, 'public/data/cards.json')
 const CARD_POOLS_FILE = resolve(ROOT, 'src/data/cardPools.js')
 const HUIZHANG_FILE = resolve(ROOT, 'src/data/huizhang.js')
 const GACHA_POOLS_FILE = resolve(ROOT, 'public/data/gacha_pools.json')
@@ -132,43 +132,31 @@ function findExportInit(ast, varName) {
   return target
 }
 
-// ── cards.js ─────────────────────────────────────────────────────────────────
+// ── cards.json ────────────────────────────────────────────────────────────────
 function readCards() {
-  const ast = parseFile(CARDS_FILE)
-  const arr = findExportInit(ast, 'allCards')
-  if (!arr) throw new Error('allCards 未找到')
-  return arr.elements.map(astToJson)
-}
-
-function getCardId(elem) {
-  const p = elem.properties?.find((p) => (p.key?.name ?? p.key?.value) === 'id')
-  return p ? astToJson(p.value) : null
+  const cards = JSON.parse(readFileSync(CARDS_FILE, 'utf8'))
+  if (!Array.isArray(cards)) throw new Error('cards.json 格式错误')
+  return cards
 }
 
 function writeCard(cardData) {
-  const ast = parseFile(CARDS_FILE)
-  const arr = findExportInit(ast, 'allCards')
-  if (!arr) throw new Error('allCards 未找到')
+  const cards = readCards()
+  const idx = cards.findIndex((card) => String(card.id) === String(cardData.id))
+  const newCard = buildCardData(cardData)
 
-  const idx = arr.elements.findIndex((el) => getCardId(el) === cardData.id)
-  const newNode = buildCardNode(cardData)
-
-  if (idx >= 0) {
-    arr.elements[idx] = newNode
-  } else {
-    arr.elements.push(newNode)
-  }
-  writeFileSync(CARDS_FILE, recast.print(ast).code, 'utf8')
+  if (idx >= 0) cards[idx] = newCard
+  else cards.push(newCard)
+  writeFileSync(CARDS_FILE, `${JSON.stringify(cards, null, 2)}\n`, 'utf8')
 }
 
-function buildCardNode(data) {
+function buildCardData(data) {
   const orderedKeys = ['id', 'name', 'rarity', 'imageUrl', 'realname', 'theme', 'qban_url']
-  const props = []
+  const card = {}
   for (const key of orderedKeys) {
-    if (data[key] != null) props.push(b.property('init', b.identifier(key), valueToAst(data[key])))
+    if (data[key] != null) card[key] = String(data[key])
   }
-  if (data.notInGame) props.push(b.property('init', b.identifier('notInGame'), b.literal(true)))
-  return b.objectExpression(props)
+  if (data.notInGame) card.notInGame = true
+  return card
 }
 
 // ── cardPools.js ──────────────────────────────────────────────────────────────

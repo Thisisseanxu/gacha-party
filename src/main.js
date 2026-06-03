@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router' // 导入路由相关功能
+import { loadCards } from '@/data/cards.js'
 
 // 路由组件
 import HomePage from './views/HomePage.vue'
@@ -150,7 +151,13 @@ router.afterEach((to) => {
   document.title = to.meta.title || defaultTitle
 })
 
-// 创建Vue应用
-const app = createApp(App)
-app.use(router)
-app.mount('#app')
+async function bootstrap() {
+  await loadCards()
+
+  // 创建Vue应用
+  const app = createApp(App)
+  app.use(router)
+  app.mount('#app')
+}
+
+bootstrap()
