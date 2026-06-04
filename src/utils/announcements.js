@@ -6,6 +6,7 @@ const SHOWN_KEY = 'mhpd_announcements_shown_v1'
 const CACHE_TTL = 30 * 60 * 1000
 const ALREADY_STARTED = -Infinity
 const NEVER_ENDS = Infinity
+let latestAnnouncementIds = new Set()
 
 function parseDate(value, fallback) {
   if (!value) return fallback
@@ -20,14 +21,26 @@ function normalizeList(data) {
   return []
 }
 
-function getAnnouncementKey(announcement) {
-  return [
-    announcement.id || '',
-    announcement.title || '',
-    announcement.startDate || '',
-    announcement.endDate || '',
-    announcement.content || '',
-  ].join('|')
+function getAnnouncementId(announcement) {
+  return String(announcement?.id || '').trim()
+}
+
+function cleanShownAnnouncements(shown, validIds = latestAnnouncementIds) {
+  const next = {}
+  let changed = false
+
+  for (const [key, value] of Object.entries(shown || {})) {
+    const id = String(key || '').split('|')[0].trim()
+    if (!id || (validIds?.size && !validIds.has(id))) {
+      changed = true
+      continue
+    }
+    if (next[id] !== value) changed = true
+    next[id] = value
+  }
+
+  if (Object.keys(next).length !== Object.keys(shown || {}).length) changed = true
+  return { shown: next, changed }
 }
 
 function normalizeAnnouncement(announcement) {
@@ -81,12 +94,13 @@ async function loadAnnouncements() {
 }
 
 export async function getActiveWebAnnouncements() {
-  const announcements = await loadAnnouncements()
-  const shown = loadJson(SHOWN_KEY, {})
+  const announcements = (await loadAnnouncements()).map(normalizeAnnouncement)
+  latestAnnouncementIds = new Set(announcements.map(getAnnouncementId).filter(Boolean))
+  const cleaned = cleanShownAnnouncements(loadJson(SHOWN_KEY, {}), latestAnnouncementIds)
+  if (cleaned.changed) saveJson(SHOWN_KEY, cleaned.shown)
   const now = Date.now()
 
   return announcements
-    .map(normalizeAnnouncement)
     .filter((announcement) => {
       if (!announcement.enabled) return false
       if (announcement.miniProgramOnly) return false
@@ -94,18 +108,21 @@ export async function getActiveWebAnnouncements() {
       if (parseDate(announcement.endDate, NEVER_ENDS) < now) return false
       if (announcement.showEveryOpen) return true
 
-      return !shown[getAnnouncementKey(announcement)]
+      const id = getAnnouncementId(announcement)
+      return Boolean(id) && !cleaned.shown[id]
     })
     .map((announcement) => ({
       ...announcement,
-      key: getAnnouncementKey(announcement),
+      key: getAnnouncementId(announcement),
       showEveryOpen: Boolean(announcement.showEveryOpen),
     }))
 }
 
 export function markWebAnnouncementShown(announcement) {
   if (!announcement || announcement.showEveryOpen) return
-  const shown = loadJson(SHOWN_KEY, {})
-  shown[announcement.key || getAnnouncementKey(announcement)] = Date.now()
-  saveJson(SHOWN_KEY, shown)
+  const id = getAnnouncementId(announcement.key ? { id: announcement.key } : announcement)
+  if (!id) return
+  const cleaned = cleanShownAnnouncements(loadJson(SHOWN_KEY, {}))
+  cleaned.shown[id] = Date.now()
+  saveJson(SHOWN_KEY, cleaned.shown)
 }

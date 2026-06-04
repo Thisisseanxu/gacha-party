@@ -121,7 +121,6 @@
       :LIMITED_FUKE_CARD_POOLS_ID="LIMITED_FUKE_CARD_POOLS_ID"
       :EVENT_FUKE_CARD_POOLS_ID="EVENT_FUKE_CARD_POOLS_ID"
       :OTHER_CARD_POOLS_ID="OTHER_CARD_POOLS_ID"
-      :SPECIAL_OUTSIDE_POOLS="SPECIAL_OUTSIDE_POOLS"
       :CARDPOOLS_NAME_MAP="CARDPOOLS_NAME_MAP"
       @reset-view="resetView"
     />
@@ -256,9 +255,8 @@ const LimitedFukeGachaData = ref([]) // 存储限定复刻卡池抽卡记录
 const EventFukeGachaData = ref([]) // 存储联动复刻卡池抽卡记录
 const NormalGachaData = ref([]) // 存储常驻卡池抽卡记录
 const AdvanceNormalGachaData = ref([]) // 存储高级常驻卡池抽卡记录
-const OtherGachaData = ref({}) // 存储其他所有未分类特殊卡池抽卡记录
-const OTHER_CARD_POOLS_ID = ref([]) // 其他未分类特殊卡池ID列表
-const SPECIAL_OUTSIDE_POOLS = ref([]) // 手动临时放到外面的特殊卡池ID列表（比如填入 '1002' 就会单独置顶显示春日自选扩招）
+const OtherGachaData = ref({}) // 存储其他未分类卡池抽卡记录
+const OTHER_CARD_POOLS_ID = ref([]) // 其他未分类卡池ID列表
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示

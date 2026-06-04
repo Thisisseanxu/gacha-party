@@ -66,6 +66,14 @@ const routes = [
     },
   },
   {
+    path: '/fenxi/dev',
+    name: '抽卡记录调试',
+    component: () => import('./views/RecordDevPage.vue'),
+    meta: {
+      title: '抽卡记录调试 - 织夜工具箱',
+    },
+  },
+  {
     path: '/daoyan',
     name: '导演模式',
     component: () => import('./views/CustomChatPage.vue'), // 导演模式页面组件
