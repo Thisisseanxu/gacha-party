@@ -165,7 +165,7 @@
                 </div>
                 <div v-if="shouldShowSummarySsr" class="timeline-bottom">
                   <span class="pool-name">{{
-                    item.isPityPlaceholder ? '当前保底' : formatShortDate(item.createdAt)
+                    item.isPityPlaceholder ? '当前' : formatShortDate(item.createdAt)
                   }}</span>
                   <div class="ssr-strip">
                     <template v-if="item.ssrInSegment?.length">
@@ -632,6 +632,9 @@ const mergeAnalyses = (name, analyses) => {
   const records = analyses.flatMap((item) => item.records).sort((a, b) => b.createdAt - a.createdAt)
   const currentSpPity = analyses.reduce((total, item) => total + item.currentSpPity, 0)
   const currentSsrPity = analyses.reduce((total, item) => total + item.currentSsrPity, 0)
+  const currentSsrInSegment = analyses
+    .flatMap((item) => item.currentSsrInSegment || [])
+    .sort((a, b) => a.createdAt - b.createdAt)
 
   return {
     name,
@@ -640,6 +643,7 @@ const mergeAnalyses = (name, analyses) => {
     ssrCount: ssrHistory.length,
     currentSpPity,
     currentSsrPity,
+    currentSsrInSegment,
     avgSp: calculateAverage(spHistory.map((item) => item.count)),
     avgSsr: calculateAverage(ssrHistory.map((item) => item.count)),
     spHistory,
@@ -688,6 +692,7 @@ const buildPoolAnalysis = (records, name = '') => {
       totalPulls: sorted.length,
       currentSpPity: spCounter,
       currentSsrPity: ssrCounter,
+      currentSsrInSegment: [...ssrInSegment].sort((a, b) => a.createdAt - b.createdAt),
       spHistory,
       ssrHistory,
       records: normalizedRecords,
@@ -792,7 +797,7 @@ const buildPityPlaceholder = (group) => {
     count,
     createdAt: 0,
     createdAtMs: 0,
-    ssrInSegment: [],
+    ssrInSegment: isNormal ? [] : group.currentSsrInSegment || [],
     isPityPlaceholder: true,
   }
 }
