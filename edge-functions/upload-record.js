@@ -1,11 +1,16 @@
 import {
   canAccessPlayer,
+  diagnosticHeaders,
   enforceUploadRateLimit,
+  EDGEONE_BODY_LIMIT_BYTES,
   getGachaKv,
+  isKvLimitError,
   jsonResponse,
   optionsResponse,
   recordKey,
   saveRecordMeta,
+  SAFE_RECORD_LIMIT_BYTES,
+  utf8Bytes,
   verifyLicenseForEdgeOne,
 } from './_shared/gacha-records.js'
 
@@ -43,6 +48,20 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse(responseBody, 400)
     }
 
+    const payloadBytes = utf8Bytes(payload)
+    if (payloadBytes > SAFE_RECORD_LIMIT_BYTES) {
+      responseBody.message = `抽卡记录过大（${payloadBytes} bytes），已接近 EdgeOne Edge Functions/KV 的 1MB 限制，请改用 Blob/数据库存储。`
+      responseBody.limitBytes = EDGEONE_BODY_LIMIT_BYTES
+      responseBody.safeLimitBytes = SAFE_RECORD_LIMIT_BYTES
+      return jsonResponse(
+        responseBody,
+        413,
+        diagnosticHeaders('record-too-large', {
+          'X-Record-Bytes': String(payloadBytes),
+        }),
+      )
+    }
+
     const kv = getGachaKv(env)
     const limit = await enforceUploadRateLimit(kv, playerId, userId, isExpired)
 
@@ -56,8 +75,19 @@ export async function onRequestPost({ request, env }) {
     await saveRecordMeta(kv, playerId)
 
     responseBody.message = '抽卡记录上传成功！'
-    return jsonResponse(responseBody)
+    responseBody.bytes = payloadBytes
+    return jsonResponse(
+      responseBody,
+      200,
+      diagnosticHeaders('ok', {
+        'X-Record-Bytes': String(payloadBytes),
+      }),
+    )
   } catch (error) {
+    if (isKvLimitError(error)) {
+      responseBody.message = `KV 服务限额或容量异常：${error.message}`
+      return jsonResponse(responseBody, 503, diagnosticHeaders('kv-limit-or-size-error'))
+    }
     responseBody.message = `验证失败：${error.message}`
     return jsonResponse(responseBody, 403)
   }

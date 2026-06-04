@@ -3,7 +3,7 @@ import {
   jsonResponse,
   optionsResponse,
   verifyGameMailCodeOnServer,
-} from './_shared/gacha-records.js'
+} from './_shared/activation.js'
 
 export function onRequestOptions() {
   return optionsResponse()

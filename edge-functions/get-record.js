@@ -1,9 +1,13 @@
 import {
   canAccessPlayer,
+  diagnosticHeaders,
   getGachaKv,
+  isKvLimitError,
   optionsResponse,
   recordKey,
+  SAFE_RECORD_LIMIT_BYTES,
   textResponse,
+  utf8Bytes,
   verifyLicenseForEdgeOne,
 } from './_shared/gacha-records.js'
 
@@ -33,8 +37,32 @@ export async function onRequestGet({ request, env }) {
       return textResponse(`数据库中没有找到玩家ID ${playerId} 对应的记录`, 404)
     }
 
-    return textResponse(value)
+    const valueBytes = utf8Bytes(value)
+    if (valueBytes > SAFE_RECORD_LIMIT_BYTES) {
+      return textResponse(
+        `抽卡记录过大（${valueBytes} bytes），已接近 EdgeOne Edge Functions/KV 的 1MB 限制，请迁移到 Cloud Functions + Blob/数据库后再读取。`,
+        413,
+        diagnosticHeaders('record-too-large', {
+          'X-Record-Bytes': String(valueBytes),
+        }),
+      )
+    }
+
+    return textResponse(
+      value,
+      200,
+      diagnosticHeaders('ok', {
+        'X-Record-Bytes': String(valueBytes),
+      }),
+    )
   } catch (error) {
+    if (isKvLimitError(error)) {
+      return textResponse(
+        `KV 服务限额或容量异常：${error.message}`,
+        503,
+        diagnosticHeaders('kv-limit-or-size-error'),
+      )
+    }
     return textResponse(`验证失败：${error.message}`, 403)
   }
 }

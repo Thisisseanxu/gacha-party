@@ -8,6 +8,9 @@ const RATE_LIMITS = {
   },
 }
 
+export const EDGEONE_BODY_LIMIT_BYTES = 1024 * 1024
+export const SAFE_RECORD_LIMIT_BYTES = 950 * 1024
+
 const GAME_MAIL_URL = 'https://matrix-api.aojiaostudio.com/api2/mail'
 const GAME_MAIL_HEADERS = {
   'Content-Type': 'application/json',
@@ -29,20 +32,40 @@ export function corsHeaders() {
   }
 }
 
-export function textResponse(message, status = 200) {
+export function utf8Bytes(value) {
+  return new TextEncoder().encode(String(value || '')).byteLength
+}
+
+export function isKvLimitError(error) {
+  const message = String(error?.message || error || '')
+  return /LimitExceeded|quota|exceed|exceeded|too large|size|容量|限额|超出/i.test(message)
+}
+
+export function diagnosticHeaders(diagnostic, extra = {}) {
+  return {
+    'X-EO-Diagnostic': diagnostic,
+    ...extra,
+  }
+}
+
+export function textResponse(message, status = 200, extraHeaders = {}) {
   return new Response(message, {
     status,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       ...corsHeaders(),
+      ...extraHeaders,
     },
   })
 }
 
-export function jsonResponse(body, status = 200) {
+export function jsonResponse(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers: {
+      ...jsonHeaders,
+      ...extraHeaders,
+    },
   })
 }
 

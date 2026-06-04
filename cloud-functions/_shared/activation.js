@@ -1,0 +1,177 @@
+import nacl from 'tweetnacl'
+
+const GAME_MAIL_URL = 'https://matrix-api.aojiaostudio.com/api2/mail'
+const GAME_MAIL_HEADERS = {
+  'Content-Type': 'application/json',
+  Origin: 'https://act-horcrux.aojiaostudio.com',
+  Referer: 'https://act-horcrux.aojiaostudio.com/',
+}
+
+const textEncoder = new TextEncoder()
+
+export function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers':
+      'Content-Type,Authorization,X-License-Key,X-Player-Id,X-Player-ID',
+  }
+}
+
+export function jsonResponse(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...corsHeaders(),
+    },
+  })
+}
+
+export function optionsResponse() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(),
+  })
+}
+
+function base64UrlFromBytes(bytes) {
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+}
+
+function normalizePemBase64(value) {
+  return String(value || '')
+    .replace(/-----BEGIN [^-]+-----/g, '')
+    .replace(/-----END [^-]+-----/g, '')
+    .replace(/\s+/g, '')
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(normalizePemBase64(base64))
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes
+}
+
+function extractEd25519SeedFromPkcs8(pkcs8Bytes) {
+  const bytes = pkcs8Bytes instanceof Uint8Array ? pkcs8Bytes : new Uint8Array(pkcs8Bytes)
+  const oid = [0x06, 0x03, 0x2b, 0x65, 0x70]
+  let hasEd25519Oid = false
+  for (let start = 0; start <= bytes.length - oid.length; start += 1) {
+    if (oid.every((value, index) => bytes[start + index] === value)) {
+      hasEd25519Oid = true
+      break
+    }
+  }
+
+  if (!hasEd25519Oid) {
+    throw new Error('PRIVATE_KEY 不是 Ed25519 PKCS#8 DER base64 格式。')
+  }
+
+  if (bytes.length < 32) {
+    throw new Error('PRIVATE_KEY 长度不正确。')
+  }
+
+  return bytes.slice(bytes.length - 32)
+}
+
+async function callGameMailApi(payload) {
+  const maxAttempts = 2
+  let lastError = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+
+    try {
+      const response = await fetch(GAME_MAIL_URL, {
+        method: 'POST',
+        headers: GAME_MAIL_HEADERS,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        lastError = new Error(`游戏邮件服务请求失败：${response.status}`)
+        if (response.status >= 500 && attempt < maxAttempts) continue
+        throw lastError
+      }
+
+      return response.json()
+    } catch (error) {
+      lastError = error
+      if (attempt >= maxAttempts) break
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
+  const isTimeout = lastError && lastError.name === 'AbortError'
+  throw new Error(isTimeout ? '游戏邮件服务响应超时，请稍后重试' : lastError?.message || '游戏邮件服务请求失败')
+}
+
+function jsonResponseFromGameFailure(data) {
+  if (!data || typeof data !== 'object') return '游戏账号验证未通过'
+  return data.msg || data.message || '游戏账号验证未通过'
+}
+
+export async function verifyGameMailCodeOnServer(uid, mailCode) {
+  const uidNumber = Number(uid)
+  const mailCodeNumber = Number(mailCode)
+  if (!Number.isSafeInteger(uidNumber) || uidNumber <= 0) {
+    throw new Error('UID格式不正确')
+  }
+  if (!Number.isSafeInteger(mailCodeNumber) || mailCodeNumber <= 0) {
+    throw new Error('验证码格式不正确')
+  }
+
+  const data = await callGameMailApi({
+    command: 'login_mail_code',
+    playerId: uidNumber,
+    serverId: '_',
+    mailCode: mailCodeNumber,
+    activity: 'mhzq',
+  })
+
+  if (!data || data.code !== 0) {
+    throw new Error(jsonResponseFromGameFailure(data))
+  }
+
+  return data
+}
+
+export async function generateActivationKey(uid, base64PrivateKey) {
+  if (!base64PrivateKey) {
+    throw new Error('PRIVATE_KEY 未设置。')
+  }
+
+  const uidInt = Number.parseInt(String(uid), 10)
+  if (!Number.isSafeInteger(uidInt) || uidInt < 0 || uidInt > 0xffffffff) {
+    throw new Error('UID 超出 uint32 范围')
+  }
+
+  const expiry = BigInt(Math.floor(Date.now() / 1000) + 45 * 24 * 3600)
+  const payload = new Uint8Array(12)
+  const dataView = new DataView(payload.buffer)
+  dataView.setUint32(0, uidInt, true)
+  dataView.setBigUint64(4, expiry, true)
+
+  const seed = extractEd25519SeedFromPkcs8(base64ToBytes(base64PrivateKey))
+  const keyPair = nacl.sign.keyPair.fromSeed(seed)
+  const signature = nacl.sign.detached(payload, keyPair.secretKey)
+  const fullData = new Uint8Array(payload.length + signature.length)
+  fullData.set(payload, 0)
+  fullData.set(signature, payload.length)
+
+  return base64UrlFromBytes(fullData)
+}
+
+export function sha256Hex(value) {
+  return crypto.subtle.digest('SHA-256', textEncoder.encode(value)).then((hashBuf) =>
+    Array.from(new Uint8Array(hashBuf), (b) => b.toString(16).padStart(2, '0')).join(''),
+  )
+}
