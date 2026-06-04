@@ -443,7 +443,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGacha } from '@/utils/useGacha'
 import { SP, SSR, SR, R } from '@/data/constant.js'
-import { cardPools, cardPoolsInOrder } from '@/data/cardPools'
+import { cardPools, cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools'
 import { cardMap } from '@/data/cards'
 import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'
@@ -480,6 +480,8 @@ const showProbabilityPopup = ref(false)
 const showOrientationPrompt = ref(true)
 const isFullscreen = ref(false)
 const landscapeRootRef = ref(null)
+const currentTimeMs = ref(Date.now())
+let currentTimeTimer = null
 const touchScrollState = {
   el: null,
   startX: 0,
@@ -619,6 +621,9 @@ const handleLandscapeTouchMove = (event) => {
 }
 
 onMounted(() => {
+  currentTimeTimer = window.setInterval(() => {
+    currentTimeMs.value = Date.now()
+  }, 60 * 1000)
   updateLayout()
   window.addEventListener('resize', updateLayout)
   document.addEventListener('fullscreenchange', onFullscreenChange)
@@ -633,6 +638,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (currentTimeTimer) window.clearInterval(currentTimeTimer)
   window.removeEventListener('resize', updateLayout)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
   landscapeRootRef.value?.removeEventListener('touchstart', handleLandscapeTouchStart)
@@ -714,11 +720,11 @@ const isWishUpPool = computed(() => currentPool.value?.rules?.[SP]?.WishUpGuaran
 const maxWishSelection = computed(() => currentPool.value?.rules?.[SP]?.MaximumSelection || 4)
 
 const availablePools = computed(() => {
-  return cardPoolsInOrder.filter(([, pool]) => pool.isAvailable)
+  return cardPoolsInOrder.filter(([, pool]) => isCardPoolAvailable(pool, currentTimeMs.value))
 })
 
 const endedPools = computed(() => {
-  return cardPoolsInOrder.filter(([, pool]) => !pool.isAvailable)
+  return cardPoolsInOrder.filter(([, pool]) => !isCardPoolAvailable(pool, currentTimeMs.value))
 })
 
 const showEndedPools = ref(false)

@@ -200,7 +200,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Return } from '@icon-park/vue-next'
 import { colors } from '@/styles/colors.js'
 import { cardMap, cardNameMap } from '@/data/cards.js'
-import { cardPoolsInOrder } from '@/data/cardPools.js'
+import { cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools.js'
 import PopUp from '@/components/PopUp.vue'
 
 const isReady = ref(false)
@@ -273,7 +273,7 @@ function buildRoleAppearances() {
           entry.isInPermanent = true
         }
 
-        if (pool.isAvailable) {
+        if (isCardPoolAvailable(pool)) {
           entry.isCurrentlyAvailable = true
         }
       }

@@ -48,7 +48,7 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  * - cardNames: 卡池包含的角色列表 (按稀有度分类的名称数组)
  * =============================================================================
  */
-export const cardPoolsInOrder = [
+const rawCardPoolsInOrder = [
   [
     "136",
     {
@@ -3680,6 +3680,46 @@ export const cardPoolsInOrder = [
     },
   ]
 ]
+
+function parsePoolTimeMs(time) {
+  if (!time) return null
+  if (time instanceof Date) return time.getTime()
+  if (typeof time !== 'string') return null
+
+  const match = time.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/,
+  )
+  if (!match) {
+    const parsed = Date.parse(time)
+    return Number.isNaN(parsed) ? null : parsed
+  }
+
+  const [, year, month, day, hour = '0', minute = '0', second = '0'] = match
+  return new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+    Number(second),
+  ).getTime()
+}
+
+export function isCardPoolEnded(pool, now = Date.now()) {
+  const finishTimeMs = parsePoolTimeMs(pool?.finishTime)
+  return finishTimeMs !== null && finishTimeMs < now
+}
+
+export function isCardPoolAvailable(pool, now = Date.now()) {
+  return !isCardPoolEnded(pool, now)
+}
+
+export const cardPoolsInOrder = rawCardPoolsInOrder.slice().sort((a, b) => {
+  const aEnded = isCardPoolEnded(a[1])
+  const bEnded = isCardPoolEnded(b[1])
+  if (aEnded === bEnded) return 0
+  return aEnded ? 1 : -1
+})
 
 export const cardPools = Object.fromEntries(cardPoolsInOrder)
 
