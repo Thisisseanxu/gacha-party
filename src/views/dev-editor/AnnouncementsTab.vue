@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useEditorApi } from '@/composables/useEditorApi.js'
 
 const { data, loading, error, load } = useEditorApi('announcements')
@@ -131,6 +131,7 @@ const originalId = ref('')
 const startDateTime = ref('')
 const endDateTime = ref('')
 const timezoneOffset = ref('+08:00')
+const originalContent = ref('')
 
 const emptyForm = () => ({
   id: '',
@@ -199,12 +200,20 @@ function applyDateTime(field) {
 }
 
 function makeAnnouncementId() {
-  const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 14)
-  return `announcement-${stamp}`
+  const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 17)
+  const suffix = Math.random().toString(36).slice(2, 6)
+  return `announcement-${stamp}-${suffix}`
+}
+
+function makeUniqueAnnouncementId() {
+  const existingIds = new Set(announcements.value.map((item) => item.id).filter(Boolean))
+  let id = makeAnnouncementId()
+  while (existingIds.has(id)) id = makeAnnouncementId()
+  return id
 }
 
 function fillId() {
-  form.value.id = makeAnnouncementId()
+  form.value.id = makeUniqueAnnouncementId()
 }
 
 function selectAnnouncement(announcement) {
@@ -212,14 +221,16 @@ function selectAnnouncement(announcement) {
   originalId.value = announcement.id || ''
   saveMsg.value = null
   form.value = normalizeAnnouncement(announcement)
+  originalContent.value = form.value.content
   syncDateTimeInputs()
 }
 
 function newAnnouncement() {
   isNew.value = true
   originalId.value = ''
+  originalContent.value = ''
   saveMsg.value = null
-  form.value = { ...emptyForm(), id: makeAnnouncementId() }
+  form.value = { ...emptyForm(), id: makeUniqueAnnouncementId() }
   syncDateTimeInputs()
 }
 
@@ -229,7 +240,7 @@ function resetForm() {
     newAnnouncement()
     return
   }
-  const original = announcements.value.find((item) => item.id === form.value.id)
+  const original = announcements.value.find((item) => item.id === originalId.value)
   if (original) selectAnnouncement(original)
 }
 
@@ -284,7 +295,7 @@ async function saveCurrent() {
 
 async function removeCurrent() {
   await persist(
-    announcements.value.filter((item) => item.id !== form.value.id),
+    announcements.value.filter((item) => item.id !== (originalId.value || form.value.id)),
     '删除成功',
   )
 }
@@ -305,6 +316,20 @@ onMounted(() => {
   loadAndSelect()
   window.addEventListener('keydown', handleGlobalKeyDown)
 })
+
+watch(
+  () => form.value.content,
+  (content) => {
+    if (isNew.value || !originalId.value || form.value.id !== originalId.value) return
+    if (content !== originalContent.value) {
+      form.value.id = makeUniqueAnnouncementId()
+      saveMsg.value = {
+        ok: true,
+        text: '内容已修改，已自动生成新 ID。保存后会作为新公告再次展示。',
+      }
+    }
+  },
+)
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeyDown)

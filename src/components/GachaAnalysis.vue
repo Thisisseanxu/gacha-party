@@ -151,7 +151,9 @@
                   </div>
                 </div>
                 <div v-if="shouldShowSummarySsr" class="timeline-bottom">
-                  <span class="pool-name">{{ formatShortDate(item.createdAt) }}</span>
+                  <span class="pool-name">{{
+                    item.isPityPlaceholder ? '当前保底' : formatShortDate(item.createdAt)
+                  }}</span>
                   <div class="ssr-strip">
                     <template v-if="item.ssrInSegment?.length">
                       <img
@@ -317,7 +319,6 @@ const props = defineProps({
   LIMITED_FUKE_CARD_POOLS_ID: { type: Array, default: () => [] },
   EVENT_FUKE_CARD_POOLS_ID: { type: Array, default: () => [] },
   OTHER_CARD_POOLS_ID: { type: Array, default: () => [] },
-  SPECIAL_OUTSIDE_POOLS: { type: Array, default: () => [] },
   CARDPOOLS_NAME_MAP: { type: Object, default: () => ({}) },
 })
 
@@ -718,10 +719,6 @@ const groupAnalyses = computed(() => {
   const eventFuke = mergeAnalyses('联动复刻', buildAnalysesForIds(props.EVENT_FUKE_CARD_POOLS_ID))
   const advancedNormal = buildPoolAnalysis(props.advancedNormalGachaData, '高级常驻')
   const normal = buildPoolAnalysis(props.normalGachaData, '常驻')
-  const other = mergeAnalyses(
-    '特殊',
-    props.OTHER_CARD_POOLS_ID.map((id) => analysisByPoolId.value.get(String(id))).filter(Boolean),
-  )
 
   return {
     limited: limitedBase,
@@ -730,18 +727,37 @@ const groupAnalyses = computed(() => {
     eventFuke,
     advancedNormal,
     normal,
-    other,
   }
 })
+
+const getPoolStartTime = (id) => parsePoolDate(poolMeta.value.times?.[String(id)]?.start)
+
+const getAnalysisLatestTime = (analysis) =>
+  analysis.records.reduce((latest, item) => Math.max(latest, item.createdAtMs || 0), 0)
+
+const otherPoolGroups = computed(() =>
+  props.OTHER_CARD_POOLS_ID.map((id) => {
+    const poolId = String(id)
+    const analysis =
+      analysisByPoolId.value.get(poolId) || buildPoolAnalysis([], getPoolName(poolId))
+    return {
+      key: `pool-${poolId}`,
+      poolId,
+      name: getPoolName(poolId),
+      sortTime: getPoolStartTime(poolId) || getAnalysisLatestTime(analysis),
+      ...analysis,
+    }
+  }).sort((a, b) => b.sortTime - a.sortTime || Number(b.poolId) - Number(a.poolId)),
+)
 
 const groupList = computed(() => [
   { key: 'limited', name: '限定', ...groupAnalyses.value.limited },
   { key: 'limitedFuke', name: '限定复刻', ...groupAnalyses.value.limitedFuke },
   { key: 'event', name: '联动', ...groupAnalyses.value.event },
   { key: 'eventFuke', name: '联动复刻', ...groupAnalyses.value.eventFuke },
-  { key: 'other', name: '特殊', ...groupAnalyses.value.other },
   { key: 'advancedNormal', name: '高级常驻', ...groupAnalyses.value.advancedNormal },
   { key: 'normal', name: '常驻', ...groupAnalyses.value.normal },
+  ...otherPoolGroups.value,
 ])
 
 const selectedSummary = computed(
@@ -750,9 +766,30 @@ const selectedSummary = computed(
 
 const isNormalSummary = computed(() => selectedSummary.value?.key === 'normal')
 const shouldShowSummarySsr = computed(() => showSummarySsr.value && !isNormalSummary.value)
-const selectedSummaryTimeline = computed(() =>
-  isNormalSummary.value ? selectedSummary.value.ssrHistory : selectedSummary.value.spHistory,
-)
+const buildPityPlaceholder = (group) => {
+  const isNormal = group.key === 'normal'
+  const count = isNormal ? group.currentSsrPity : group.currentSpPity
+  if (!count) return null
+  return {
+    key: `${group.key}-current-pity`,
+    id: `${group.key}-current-pity`,
+    name: '已垫',
+    imageUrl: placeholderImage,
+    rarity: isNormal ? SSR : SP,
+    count,
+    createdAt: 0,
+    createdAtMs: 0,
+    ssrInSegment: [],
+    isPityPlaceholder: true,
+  }
+}
+const selectedSummaryTimeline = computed(() => {
+  const history = isNormalSummary.value
+    ? selectedSummary.value.ssrHistory
+    : selectedSummary.value.spHistory
+  const placeholder = buildPityPlaceholder(selectedSummary.value)
+  return placeholder ? [placeholder, ...history] : history
+})
 const summaryEmptyText = computed(() =>
   isNormalSummary.value ? '暂无SSR记录。' : '暂无SP记录，SSR统计可在卡池详情查看',
 )
@@ -850,7 +887,7 @@ const scoreAnalyses = computed(() => [
   buildPoolAnalysis(props.eventGachaData, '联动'),
   ...buildAnalysesForIds(props.LIMITED_FUKE_CARD_POOLS_ID),
   ...buildAnalysesForIds(props.EVENT_FUKE_CARD_POOLS_ID),
-  ...props.OTHER_CARD_POOLS_ID.map((id) => analysisByPoolId.value.get(String(id))).filter(Boolean),
+  ...otherPoolGroups.value,
 ])
 
 const gachaAchievements = computed(() => {
