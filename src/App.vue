@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view> </router-view>
-    <FloatingHomeButton :is-updating="needRefresh" />
+    <FloatingHomeButton :is-update-downloading="isUpdateDownloading" />
     <AnnouncementDialog
       :announcement="currentAnnouncement"
       :index="currentAnnouncementIndex"
@@ -43,16 +43,21 @@ import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { colors } from '@/styles/colors.js'
 import { getActiveWebAnnouncements, markWebAnnouncementShown } from '@/utils/announcements.js'
 
-const { needRefresh, updateServiceWorker } = useRegisterSW()
-// 使用 watch 监听是否有新版本
-
 const showUpdateDialog = ref(false)
 const isUpdating = ref(false)
+const isUpdateDownloading = ref(false)
 const updateStatusMessage = ref('正在切换到新版本，请稍候...')
 const announcements = ref([])
 const currentAnnouncementIndex = ref(0)
 const currentAnnouncement = ref(null)
 let updateFallbackTimer = null
+let removeUpdateFoundListener = null
+
+const { needRefresh, updateServiceWorker } = useRegisterSW({
+  onRegisteredSW(_swScriptUrl, registration) {
+    watchForServiceWorkerUpdates(registration)
+  },
+})
 
 onMounted(async () => {
   announcements.value = await getActiveWebAnnouncements()
@@ -62,8 +67,8 @@ onMounted(async () => {
 
 watch(needRefresh, (newValue) => {
   if (newValue) {
+    isUpdateDownloading.value = false
     showUpdateDialog.value = true
-    updateStatusMessage.value = '发现新版本，准备开始更新。'
   } else {
     showUpdateDialog.value = false
     isUpdating.value = false
@@ -71,6 +76,35 @@ watch(needRefresh, (newValue) => {
     updateStatusMessage.value = '正在切换到新版本，请稍候...'
   }
 })
+
+function watchForServiceWorkerUpdates(registration) {
+  if (!registration) return
+
+  const trackInstallingWorker = () => {
+    const worker = registration.installing
+    // 首次安装 PWA 时没有现有 controller，不应提示用户正在更新。
+    if (!worker || !navigator.serviceWorker.controller) return
+
+    isUpdateDownloading.value = true
+
+    const handleStateChange = () => {
+      if (worker.state !== 'installing') {
+        isUpdateDownloading.value = false
+        worker.removeEventListener('statechange', handleStateChange)
+      }
+    }
+
+    worker.addEventListener('statechange', handleStateChange)
+    handleStateChange()
+  }
+
+  registration.addEventListener('updatefound', trackInstallingWorker)
+  removeUpdateFoundListener = () => {
+    registration.removeEventListener('updatefound', trackInstallingWorker)
+  }
+
+  trackInstallingWorker()
+}
 
 function clearUpdateFallbackTimer() {
   if (updateFallbackTimer) {
@@ -121,6 +155,7 @@ function nextAnnouncement() {
 
 onBeforeUnmount(() => {
   clearUpdateFallbackTimer()
+  removeUpdateFoundListener?.()
 })
 </script>
 

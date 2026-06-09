@@ -8,7 +8,7 @@
       </Transition>
 
       <Transition name="fade">
-        <div class="hint-bubble" v-if="props.isUpdating">
+        <div class="hint-bubble" v-if="props.isUpdateDownloading">
           <div class="spinner"></div>
           <span>发现新版本，在下载喵~</span>
         </div>
@@ -24,7 +24,7 @@ import { colors } from '@/styles/colors.js'
 import { isFloatingButtonHidden } from '@/utils/floatingButtonState.js'
 
 const props = defineProps({
-  isUpdating: {
+  isUpdateDownloading: {
     type: Boolean,
     default: false,
   },
