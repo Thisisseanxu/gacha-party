@@ -1,5 +1,23 @@
 [
   {
+    "id": "1715",
+    "name": "波子汽水",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1715.webp",
+    "realname": "橙汽",
+    "theme": "ice",
+    "qban_url": "/images/qban/1715.webp"
+  },
+  {
+    "id": "1716",
+    "name": "清凉冰箱贴",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1716.webp",
+    "realname": "贴贴",
+    "theme": "ice",
+    "qban_url": "/images/qban/1716.webp"
+  },
+  {
     "id": "2103",
     "name": "果宝",
     "rarity": "SP",

@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "announcements": [
     {
       "id": "announcement-20260604160444",
@@ -10,17 +10,6 @@
       "enabled": true,
       "showEveryOpen": false,
       "miniProgramOnly": true,
-      "webOnly": false
-    },
-    {
-      "id": "announcement-20260604160441",
-      "title": "高考加油！",
-      "content": "织夜工具箱祝愿所有参与高考的班长从容赴考，奋力一搏，落笔生花，得偿所愿，金榜题名！",
-      "startDate": "2026-06-02T00:00:00+08:00",
-      "endDate": "2026-06-09T23:59:59+08:00",
-      "enabled": true,
-      "showEveryOpen": false,
-      "miniProgramOnly": false,
       "webOnly": false
     }
   ]
