@@ -17,6 +17,7 @@
       <HuizhangTab v-else-if="activeTab === 'huizhang'" />
       <GachaPoolsTab v-else-if="activeTab === 'gachapools'" />
       <AnnouncementsTab v-else-if="activeTab === 'announcements'" />
+      <CharacterScoresTab v-else-if="activeTab === 'character-scores'" />
     </div>
   </div>
 </template>
@@ -28,6 +29,7 @@ import CardPoolsTab from './dev-editor/CardPoolsTab.vue'
 import HuizhangTab from './dev-editor/HuizhangTab.vue'
 import GachaPoolsTab from './dev-editor/GachaPoolsTab.vue'
 import AnnouncementsTab from './dev-editor/AnnouncementsTab.vue'
+import CharacterScoresTab from './dev-editor/CharacterScoresTab.vue'
 import NoFloatingButton from '@/components/NoFloatingButton.vue'
 import './dev-editor/dev-shared.css' // 公共样式
 
@@ -37,6 +39,7 @@ const tabs = [
   { key: 'huizhang', label: '徽章槽位' },
   { key: 'gachapools', label: '卡池数据' },
   { key: 'announcements', label: '公告' },
+  { key: 'character-scores', label: '角色四维倾向' },
 ]
 
 const activeTab = ref('cards')

@@ -16,6 +16,7 @@ const HUIZHANG_FILE = resolve(ROOT, 'src/data/huizhang.js')
 const GACHA_POOLS_FILE = resolve(ROOT, 'public/data/gacha_pools.json')
 const DATABASE_FILE = resolve(ROOT, 'public/data/gacha_info.json')
 const ANNOUNCEMENTS_FILE = resolve(ROOT, 'public/data/announcements.json')
+const CHARACTER_SCORES_FILE = resolve(ROOT, 'public/data/character_scores.json')
 
 // ── 符号映射：AST Identifier/MemberExpression → JSON 值 ────────────────────
 const SYMBOL_RESOLVE = {
@@ -170,8 +171,10 @@ function readCardPools() {
 }
 
 function findCardPoolsEntries(ast) {
-  const entries = findExportInit(ast, 'cardPoolsInOrder')
-  if (entries?.type === 'ArrayExpression') return entries
+  for (const varName of ['rawCardPoolsInOrder', 'cardPoolsInOrder']) {
+    const entries = findExportInit(ast, varName)
+    if (entries?.type === 'ArrayExpression') return entries
+  }
 
   const obj = findExportInit(ast, 'cardPools')
   if (obj?.type === 'ObjectExpression') {
@@ -187,8 +190,7 @@ function findCardPoolsEntries(ast) {
 
 function writeCardPool(poolId, poolData) {
   const ast = parseFile(CARD_POOLS_FILE)
-  const entries = findExportInit(ast, 'cardPoolsInOrder')
-  if (entries?.type !== 'ArrayExpression') throw new Error('cardPoolsInOrder 未找到')
+  const entries = findCardPoolsEntries(ast)
 
   const existing = entries.elements.find((entry) => {
     if (entry?.type !== 'ArrayExpression') return false
@@ -210,6 +212,8 @@ function buildPoolNode(data) {
     'name',
     'isAvailable',
     'imageUrl',
+    'startTime',
+    'finishTime',
     'tag_type',
     'tag_name',
     'rates',
@@ -274,6 +278,28 @@ function readJson(filePath) {
 
 function writeJson(filePath, data) {
   writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8')
+}
+
+function writeCharacterScores(characterName, scores) {
+  const data = readJson(CHARACTER_SCORES_FILE)
+  if (!Array.isArray(data.characters)) throw new Error('character_scores.json 格式错误')
+
+  const character = data.characters.find((item) => item['角色'] === characterName)
+  if (!character) throw new Error(`未找到角色：${characterName}`)
+
+  const dimensionNames = Object.values(data.dimensions || {}).map((axis) => axis.positive)
+  for (const dimension of dimensionNames) {
+    const value = Number(scores?.[dimension])
+    if (!Number.isFinite(value)) throw new Error(`${dimension} 必须是数字`)
+    if (value < data.scoring_scale.min || value > data.scoring_scale.max) {
+      throw new Error(
+        `${dimension} 必须在 ${data.scoring_scale.min} 至 ${data.scoring_scale.max} 之间`,
+      )
+    }
+    character[dimension] = value
+  }
+
+  writeJson(CHARACTER_SCORES_FILE, data)
 }
 
 // ── HTTP 工具 ─────────────────────────────────────────────────────────────────
@@ -355,6 +381,14 @@ export function devEditorPlugin() {
             return respond(res, readJson(ANNOUNCEMENTS_FILE))
           if (method === 'PUT' && url === '/announcements') {
             writeJson(ANNOUNCEMENTS_FILE, await readBody(req))
+            return respond(res, { ok: true })
+          }
+
+          if (method === 'GET' && url === '/character-scores')
+            return respond(res, readJson(CHARACTER_SCORES_FILE))
+          if (method === 'PUT' && url === '/character-scores') {
+            const body = await readBody(req)
+            writeCharacterScores(body.character, body.scores)
             return respond(res, { ok: true })
           }
 

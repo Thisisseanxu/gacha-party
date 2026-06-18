@@ -11,6 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "previewhost": "vite preview --host",
+    "quiz:calibrate": "node scripts/calibrate-personality-scores.mjs",
+    "quiz:validate": "node scripts/validate-personality-quiz.mjs",
     "lint": "eslint . --fix",
     "lint:fix": "eslint \"src/**/*.{vue,js,ts,jsx,tsx}\" --fix",
     "format": "prettier --write \"**/*.{js,json,vue}\"",

@@ -48,6 +48,13 @@ const dark = {
     narratorBg: '#4B3F66', // 旁白背景
     narratorText: '#C0BCC9', // 旁白文字
   },
+  // --- 性格倾向轴颜色 ---
+  personality: {
+    cuteness: '#f06c9b', // 可爱
+    tsundere: '#a78bfa', // 傲娇
+    capability: '#38bdf8', // 能干
+    energy: '#f59e0b', // 活力
+  },
   // --- 稀有度颜色 ---
   rarity: {
     sp: 'rgba(255, 85, 61, 1)', // SP 稀有度颜色
@@ -172,6 +179,12 @@ const light = {
     warnBorder: 'rgba(245, 158, 11, 0.35)', // 警告边框色
   },
   game: { ...dark.game }, // 游戏内颜色保持一致
+  personality: {
+    cuteness: '#db2777',
+    tsundere: '#7c3aed',
+    capability: '#0284c7',
+    energy: '#d97706',
+  },
   rarity: { ...dark.rarity }, // 稀有度颜色保持一致
   status: { ...dark.status }, // 状态颜色保持一致
   colorOfLuck: {

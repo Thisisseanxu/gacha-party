@@ -131,6 +131,22 @@ const routes = [
     },
   },
   {
+    path: '/quiz',
+    name: '角色性格匹配',
+    component: () => import('./views/PersonalityQuizPage.vue'),
+    meta: {
+      title: '角色性格匹配 - 织夜工具箱',
+    },
+  },
+  {
+    path: '/quiz/dev',
+    name: '角色四维倾向一览',
+    component: () => import('./views/CharacterTendenciesPage.vue'),
+    meta: {
+      title: '角色四维倾向一览 - 织夜工具箱',
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('./views/NotFound.vue'),
