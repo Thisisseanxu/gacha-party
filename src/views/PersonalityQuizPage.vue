@@ -4,10 +4,19 @@
       <header class="quiz-header">
         <p class="eyebrow">盲盒派对 · 性格测试</p>
         <h1>你和哪位角色最匹配？</h1>
-        <p>完成 40 道情境选择题，看看你在四条性格倾向轴上更靠近哪一端。</p>
+        <p>完成 30 道情境选择题，看看你和盲盒派对哪位角色性格相符。</p>
       </header>
 
       <template v-if="!isFinished">
+        <input
+          id="personality-answer-sequence"
+          class="answer-sequence-input"
+          type="text"
+          autocomplete="off"
+          tabindex="-1"
+          aria-hidden="true"
+          @change="applyAnswerSequence($event.target.value)"
+        />
         <div
           class="progress-track"
           role="progressbar"
@@ -20,7 +29,7 @@
 
         <article class="question-card">
           <div class="question-meta">
-            <span>QUESTION {{ String(currentQuestion.id).padStart(2, '0') }}</span>
+            <span>QUESTION {{ String(currentIndex + 1).padStart(2, '0') }}</span>
             <span>{{ currentIndex + 1 }} / {{ personalityQuestions.length }}</span>
           </div>
           <h2>{{ currentQuestion.prompt }}</h2>
@@ -87,7 +96,6 @@
           </div>
 
           <div class="result-actions">
-            <button type="button" class="secondary-button" @click="reviewAnswers">返回检查</button>
             <button type="button" class="primary-button" @click="restartQuiz">重新测试</button>
           </div>
         </template>
@@ -105,6 +113,7 @@ import { personalityQuestions } from '@/data/personalityQuiz.js'
 import TendencyProfile from '@/components/TendencyProfile.vue'
 import {
   calculateQuizProfile,
+  decodeAnswerSequence,
   dimensionEntries,
   findClosestCharacter,
 } from '@/utils/personalityMatch.js'
@@ -180,6 +189,18 @@ function createShuffledQuestions() {
   }))
 }
 
+function applyAnswerSequence(sequence) {
+  try {
+    answers.value = decodeAnswerSequence(personalityQuestions, sequence)
+    currentIndex.value = personalityQuestions.length - 1
+    isFinished.value = true
+    resultError.value = ''
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch (error) {
+    resultError.value = `测试答案序列无效：${error.message}`
+  }
+}
+
 function selectOption(optionId) {
   answers.value[currentIndex.value] = optionId
   nextQuestion()
@@ -197,11 +218,6 @@ function nextQuestion() {
     isFinished.value = true
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-}
-
-function reviewAnswers() {
-  isFinished.value = false
-  currentIndex.value = 0
 }
 
 function restartQuiz() {
@@ -252,6 +268,15 @@ function restartQuiz() {
   margin: 14px 0 0;
   color: v-bind('colors.text.secondary');
   line-height: 1.7;
+}
+
+.answer-sequence-input {
+  position: fixed;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .progress-track {

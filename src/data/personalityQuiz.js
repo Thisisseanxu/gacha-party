@@ -4,7 +4,6 @@ export const quizDimensions = ['傲娇', '可爱', '能干', '活力']
 
 const personalityQuestionSource = [
   {
-    id: 1,
     prompt:
       '刚来到这个微缩世界建立营地，面对堆积如山的奇特物资（巨大的甜点、巨大的零件），你打算怎么安排？',
     options: [
@@ -43,7 +42,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 2,
     prompt: '营地工程部和防务部因为“是先造防御电磁炮还是先盖公共浴室”吵得不可开交，作为班长你会：',
     options: [
       {
@@ -72,7 +70,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，真拿你们没办法，两个方案我熬夜一起优化总行了吧。”',
+        text: '嘴上说着“真会给人添麻烦”，却把两个方案都带回去连夜整理出可行版本。',
         scores: {
           傲娇: 15,
           能干: 10,
@@ -81,7 +79,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 3,
     prompt: '晚上你在营地巡视，发现一位学员在空地上看着星空默默流泪，似乎在想念原本的世界，你会：',
     options: [
       {
@@ -110,7 +107,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“咳……这里风大，感冒了可别指望我照顾你，赶紧回屋去。”',
+        text: '提醒她夜里风凉，顺手把外套披到她肩上，再若无其事地催她早点回屋。',
         scores: {
           傲娇: 20,
           感性: 10,
@@ -118,8 +115,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 4,
     prompt: '营地的夜市和茶馆开张了，你想为营地拉拢人气，你会选择哪种宣传方式？',
     options: [
       {
@@ -156,8 +153,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 5,
     prompt: '营地的财务报告出来了，发现最近因为买甜点和游戏机的开销有些超支，你会怎么做？',
     options: [
       {
@@ -186,7 +183,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，谁让你们吃那么多蛋糕的，以后零食分量减半，不准抗议！”',
+        text: '当面宣布缩减零食预算，转身却开始研究怎样从别的项目里省出甜点钱。',
         scores: {
           傲娇: 20,
           能干: 5,
@@ -194,8 +191,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 6,
     prompt: '营地要举办一场大型的迎新派对，在选择派对主题时，你更倾向于：',
     options: [
       {
@@ -232,8 +229,9 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
+  /*
   {
-    id: 7,
     prompt: '如果要在营地中心为自己盖一间班长办公室，你希望把它装修成什么样？',
     options: [
       {
@@ -270,8 +268,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 8,
     prompt: '有学员不小心把你最喜欢的一个水杯给打碎了，她正慌张地向你道歉，你会：',
     options: [
       {
@@ -300,7 +298,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，毛手毛脚的……下次注意点！喏，把地扫干净，我才没有生气。”',
+        text: '先板着脸让她把碎片扫干净，确认她没有受伤后便不再追究。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -309,7 +307,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 9,
     prompt: '面对每天不断增加的营地政务和各种琐碎的事故报告，你的状态通常是：',
     options: [
       {
@@ -338,7 +335,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“烦死了，怎么这么多报告……要不是担心你们把营地拆了，我才懒得管！”',
+        text: '一边抱怨报告没完没了，一边仍把每页都看完，连最小的隐患也圈出来。',
         scores: {
           傲娇: 25,
           能干: 10,
@@ -346,8 +343,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 10,
     prompt: '营地里的几位年幼学员想让你在睡觉前给她们讲一个故事，你会选择：',
     options: [
       {
@@ -384,8 +381,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 11,
     prompt: '带领小队踏入“甜品区”，面对比人还高的巨型草莓蛋糕和空气中浓郁的奶香，你的第一反应是：',
     options: [
       {
@@ -414,7 +411,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“咳……我是为了让某些贪吃鬼开心，才勉强决定在这里扎营收集物资的。”',
+        text: '故作冷静地安排扎营采集，清单上却悄悄把大家爱吃的材料排在了最前面。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -423,7 +420,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 12,
     prompt: '进入危险的“梦境区”，四周被黑夜迷雾笼罩，现实与幻觉开始模糊，你如何带队前进？',
     options: [
       {
@@ -452,7 +448,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“害怕就抓着我的衣角……哼，我只是怕你们走丢了拖累进度而已！”',
+        text: '让紧张的人抓住自己的衣角，并坚持说这只是为了避免队伍在雾里走散。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -461,7 +457,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 13,
     prompt: '在“电玩区”探索时，前方有一扇高难度的电子密码门锁闭了去路，你会：',
     options: [
       {
@@ -490,7 +485,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“这种小关卡怎么可能难倒我？看好了，我可不是为了在你们面前耍帅！”',
+        text: '若无其事地让大家退后，独自接过终端操作；解开后又装作这只是基本功。',
         scores: {
           傲娇: 25,
           能干: 10,
@@ -498,8 +493,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 14,
     prompt: '深入“电音区”，四周播放着动感的音乐，原住民微型机也随着节拍晃动，你会：',
     options: [
       {
@@ -536,8 +531,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 15,
     prompt: '来到极度危险的“火焰区”，这里高温且随时可能发生爆炸，你作为队长的态度是：',
     options: [
       {
@@ -566,7 +561,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '把耐热道具塞到容易受伤的学员手里：“拿着！别以为我是关心你，我只是怕你拖后腿！”',
+        text: '把最好的耐热道具塞给容易受伤的学员，理由是“不想有人拖慢整队进度”。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -574,8 +569,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 16,
     prompt: '在“寒冰区”探索时，大家发现新盖好的滑冰场，学员们热情地邀请你一起下去玩：',
     options: [
       {
@@ -612,8 +607,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 17,
     prompt: '队伍在“水流区”遇到了湍急的河流，需要搭建一座临时木桥，你会：',
     options: [
       {
@@ -642,7 +637,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“这河流有什么好怕的？都看着我，我才没有在腿抖！”',
+        text: '坚持第一个踏上还没完全固定的桥，用过分镇定的语气催大家跟上。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -651,7 +646,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 18,
     prompt: '在探索过程中，你突然发现了一处似乎能引发“时间回溯”的异常古代遗迹，你会：',
     options: [
       {
@@ -680,7 +674,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，总觉得有些古怪……大家都退后，让我这个班长走在最前面探路！”',
+        text: '察觉遗迹不对劲后让所有人退后，自己先走在前面确认是否安全。',
         scores: {
           傲娇: 25,
           活力: 5,
@@ -688,8 +682,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 19,
     prompt: '在漫长的未知区域远征中，干粮吃光了，你为大家做了一顿味道很奇特的异世界大杂烩：',
     options: [
       {
@@ -726,8 +720,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 20,
     prompt: '终于结束了一次高强度的区域开荒，带着满载的物资回到盲盒营地时，你的表现是：',
     options: [
       {
@@ -756,7 +750,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“看什么看，只是完成了基本的探索任务而已，一个个用这种崇拜的眼神看着我干嘛……”',
+        text: '把大家的欢迎说成“小题大做”，却明显放慢脚步，多享受了一会儿这份热闹。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -765,7 +759,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 21,
     prompt: '营地突然遭到一队原住民“微型机”的袭击，战斗一触即发，作为指挥官你的第一指令是：',
     options: [
       {
@@ -794,7 +787,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，不自量力的家伙。大家都退后，别妨碍本班长发挥！”',
+        text: '冷着脸让大家撤到安全位置，自己接下最危险的正面防线。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -803,7 +796,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 22,
     prompt: '在战斗后，你俘获了一只由于能量耗尽而瘫痪、甚至还在发出委屈哭腔的小型微型机，你会：',
     options: [
       {
@@ -832,7 +824,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“真弱啊……喏，这点能量分给你，可别以为我是对你好，只是怕你坏掉没办法研究！”',
+        text: '评价一句“也太不经打了”，却把自己的备用能源接给它，确保它先稳定下来。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -840,8 +832,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 23,
     prompt: '黑木幸负责的“微型机战俘学校”成立了，你作为班长去视察，你希望传授给这些微型机什么？',
     options: [
       {
@@ -878,8 +870,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 24,
     prompt:
       '营地里对于如何对待微型机产生了分裂：一方主张彻底消灭保证安全，一方主张尝试和解。你会倾向于：',
     options: [
@@ -909,7 +901,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“吵死了！都给我闭嘴！只要它们敢袭击就打，愿意和平相处的就留下来打工，有什么好吵的！”',
+        text: '直接划出底线：袭击者必须防范，愿意守规矩的则可以留下，用行动再作判断。',
         scores: {
           傲娇: 25,
           活力: 5,
@@ -918,7 +910,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 25,
     prompt:
       '一只经过培训的和平微型机在营地送餐时，不小心把汤汁洒在了你刚洗好的衣服上，它吓得瑟瑟发抖：',
     options: [
@@ -948,7 +939,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“真是笨手笨脚的！……拿去，用这个抹布擦干净，下不为例，听懂了没！”',
+        text: '皱着眉递给它抹布，嘴上说着“下不为例”，处理完却先检查它有没有被烫到。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -957,7 +948,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 26,
     prompt: '营地要为微型机粉丝们举办一场和解演唱会，但在演出的前一刻音响设备突然烧坏了，你会：',
     options: [
       {
@@ -986,7 +976,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“啧，真不让人省心……都闪开，让我来弄，要是演唱会搞砸了，你们可别哭！”',
+        text: '叹着气接管最棘手的维修，把其他人赶去安抚观众，自己留在后台抢修。',
         scores: {
           傲娇: 25,
           能干: 10,
@@ -995,7 +985,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 27,
     prompt:
       '战俘学校的一只微型机给你写了一封歪歪扭扭的匿名投诉信，抱怨黑木幸的风纪防务管理太严格了：',
     options: [
@@ -1025,7 +1014,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“嫌严格？那是因为你们以前总想着拆营地！……不过，我会盯着那家伙让她稍微少罚你们一点的。”',
+        text: '先指出它们过去确实惹过不少麻烦，随后还是去和黑木幸商量更合理的奖惩办法。',
         scores: {
           傲娇: 25,
           感性: 5,
@@ -1034,7 +1023,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 28,
     prompt: '有一只非常聪明的微型机，居然学会了模仿你的日常口头禅，引得营地里的学员们哄堂大笑：',
     options: [
       {
@@ -1047,7 +1035,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'B',
-        text: '脸红到脖子根，羞愤地大喊：“不准学我说话！一点都不像！赶紧把它给我带走！”',
+        text: '立刻打断模仿并把它赶去做别的事，反应之快反而让周围的人笑得更厉害。',
         scores: {
           傲娇: 25,
           可爱: 5,
@@ -1071,8 +1059,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 29,
     prompt:
       '营地防御战大获全胜，那些主动要求留下打工的微型机也立了功，在庆功宴上你会怎么对待它们？',
     options: [
@@ -1110,8 +1098,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 30,
     prompt:
       '在深度的探索中，你发现微型机居然有自己的节日和争吵。这让你对这个世界的本质产生了怀疑，此时你觉得：',
     options: [
@@ -1141,7 +1129,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“麻烦死了……这个世界到底是怎么回事啊！……反正，在真相大白前，谁也别想破坏现在的营地！”',
+        text: '虽然嫌真相越来越麻烦，还是决定在查清一切前守住营地，不让任何一方破坏现状。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -1150,7 +1138,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 31,
     prompt:
       '水流区域里的史莱姆化为了少女形态（布露），面对这个可能拥有整个世界核心AI秘密的单纯少女，你第一反应是：',
     options: [
@@ -1180,7 +1167,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“你……你就是那个传闻中的世界化身吗？哼，既然无家可归，就勉强跟在我身边吧。”',
+        text: '谨慎地问清她的来历，最后还是给她留了一个离自己最近的位置方便照看。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -1189,7 +1176,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 32,
     prompt:
       '偶尔你也会想起自己失去部分记忆这件事，黑木幸曾暗示过继续在这里生活能恢复记忆，你的态度是：',
     options: [
@@ -1219,7 +1205,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“失忆什么的……偶尔也会让人有点寂寞啦，但、但本班长才没有因为这个在半夜偷偷难过呢！”',
+        text: '白天装作并不在意，夜深时却会独自整理零散线索，不愿让别人看出自己的不安。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -1228,7 +1214,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 33,
     prompt:
       '布露展现了能将普通造物“活化”变成微型机的能力，这可能是整个盲盒世界诞生的秘密，面对这股危险的力量：',
     options: [
@@ -1258,7 +1243,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“听好了！以后不准随随便便把别的东西活化！……万一你失控受伤了，我可不管你！”',
+        text: '严肃规定她以后不能独自尝试活化，所有实验都必须有人陪同并准备好保护措施。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -1267,7 +1252,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 34,
     prompt:
       '随着营地从一个前线据点变成热闹的小型城镇，寻找“回家的方法”依然在继续，但不少同伴开始流露出担忧，此时你会：',
     options: [
@@ -1297,7 +1281,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“烦、烦死了！想那么多干嘛！不管以后在哪里，本班长都一直是你们的班长，这点是不会变的！”',
+        text: '嫌大家想得太远，却很认真地保证：无论最后身在何处，这支队伍都不会散。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -1306,7 +1290,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 35,
     prompt:
       '假如你在某个区域的深处，意外发现了一台留给你的古老录音机，里面似乎留有你在来盲盒世界前的声音，你会：',
     options: [
@@ -1336,7 +1319,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '悄悄躲进没有人的房间里，一边小声碎碎念着“我只是好奇才听的”，一边按下了播放。',
+        text: '等到四下无人时才独自播放，事后若有人问起，便说自己只是顺手检查设备。',
         scores: {
           傲娇: 25,
           感性: 10,
@@ -1345,7 +1328,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 36,
     prompt:
       '随着真相越来越近，你发现学院高层似乎隐藏了把你们送来这里的真实目的，甚至带有试验性质，得知这点你：',
     options: [
@@ -1375,7 +1357,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼，那个超天才院长果然不靠谱。不过……既然本班长已经在这里站稳脚跟了，试验就由我说了算！”',
+        text: '对学院的安排表现得不屑，却立即接管局面，把保护营地写进后续行动的第一条。',
         scores: {
           傲娇: 25,
           活力: 5,
@@ -1384,7 +1366,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 37,
     prompt: '布露问你：“班长，如果有一天这个世界发生危机要毁灭了，你还会像现在这样保护这里吗？”',
     options: [
       {
@@ -1413,7 +1394,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“笨、笨蛋！一天到晚瞎想什么呢！……听好了，没有我的允许，这个世界和你不准出任何意外！”',
+        text: '先打断她越想越坏的猜测，随后郑重承诺会守住世界，也会守住她。',
         scores: {
           傲娇: 25,
           可爱: 5,
@@ -1422,7 +1403,6 @@ const personalityQuestionSource = [
     ],
   },
   {
-    id: 38,
     prompt:
       '假如你终于集齐了所有区域的核心异常能源，眼看就能打开返回原本世界的稳定传送门，但会导致盲盒世界由于能量抽离而陷入休眠，此时：',
     options: [
@@ -1452,7 +1432,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼……好不容易建好的营地，怎么可能说丢下就丢下。大门先关了！本班长还没玩够呢！”',
+        text: '果断关停传送门，把决定说成“不想浪费已经建好的营地”，然后继续寻找别的办法。',
         scores: {
           傲娇: 25,
           能干: 5,
@@ -1460,8 +1440,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  /*
   {
-    id: 39,
     prompt:
       '临近最后的决战与抉择，为了让营地的全体同伴（学员与和平微型机）安心，你需要在全营地发表一次广播演讲，你倾向于说：',
     options: [
@@ -1499,8 +1479,8 @@ const personalityQuestionSource = [
       },
     ],
   },
+  */
   {
-    id: 40,
     prompt: '如果由你来为这趟宏大的“盲盒派对”远征下定义，你觉得它是：',
     options: [
       {
@@ -1529,7 +1509,7 @@ const personalityQuestionSource = [
       },
       {
         id: 'D',
-        text: '“哼……只是一次有些吵闹、麻烦不断，但勉强还算让人不讨厌的学院课外实践远征罢了。”',
+        text: '一次麻烦不断、总有人需要操心，却在真正结束时会让人有些舍不得的课外远征。',
         scores: {
           傲娇: 25,
           可爱: 5,
@@ -1553,7 +1533,7 @@ function optionSignal(option, dimension) {
   )
 }
 
-function convertQuestionScores(question) {
+function convertQuestionScores(question, questionIndex) {
   const signals = Object.fromEntries(
     quizDimensions.map((dimension) => [
       dimension,
@@ -1587,8 +1567,10 @@ function convertQuestionScores(question) {
             return [dimension, rankScores[rank]]
           }
 
-          const split = [...balancedSplits[(question.id + dimensionIndex) % balancedSplits.length]]
-          let state = question.id * 101 + dimensionIndex * 37
+          const split = [
+            ...balancedSplits[(questionIndex + dimensionIndex) % balancedSplits.length],
+          ]
+          let state = (questionIndex + 1) * 101 + dimensionIndex * 37
           for (let index = split.length - 1; index > 0; index -= 1) {
             state = (state * 1664525 + 1013904223) >>> 0
             const swapIndex = state % (index + 1)

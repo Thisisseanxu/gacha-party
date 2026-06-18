@@ -41,7 +41,7 @@
           <img src="/images/icons/placeholder.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
             <span class="btn-title">角色性格匹配<sup class="beta-tag">NEW</sup></span>
-            <span class="btn-subtitle">完成 40 道情境题，看看你最像盲盒派对中的哪位角色</span>
+            <span class="btn-subtitle">看看你最像盲盒派对中的哪位角色</span>
           </div>
         </router-link>
 

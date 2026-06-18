@@ -52,10 +52,9 @@ function findMatch(profile, excludedIndex = -1) {
 }
 
 function serializeAnswers(answers) {
-  return answers.map((optionIndex, questionIndex) => ({
-    questionId: personalityQuestions[questionIndex].id,
-    optionId: personalityQuestions[questionIndex].options[optionIndex].id,
-  }))
+  return answers.map(
+    (optionIndex, questionIndex) => personalityQuestions[questionIndex].options[optionIndex].id,
+  )
 }
 
 function searchForCharacter(targetIndex, restarts = 80) {
@@ -165,6 +164,7 @@ if (recordedAdjustments.length) {
 
 const witnesses = characters.map((character) => {
   const result = finalWitnesses.get(character['角色'])
+  delete character.answer_sequence
   return {
     character: character['角色'],
     profile: result.profile,
@@ -177,7 +177,7 @@ fs.writeFileSync(
   witnessFile,
   `${JSON.stringify(
     {
-      schema_version: 2,
+      schema_version: 3,
       question_count: questionCount,
       dimensions: quizDimensions,
       adjusted_characters: recordedAdjustments,
