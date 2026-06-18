@@ -595,6 +595,12 @@ const sortRecordsAsc = (records) =>
       (Number(a.id) || 0) - (Number(b.id) || 0),
   )
 
+const sortHistoryAsc = (a, b) =>
+  a.createdAt - b.createdAt || (Number(a.recordId) || 0) - (Number(b.recordId) || 0)
+
+const sortHistoryDesc = (a, b) =>
+  b.createdAt - a.createdAt || (Number(b.recordId) || 0) - (Number(a.recordId) || 0)
+
 const calculateAverage = (items) =>
   items.length ? items.reduce((total, item) => total + item, 0) / items.length : 0
 
@@ -625,16 +631,16 @@ const mergeAnalyses = (name, analyses) => {
   const totalPulls = analyses.reduce((total, item) => total + item.totalPulls, 0)
   const spHistory = analyses
     .flatMap((item) => item.spHistory)
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort(sortHistoryDesc)
   const ssrHistory = analyses
     .flatMap((item) => item.ssrHistory)
-    .sort((a, b) => b.createdAt - a.createdAt)
-  const records = analyses.flatMap((item) => item.records).sort((a, b) => b.createdAt - a.createdAt)
+    .sort(sortHistoryDesc)
+  const records = analyses.flatMap((item) => item.records).sort(sortHistoryDesc)
   const currentSpPity = analyses.reduce((total, item) => total + item.currentSpPity, 0)
   const currentSsrPity = analyses.reduce((total, item) => total + item.currentSsrPity, 0)
   const currentSsrInSegment = analyses
     .flatMap((item) => item.currentSsrInSegment || [])
-    .sort((a, b) => a.createdAt - b.createdAt)
+    .sort(sortHistoryAsc)
 
   return {
     name,
@@ -680,7 +686,7 @@ const buildPoolAnalysis = (records, name = '') => {
       spHistory.push({
         ...item,
         count: spCounter,
-        ssrInSegment: [...ssrInSegment].sort((a, b) => a.createdAt - b.createdAt),
+        ssrInSegment: [...ssrInSegment].sort(sortHistoryAsc),
       })
       spCounter = 0
       ssrInSegment = []
@@ -692,7 +698,7 @@ const buildPoolAnalysis = (records, name = '') => {
       totalPulls: sorted.length,
       currentSpPity: spCounter,
       currentSsrPity: ssrCounter,
-      currentSsrInSegment: [...ssrInSegment].sort((a, b) => a.createdAt - b.createdAt),
+      currentSsrInSegment: [...ssrInSegment].sort(sortHistoryAsc),
       spHistory,
       ssrHistory,
       records: normalizedRecords,
@@ -819,7 +825,7 @@ const totalOverview = computed(() => {
   const advancedPulls = advancedGroups.reduce((total, group) => total + group.totalPulls, 0)
   const spHistory = groups
     .flatMap((group) => group.spHistory)
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort(sortHistoryDesc)
   const ssrHistory = groups.flatMap((group) => group.ssrHistory)
   const scoreSpHistory = advancedGroups
     .filter((group) => group.key !== 'advancedNormal')
@@ -929,7 +935,7 @@ const historicalScoreAverage = computed(() =>
 const recentScoreAverage = computed(() => {
   const recentSpHistory = scoreAnalyses.value
     .flatMap((analysis) => analysis.spHistory)
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort(sortHistoryDesc)
     .slice(0, 20) // 取最近20条SP记录的平均抽数
   return calculateAverage(recentSpHistory.map((item) => item.count))
 })
