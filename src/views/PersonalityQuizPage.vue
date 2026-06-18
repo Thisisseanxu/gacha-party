@@ -34,7 +34,11 @@
           </div>
           <h2>{{ currentQuestion.prompt }}</h2>
 
-          <div class="option-list">
+          <div
+            class="option-list"
+            :class="{ 'suppress-hover': suppressOptionHover }"
+            @pointermove="restoreOptionHover"
+          >
             <button
               v-for="(option, optionIndex) in currentQuestion.options"
               :key="option.id"
@@ -42,7 +46,7 @@
               class="option-card"
               :class="{ selected: answers[currentIndex] === option.id }"
               :aria-pressed="answers[currentIndex] === option.id"
-              @click="selectOption(option.id)"
+              @click="selectOption(option.id, $event)"
             >
               <span class="option-letter">{{ optionLetters[optionIndex] }}</span>
               <span>{{ option.text }}</span>
@@ -127,6 +131,7 @@ const shuffledQuestions = ref(createShuffledQuestions())
 const scoreData = ref(null)
 const matchedCard = ref(null)
 const resultError = ref('')
+const suppressOptionHover = ref(false)
 
 const axes = computed(() => dimensionEntries(scoreData.value))
 const dimensions = computed(() => axes.value.map((axis) => axis.key))
@@ -201,9 +206,15 @@ function applyAnswerSequence(sequence) {
   }
 }
 
-function selectOption(optionId) {
+function selectOption(optionId, event) {
+  event.currentTarget.blur()
+  suppressOptionHover.value = true
   answers.value[currentIndex.value] = optionId
   nextQuestion()
+}
+
+function restoreOptionHover() {
+  suppressOptionHover.value = false
 }
 
 function previousQuestion() {
@@ -224,6 +235,7 @@ function restartQuiz() {
   answers.value = personalityQuestions.map(() => null)
   shuffledQuestions.value = createShuffledQuestions()
   matchedCard.value = null
+  suppressOptionHover.value = false
   currentIndex.value = 0
   isFinished.value = false
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -348,6 +360,11 @@ function restartQuiz() {
 .option-card:hover {
   transform: translateY(-2px);
   border-color: v-bind('colors.brand.primary');
+}
+
+.option-list.suppress-hover .option-card:hover {
+  transform: none;
+  border-color: v-bind('colors.border.primary');
 }
 
 .option-card.selected {
