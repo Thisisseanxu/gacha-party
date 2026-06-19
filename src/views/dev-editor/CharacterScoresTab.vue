@@ -86,8 +86,8 @@
           当前四项数值与 {{ currentDuplicates.join('、') }} 完全一致
         </div>
         <div class="calibration-notice">
-          修改角色倾向后，请运行 <code>npm run quiz:calibrate</code> 与
-          <code>npm run quiz:validate</code> 重新生成并验证答案见证。
+          修改角色倾向后，可运行 <code>npm run quiz:verify</code> 检查全部角色是否可达；
+          <code>npm run quiz:calibrate</code> 只会输出人工调整建议，不会修改文件。
         </div>
 
         <div class="form-actions">

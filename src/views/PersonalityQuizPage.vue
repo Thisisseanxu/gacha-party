@@ -8,15 +8,6 @@
       </header>
 
       <template v-if="!isFinished">
-        <input
-          id="personality-answer-sequence"
-          class="answer-sequence-input"
-          type="text"
-          autocomplete="off"
-          tabindex="-1"
-          aria-hidden="true"
-          @change="applyAnswerSequence($event.target.value)"
-        />
         <div
           class="progress-track"
           role="progressbar"
@@ -117,7 +108,6 @@ import { personalityQuestions } from '@/data/personalityQuiz.js'
 import TendencyProfile from '@/components/TendencyProfile.vue'
 import {
   calculateQuizProfile,
-  decodeAnswerSequence,
   dimensionEntries,
   findClosestCharacter,
 } from '@/utils/personalityMatch.js'
@@ -194,18 +184,6 @@ function createShuffledQuestions() {
   }))
 }
 
-function applyAnswerSequence(sequence) {
-  try {
-    answers.value = decodeAnswerSequence(personalityQuestions, sequence)
-    currentIndex.value = personalityQuestions.length - 1
-    isFinished.value = true
-    resultError.value = ''
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  } catch (error) {
-    resultError.value = `测试答案序列无效：${error.message}`
-  }
-}
-
 function selectOption(optionId, event) {
   event.currentTarget.blur()
   suppressOptionHover.value = true
@@ -280,15 +258,6 @@ function restartQuiz() {
   margin: 14px 0 0;
   color: v-bind('colors.text.secondary');
   line-height: 1.7;
-}
-
-.answer-sequence-input {
-  position: fixed;
-  left: -10000px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
 }
 
 .progress-track {
@@ -465,8 +434,7 @@ button:disabled {
   text-align: left;
 }
 
-.match-copy span,
-.match-copy p {
+.match-copy span {
   color: v-bind('colors.text.secondary');
 }
 
@@ -474,10 +442,6 @@ button:disabled {
   margin: 4px 0 8px;
   color: v-bind('colors.brand.primary');
   font-size: clamp(2rem, 6vw, 3.5rem);
-}
-
-.match-copy p {
-  margin: 0;
 }
 
 .profile-comparison {

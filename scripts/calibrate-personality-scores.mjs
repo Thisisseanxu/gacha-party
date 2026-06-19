@@ -1,193 +1,81 @@
 import fs from 'node:fs'
+import process from 'node:process'
 import { personalityQuestions, quizDimensions } from '../src/data/personalityQuiz.js'
+import { createSeededRandom, formatProfile, searchForCharacter } from './personality-quiz-tools.mjs'
 
-const scoreFile = new URL('../public/data/character_scores.json', import.meta.url)
-const witnessFile = new URL('./personality-match-witnesses.json', import.meta.url)
-const scoreData = JSON.parse(fs.readFileSync(scoreFile, 'utf8'))
-const characters = scoreData.characters
-const questionCount = personalityQuestions.length
-const previousWitnessData = fs.existsSync(witnessFile)
-  ? JSON.parse(fs.readFileSync(witnessFile, 'utf8'))
-  : null
+const scoreData = JSON.parse(
+  fs.readFileSync(new URL('../public/data/character_scores.json', import.meta.url), 'utf8'),
+)
+const originalCharacters = scoreData.characters
+const simulatedCharacters = originalCharacters.map((character) => ({ ...character }))
+const random = createSeededRandom()
+const suggestions = new Map()
 
-let randomState = 0x5f3759df
-function random() {
-  randomState ^= randomState << 13
-  randomState ^= randomState >>> 17
-  randomState ^= randomState << 5
-  return (randomState >>> 0) / 4294967296
-}
-
-function randomAnswers() {
-  return personalityQuestions.map((question) => Math.floor(random() * question.options.length))
-}
-
-function profileFor(answers) {
-  const totals = Object.fromEntries(quizDimensions.map((dimension) => [dimension, 0]))
-  answers.forEach((optionIndex, questionIndex) => {
-    const option = personalityQuestions[questionIndex].options[optionIndex]
-    quizDimensions.forEach((dimension) => {
-      totals[dimension] += option.scores[dimension]
-    })
-  })
-  return Object.fromEntries(
-    quizDimensions.map((dimension) => [dimension, Math.round(totals[dimension] / questionCount)]),
-  )
-}
-
-function squaredDistance(left, right) {
-  return quizDimensions.reduce((sum, dimension) => {
-    const difference = left[dimension] - right[dimension]
-    return sum + difference ** 2
-  }, 0)
-}
-
-function findMatch(profile, excludedIndex = -1) {
-  return characters.reduce((closest, character, index) => {
-    if (index === excludedIndex) return closest
-    const distance = squaredDistance(profile, character)
-    if (!closest || distance < closest.distance) return { character, distance, index }
-    return closest
-  }, null)
-}
-
-function serializeAnswers(answers) {
-  return answers.map(
-    (optionIndex, questionIndex) => personalityQuestions[questionIndex].options[optionIndex].id,
-  )
-}
-
-function searchForCharacter(targetIndex, restarts = 80) {
-  const target = characters[targetIndex]
-  let nearest = null
-
-  for (let restart = 0; restart < restarts; restart += 1) {
-    const answers = randomAnswers()
-
-    for (let step = 0; step < 100; step += 1) {
-      const profile = profileFor(answers)
-      const targetDistance = squaredDistance(profile, target)
-      const competitor = findMatch(profile, targetIndex)
-      const margin = targetDistance - competitor.distance
-
-      if (!nearest || targetDistance < nearest.targetDistance) {
-        nearest = { answers: [...answers], profile, targetDistance }
-      }
-      if (findMatch(profile).index === targetIndex) {
-        return { answers: [...answers], profile, targetDistance }
-      }
-
-      let bestMove = null
-      let bestMargin = margin
-      for (let questionIndex = 0; questionIndex < questionCount; questionIndex += 1) {
-        const currentOption = answers[questionIndex]
-        for (
-          let optionIndex = 0;
-          optionIndex < personalityQuestions[questionIndex].options.length;
-          optionIndex += 1
-        ) {
-          if (optionIndex === currentOption) continue
-          answers[questionIndex] = optionIndex
-          const candidateProfile = profileFor(answers)
-          const candidateTargetDistance = squaredDistance(candidateProfile, target)
-          const candidateCompetitor = findMatch(candidateProfile, targetIndex)
-          const candidateMargin = candidateTargetDistance - candidateCompetitor.distance
-          answers[questionIndex] = currentOption
-
-          if (candidateMargin < bestMargin) {
-            bestMargin = candidateMargin
-            bestMove = { optionIndex, questionIndex }
-          }
-        }
-      }
-
-      if (!bestMove) break
-      answers[bestMove.questionIndex] = bestMove.optionIndex
-    }
-  }
-
-  return nearest
-}
-
-let finalWitnesses = new Map()
-const adjustedCharacters = new Set()
-
-for (let calibrationRound = 0; calibrationRound < 4; calibrationRound += 1) {
-  const roundWitnesses = new Map()
+for (let round = 0; round < 4; round += 1) {
   const missing = []
 
-  for (let index = 0; index < characters.length; index += 1) {
-    const result = searchForCharacter(index)
-    if (result && findMatch(result.profile).index === index) {
-      roundWitnesses.set(characters[index]['角色'], result)
-    } else {
-      missing.push({ index, nearest: result })
-    }
+  for (let targetIndex = 0; targetIndex < simulatedCharacters.length; targetIndex += 1) {
+    const result = searchForCharacter({
+      questions: personalityQuestions,
+      dimensions: quizDimensions,
+      characters: simulatedCharacters,
+      targetIndex,
+      random,
+    })
+    if (!result?.reachable) missing.push({ targetIndex, nearest: result })
   }
 
-  if (!missing.length) {
-    finalWitnesses = roundWitnesses
-    break
-  }
+  if (!missing.length) break
 
   const occupiedProfiles = new Set(
-    characters.map((character) =>
+    simulatedCharacters.map((character) =>
       quizDimensions.map((dimension) => character[dimension]).join('|'),
     ),
   )
 
-  for (const { index, nearest } of missing) {
-    if (!nearest) throw new Error(`无法为 ${characters[index]['角色']} 找到候选答案`)
+  for (const { targetIndex, nearest } of missing) {
+    const character = simulatedCharacters[targetIndex]
+    if (!nearest) throw new Error(`无法为 ${character['角色']} 找到候选答案`)
     const profileKey = quizDimensions.map((dimension) => nearest.profile[dimension]).join('|')
     if (occupiedProfiles.has(profileKey)) {
-      throw new Error(`${characters[index]['角色']} 的最近可达坐标与现有角色重复`)
+      throw new Error(`${character['角色']} 的最近可达坐标与现有角色重复`)
     }
     occupiedProfiles.add(profileKey)
-    quizDimensions.forEach((dimension) => {
-      characters[index][dimension] = nearest.profile[dimension]
+    suggestions.set(character['角色'], {
+      before: Object.fromEntries(
+        quizDimensions.map((dimension) => [dimension, character[dimension]]),
+      ),
+      after: nearest.profile,
     })
-    adjustedCharacters.add(characters[index]['角色'])
+    quizDimensions.forEach((dimension) => {
+      character[dimension] = nearest.profile[dimension]
+    })
   }
 }
 
-if (finalWitnesses.size !== characters.length) {
-  throw new Error(`校准后仍只有 ${finalWitnesses.size}/${characters.length} 个角色可匹配`)
+const stillMissing = []
+for (let targetIndex = 0; targetIndex < simulatedCharacters.length; targetIndex += 1) {
+  const result = searchForCharacter({
+    questions: personalityQuestions,
+    dimensions: quizDimensions,
+    characters: simulatedCharacters,
+    targetIndex,
+    random,
+  })
+  if (!result?.reachable) stillMissing.push(simulatedCharacters[targetIndex]['角色'])
 }
 
-scoreData.methodology = scoreData.methodology.replace(/\s*问卷可达性校准：.*$/u, '')
-const recordedAdjustments = adjustedCharacters.size
-  ? [...adjustedCharacters]
-  : previousWitnessData?.adjusted_characters || []
-if (recordedAdjustments.length) {
-  scoreData.methodology += ` 问卷可达性校准：保留可直接匹配角色的原评分，仅将无法命中的${recordedAdjustments.length}个角色移动到其最近的实际可答坐标。`
-}
-
-const witnesses = characters.map((character) => {
-  const result = finalWitnesses.get(character['角色'])
-  delete character.answer_sequence
-  return {
-    character: character['角色'],
-    profile: result.profile,
-    answers: serializeAnswers(result.answers),
+if (stillMissing.length) {
+  console.error(`模拟校准后仍不可达：${stillMissing.join('、')}`)
+  process.exitCode = 1
+} else if (!suggestions.size) {
+  console.log(`无需调整：${simulatedCharacters.length} 个角色目前均可由问卷答案匹配。`)
+} else {
+  console.log(`建议手动调整以下 ${suggestions.size} 个角色的四维评分：`)
+  for (const [name, suggestion] of suggestions) {
+    console.log(`\n${name}`)
+    console.log(`  当前：${formatProfile(suggestion.before, quizDimensions)}`)
+    console.log(`  建议：${formatProfile(suggestion.after, quizDimensions)}`)
   }
-})
-
-fs.writeFileSync(scoreFile, `${JSON.stringify(scoreData, null, 2)}\n`)
-fs.writeFileSync(
-  witnessFile,
-  `${JSON.stringify(
-    {
-      schema_version: 3,
-      question_count: questionCount,
-      dimensions: quizDimensions,
-      adjusted_characters: recordedAdjustments,
-      witnesses,
-    },
-    null,
-    2,
-  )}\n`,
-)
-
-console.log(`校准完成：${characters.length} 个角色均已找到答案见证。`)
-console.log(`因原坐标不可达而调整：${adjustedCharacters.size} 个角色。`)
-if (adjustedCharacters.size) console.log([...adjustedCharacters].join('、'))
+  console.log('\n以上仅为计算建议，脚本未修改任何文件。请确认后手动编辑 character_scores.json。')
+}
