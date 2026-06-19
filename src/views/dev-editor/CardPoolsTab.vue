@@ -106,6 +106,20 @@
               </div>
             </div>
 
+            <label>开始时间</label>
+            <input
+              v-model="form.startTime"
+              class="de-input"
+              placeholder="YYYY-MM-DD HH:mm:ss"
+            />
+
+            <label>结束时间</label>
+            <input
+              v-model="form.finishTime"
+              class="de-input"
+              placeholder="YYYY-MM-DD HH:mm:ss"
+            />
+
             <label>标签类型</label>
             <select v-model.number="form.tag_type" class="de-select">
               <option :value="null">不显示</option>
@@ -426,6 +440,8 @@ function emptyForm() {
     type: '限定',
     name: '',
     imageUrl: '/images/cardpools/',
+    startTime: '',
+    finishTime: '',
     tag_type: null,
     tag_name: '',
     isAvailable: true,
@@ -478,6 +494,8 @@ function selectPool(key, pool) {
     type: pool.type ?? '限定',
     name: pool.name ?? '',
     imageUrl: pool.imageUrl ?? '',
+    startTime: pool.startTime ?? '',
+    finishTime: pool.finishTime ?? '',
     tag_type: pool.tag_type ?? null,
     tag_name: pool.tag_name ?? '',
     isAvailable: !!pool.isAvailable,
@@ -577,6 +595,8 @@ function buildPayload() {
     rules: { SP: rSP, SSR: rSSR },
     cardNames,
   }
+  if (f.startTime) payload.startTime = f.startTime
+  if (f.finishTime) payload.finishTime = f.finishTime
   if (f.tag_type) payload.tag_type = f.tag_type
   if (f.tag_name) payload.tag_name = f.tag_name
   return payload
