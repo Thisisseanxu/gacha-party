@@ -661,15 +661,9 @@ const handleFileUpload = (event) => {
   event.target.value = ''
 }
 
-// 获取worker的URL，开发模式下使用地址+8787端口，生产模式下直接使用当前地址
 const WorkerUrl = ref('')
 onMounted(() => {
-  const url = new URL(window.location.href)
-  if (isDev) {
-    WorkerUrl.value = `${url.protocol}//${url.hostname}:8787`
-  } else {
-    WorkerUrl.value = url.origin
-  }
+  WorkerUrl.value = import.meta.env.VITE_WORKER_BASE_URL || window.location.origin
 })
 
 const milisecondsToTime = (milliseconds) => {

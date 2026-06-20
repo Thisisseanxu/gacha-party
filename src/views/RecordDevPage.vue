@@ -132,8 +132,7 @@ onMounted(() => {
   playerId.value = localStorage.getItem(PLAYER_ID_KEY) || ''
   licenseKey.value = localStorage.getItem(LICENSE_KEY) || ''
 
-  const url = new URL(window.location.href)
-  workerUrl.value = import.meta.env.DEV ? `${url.protocol}//${url.hostname}:8787` : url.origin
+  workerUrl.value = import.meta.env.VITE_WORKER_BASE_URL || window.location.origin
   tickTimer = window.setInterval(() => {
     now.value = Date.now()
   }, 1000)

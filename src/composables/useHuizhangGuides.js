@@ -16,13 +16,8 @@ const _loading = ref(false)
 const _error = ref(null)
 let _initPromise = null
 
-/**
- * 获取 Worker 基础 URL（开发环境用 8787 端口，生产环境同源）
- */
 function getWorkerBase() {
-  const url = new URL(window.location.href)
-  const isDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
-  return isDev ? `${url.protocol}//${url.hostname}:8787` : url.origin
+  return import.meta.env.VITE_WORKER_BASE_URL || window.location.origin
 }
 
 /**

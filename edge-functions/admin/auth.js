@@ -1,5 +1,5 @@
-import { jsonResponse, optionsResponse } from '../../../_shared/gacha-records.js'
-import { signAdminToken, verifyAdminLogin } from '../../../_shared/huizhang-guides.js'
+import { jsonResponse, optionsResponse } from '../_shared/gacha-kv-http.js'
+import { signAdminToken, verifyAdminLogin } from '../_shared/admin-login.js'
 
 export function onRequestOptions() {
   return optionsResponse()

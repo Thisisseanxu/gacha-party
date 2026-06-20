@@ -37,13 +37,13 @@
           </div>
         </router-link>
 
-        <router-link to="quiz" class="btn btn-secondary">
+        <!-- <router-link to="quiz" class="btn btn-secondary">
           <img src="/images/icons/placeholder.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
             <span class="btn-title">角色性格匹配<sup class="beta-tag">NEW</sup></span>
             <span class="btn-subtitle">看看你最像盲盒派对中的哪位角色</span>
           </div>
-        </router-link>
+        </router-link> -->
 
         <router-link to="daoyan" class="btn btn-secondary">
           <img src="/images/icons/daoyan.webp" class="btn-icon" alt="icon" />

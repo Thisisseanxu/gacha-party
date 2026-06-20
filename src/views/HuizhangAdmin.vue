@@ -507,7 +507,7 @@ async function handleLogin() {
   }
   loginLoading.value = true
   try {
-    const res = await fetch(`${getWorkerBase()}/api/hz/admin/auth`, {
+    const res = await fetch(`${getWorkerBase()}/admin/auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: password.value, activationKey: activationKey.value }),

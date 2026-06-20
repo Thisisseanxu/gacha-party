@@ -1,6 +1,5 @@
 import {
   canAccessPlayer,
-  diagnosticHeaders,
   enforceUploadRateLimit,
   EDGEONE_BODY_LIMIT_BYTES,
   getGachaKv,
@@ -56,9 +55,7 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse(
         responseBody,
         413,
-        diagnosticHeaders('record-too-large', {
-          'X-Record-Bytes': String(payloadBytes),
-        }),
+        { 'X-Record-Bytes': String(payloadBytes) },
       )
     }
 
@@ -76,17 +73,11 @@ export async function onRequestPost({ request, env }) {
 
     responseBody.message = '抽卡记录上传成功！'
     responseBody.bytes = payloadBytes
-    return jsonResponse(
-      responseBody,
-      200,
-      diagnosticHeaders('ok', {
-        'X-Record-Bytes': String(payloadBytes),
-      }),
-    )
+    return jsonResponse(responseBody, 200, { 'X-Record-Bytes': String(payloadBytes) })
   } catch (error) {
     if (isKvLimitError(error)) {
       responseBody.message = `KV 服务限额或容量异常：${error.message}`
-      return jsonResponse(responseBody, 503, diagnosticHeaders('kv-limit-or-size-error'))
+      return jsonResponse(responseBody, 503)
     }
     responseBody.message = `验证失败：${error.message}`
     return jsonResponse(responseBody, 403)

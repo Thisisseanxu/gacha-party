@@ -1,6 +1,5 @@
 import {
   canAccessPlayer,
-  diagnosticHeaders,
   getGachaKv,
   isKvLimitError,
   optionsResponse,
@@ -42,26 +41,14 @@ export async function onRequestGet({ request, env }) {
       return textResponse(
         `抽卡记录过大（${valueBytes} bytes），已接近 EdgeOne Edge Functions/KV 的 1MB 限制，请迁移到 Cloud Functions + Blob/数据库后再读取。`,
         413,
-        diagnosticHeaders('record-too-large', {
-          'X-Record-Bytes': String(valueBytes),
-        }),
+        { 'X-Record-Bytes': String(valueBytes) },
       )
     }
 
-    return textResponse(
-      value,
-      200,
-      diagnosticHeaders('ok', {
-        'X-Record-Bytes': String(valueBytes),
-      }),
-    )
+    return textResponse(value, 200, { 'X-Record-Bytes': String(valueBytes) })
   } catch (error) {
     if (isKvLimitError(error)) {
-      return textResponse(
-        `KV 服务限额或容量异常：${error.message}`,
-        503,
-        diagnosticHeaders('kv-limit-or-size-error'),
-      )
+      return textResponse(`KV 服务限额或容量异常：${error.message}`, 503)
     }
     return textResponse(`验证失败：${error.message}`, 403)
   }

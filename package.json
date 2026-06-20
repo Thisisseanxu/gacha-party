@@ -11,6 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "previewhost": "vite preview --host",
+    "edgeone:dev": "edgeone makers dev --skip-env-sync",
+    "edgeone:test": "node scripts/test-edgeone-functions.mjs",
     "quiz:calibrate": "node scripts/calibrate-personality-scores.mjs",
     "quiz:answer": "node scripts/verify-personality-quiz.mjs",
     "quiz:verify": "node scripts/validate-personality-quiz.mjs",
