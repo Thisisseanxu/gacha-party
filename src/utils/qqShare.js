@@ -2,9 +2,45 @@ const QQ_API_URL = 'https://open.mobile.qq.com/sdk/qqapi.js'
 const QQ_API_SCRIPT_ID = 'mobile-qq-js-api'
 
 let qqApiPromise = null
+let shareSyncObserver = null
+let shareSyncTimer = null
 
 export function isMobileQQ() {
   return /\bQQ\/[\d.]+/i.test(navigator.userAgent)
+}
+
+function truncateUtf8(value, maximumBytes) {
+  let result = ''
+  let bytes = 0
+
+  for (const character of String(value || '')) {
+    const characterBytes = new TextEncoder().encode(character).length
+    if (bytes + characterBytes > maximumBytes) break
+    result += character
+    bytes += characterBytes
+  }
+
+  return result
+}
+
+function normalizeShareData({ title, description, url, imageUrl }) {
+  const requestedUrl = new URL(url, window.location.origin)
+  let shareUrl = requestedUrl.href
+
+  if (new TextEncoder().encode(shareUrl).length > 120) {
+    shareUrl = `${requestedUrl.origin}${requestedUrl.pathname}`
+  }
+  if (new TextEncoder().encode(shareUrl).length > 120) {
+    shareUrl = requestedUrl.origin
+  }
+
+  return {
+    title: truncateUtf8(title, 45),
+    desc: truncateUtf8(description, 60),
+    share_url: shareUrl,
+    image_url: imageUrl,
+    back: true,
+  }
 }
 
 export function loadMobileQQApi() {
@@ -56,13 +92,7 @@ export async function configureMobileQQShare({ title, description, url, imageUrl
   const mqq = await loadMobileQQApi()
   if (!mqq) return false
 
-  const shareData = {
-    title,
-    desc: description,
-    share_url: url,
-    image_url: imageUrl,
-    back: true,
-  }
+  const shareData = normalizeShareData({ title, description, url, imageUrl })
 
   mqq.invoke('data', 'setShareInfo', shareData)
 
@@ -78,19 +108,61 @@ export async function configureMobileQQShare({ title, description, url, imageUrl
   return true
 }
 
-export async function shareImageToQQ(dataUrl, callback) {
+export async function shareWebpageToQQ({ title, description, url, imageUrl }, callback) {
   const mqq = await loadMobileQQApi()
   if (!mqq) return false
 
-  mqq.invoke(
-    'Qzone',
-    'sharePicture',
+  if (!mqq.ui?.shareMessage) {
+    throw new Error('当前 QQ 版本不支持网页主动分享')
+  }
+
+  mqq.ui.shareMessage(
     {
-      type: '0',
-      base64: dataUrl.replace('data:image/jpeg;', 'data:image/jpg;'),
+      ...normalizeShareData({ title, description, url, imageUrl }),
+      share_type: 0,
     },
     callback,
   )
 
   return true
+}
+
+function readCurrentShareData() {
+  const description =
+    document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  const imageUrl =
+    document.querySelector('meta[itemprop="image"]')?.getAttribute('content') ||
+    new URL('/images/icons/icon-512x512.png', window.location.origin).href
+
+  return {
+    title: document.title,
+    description,
+    url: window.location.href,
+    imageUrl: new URL(imageUrl, window.location.origin).href,
+  }
+}
+
+export function installMobileQQShareSync() {
+  if (!isMobileQQ() || shareSyncObserver) return
+
+  const sync = () => {
+    if (shareSyncTimer) window.clearTimeout(shareSyncTimer)
+    shareSyncTimer = window.setTimeout(() => {
+      shareSyncTimer = null
+      configureMobileQQShare(readCurrentShareData()).catch((error) => {
+        console.warn('同步手机 QQ 分享卡片失败:', error)
+      })
+    }, 50)
+  }
+
+  shareSyncObserver = new MutationObserver(sync)
+  shareSyncObserver.observe(document.head, {
+    subtree: true,
+    childList: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['content', 'href'],
+  })
+
+  sync()
 }

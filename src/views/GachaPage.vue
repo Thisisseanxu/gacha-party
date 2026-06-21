@@ -967,7 +967,7 @@ const poolSsrCards = computed(() => {
 watch(
   currentPool,
   (newPool) => {
-    document.title = newPool?.name ? `${newPool.name}卡池模拟-织夜工具箱` : '抽卡模拟器'
+    document.title = newPool?.name ? `${newPool.name}卡池模拟 | 织夜工具箱` : '抽卡模拟器'
   },
   { immediate: true, deep: true },
 )

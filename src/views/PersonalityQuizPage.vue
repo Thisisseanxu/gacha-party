@@ -70,7 +70,8 @@
                 <span v-else>{{ matchedCharacter['角色'].slice(0, 1) }}</span>
               </div>
               <div class="match-copy">
-                <span>与你最匹配的角色是</span>
+                <span class="screen-match-label">与你最匹配的角色是</span>
+                <span class="capture-match-label">和我最匹配的角色是</span>
                 <h2>{{ matchedCharacter['角色'] }}</h2>
               </div>
             </div>
@@ -80,14 +81,24 @@
             </article>
 
             <div class="profile-comparison">
+              <div class="screen-player-profile">
+                <TendencyProfile
+                  title="你的性格倾向"
+                  :scores="quizProfile"
+                  :axes="axes"
+                  tone="player"
+                />
+              </div>
+              <div class="capture-player-profile">
+                <TendencyProfile
+                  title="我的性格倾向"
+                  :scores="quizProfile"
+                  :axes="axes"
+                  tone="player"
+                />
+              </div>
               <TendencyProfile
-                title="你的四维倾向"
-                :scores="quizProfile"
-                :axes="axes"
-                tone="player"
-              />
-              <TendencyProfile
-                :title="`${matchedCharacter['角色']}的四维倾向`"
+                :title="`${matchedCharacter['角色']}的性格倾向`"
                 :scores="matchedCharacter"
                 :axes="axes"
                 tone="character"
@@ -96,8 +107,8 @@
 
             <footer class="share-card-footer">
               <div class="share-brand">
-                <strong>织夜工具箱</strong>
-                <span>性格匹配测试</span>
+                <strong>织夜工具箱 | 性格匹配测试</strong>
+                <span>想参与同款测试？扫描右侧二维码试试吧</span>
               </div>
               <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="当前页面二维码" />
               <span v-else class="qr-placeholder">二维码生成中</span>
@@ -133,11 +144,38 @@
       </section>
     </section>
   </main>
+
+  <Teleport to="body">
+    <div
+      v-if="sharePreviewUrl"
+      class="share-preview-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="分享结果图片"
+      @click.self="closeSharePreview"
+    >
+      <button
+        type="button"
+        class="share-preview-close"
+        aria-label="关闭分享图片"
+        @click="closeSharePreview"
+      >
+        ×
+      </button>
+      <div class="share-preview-content">
+        <img
+          :src="sharePreviewUrl"
+          :alt="`我和${matchedCharacter?.['角色'] || '盲盒派对角色'}的性格匹配结果`"
+        />
+        <p>长按图片保存或分享</p>
+        <span>点击图片外区域关闭</span>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import FileSaver from 'file-saver'
 import { toPng } from 'html-to-image'
 import QRCode from 'qrcode'
 import { allCards } from '@/data/cards.js'
@@ -148,7 +186,6 @@ import {
   dimensionEntries,
   findClosestCharacter,
 } from '@/utils/personalityMatch.js'
-import { configureMobileQQShare, isMobileQQ, shareImageToQQ } from '@/utils/qqShare.js'
 import { colors } from '@/styles/colors.js'
 
 const optionLetters = ['A', 'B', 'C', 'D']
@@ -166,9 +203,10 @@ const isSharing = ref(false)
 const isPreparingShareImage = ref(false)
 const preparedShareImageBlob = shallowRef(null)
 const shareStatus = ref(null)
-const isQqEnvironment = isMobileQQ()
+const sharePreviewUrl = ref('')
 let shareStatusTimer = null
 let sharePreparationTimer = null
+let previousBodyOverflow = ''
 
 const axes = computed(() => dimensionEntries(scoreData.value))
 const dimensions = computed(() => axes.value.map((axis) => axis.key))
@@ -186,13 +224,12 @@ const matchedCharacter = computed(() => match.value?.character || null)
 
 onMounted(() => {
   loadCharacterScores()
-  configureQqShareCard()
+  window.addEventListener('keydown', handlePreviewKeydown)
 })
 
 watch([isFinished, matchedCharacter], async ([finished, character]) => {
   if (finished && character) {
     selectRandomMatchedCard(character)
-    configureQqShareCard(character)
     await generateShareQrCode()
     await nextTick()
     if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
@@ -314,21 +351,6 @@ async function assertImageHasContent(blob) {
   }
 }
 
-function downloadShareImage(blob, filename) {
-  FileSaver.saveAs(blob, filename)
-  showShareStatus('分享图片已保存，请在相册或浏览器下载内容中查看。')
-}
-
-function canvasToBlob(canvas, type, quality) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('图片压缩失败'))),
-      type,
-      quality,
-    )
-  })
-}
-
 function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -340,57 +362,20 @@ function blobToDataUrl(blob) {
   })
 }
 
-async function createQqShareImage(blob) {
-  const sourceUrl = URL.createObjectURL(blob)
-  try {
-    const image = new Image()
-    image.src = sourceUrl
-    await image.decode()
-
-    const maxWidth = 1280
-    const scale = Math.min(1, maxWidth / image.naturalWidth)
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.round(image.naturalWidth * scale)
-    canvas.height = Math.round(image.naturalHeight * scale)
-
-    const context = canvas.getContext('2d')
-    context.fillStyle = colors.background.content
-    context.fillRect(0, 0, canvas.width, canvas.height)
-    context.drawImage(image, 0, 0, canvas.width, canvas.height)
-
-    let quality = 0.88
-    let compressedBlob = await canvasToBlob(canvas, 'image/jpeg', quality)
-    while (compressedBlob.size > 950 * 1024 && quality > 0.5) {
-      quality -= 0.08
-      compressedBlob = await canvasToBlob(canvas, 'image/jpeg', quality)
-    }
-
-    if (compressedBlob.size > 1024 * 1024) {
-      throw new Error('结果图片超过 QQ 的 1 MB 分享限制')
-    }
-
-    return blobToDataUrl(compressedBlob)
-  } finally {
-    URL.revokeObjectURL(sourceUrl)
-  }
+async function openSharePreview(blob) {
+  closeSharePreview()
+  sharePreviewUrl.value = await blobToDataUrl(blob)
+  previousBodyOverflow = document.body.style.overflow
+  document.body.style.overflow = 'hidden'
 }
 
-function configureQqShareCard(character = null) {
-  if (!isQqEnvironment) return
+function closeSharePreview() {
+  sharePreviewUrl.value = ''
+  document.body.style.overflow = previousBodyOverflow
+}
 
-  const title = character ? `我和${character['角色']}最匹配` : '盲盒派对角色性格测试'
-  const description = character
-    ? '来织夜工具箱测测你和哪位角色最匹配'
-    : '完成 30 道情境题，看看你和哪位角色最匹配'
-
-  configureMobileQQShare({
-    title,
-    description,
-    url: new URL('/quiz', window.location.origin).href,
-    imageUrl: new URL('/images/icons/icon-512x512.png', window.location.origin).href,
-  }).catch((error) => {
-    console.warn('配置手机 QQ 分享卡片失败:', error)
-  })
+function handlePreviewKeydown(event) {
+  if (event.key === 'Escape' && sharePreviewUrl.value) closeSharePreview()
 }
 
 async function prepareShareImage() {
@@ -442,23 +427,6 @@ async function shareResult() {
     if (!blob) throw new Error('图片生成失败，请稍后重试')
 
     const filename = `盲盒派对性格匹配-${matchedCharacter.value['角色']}.png`
-
-    if (isQqEnvironment) {
-      const qqImageDataUrl = await createQqShareImage(blob)
-      await shareImageToQQ(qqImageDataUrl, (result) => {
-        const retCode = Number(result?.retCode ?? result?.data?.retCode)
-        if (retCode === 0) {
-          showShareStatus('已分享给 QQ 好友。')
-        } else if (retCode === -1 || retCode === -2 || retCode === 1 || retCode === 2) {
-          showShareStatus('已取消分享。', 'neutral')
-        } else if (Number.isFinite(retCode)) {
-          showShareStatus(`QQ 分享失败（${retCode}），请保存图片后分享。`, 'error')
-        }
-      })
-      showShareStatus('QQ 好友选择器已打开。', 'neutral')
-      return
-    }
-
     const file = new File([blob], filename, { type: 'image/png' })
     const shareData = {
       files: [file],
@@ -469,18 +437,16 @@ async function shareResult() {
     if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
       try {
         await navigator.share(shareData)
-        showShareStatus('分享面板已打开。')
+        showShareStatus('分享完成。')
         return
       } catch (error) {
-        if (error?.name === 'AbortError') {
-          showShareStatus('已取消分享。', 'neutral')
-          return
+        if (error?.name !== 'AbortError') {
+          console.warn('浏览器分享失败，改为展示长按分享图片:', error)
         }
-        console.warn('浏览器分享失败，已回退为下载:', error)
       }
     }
 
-    downloadShareImage(blob, filename)
+    await openSharePreview(blob)
   } catch (error) {
     console.error('生成分享图片失败:', error)
     showShareStatus(`生成分享图片失败：${error.message || error}`, 'error')
@@ -515,6 +481,7 @@ function nextQuestion() {
 }
 
 function restartQuiz() {
+  closeSharePreview()
   if (sharePreparationTimer) {
     window.clearTimeout(sharePreparationTimer)
     sharePreparationTimer = null
@@ -536,6 +503,8 @@ function restartQuiz() {
 }
 
 onBeforeUnmount(() => {
+  closeSharePreview()
+  window.removeEventListener('keydown', handlePreviewKeydown)
   if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
   if (shareStatusTimer) window.clearTimeout(shareStatusTimer)
 })
@@ -767,6 +736,10 @@ button:disabled {
   color: v-bind('colors.text.secondary');
 }
 
+.capture-match-label {
+  display: none;
+}
+
 .match-copy h2 {
   margin: 4px 0 8px;
   color: v-bind('colors.brand.primary');
@@ -793,6 +766,10 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.capture-player-profile {
+  display: none;
 }
 
 .share-card-footer {
@@ -828,12 +805,28 @@ button:disabled {
   text-align: left;
 }
 
+.share-card.share-capture-mode .screen-match-label {
+  display: none;
+}
+
+.share-card.share-capture-mode .capture-match-label {
+  display: inline;
+}
+
 .share-card.share-capture-mode .match-copy h2 {
   font-size: 3.5rem;
 }
 
 .share-card.share-capture-mode .profile-comparison {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.share-card.share-capture-mode .screen-player-profile {
+  display: none;
+}
+
+.share-card.share-capture-mode .capture-player-profile {
+  display: block;
 }
 
 .share-card.share-capture-mode .share-card-footer {
@@ -918,6 +911,68 @@ button:disabled {
 
 .result-error {
   color: v-bind('colors.status.error');
+}
+
+.share-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  overflow: auto;
+  place-items: center;
+  padding: 56px 18px 28px;
+  box-sizing: border-box;
+  background: rgb(0 0 0 / 82%);
+  overscroll-behavior: contain;
+}
+
+.share-preview-content {
+  display: grid;
+  width: min(760px, 100%);
+  justify-items: center;
+  gap: 10px;
+}
+
+.share-preview-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100dvh - 150px);
+  border-radius: 10px;
+  object-fit: contain;
+  box-shadow: 0 18px 60px rgb(0 0 0 / 45%);
+  -webkit-touch-callout: default;
+  user-select: auto;
+}
+
+.share-preview-content p {
+  margin: 4px 0 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.share-preview-content span {
+  color: rgb(255 255 255 / 65%);
+  font-size: 0.78rem;
+}
+
+.share-preview-close {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 16px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 50%;
+  color: #ffffff;
+  background: rgb(0 0 0 / 35%);
+  font: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 @media (max-width: 720px) {
