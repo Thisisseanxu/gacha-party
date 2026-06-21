@@ -156,7 +156,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
-import { colors } from '@/styles/colors.js'
 import HuizhangLiveCard from '@/components/HuizhangLiveCard.vue'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 
@@ -347,12 +346,12 @@ watch(
 <style scoped>
 .page-container {
   min-height: 100vh;
-  background: v-bind('colors.background.primary');
+  background: var(--color-background-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .content-wrap {
@@ -364,7 +363,7 @@ watch(
 .back-btn {
   background: none;
   border: none;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0.3rem 0;
@@ -373,7 +372,7 @@ watch(
 }
 
 .back-btn:hover {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 /* 角色头部 */
@@ -381,8 +380,8 @@ watch(
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   padding: 0.8rem 1rem;
   margin-bottom: 0.8rem;
@@ -393,19 +392,19 @@ watch(
   height: 72px;
   border-radius: 10px;
   object-fit: cover;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   flex-shrink: 0;
 }
 
 .char-realname {
   font-size: 1.2rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .char-cardname {
   font-size: 0.85rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .char-theme {
@@ -413,7 +412,7 @@ watch(
   align-items: center;
   gap: 4px;
   font-size: 0.82rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 3px;
 }
 
@@ -429,24 +428,24 @@ watch(
   font-weight: bold;
   padding: 1px 7px;
   border-radius: 4px;
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-lighter);
+  color: var(--color-text-primary);
 }
 
 .char-rarity.sp {
-  color: v-bind('colors.rarity.sp');
+  color: var(--color-rarity-sp);
 }
 
 .char-rarity.ssr {
-  color: v-bind('colors.rarity.ssr');
+  color: var(--color-rarity-ssr);
 }
 
 .char-rarity.sr {
-  color: v-bind('colors.rarity.sr');
+  color: var(--color-rarity-sr);
 }
 
 .char-rarity.r {
-  color: v-bind('colors.rarity.r');
+  color: var(--color-rarity-r);
 }
 
 /* 操作按钮行 */
@@ -463,18 +462,18 @@ watch(
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.15s;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .action-btn.primary {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-  border-color: v-bind('colors.brand.primary');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
+  border-color: var(--color-brand-primary);
   font-weight: bold;
 }
 
 .action-btn.primary:hover {
-  background: v-bind('colors.brand.hover');
+  background: var(--color-brand-hover);
 }
 
 .action-btn.primary:disabled {
@@ -483,19 +482,19 @@ watch(
 }
 
 .action-btn.secondary {
-  background: v-bind('colors.background.content');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-content);
+  color: var(--color-text-secondary);
 }
 
 .action-btn.secondary:hover {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
 }
 
 /* 导入代码 */
 .import-code-section {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 10px;
   padding: 0.8rem;
   margin-bottom: 0.8rem;
@@ -506,10 +505,10 @@ watch(
 
 .code-input {
   width: 100%;
-  background: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 6px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 0.8rem;
   padding: 0.5rem;
   resize: vertical;
@@ -518,7 +517,7 @@ watch(
 }
 
 .import-error {
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
   font-size: 0.85rem;
 }
 
@@ -535,33 +534,33 @@ watch(
   gap: 8px;
   font-size: 1.05rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
-  border-left: 3px solid v-bind('colors.brand.primary');
+  color: var(--color-text-primary);
+  border-left: 3px solid var(--color-brand-primary);
   padding-left: 0.6rem;
   margin-bottom: 0.3rem;
 }
 
 .count-badge {
   font-size: 0.78rem;
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-lighter);
+  color: var(--color-text-secondary);
   border-radius: 10px;
   padding: 1px 8px;
 }
 
 .empty-msg {
   text-align: center;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding: 2rem;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   border-radius: 10px;
-  border: 1px dashed v-bind('colors.border.primary');
+  border: 1px dashed var(--color-border-primary);
 }
 
 /* 攻略卡片 */
 .strategy-card {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
@@ -579,15 +578,15 @@ watch(
 .strategy-title {
   font-size: 1rem;
   font-weight: bold;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 .edit-btn {
   padding: 4px 14px;
   border-radius: 6px;
-  background: v-bind('colors.background.lighter');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-lighter);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.85rem;
   flex-shrink: 0;
@@ -595,8 +594,8 @@ watch(
 }
 
 .edit-btn:hover {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
 }
 
 .strategy-meta {
@@ -607,7 +606,7 @@ watch(
 }
 
 .author {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.82rem;
 }
 
@@ -618,14 +617,14 @@ watch(
 }
 
 .stars-label {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.78rem;
 }
 
 .star-chip {
   font-size: 0.78rem;
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-lighter);
+  color: var(--color-text-secondary);
   border-radius: 4px;
   padding: 1px 5px;
 }
@@ -742,14 +741,14 @@ watch(
 
 /* 管理员相关 */
 .featured-card {
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .featured-badge {
   display: inline-block;
   font-size: 0.7rem;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
   border-radius: 4px;
   padding: 1px 6px;
   margin-right: 4px;
@@ -780,35 +779,35 @@ watch(
 }
 
 .feature-btn {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
   background: transparent;
 }
 
 .feature-btn:not(:disabled):hover {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .overwrite-btn {
-  border-color: v-bind('colors.text.secondary');
-  color: v-bind('colors.text.secondary');
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
   background: transparent;
 }
 
 .overwrite-btn:not(:disabled):hover {
-  border-color: v-bind('colors.text.primary');
-  color: v-bind('colors.text.primary');
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
 }
 
 .delete-btn {
-  border-color: v-bind('colors.status.error');
-  color: v-bind('colors.status.error');
+  border-color: var(--color-status-error);
+  color: var(--color-status-error);
   background: transparent;
 }
 
 .delete-btn:not(:disabled):hover {
-  background: v-bind('colors.status.error');
+  background: var(--color-status-error);
   color: #fff;
 }
 
@@ -817,9 +816,9 @@ watch(
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
   padding: 0.6rem 1.4rem;
   border-radius: 8px;
   font-size: 0.9rem;

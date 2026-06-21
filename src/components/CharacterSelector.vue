@@ -123,7 +123,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { SP, SSR, SR, R } from '@/data/constant.js'
-import { colors } from '@/styles/colors.js'
 import { THEMES } from '@/data/constant.js'
 
 const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'eiji']
@@ -370,8 +369,8 @@ const deleteCustomCharacter = (characterId) => {
 
 <style scoped>
 .character-selection-container {
-  background-color: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   padding: 1rem 1rem;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -383,12 +382,12 @@ const deleteCustomCharacter = (characterId) => {
   margin: 0;
   font-size: 1.8rem;
   text-align: center;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .selection-description {
   text-align: center;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin: 0rem;
 }
 
@@ -421,9 +420,9 @@ const deleteCustomCharacter = (characterId) => {
   gap: 2px;
   padding: 4px 6px;
   border-radius: 20px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.75rem;
   white-space: nowrap;
@@ -437,39 +436,39 @@ const deleteCustomCharacter = (characterId) => {
 }
 
 .filter-chip:hover {
-  border-color: v-bind('colors.brand.primary');
-  background: v-bind('colors.shadow.primaryHover');
+  border-color: var(--color-brand-primary);
+  background: var(--color-shadow-primary-hover);
 }
 
 .filter-chip.active {
-  background: v-bind('colors.brand.primary');
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-text-black);
   font-weight: bold;
 }
 
 /* 稀有度筛选激活颜色 */
 .rarity-chip.SP.active {
-  background: v-bind('colors.rarity.sp');
-  border-color: v-bind('colors.rarity.sp');
+  background: var(--color-rarity-sp);
+  border-color: var(--color-rarity-sp);
   color: white;
 }
 
 .rarity-chip.SSR.active {
-  background: v-bind('colors.rarity.ssr');
-  border-color: v-bind('colors.rarity.ssr');
+  background: var(--color-rarity-ssr);
+  border-color: var(--color-rarity-ssr);
   color: white;
 }
 
 .rarity-chip.SR.active {
-  background: v-bind('colors.rarity.sr');
-  border-color: v-bind('colors.rarity.sr');
+  background: var(--color-rarity-sr);
+  border-color: var(--color-rarity-sr);
   color: white;
 }
 
 .rarity-chip.R.active {
-  background: v-bind('colors.rarity.r');
-  border-color: v-bind('colors.rarity.r');
+  background: var(--color-rarity-r);
+  border-color: var(--color-rarity-r);
   color: white;
 }
 
@@ -478,9 +477,9 @@ const deleteCustomCharacter = (characterId) => {
   margin-left: auto;
   padding: 4px 12px;
   border-radius: 20px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-light);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.78rem;
   white-space: nowrap;
@@ -489,9 +488,9 @@ const deleteCustomCharacter = (characterId) => {
 }
 
 .image-toggle-btn.active {
-  background: v-bind('colors.brand.primary');
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-text-black);
   font-weight: bold;
 }
 
@@ -514,28 +513,28 @@ const deleteCustomCharacter = (characterId) => {
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s ease;
-  background-color: v-bind('colors.background.light');
+  background-color: var(--color-background-light);
 }
 
 .card-option.SP > .card-image {
-  background: linear-gradient(180deg, v-bind('colors.rarity.sp'), v-bind('colors.rarity.ssr'));
+  background: linear-gradient(180deg, var(--color-rarity-sp), var(--color-rarity-ssr));
 }
 
 .card-option.SSR > .card-image {
-  background-color: v-bind('colors.rarity.ssr');
+  background-color: var(--color-rarity-ssr);
 }
 
 .card-option.SR > .card-image {
-  background-color: v-bind('colors.rarity.sr');
+  background-color: var(--color-rarity-sr);
 }
 
 .card-option.R > .card-image {
-  background-color: v-bind('colors.rarity.r');
+  background-color: var(--color-rarity-r);
 }
 
 .card-option:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+  box-shadow: 0 4px 12px var(--color-shadow-primary);
 }
 
 .card-option.disabled {
@@ -558,13 +557,13 @@ const deleteCustomCharacter = (characterId) => {
 .card-option .card-name {
   font-size: 0.75rem;
   text-align: center;
-  background: v-bind('colors.shadow.primaryHover');
+  background: var(--color-shadow-primary-hover);
   backdrop-filter: blur(2px);
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  color: v-bind('colors.text.white');
+  color: var(--color-text-white);
 }
 
 .card-option .checkmark {
@@ -573,8 +572,8 @@ const deleteCustomCharacter = (characterId) => {
   right: 5px;
   width: 20px;
   height: 20px;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.primary');
+  background: var(--color-brand-primary);
+  color: var(--color-text-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -586,7 +585,7 @@ const deleteCustomCharacter = (characterId) => {
 }
 
 .card-option.selected {
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .card-option.selected .checkmark {
@@ -601,7 +600,7 @@ const deleteCustomCharacter = (characterId) => {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: v-bind('colors.brand.cancel');
+  background-color: var(--color-brand-cancel);
   color: white;
   border: 1px solid white;
   font-size: 16px;
@@ -627,46 +626,46 @@ const deleteCustomCharacter = (characterId) => {
   align-items: center;
   justify-content: center;
   min-height: 4.2rem;
-  border: 2px dashed v-bind('colors.border.primary');
+  border: 2px dashed var(--color-border-primary);
   background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .add-custom-btn:hover {
-  border-color: v-bind('colors.brand.primary');
-  background: v-bind('colors.shadow.primaryHover');
+  border-color: var(--color-brand-primary);
+  background: var(--color-shadow-primary-hover);
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+  box-shadow: 0 4px 12px var(--color-shadow-primary);
 }
 
 .add-custom-icon {
   font-size: 1.8rem;
   line-height: 1;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding-bottom: 0.5rem;
 }
 
 .add-custom-btn:hover .add-custom-icon {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 .add-custom-btn .card-name {
   position: static;
   background: none;
   backdrop-filter: none;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding: 0 0 0.3rem 0;
 }
 
 .add-custom-btn:hover .card-name {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 .filter-tips {
   text-align: center;
   font-size: 0.8rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin-top: 10px;
 }
 </style>

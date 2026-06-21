@@ -325,7 +325,6 @@
 
 <script setup>
 import { computed, defineComponent, h, onMounted, onUnmounted, ref } from 'vue'
-import { colors } from '@/styles/colors.js'
 import { getCharConfig } from '@/data/huizhang.js'
 import { decodeStrategy, encodeStrategy } from '@/utils/huizhangCode.js'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
@@ -805,8 +804,8 @@ onUnmounted(() => {
 <style scoped>
 .page-container {
   min-height: 100vh;
-  background: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -822,8 +821,8 @@ onUnmounted(() => {
 }
 
 .login-card {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 14px;
   padding: 2rem 2.4rem;
   width: 90%;
@@ -831,7 +830,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 8px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 8px 24px var(--color-shadow-primary);
 }
 
 .login-title {
@@ -843,7 +842,7 @@ onUnmounted(() => {
 .login-sub,
 .admin-meta {
   margin: 0.25rem 0 0;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.82rem;
 }
 
@@ -875,8 +874,8 @@ onUnmounted(() => {
 }
 
 .dirty-pill {
-  border: 1px solid v-bind('colors.text.highlight');
-  color: v-bind('colors.text.highlight');
+  border: 1px solid var(--color-text-highlight);
+  color: var(--color-text-highlight);
   border-radius: 999px;
   padding: 0.28rem 0.7rem;
   font-size: 0.78rem;
@@ -898,16 +897,16 @@ onUnmounted(() => {
 .action-btn,
 .cancel-btn {
   background: transparent;
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-secondary);
   padding: 0.42rem 0.8rem;
 }
 
 .primary-btn {
   padding: 0.5rem 1.1rem;
   border: none;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .full-btn {
@@ -915,7 +914,7 @@ onUnmounted(() => {
 }
 
 .primary-btn:hover:not(:disabled) {
-  background: v-bind('colors.brand.hover');
+  background: var(--color-brand-hover);
 }
 
 .primary-btn:disabled,
@@ -928,7 +927,7 @@ onUnmounted(() => {
 .tab-bar {
   display: flex;
   gap: 6px;
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  border-bottom: 1px solid var(--color-border-primary);
   margin-bottom: 1rem;
   overflow-x: auto;
 }
@@ -938,7 +937,7 @@ onUnmounted(() => {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.9rem;
   display: flex;
@@ -949,13 +948,13 @@ onUnmounted(() => {
 }
 
 .tab-btn.active {
-  color: v-bind('colors.brand.primary');
-  border-bottom-color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
+  border-bottom-color: var(--color-brand-primary);
   font-weight: bold;
 }
 
 .tab-badge {
-  background: v-bind('colors.brand.cancel');
+  background: var(--color-brand-cancel);
   color: white;
   border-radius: 10px;
   font-size: 0.7rem;
@@ -965,7 +964,7 @@ onUnmounted(() => {
 .table-wrap {
   overflow-x: auto;
   border-radius: 10px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .data-table {
@@ -975,17 +974,17 @@ onUnmounted(() => {
 }
 
 .data-table th {
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-light);
+  color: var(--color-text-secondary);
   padding: 0.6rem 0.8rem;
   text-align: left;
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  border-bottom: 1px solid var(--color-border-primary);
   white-space: nowrap;
 }
 
 .data-table td {
   padding: 0.55rem 0.8rem;
-  border-bottom: 1px solid v-bind('colors.border.secondary');
+  border-bottom: 1px solid var(--color-border-secondary);
   vertical-align: middle;
 }
 
@@ -996,7 +995,7 @@ onUnmounted(() => {
 .td-id,
 .td-time,
 .td-userid {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.8rem;
   white-space: nowrap;
 }
@@ -1015,37 +1014,37 @@ onUnmounted(() => {
 }
 
 .info-btn {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
 }
 
 .approve-btn {
-  border-color: v-bind('colors.brand.confirm');
-  color: v-bind('colors.brand.confirm');
+  border-color: var(--color-brand-confirm);
+  color: var(--color-brand-confirm);
 }
 
 .warn-btn {
-  border-color: v-bind('colors.text.highlight');
-  color: v-bind('colors.text.highlight');
+  border-color: var(--color-text-highlight);
+  color: var(--color-text-highlight);
 }
 
 .danger-btn {
-  border-color: v-bind('colors.brand.cancel');
-  color: v-bind('colors.brand.cancel');
+  border-color: var(--color-brand-cancel);
+  color: var(--color-brand-cancel);
 }
 
 .edit-btn {
-  border-color: v-bind('colors.text.secondary');
-  color: v-bind('colors.text.secondary');
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .featured-tag {
   font-size: 0.78rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 .featured-tag.active {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-weight: bold;
 }
 
@@ -1060,16 +1059,16 @@ onUnmounted(() => {
 .page-btn {
   padding: 0.35rem 0.9rem;
   border-radius: 6px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-lighter);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.85rem;
 }
 
 .page-info,
 .section-count {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.82rem;
 }
 
@@ -1083,8 +1082,8 @@ onUnmounted(() => {
 }
 
 .ban-form-card {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -1112,11 +1111,11 @@ onUnmounted(() => {
 }
 
 .seed-warn {
-  background: v-bind('colors.status.errorBg');
-  border: 1px solid v-bind('colors.brand.cancel');
+  background: var(--color-status-error-bg);
+  border: 1px solid var(--color-brand-cancel);
   border-radius: 8px;
   padding: 0.8rem 1rem;
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
   font-size: 0.88rem;
   line-height: 1.6;
   margin-bottom: 1rem;
@@ -1142,15 +1141,15 @@ onUnmounted(() => {
 .edit-label {
   font-weight: bold;
   font-size: 0.85rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-input {
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid v-bind('colors.input.border');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   font-size: 0.95rem;
 }
 
@@ -1161,14 +1160,14 @@ onUnmounted(() => {
 }
 
 .error-msg {
-  background: v-bind('colors.status.errorBg');
-  color: v-bind('colors.status.error');
+  background: var(--color-status-error-bg);
+  color: var(--color-status-error);
 }
 
 .loading-msg,
 .empty-msg {
   text-align: center;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   padding: 2rem 0;
   font-size: 0.9rem;
 }
@@ -1176,7 +1175,7 @@ onUnmounted(() => {
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: v-bind('colors.background.overlay');
+  background-color: var(--color-background-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1184,8 +1183,8 @@ onUnmounted(() => {
 }
 
 .preview-dialog {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 14px;
   padding: 1.2rem;
   width: 90%;
@@ -1208,18 +1207,18 @@ onUnmounted(() => {
   display: flex;
   gap: 1rem;
   font-size: 0.82rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 .preview-error {
   text-align: center;
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   cursor: pointer;
   font-size: 1rem;
   padding: 2px 6px;
@@ -1227,11 +1226,11 @@ onUnmounted(() => {
 
 .confirm-dialog,
 .edit-dialog {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   width: min(520px, 92vw);
-  box-shadow: 0 8px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 8px 24px var(--color-shadow-primary);
 }
 
 .confirm-dialog {
@@ -1251,7 +1250,7 @@ onUnmounted(() => {
 }
 
 .danger-primary {
-  background: v-bind('colors.brand.cancel');
+  background: var(--color-brand-cancel);
   color: #fff;
 }
 
@@ -1285,16 +1284,16 @@ onUnmounted(() => {
   font-size: 0.9rem;
   font-weight: bold;
   z-index: 2000;
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+  box-shadow: 0 4px 12px var(--color-shadow-primary);
 }
 
 .toast.success {
-  background: v-bind('colors.status.success');
+  background: var(--color-status-success);
   color: #fff;
 }
 
 .toast.error {
-  background: v-bind('colors.status.error');
+  background: var(--color-status-error);
   color: #fff;
 }
 

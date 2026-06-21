@@ -385,7 +385,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, toRaw } from 'vue'
 import { allCards } from '@/data/cards.js'
-import { colors } from '@/styles/colors.js'
 import PopUp from '@/components/PopUp.vue'
 import CharacterSelector from '@/components/CharacterSelector.vue'
 import { logger } from '@/utils/logger'
@@ -1388,8 +1387,8 @@ onUnmounted(() => {
 <style scoped>
 .background {
   min-height: 100vh;
-  background-color: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -1399,7 +1398,7 @@ onUnmounted(() => {
 
 .chat-page-container {
   width: 100%;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   box-sizing: border-box;
   padding: 0.5rem;
 }
@@ -1407,7 +1406,7 @@ onUnmounted(() => {
 .page-title {
   text-align: center;
   font-size: 2em;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0.5rem 0 1rem 0;
 }
 
@@ -1425,20 +1424,20 @@ onUnmounted(() => {
 .controls-panel {
   flex: 1;
   min-width: 300px;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   padding: 15px;
   border-radius: 12px;
   height: fit-content;
   box-sizing: border-box;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .controls-panel h2 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 1.5rem;
-  color: v-bind('colors.text.highlight');
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  color: var(--color-text-highlight);
+  border-bottom: 1px solid var(--color-border-primary);
   padding-bottom: 10px;
 }
 
@@ -1450,7 +1449,7 @@ onUnmounted(() => {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 /* 小按钮样式 */
@@ -1460,7 +1459,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px solid v-bind('colors.border.primary');
+  border-top: 1px solid var(--color-border-primary);
 }
 
 .actions-container .action-button {
@@ -1471,8 +1470,8 @@ onUnmounted(() => {
 .action-button {
   padding: 0.5rem 1rem;
   border: none;
-  background-color: v-bind('colors.button.defaultBg');
-  color: v-bind('colors.button.defaultText');
+  background-color: var(--color-button-default-bg);
+  color: var(--color-button-default-text);
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -1480,12 +1479,12 @@ onUnmounted(() => {
 }
 
 .action-button:hover {
-  background-color: v-bind('colors.button.hoverBg');
-  color: v-bind('colors.button.hoverText');
+  background-color: var(--color-button-hover-bg);
+  color: var(--color-button-hover-text);
 }
 
 .export-btn {
-  background-color: v-bind('colors.brand.confirm');
+  background-color: var(--color-brand-confirm);
   color: white;
   border: none;
 }
@@ -1504,16 +1503,16 @@ onUnmounted(() => {
 
 .config-item span {
   font-size: 0.8rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .mini-input {
   width: 100%;
   padding: 6px;
   border-radius: 4px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   box-sizing: border-box;
 }
 
@@ -1522,8 +1521,8 @@ onUnmounted(() => {
   flex: 2;
   min-width: 300px;
   overflow: hidden;
-  border: 2px dashed v-bind('colors.border.dashed');
-  background: v-bind('colors.background.darker');
+  border: 2px dashed var(--color-border-dashed);
+  background: var(--color-background-darker);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -1535,7 +1534,7 @@ onUnmounted(() => {
 }
 
 .preview-hint {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 0.9rem;
@@ -1582,7 +1581,7 @@ onUnmounted(() => {
 }
 
 .chat-log-container {
-  background-color: v-bind('colors.game.backgroundBlack');
+  background-color: var(--color-game-background-black);
   overflow-y: auto;
   overflow-x: hidden;
   /* 隐藏滚动条 */
@@ -1626,14 +1625,14 @@ onUnmounted(() => {
 }
 
 .avatar.missing-avatar {
-  background-color: v-bind('colors.status.errorBg');
-  border: 2px dashed v-bind('colors.status.error');
+  background-color: var(--color-status-error-bg);
+  border: 2px dashed var(--color-status-error);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: 0.9rem;
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
   cursor: pointer;
   text-align: center;
   line-height: 1.2;
@@ -1661,7 +1660,7 @@ onUnmounted(() => {
 /* 聊天气泡样式 */
 .bubble,
 .image-bubble {
-  background-color: v-bind('colors.game.primary');
+  background-color: var(--color-game-primary);
   color: white;
   border-radius: 15px;
   padding: 0.25rem 0.5rem 0.375rem 0.5rem;
@@ -1693,7 +1692,7 @@ onUnmounted(() => {
   border-style: solid;
   border-width: 0 7px 9px 0;
   rotate: 20deg;
-  border-color: transparent v-bind('colors.game.primary') transparent transparent;
+  border-color: transparent var(--color-game-primary) transparent transparent;
 }
 
 /* 右侧消息 */
@@ -1708,7 +1707,7 @@ onUnmounted(() => {
 
 .chat-message.right .bubble {
   background-color: white;
-  color: v-bind('colors.game.primaryText');
+  color: var(--color-game-primary-text);
 }
 
 /* 右侧消息气泡的小尾巴 (右上角) */
@@ -1735,9 +1734,9 @@ onUnmounted(() => {
 
 /* 旁白的气泡样式 */
 .bubble.center {
-  background-color: v-bind('colors.game.narratorBg');
+  background-color: var(--color-game-narrator-bg);
   /* 浅紫色底 */
-  color: v-bind('colors.game.narratorText');
+  color: var(--color-game-narrator-text);
   /* 浅灰文字 */
   text-align: left;
   /* 文字对齐 */
@@ -1794,9 +1793,9 @@ onUnmounted(() => {
   border-radius: 5px;
   font-size: 1em;
   box-sizing: border-box;
-  background-color: v-bind('colors.input.background');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-input-background);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
 }
 
 .editor-textarea {
@@ -1817,12 +1816,12 @@ onUnmounted(() => {
   cursor: pointer;
   border: none;
   transition: background-color 0.2s;
-  background-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .editor-button:hover {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 /* 叠加层样式 */
@@ -1841,7 +1840,7 @@ onUnmounted(() => {
 
 /* 修复角色弹窗样式 (复用 CharacterSelector 的样式) */
 .custom-character-form {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 20px 30px;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -1850,13 +1849,13 @@ onUnmounted(() => {
   gap: 15px;
   width: 90%;
   max-width: 400px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .custom-character-form h3 {
   text-align: center;
   margin-top: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .form-row {
@@ -1868,7 +1867,7 @@ onUnmounted(() => {
 .form-row label {
   font-weight: bold;
   font-size: 0.9em;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-row input[type='text'] {
@@ -1877,9 +1876,9 @@ onUnmounted(() => {
   border-radius: 5px;
   font-size: 1em;
   box-sizing: border-box;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
 }
 
 .avatar-preview-container {
@@ -1890,7 +1889,7 @@ onUnmounted(() => {
   max-width: 100px;
   max-height: 100px;
   border-radius: 8px;
-  border: 2px solid v-bind('colors.border.primary');
+  border: 2px solid var(--color-border-primary);
   margin-top: 5px;
 }
 
@@ -1906,9 +1905,9 @@ onUnmounted(() => {
 }
 
 .form-actions .action-button.cancel {
-  background-color: v-bind('colors.button.secondaryBg');
-  border-color: v-bind('colors.button.secondaryBg');
-  color: v-bind('colors.button.secondaryText');
+  background-color: var(--color-button-secondary-bg);
+  border-color: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
 }
 
 .form-actions .action-button.cancel:hover {
@@ -1918,8 +1917,8 @@ onUnmounted(() => {
 /* 编辑菜单样式 */
 .edit-menu-container {
   position: relative;
-  background-color: v-bind('colors.background.content');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-content);
+  color: var(--color-text-primary);
   padding: 20px 30px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -1936,14 +1935,14 @@ onUnmounted(() => {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.2em;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .edit-menu-button {
   padding: 10px 15px;
   border: none;
-  background-color: v-bind('colors.button.defaultBg');
-  color: v-bind('colors.button.defaultText');
+  background-color: var(--color-button-default-bg);
+  color: var(--color-button-default-text);
   border-radius: 5px;
   cursor: pointer;
   font-size: 1em;
@@ -1955,14 +1954,14 @@ onUnmounted(() => {
 }
 
 .edit-menu-button:hover {
-  background-color: v-bind('colors.button.hoverBg');
-  color: v-bind('colors.button.hoverText');
+  background-color: var(--color-button-hover-bg);
+  color: var(--color-button-hover-text);
 }
 
 .edit-menu-button.delete {
-  background-color: v-bind('colors.button.dangerBg');
-  border-color: v-bind('colors.button.dangerBorder');
-  color: v-bind('colors.button.dangerText');
+  background-color: var(--color-button-danger-bg);
+  border-color: var(--color-button-danger-border);
+  color: var(--color-button-danger-text);
 }
 
 .edit-menu-button.delete:hover {
@@ -1972,8 +1971,8 @@ onUnmounted(() => {
 .edit-menu-button.close {
   margin-top: 10px;
   /* 与功能按钮分隔开 */
-  background-color: v-bind('colors.background.light');
-  border-color: v-bind('colors.border.primary');
+  background-color: var(--color-background-light);
+  border-color: var(--color-border-primary);
 }
 
 .edit-menu-button.close:hover {
@@ -1983,8 +1982,8 @@ onUnmounted(() => {
 /* 存档菜单样式 */
 .save-load-menu {
   position: relative;
-  background-color: v-bind('colors.background.content');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-content);
+  color: var(--color-text-primary);
   padding: 20px;
   border-radius: 10px;
   width: 90%;
@@ -1999,7 +1998,7 @@ onUnmounted(() => {
 .menu-title {
   text-align: center;
   margin: 0;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .slot-section {
@@ -2010,7 +2009,7 @@ onUnmounted(() => {
 
 .slot-header {
   font-weight: bold;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9em;
 }
 
@@ -2018,7 +2017,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   padding: 0.5rem;
   border-radius: 0.5rem;
 }
@@ -2042,15 +2041,15 @@ onUnmounted(() => {
   flex: 1;
   padding: 5px;
   border-radius: 4px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   min-width: 0;
 }
 
 .slot-time-small {
   font-size: 0.75em;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -2067,8 +2066,8 @@ onUnmounted(() => {
 }
 
 .delete-slot-btn {
-  background: v-bind('colors.button.dangerBg');
-  color: v-bind('colors.button.dangerText');
+  background: var(--color-button-danger-bg);
+  color: var(--color-button-danger-text);
   border: none;
   border-radius: 50%;
   width: 24px;
@@ -2083,7 +2082,7 @@ onUnmounted(() => {
 }
 
 .save-btn {
-  background-color: v-bind('colors.brand.confirm');
+  background-color: var(--color-brand-confirm);
   color: white;
   border: none;
 }
@@ -2095,7 +2094,7 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   line-height: 1;
   padding: 5px;
@@ -2103,7 +2102,7 @@ onUnmounted(() => {
 
 /* 编辑行高亮样式 */
 .editing-highlight {
-  border: 2px solid v-bind('colors.brand.confirm');
+  border: 2px solid var(--color-brand-confirm);
   /* 绿色边框 */
   border-radius: 8px;
   padding: 5px;
@@ -2121,7 +2120,7 @@ onUnmounted(() => {
 
 /* 插入行高亮样式 */
 .insert-highlight-after {
-  border-bottom: 2px solid v-bind('colors.brand.confirm');
+  border-bottom: 2px solid var(--color-brand-confirm);
   /* 绿色横线 */
   padding: 5px;
   margin: -7px -5px;
@@ -2135,8 +2134,8 @@ onUnmounted(() => {
 
 /* 取消按钮的特定样式 */
 .editor-action-row .editor-button.cancel {
-  background-color: v-bind('colors.button.dangerBg');
-  color: v-bind('colors.button.dangerText');
+  background-color: var(--color-button-danger-bg);
+  color: var(--color-button-danger-text);
 }
 
 .editor-action-row .editor-button.cancel:hover {
@@ -2144,7 +2143,7 @@ onUnmounted(() => {
 }
 
 .highlight {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 /* 为协议列表添加样式 */
@@ -2152,11 +2151,11 @@ onUnmounted(() => {
   max-height: 20rem;
   overflow-y: auto;
   /* 美化列表，增加一些内边距和边框 */
-  border: 2px solid v-bind('colors.border.primary');
+  border: 2px solid var(--color-border-primary);
   /* 左侧留出空间给数字序号 */
   padding: 0 0 0 20px;
   border-radius: 8px;
-  background-color: v-bind('colors.shadow.primaryHover');
+  background-color: var(--color-shadow-primary-hover);
 }
 
 /* 列表项的样式 */
@@ -2178,7 +2177,7 @@ onUnmounted(() => {
 }
 
 .agreement-list::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 3px;
 }
 
@@ -2203,12 +2202,12 @@ onUnmounted(() => {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   z-index: 999;
   font-size: 1.2rem;
-  background-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .finalize-button:hover {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 .finalize-button:disabled {

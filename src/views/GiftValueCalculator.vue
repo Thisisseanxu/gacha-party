@@ -60,7 +60,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { colors } from '@/styles/colors.js'
 
 // --- 输入绑定 ---
 const price = ref(null)
@@ -96,31 +95,21 @@ const calculateValue = () => {
   result.value = (totalStandardCurrency / baseValue) * 100
 }
 
-// CSS颜色常量
-const colorBgPrimary = colors.background.primary
-const colorBgContent = colors.background.content
-const colorBgLight = colors.background.light
-const colorTextPrimary = colors.text.primary
-const colorTextSecondary = colors.text.secondary
-const colorBrandPrimary = colors.brand.primary
-const colorBrandHover = colors.brand.hover
-const colorTextHighlight = colors.text.highlight
-const colorBorderPrimary = colors.border.primary
 </script>
 
 <style scoped>
 .background {
   padding: 2rem;
   min-height: 100vh;
-  background-color: v-bind(colorBgPrimary);
-  color: v-bind(colorTextPrimary);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
 .calculator-container {
-  background-color: v-bind(colorBgContent);
+  background-color: var(--color-background-content);
   padding: 2rem;
   border-radius: 12px;
   width: 100%;
@@ -137,7 +126,7 @@ const colorBorderPrimary = colors.border.primary
 }
 
 .description {
-  color: v-bind(colorTextSecondary);
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   text-align: center;
   margin: 0;
@@ -152,31 +141,31 @@ const colorBorderPrimary = colors.border.primary
 .input-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: v-bind(colorTextSecondary);
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
 .input-group input {
   width: 100%;
   padding: 0.75rem;
-  background-color: v-bind(colorBgLight);
-  border: 1px solid v-bind(colorBorderPrimary);
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
-  color: v-bind(colorTextPrimary);
+  color: var(--color-text-primary);
   font-size: 1rem;
   box-sizing: border-box;
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: v-bind(colorBrandPrimary);
+  border-color: var(--color-brand-primary);
 }
 
 .calculate-button {
   padding: 1rem;
   border: none;
   border-radius: 8px;
-  background-color: v-bind(colorBrandPrimary);
+  background-color: var(--color-brand-primary);
   color: #111;
   font-size: 1.1rem;
   font-weight: bold;
@@ -185,19 +174,19 @@ const colorBorderPrimary = colors.border.primary
 }
 
 .calculate-button:hover {
-  background-color: v-bind(colorBrandHover);
+  background-color: var(--color-brand-hover);
 }
 
 .result-section {
   margin-top: 1rem;
   padding-top: 1.5rem;
-  border-top: 1px solid v-bind(colorBorderPrimary);
+  border-top: 1px solid var(--color-border-primary);
   text-align: center;
 }
 
 .result-section p {
   font-size: 1.2rem;
-  color: v-bind(colorTextSecondary);
+  color: var(--color-text-secondary);
 }
 
 .result-value {
@@ -207,7 +196,7 @@ const colorBorderPrimary = colors.border.primary
 }
 
 .result-value span {
-  color: v-bind(colorTextHighlight);
+  color: var(--color-text-highlight);
   font-size: 2.5rem;
   margin-left: 0.5rem;
 }

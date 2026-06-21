@@ -130,7 +130,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { colors } from '@/styles/colors.js'
 import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 import { cardPoolsInOrder } from '@/data/cardPools'
@@ -241,7 +240,7 @@ const handleComingSoon = () => {
 .background {
   position: relative;
   min-height: 100dvh;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -272,7 +271,7 @@ const handleComingSoon = () => {
   z-index: 2;
   width: 100%;
   padding: 1rem;
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -291,7 +290,7 @@ const handleComingSoon = () => {
 .title {
   font-size: 3rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0;
   flex-shrink: 0;
 }
@@ -303,7 +302,7 @@ const handleComingSoon = () => {
 .subtitle {
   font-size: 1.2rem;
   font-weight: normal;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 0;
   margin-bottom: 0.75rem;
   flex-shrink: 0;
@@ -315,7 +314,7 @@ const handleComingSoon = () => {
 
 .version {
   font-size: 1rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   transition: color 0.3s ease;
   flex-shrink: 0;
 }
@@ -323,13 +322,13 @@ const handleComingSoon = () => {
 .beian-link {
   margin-top: 0.25rem;
   font-size: 0.9rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .beian-link:hover {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   text-decoration: underline;
 }
 
@@ -418,7 +417,7 @@ const handleComingSoon = () => {
   padding-top: 0.25rem;
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.border.primary') transparent;
+  scrollbar-color: var(--color-border-primary) transparent;
 }
 
 .secondary-actions::-webkit-scrollbar {
@@ -426,7 +425,7 @@ const handleComingSoon = () => {
 }
 
 .secondary-actions::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.border.primary');
+  background-color: var(--color-border-primary);
   border-radius: 3px;
 }
 
@@ -437,13 +436,13 @@ const handleComingSoon = () => {
   padding: 0.75rem 1rem;
   text-align: left;
   background: transparent;
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
 }
 
 .btn-secondary:hover {
-  border-color: v-bind('colors.brand.primary');
-  background-color: v-bind('colors.brand.primaryBackground');
+  border-color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-background);
 }
 
 .btn-text {
@@ -457,13 +456,13 @@ const handleComingSoon = () => {
 .btn-title {
   font-size: 1rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .btn-subtitle {
   font-size: 0.8rem;
   font-weight: normal;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin-top: 2px;
 }
 
@@ -481,7 +480,7 @@ const handleComingSoon = () => {
   margin: 1rem 0 0.5rem 0;
   font-size: 0.85rem;
   font-weight: normal;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -490,7 +489,7 @@ const handleComingSoon = () => {
   content: '';
   flex: 1;
   height: 1px;
-  background: v-bind('colors.border.primary');
+  background: var(--color-border-primary);
 }
 
 .coming-soon:disabled {
@@ -524,7 +523,7 @@ const handleComingSoon = () => {
   text-wrap: nowrap;
   align-items: center;
   gap: 0.8rem;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   text-decoration: none;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -550,14 +549,14 @@ const handleComingSoon = () => {
   flex-direction: row;
   align-items: center;
   gap: 4px;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-left: none;
   border-radius: 0 8px 8px 0;
   margin-left: -20px;
   padding: 6px 6px 6px 26px;
   text-decoration: none;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 0.8rem;
   font-weight: bold;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);

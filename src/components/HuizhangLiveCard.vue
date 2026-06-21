@@ -142,7 +142,6 @@
 
 <script setup>
 import { computed, getCurrentInstance } from 'vue'
-import { colors } from '@/styles/colors.js'
 import { HUIZHANG_SHAPES, HUIZHANG_TYPES, getHuizhangBgUrl } from '@/data/huizhang.js'
 
 const props = defineProps({
@@ -233,7 +232,7 @@ function getStarImage(level, starIndex) {
   left: 20px;
   z-index: 10;
   display: flex;
-  background: v-bind('colors.preview.overlay');
+  background: var(--color-preview-overlay);
   padding: 8px 16px;
   border-radius: 30px;
   align-items: center;
@@ -242,7 +241,7 @@ function getStarImage(level, starIndex) {
 
 .star-label {
   font-size: 1rem;
-  color: v-bind('colors.preview.text');
+  color: var(--color-preview-text);
   margin-right: 8px;
   text-align: center;
 }
@@ -393,7 +392,7 @@ function getStarImage(level, starIndex) {
 /* 徽章底部星星容器 */
 .badge-stars-container {
   margin-top: 4px;
-  background-color: v-bind('colors.preview.panelBg');
+  background-color: var(--color-preview-panel-bg);
   border-radius: 10px;
   padding: 2px 6px;
   border: 1px solid rgba(150, 130, 170, 0.3);
@@ -420,7 +419,7 @@ function getStarImage(level, starIndex) {
   min-width: 370px;
   min-height: 180px;
   max-width: 480px;
-  background: v-bind('colors.preview.panelBg');
+  background: var(--color-preview-panel-bg);
   border: 1px solid #555;
   border-radius: 10px;
   padding: 12px;
@@ -430,26 +429,26 @@ function getStarImage(level, starIndex) {
 
 .active-effects {
   margin-bottom: 8px;
-  border-bottom: 1px solid v-bind('colors.preview.divideline');
+  border-bottom: 1px solid var(--color-preview-divideline);
   padding-bottom: 8px;
   white-space: nowrap;
 }
 
 .label {
-  color: v-bind('colors.preview.secondary');
+  color: var(--color-preview-secondary);
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 .effect-text {
-  color: v-bind('colors.preview.highlight');
+  color: var(--color-preview-highlight);
   font-size: 1.1rem;
   font-weight: bold;
   margin-left: 5px;
 }
 
 .recommendation-text p {
-  color: v-bind('colors.preview.text');
+  color: var(--color-preview-text);
   font-size: 0.9rem;
   margin: 5px 0 0 0;
   line-height: 1.4;
@@ -461,7 +460,7 @@ function getStarImage(level, starIndex) {
   bottom: 0px;
   right: 0px;
   font-size: 1rem;
-  color: v-bind('colors.preview.watermark');
+  color: var(--color-preview-watermark);
 }
 
 .author-display {
@@ -469,7 +468,7 @@ function getStarImage(level, starIndex) {
   bottom: 5px;
   left: 10px;
   font-size: 0.9rem;
-  color: v-bind('colors.preview.author');
+  color: var(--color-preview-author);
   z-index: 15;
 }
 </style>

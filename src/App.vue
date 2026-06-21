@@ -15,7 +15,7 @@
         <UpdateRotation
           theme="outline"
           size="20"
-          :fill="colors.text.primary"
+          fill="var(--color-text-primary)"
           :class="{ 'icon-spin': isUpdating }"
         />
         <span class="notification-text">{{
@@ -40,7 +40,6 @@ import AnnouncementDialog from './components/AnnouncementDialog.vue'
 import FloatingHomeButton from './components/FloatingHomeButton.vue'
 import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
-import { colors } from '@/styles/colors.js'
 import { getActiveWebAnnouncements, markWebAnnouncementShown } from '@/utils/announcements.js'
 
 const showUpdateDialog = ref(false)
@@ -162,7 +161,7 @@ onBeforeUnmount(() => {
 <style scoped>
 #app {
   text-align: center;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   min-height: 100dvh;
 }
 
@@ -172,8 +171,8 @@ onBeforeUnmount(() => {
   top: 16px;
   left: 16px;
   z-index: 9999;
-  background-color: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   padding: 10px 16px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -186,7 +185,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .notification-text {

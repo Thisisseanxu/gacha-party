@@ -40,7 +40,6 @@ import { computed, onMounted, ref } from 'vue'
 import { allCards } from '@/data/cards.js'
 import TendencyProfile from '@/components/TendencyProfile.vue'
 import { dimensionEntries } from '@/utils/personalityMatch.js'
-import { colors } from '@/styles/colors.js'
 
 const search = ref('')
 const scoreData = ref(null)
@@ -90,8 +89,8 @@ function portraitFor(character) {
   min-height: 100dvh;
   padding: 48px 20px 80px;
   box-sizing: border-box;
-  color: v-bind('colors.text.primary');
-  background: v-bind('colors.background.primary');
+  color: var(--color-text-primary);
+  background: var(--color-background-primary);
 }
 
 .page-shell {
@@ -105,7 +104,7 @@ header {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -117,17 +116,17 @@ h1 {
 }
 
 header p:last-of-type {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 input {
   width: min(420px, 100%);
   margin-top: 16px;
   padding: 12px 14px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 10px;
-  color: v-bind('colors.text.primary');
-  background: v-bind('colors.input.background');
+  color: var(--color-text-primary);
+  background: var(--color-input-background);
   font: inherit;
 }
 
@@ -140,9 +139,9 @@ input {
 
 .character-card {
   padding: 18px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 18px;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
 }
 
 .identity {
@@ -159,7 +158,7 @@ input {
   border-radius: 14px;
   object-fit: cover;
   object-position: top;
-  background: v-bind('colors.background.avatar');
+  background: var(--color-background-avatar);
 }
 
 .identity h2 {
@@ -168,20 +167,20 @@ input {
 
 .identity span,
 .state-text {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .error-text {
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
 }
 
 .comment {
   margin: 14px 0 0;
   padding: 12px 14px;
-  border-left: 3px solid v-bind('colors.brand.primary');
+  border-left: 3px solid var(--color-brand-primary);
   border-radius: 8px;
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-light);
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   line-height: 1.75;
   text-align: left;

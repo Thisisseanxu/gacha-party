@@ -373,7 +373,8 @@ import { ArrowLeft, History, Share, Square } from '@icon-park/vue-next'
 
 import { cardMap } from '@/data/cards.js'
 import { SP, SSR, SR, R } from '@/data/constant.js'
-import { colors } from '@/styles/colors.js'
+import { resolveThemeColor, themeVar } from '@/utils/themeColor.js'
+import { currentTheme } from '@/styles/theme.js'
 import { logger } from '@/utils/logger.js'
 
 import SelectorComponent from '@/components/SelectorComponent.vue'
@@ -465,21 +466,21 @@ const CARDPOOLS_NAME_MAP = {
 // 抽数小于字典键值时显示对应称号
 const LIMITPOOL_TITLE_MAP = {
   32: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
-  34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
-  37.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
-  39: { title: '小非酋', background: colors.colorOfLuck.high },
-  41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
-  120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
+  34.5: { title: '大欧皇', background: themeVar('colorOfLuck.veryLow') },
+  35.75: { title: '小欧皇', background: themeVar('colorOfLuck.low') },
+  37.5: { title: '平平无奇', background: themeVar('colorOfLuck.medium') },
+  39: { title: '小非酋', background: themeVar('colorOfLuck.high') },
+  41: { title: '大非酋', background: themeVar('colorOfLuck.veryHigh') },
+  120: { title: '艰难依旧坚持', background: themeVar('colorOfLuck.veryHigh') },
 } // 区间：0-32，32-34.5，34.5-35.75，35.75-37.5，37.5-39，39-41，41+
 const NORMALPOOL_TITLE_MAP = {
   8.75: { title: '天选之子', text_color: 'rgb(255, 215, 0)', background: 'rgb(128, 0, 128)' },
-  9.75: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  10.5: { title: '小欧皇', background: colors.colorOfLuck.low },
-  11.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
-  12.25: { title: '小非酋', background: colors.colorOfLuck.high },
-  13.25: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
-  120: { title: '艰难依旧坚持', background: colors.colorOfLuck.veryHigh },
+  9.75: { title: '大欧皇', background: themeVar('colorOfLuck.veryLow') },
+  10.5: { title: '小欧皇', background: themeVar('colorOfLuck.low') },
+  11.5: { title: '平平无奇', background: themeVar('colorOfLuck.medium') },
+  12.25: { title: '小非酋', background: themeVar('colorOfLuck.high') },
+  13.25: { title: '大非酋', background: themeVar('colorOfLuck.veryHigh') },
+  120: { title: '艰难依旧坚持', background: themeVar('colorOfLuck.veryHigh') },
 } // 区间：0-8.75，8.75-9.75，9.75-10.5，10.5-11.5，11.5-12.25，12.25-13.25，13.25+
 
 const CurrentSelectedPool = ref('AllLimited') // 控制显示哪个卡池
@@ -980,6 +981,7 @@ const rarityCounts = computed(() => {
 })
 
 const pieChartJSData = computed(() => {
+  currentTheme.value
   const counts = rarityCounts.value
   // 使用作为总数
   const total = CurrentSelectedPoolAnalysis.value?.totalPulls ?? 0
@@ -996,25 +998,25 @@ const pieChartJSData = computed(() => {
       name: '限定',
       value: counts.SP,
       percentage: calculatePercentage(counts.SP),
-      color: colors.rarity.sp,
+      color: resolveThemeColor('rarity.sp'),
     },
     {
       name: 'SSR',
       value: counts.SSR,
       percentage: calculatePercentage(counts.SSR),
-      color: colors.rarity.ssr,
+      color: resolveThemeColor('rarity.ssr'),
     },
     {
       name: 'SR',
       value: counts.SR,
       percentage: calculatePercentage(counts.SR),
-      color: colors.rarity.sr,
+      color: resolveThemeColor('rarity.sr'),
     },
     {
       name: 'R',
       value: counts.R,
       percentage: calculatePercentage(counts.R),
-      color: colors.rarity.r,
+      color: resolveThemeColor('rarity.r'),
     },
   ].filter((item) => item.value > 0)
   const labels = percentageChartData.map((d) => d.name)
@@ -1027,7 +1029,7 @@ const pieChartJSData = computed(() => {
       {
         data: data,
         backgroundColor: backgroundColors,
-        borderColor: colors.background.content, // 给色块之间留一个背景色边框
+        borderColor: resolveThemeColor('background.content'), // 给色块之间留一个背景色边框
         borderWidth: 2,
       },
     ],
@@ -1109,12 +1111,12 @@ const getHistoryItemStyle = (count, isNormal = false) => {
   let progressBarColor
   // 根据不同卡池和抽数应用不同颜色
   if ((isNormal && count < 10) || (!isNormal && count < 31))
-    progressBarColor = colors.colorOfLuck.veryLow
+    progressBarColor = themeVar('colorOfLuck.veryLow')
   else if ((isNormal && count < 15) || (!isNormal && count < 41))
-    progressBarColor = colors.colorOfLuck.medium
-  else progressBarColor = colors.colorOfLuck.veryHigh
+    progressBarColor = themeVar('colorOfLuck.medium')
+  else progressBarColor = themeVar('colorOfLuck.veryHigh')
   return {
-    background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${colors.colorOfLuck.background} ${percentage}%)`,
+    background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${themeVar('colorOfLuck.background')} ${percentage}%)`,
   }
 }
 
@@ -1174,13 +1176,13 @@ const quantityStatistics = computed(() => {
 // 根据传入的参数获取对应的修改过透明度的背景颜色
 const getAlphaBgWith = (type) => {
   const colorMap = {
-    [SP]: colors.rarity.sp,
-    [SSR]: colors.rarity.ssr,
-    [SR]: colors.rarity.sr,
-    [R]: colors.rarity.r,
-    veryHigh: colors.colorOfLuck.veryHigh,
-    medium: colors.colorOfLuck.medium,
-    veryLow: colors.colorOfLuck.veryLow,
+    [SP]: themeVar('rarity.sp'),
+    [SSR]: themeVar('rarity.ssr'),
+    [SR]: themeVar('rarity.sr'),
+    [R]: themeVar('rarity.r'),
+    veryHigh: themeVar('colorOfLuck.veryHigh'),
+    medium: themeVar('colorOfLuck.medium'),
+    veryLow: themeVar('colorOfLuck.veryLow'),
   }
   return (colorMap[type] || 'transparent').replace(/[\d.]+\)$/g, '0.3)')
 }
@@ -1442,21 +1444,23 @@ const exportToExcel = async (filename, historyData) => {
   // 定义不同稀有度的样式
   const rarityStyles = {
     SP: {
-      font: { color: { argb: getExcelColor(colors.rarity.sp) }, bold: true },
+      font: { color: { argb: getExcelColor(resolveThemeColor('rarity.sp')) }, bold: true },
       fill: {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: getExcelColor(colors.brand.hover) },
+        fgColor: { argb: getExcelColor(resolveThemeColor('brand.hover')) },
       },
     },
-    SSR: { font: { color: { argb: getExcelColor(colors.rarity.ssr) }, bold: true } },
-    SR: { font: { color: { argb: getExcelColor(colors.rarity.sr) } } },
-    R: { font: { color: { argb: getExcelColor(colors.rarity.r) } } },
+    SSR: {
+      font: { color: { argb: getExcelColor(resolveThemeColor('rarity.ssr')) }, bold: true },
+    },
+    SR: { font: { color: { argb: getExcelColor(resolveThemeColor('rarity.sr')) } } },
+    R: { font: { color: { argb: getExcelColor(resolveThemeColor('rarity.r')) } } },
   }
   // 遍历数据并添加行，同时应用样式，同时加上序号，最旧的数据为1，最新的数据为最大值
   historyData.forEach((item, i) => {
     const style = rarityStyles[item.rarity] || {
-      font: { color: { argb: getExcelColor(colors.text.primary) } },
+      font: { color: { argb: getExcelColor(resolveThemeColor('text.primary')) } },
     } // 根据稀有度选择样式
     const row = worksheet.addRow({ id: historyData.length - i, ...item })
     row.eachCell(
@@ -1598,7 +1602,7 @@ const shareAnalysisImage = async () => {
     let blob
     try {
       blob = await toBlob(analysisContentRef.value, {
-        backgroundColor: colors.background.content, // 设置背景色，防止透明
+        backgroundColor: resolveThemeColor('background.content'), // 设置背景色，防止透明
         pixelRatio: 2, // 提高分辨率
         width: element.clientWidth + 16, // 增加宽度以容纳padding防止裁切
         height: element.clientHeight + 16,
@@ -1654,7 +1658,7 @@ const formatDateTime = (timestamp) => {
 
 <style scoped>
 .gacha-analysis-container {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 0.5rem;
   margin: 1rem;
   min-width: 300px;
@@ -1669,7 +1673,7 @@ const formatDateTime = (timestamp) => {
 .analysis-section:not(:first-child) {
   margin-top: 8px;
   padding-top: 10px;
-  border-top: 2px solid v-bind('colors.border.secondary');
+  border-top: 2px solid var(--color-border-secondary);
 }
 
 .gacha-analysis-button-container {
@@ -1679,8 +1683,8 @@ const formatDateTime = (timestamp) => {
 }
 
 .button {
-  background-color: v-bind('colors.button.defaultBg');
-  color: v-bind('colors.button.defaultText');
+  background-color: var(--color-button-default-bg);
+  color: var(--color-button-default-text);
   border: none;
   padding: 4px 6px;
   border-radius: 6px;
@@ -1693,14 +1697,14 @@ const formatDateTime = (timestamp) => {
 }
 
 .button:disabled {
-  background-color: v-bind('colors.brand.disabled');
-  color: v-bind('colors.text.secondary');
+  background-color: var(--color-brand-disabled);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
 .button:hover {
-  background-color: v-bind('colors.button.hoverBg');
-  color: v-bind('colors.button.hoverText');
+  background-color: var(--color-button-hover-bg);
+  color: var(--color-button-hover-text);
 }
 
 .header-top-row {
@@ -1721,8 +1725,8 @@ const formatDateTime = (timestamp) => {
   left: 60%;
   transform: translateX(-50%);
   margin-top: 10px;
-  background-color: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-lighter);
+  color: var(--color-text-primary);
   padding: 6px 12px;
   border-radius: 15px;
   font-size: 14px;
@@ -1747,11 +1751,11 @@ const formatDateTime = (timestamp) => {
 }
 
 .highlight {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .highlight:visited {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .pulls-text {
@@ -1770,18 +1774,18 @@ const formatDateTime = (timestamp) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .pity-count {
   font-weight: bold;
   font-size: 1.2rem;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .tertiary-text {
   margin-top: 8px;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.9rem;
 }
 
@@ -1800,7 +1804,7 @@ const formatDateTime = (timestamp) => {
 }
 
 .stat-box {
-  background-color: v-bind('colors.background.light');
+  background-color: var(--color-background-light);
   border-radius: 8px;
   text-align: center;
   display: flex;
@@ -1812,7 +1816,7 @@ const formatDateTime = (timestamp) => {
 }
 
 .stat-box .stat-title {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -1826,7 +1830,7 @@ const formatDateTime = (timestamp) => {
   position: relative;
   display: flex;
   justify-content: center;
-  border-bottom: 2px solid v-bind('colors.border.lighter');
+  border-bottom: 2px solid var(--color-border-lighter);
   margin-bottom: 6px;
 }
 
@@ -1837,7 +1841,7 @@ const formatDateTime = (timestamp) => {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   transition:
     color 0.2s ease-in-out,
     background-color 0.2s ease-in-out;
@@ -1845,12 +1849,12 @@ const formatDateTime = (timestamp) => {
 }
 
 .nav-button:hover {
-  color: v-bind('colors.text.primary');
-  background-color: v-bind('colors.background.hover');
+  color: var(--color-text-primary);
+  background-color: var(--color-background-hover);
 }
 
 .nav-button.active {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   background-color: transparent;
 }
 
@@ -1858,7 +1862,7 @@ const formatDateTime = (timestamp) => {
   position: absolute;
   bottom: -2px;
   height: 3px;
-  background-color: v-bind('colors.brand.primary');
+  background-color: var(--color-brand-primary);
   border-radius: 1.5px;
   transition:
     left 0.3s ease-in-out,
@@ -1874,7 +1878,7 @@ const formatDateTime = (timestamp) => {
   max-height: 600px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.scrollbar') transparent;
+  scrollbar-color: var(--color-scrollbar) transparent;
   transition: scrollbar-color 0.5s ease-out;
 }
 
@@ -1898,7 +1902,7 @@ const formatDateTime = (timestamp) => {
 
 .history-list::-webkit-scrollbar-thumb,
 .quantity-statistics-list::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 3px;
 }
 
@@ -1915,7 +1919,7 @@ const formatDateTime = (timestamp) => {
 }
 
 .history-item-bar {
-  background-color: v-bind('colors.background.lighter');
+  background-color: var(--color-background-lighter);
   border-radius: 0 40px 40px 0;
   margin-left: 1.25rem;
 }
@@ -1948,14 +1952,14 @@ const formatDateTime = (timestamp) => {
   border-radius: 6px;
   object-fit: cover;
   margin-bottom: 4px;
-  background-color: v-bind('colors.background.avatar');
+  background-color: var(--color-background-avatar);
 }
 
 .quantity-name,
 .overview-name {
   font-weight: bold;
   font-size: 0.7rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1965,7 +1969,7 @@ const formatDateTime = (timestamp) => {
 .overview-pull-count {
   font-size: 1rem;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .no-history-text.full-width {
@@ -1988,7 +1992,7 @@ const formatDateTime = (timestamp) => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background-color: v-bind('colors.background.avatar');
+  background-color: var(--color-background-avatar);
   object-fit: cover;
   position: relative;
   z-index: 2;
@@ -1996,8 +2000,8 @@ const formatDateTime = (timestamp) => {
 
 .char-name {
   font-weight: bold;
-  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
-  color: v-bind('colors.text.primary');
+  text-shadow: 1px 1px 3px var(--color-text-shadow);
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
@@ -2012,14 +2016,14 @@ const formatDateTime = (timestamp) => {
 .pull-count {
   font-size: 1.2rem;
   font-weight: bold;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   text-align: right;
-  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
+  text-shadow: 1px 1px 3px var(--color-text-shadow);
 }
 
 .section-title {
   font-size: 1.1rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 10px;
   margin-bottom: 16px;
 }
@@ -2032,7 +2036,7 @@ const formatDateTime = (timestamp) => {
 }
 
 .no-history-text {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   text-align: center;
   padding: 20px 0;
 }
@@ -2041,45 +2045,45 @@ const formatDateTime = (timestamp) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: v-bind('colors.background.light');
+  background-color: var(--color-background-light);
   padding: 4px 8px;
   border-radius: 8px;
   border-left: 4px solid transparent;
 }
 
 .full-history-item.SP {
-  border-left-color: v-bind('colors.rarity.sp');
+  border-left-color: var(--color-rarity-sp);
 }
 
 .full-history-item.SSR {
-  border-left-color: v-bind('colors.rarity.ssr');
+  border-left-color: var(--color-rarity-ssr);
 }
 
 .full-history-item.SR {
-  border-left-color: v-bind('colors.rarity.sr');
+  border-left-color: var(--color-rarity-sr);
 }
 
 .full-history-item.R {
-  border-left-color: v-bind('colors.rarity.r');
+  border-left-color: var(--color-rarity-r);
 }
 
 .rarity-SP {
-  color: v-bind('colors.rarity.sp');
+  color: var(--color-rarity-sp);
   font-weight: bold;
 }
 
 .rarity-SSR {
-  color: v-bind('colors.rarity.ssr');
+  color: var(--color-rarity-ssr);
   font-weight: bold;
 }
 
 .rarity-SR {
-  color: v-bind('colors.rarity.sr');
+  color: var(--color-rarity-sr);
   font-weight: bold;
 }
 
 .rarity-R {
-  color: v-bind('colors.rarity.r');
+  color: var(--color-rarity-r);
   font-weight: bold;
 }
 
@@ -2088,7 +2092,7 @@ const formatDateTime = (timestamp) => {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin-top: 8px;
 }
@@ -2103,16 +2107,16 @@ const formatDateTime = (timestamp) => {
   width: 50px;
   padding: 4px;
   text-align: center;
-  background-color: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
-  border: 1px solid v-bind('colors.input.border');
+  background-color: var(--color-input-background);
+  color: var(--color-input-text);
+  border: 1px solid var(--color-input-border);
   border-radius: 4px;
   font-size: inherit;
 }
 
 .page-input:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .page-input::-webkit-outer-spin-button,
@@ -2127,8 +2131,8 @@ const formatDateTime = (timestamp) => {
 }
 
 .pagination-controls button {
-  background-color: v-bind('colors.button.defaultBg');
-  color: v-bind('colors.button.defaultText');
+  background-color: var(--color-button-default-bg);
+  color: var(--color-button-default-text);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -2138,13 +2142,13 @@ const formatDateTime = (timestamp) => {
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: v-bind('colors.button.hoverBg');
-  color: v-bind('colors.button.hoverText');
+  background-color: var(--color-button-hover-bg);
+  color: var(--color-button-hover-text);
 }
 
 .pagination-controls button:disabled {
-  background-color: v-bind('colors.brand.disabled');
-  color: v-bind('colors.text.secondary');
+  background-color: var(--color-brand-disabled);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 

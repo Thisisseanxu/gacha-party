@@ -9,8 +9,6 @@
 </template>
 
 <script setup>
-import { colors } from '@/styles/colors.js'
-
 const props = defineProps({
   // 控制开关状态
   modelValue: {
@@ -32,7 +30,6 @@ function toggle() {
   emit('update:modelValue', !props.modelValue)
 }
 
-const colorTextSecondary = colors.text.secondary
 </script>
 
 <style scoped>
@@ -49,7 +46,7 @@ const colorTextSecondary = colors.text.secondary
 
 .switch-label {
   font-size: 14px;
-  color: v-bind(colorTextSecondary);
+  color: var(--color-text-secondary);
 }
 
 .switch-container {
@@ -57,7 +54,7 @@ const colorTextSecondary = colors.text.secondary
   height: 22px;
   border-radius: 11px;
   /* 关闭时的背景色 */
-  background-color: #dcdfe6;
+  background-color: var(--color-background-lighter);
   position: relative;
   /* 背景色变化的过渡动画 */
   transition: background-color 0.3s ease;
@@ -67,19 +64,19 @@ const colorTextSecondary = colors.text.secondary
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--color-text-white);
   position: absolute;
   top: 2px;
   left: 2px;
   transition: transform 0.3s ease;
   /* 滑块移动的过渡动画 */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px var(--color-shadow-primary);
 }
 
 /* 当开关处于激活状态时的样式 */
 .switch-container.is-active {
   /* 激活时的背景色 (蓝色) */
-  background-color: #409eff;
+  background-color: var(--color-brand-primary);
 }
 
 .switch-container.is-active .switch-handle {

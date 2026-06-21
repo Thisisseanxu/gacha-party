@@ -434,7 +434,6 @@ import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 import { verifyLicense } from '@/utils/licenseManager.js'
 import { takePendingCustomChar } from '@/utils/huizhangCustomCharStore.js'
 import { allCards } from '@/data/cards.js'
-import { colors } from '@/styles/colors.js'
 import {
   HUIZHANG_SHAPES,
   HUIZHANG_RARITY,
@@ -1082,11 +1081,11 @@ const saveCustomChar = () => {
 <style scoped>
 .page-container {
   min-height: 100vh;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   padding: 0.5rem;
 }
 
@@ -1111,17 +1110,17 @@ const saveCustomChar = () => {
 }
 
 .highlight {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   cursor: pointer;
 }
 
 .agreement-list {
   max-height: 20rem;
   overflow-y: auto;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   padding: 0 0 0 20px;
   border-radius: 8px;
-  background-color: v-bind('colors.shadow.primaryHover');
+  background-color: var(--color-shadow-primary-hover);
 }
 
 .agreement-list li {
@@ -1139,15 +1138,15 @@ const saveCustomChar = () => {
 }
 
 .agreement-list::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 3px;
 }
 
 .action-button {
   padding: 0.5rem 1rem;
-  border: 1px solid v-bind('colors.button.defaultText');
-  background-color: v-bind('colors.button.defaultBg');
-  color: v-bind('colors.button.defaultText');
+  border: 1px solid var(--color-button-default-text);
+  background-color: var(--color-button-default-bg);
+  color: var(--color-button-default-text);
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -1156,14 +1155,14 @@ const saveCustomChar = () => {
 }
 
 .action-button:hover {
-  background-color: v-bind('colors.button.hoverBg');
-  color: v-bind('colors.button.hoverText');
+  background-color: var(--color-button-hover-bg);
+  color: var(--color-button-hover-text);
 }
 
 .controls-panel {
   flex: 1;
   min-width: 280px;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   padding: 15px;
   border-radius: 12px;
   height: fit-content;
@@ -1174,8 +1173,8 @@ const saveCustomChar = () => {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  background-color: v-bind('colors.button.secondaryBg');
-  color: v-bind('colors.button.secondaryText');
+  background-color: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -1189,7 +1188,7 @@ const saveCustomChar = () => {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .input-select,
@@ -1197,9 +1196,9 @@ textarea {
   width: 100%;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid v-bind('colors.input.border');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   box-sizing: border-box;
 }
 
@@ -1215,28 +1214,28 @@ textarea {
 
 .star-btn {
   padding: 5px 10px;
-  border: 1px solid v-bind('colors.border.secondary');
+  border: 1px solid var(--color-border-secondary);
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
 }
 
 .star-btn.active {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-  border-color: v-bind('colors.brand.primary');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
+  border-color: var(--color-brand-primary);
   font-weight: bold;
 }
 
 .badge-editors h3 {
   margin-bottom: 10px;
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  border-bottom: 1px solid var(--color-border-primary);
   padding-bottom: 5px;
 }
 
 .badge-hint-text {
   font-size: 0.8rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin: -5px 0 10px 0;
 }
 
@@ -1246,7 +1245,7 @@ textarea {
   padding: 0 8px;
   margin-bottom: 5px;
   font-size: 0.8rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-weight: bold;
 }
 
@@ -1274,7 +1273,7 @@ textarea {
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 8px;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   padding: 8px;
   border-radius: 4px;
 }
@@ -1297,9 +1296,9 @@ textarea {
   padding: 4px;
   border-radius: 4px;
   text-align: center;
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
-  border: 1px solid v-bind('colors.input.border');
+  background: var(--color-input-background);
+  color: var(--color-input-text);
+  border: 1px solid var(--color-input-border);
   box-sizing: border-box;
 }
 
@@ -1313,7 +1312,7 @@ textarea {
 
 .shape-hint {
   font-size: 0.8rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-left: auto;
   white-space: nowrap;
 }
@@ -1321,7 +1320,7 @@ textarea {
 .generate-btn {
   flex: 0.618;
   padding: 15px;
-  background: v-bind('colors.button.infoBg');
+  background: var(--color-button-info-bg);
   color: white;
   border: none;
   border-radius: 8px;
@@ -1333,7 +1332,7 @@ textarea {
 .export-btn {
   flex: 1;
   padding: 15px;
-  background: v-bind('colors.brand.confirm');
+  background: var(--color-brand-confirm);
   color: white;
   border: none;
   border-radius: 8px;
@@ -1343,8 +1342,8 @@ textarea {
 }
 
 .overwrite-save-btn {
-  background: v-bind('colors.brand.primary') !important;
-  color: v-bind('colors.text.black') !important;
+  background: var(--color-brand-primary) !important;
+  color: var(--color-text-black) !important;
 }
 
 .export-btn:disabled {
@@ -1354,7 +1353,7 @@ textarea {
 
 .custom-char-hint {
   font-size: 0.8rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin: -4px 0 0;
   text-align: center;
 }
@@ -1378,7 +1377,7 @@ textarea {
 .back-nav-btn {
   background: none;
   border: none;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0;
@@ -1387,21 +1386,21 @@ textarea {
 }
 
 .back-nav-btn:hover {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 /* 投稿弹窗 */
 .submit-confirm-form {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 1.4rem 1.6rem;
   border-radius: 14px;
-  box-shadow: 0 8px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 8px 24px var(--color-shadow-primary);
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   width: 90%;
   max-width: 420px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -1409,14 +1408,14 @@ textarea {
 .submit-title {
   text-align: center;
   margin: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .submit-sub {
   text-align: center;
   margin: -0.4rem 0 0;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.8rem;
   line-height: 1.4;
 }
@@ -1427,22 +1426,22 @@ textarea {
   gap: 0.5rem;
   font-size: 0.9rem;
   padding: 4px 0;
-  border-bottom: 1px solid v-bind('colors.border.secondary');
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .submit-info-label {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-weight: bold;
   min-width: 5em;
   flex-shrink: 0;
 }
 
 .submit-info-value {
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .required {
-  color: v-bind('colors.brand.cancel');
+  color: var(--color-brand-cancel);
 }
 
 .feedback-msg {
@@ -1453,27 +1452,27 @@ textarea {
 }
 
 .error-msg {
-  background: v-bind('colors.status.errorBg');
-  color: v-bind('colors.status.error');
+  background: var(--color-status-error-bg);
+  color: var(--color-status-error);
 }
 
 .success-msg {
-  background: v-bind('colors.status.successBg');
-  color: v-bind('colors.status.success');
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success);
 }
 
 .warn-msg {
-  background: v-bind('colors.brand.warnBg');
-  color: v-bind('colors.brand.warn');
-  border: 1px solid v-bind('colors.brand.warnBorder');
+  background: var(--color-brand-warn-bg);
+  color: var(--color-brand-warn);
+  border: 1px solid var(--color-brand-warn-border);
   text-align: left;
 }
 
 /* --- 预览区 --- */
 .preview-wrapper {
   overflow: hidden;
-  border: 2px dashed v-bind('colors.border.dashed');
-  background: v-bind('colors.background.darker');
+  border: 2px dashed var(--color-border-dashed);
+  background: var(--color-background-darker);
   padding: 4px;
   display: flex;
   flex-direction: column;
@@ -1502,7 +1501,7 @@ textarea {
   left: 20px;
   z-index: 10;
   display: flex;
-  background: v-bind('colors.preview.overlay');
+  background: var(--color-preview-overlay);
   padding: 8px 16px;
   border-radius: 30px;
   align-items: center;
@@ -1511,7 +1510,7 @@ textarea {
 
 .star-label {
   font-size: 1rem;
-  color: v-bind('colors.preview.text');
+  color: var(--color-preview-text);
   margin-right: 8px;
   text-align: center;
 }
@@ -1663,7 +1662,7 @@ textarea {
 /* 徽章底部星星容器 */
 .badge-stars-container {
   margin-top: 4px;
-  background-color: v-bind('colors.preview.panelBg');
+  background-color: var(--color-preview-panel-bg);
   border-radius: 10px;
   padding: 2px 6px;
   border: 1px solid rgba(150, 130, 170, 0.3);
@@ -1690,7 +1689,7 @@ textarea {
   min-width: 370px;
   min-height: 180px;
   max-width: 480px;
-  background: v-bind('colors.preview.panelBg');
+  background: var(--color-preview-panel-bg);
   border: 1px solid #555;
   border-radius: 10px;
   padding: 12px;
@@ -1700,26 +1699,26 @@ textarea {
 
 .active-effects {
   margin-bottom: 8px;
-  border-bottom: 1px solid v-bind('colors.preview.divideline');
+  border-bottom: 1px solid var(--color-preview-divideline);
   padding-bottom: 8px;
   white-space: nowrap;
 }
 
 .label {
-  color: v-bind('colors.preview.secondary');
+  color: var(--color-preview-secondary);
   font-size: 0.9rem;
   font-weight: bold;
 }
 
 .effect-text {
-  color: v-bind('colors.preview.highlight');
+  color: var(--color-preview-highlight);
   font-size: 1.1rem;
   font-weight: bold;
   margin-left: 5px;
 }
 
 .recommendation-text p {
-  color: v-bind('colors.preview.text');
+  color: var(--color-preview-text);
   font-size: 0.9rem;
   margin: 5px 0 0 0;
   line-height: 1.4;
@@ -1731,11 +1730,11 @@ textarea {
   bottom: 0px;
   right: 0px;
   font-size: 1rem;
-  color: v-bind('colors.preview.watermark');
+  color: var(--color-preview-watermark);
 }
 
 .preview-hint {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 10px;
   font-size: 0.9rem;
 }
@@ -1745,7 +1744,7 @@ textarea {
   bottom: 5px;
   left: 10px;
   font-size: 0.9rem;
-  color: v-bind('colors.preview.author');
+  color: var(--color-preview-author);
   font-weight: regular;
   z-index: 15;
 }
@@ -1757,7 +1756,7 @@ textarea {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: v-bind('colors.background.overlay');
+  background-color: var(--color-background-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1765,16 +1764,16 @@ textarea {
 }
 
 .custom-character-form {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 20px 30px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px v-bind('colors.shadow.primary');
+  box-shadow: 0 5px 15px var(--color-shadow-primary);
   display: flex;
   flex-direction: column;
   gap: 15px;
   width: 90%;
   max-width: 400px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -1782,7 +1781,7 @@ textarea {
 .custom-character-form h3 {
   text-align: center;
   margin-top: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .form-row {
@@ -1794,7 +1793,7 @@ textarea {
 .form-row label {
   font-weight: bold;
   font-size: 0.9em;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-row input[type='text'] {
@@ -1803,9 +1802,9 @@ textarea {
   border-radius: 5px;
   font-size: 1em;
   box-sizing: border-box;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
 }
 
 .form-actions {
@@ -1820,9 +1819,9 @@ textarea {
 }
 
 .form-actions .action-button.cancel {
-  background-color: v-bind('colors.button.secondaryBg');
-  border-color: v-bind('colors.button.secondaryBg');
-  color: v-bind('colors.button.secondaryText');
+  background-color: var(--color-button-secondary-bg);
+  border-color: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
 }
 
 .form-actions .action-button.cancel:hover {
@@ -1864,7 +1863,7 @@ textarea {
   height: 40px;
   object-fit: cover;
   border-radius: 4px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   flex-shrink: 0;
 }
 </style>

@@ -101,7 +101,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
+import { toggleTheme, currentTheme } from '@/styles/theme.js'
 import {
   Return,
   ThumbsUp,
@@ -162,7 +162,7 @@ const specialThanks = ref([
 .background {
   position: relative;
   min-height: 100dvh;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -194,7 +194,7 @@ const specialThanks = ref([
   width: 100%;
   max-width: min(100vw, 800px);
   max-height: 100vh;
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -216,19 +216,19 @@ const specialThanks = ref([
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: bold;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   transition: all 0.3s ease;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .back-btn:hover {
   transform: translateX(-2px);
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
 }
 
 .page-header {
@@ -239,19 +239,19 @@ const specialThanks = ref([
 .title {
   font-size: 2rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin: 0 0 0.5rem 0;
 }
 
 .vision {
   font-size: 0.9rem;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   opacity: 0.9;
   margin: 0 0 0.5rem 0;
 }
@@ -268,7 +268,7 @@ const specialThanks = ref([
 }
 
 .content-scroll::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.border.primary');
+  background-color: var(--color-border-primary);
   border-radius: 3px;
 }
 
@@ -277,12 +277,12 @@ const specialThanks = ref([
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
   padding: 0.5rem;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .section-title {
   font-size: 1.2rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -292,11 +292,11 @@ const specialThanks = ref([
 /* Runtime Display */
 .runtime-display {
   text-align: center;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 .brand-name {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-weight: bold;
 }
 
@@ -312,23 +312,23 @@ const specialThanks = ref([
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: v-bind('colors.background.primary');
+  background: var(--color-background-primary);
   padding: 0.5rem;
   border-radius: 8px;
   min-width: 60px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .time-block .num {
   font-size: 1.5rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-family: monospace;
 }
 
 .time-block .unit {
   font-size: 0.8rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 /* Thanks Grid */
@@ -339,10 +339,10 @@ const specialThanks = ref([
 }
 
 .thank-card {
-  background: v-bind('colors.background.primary');
+  background: var(--color-background-primary);
   padding: 0.8rem;
   border-radius: 8px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   transition: transform 0.2s;
   text-decoration: none;
   color: inherit;
@@ -351,7 +351,7 @@ const specialThanks = ref([
 
 .thank-card.has-link:hover {
   transform: translateY(-2px);
-  border-color: v-bind('colors.text.highlight');
+  border-color: var(--color-text-highlight);
   cursor: pointer;
 }
 
@@ -363,16 +363,16 @@ const specialThanks = ref([
 
 .supporter {
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .thank-card.has-link .supporter {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .contribution {
   font-size: 0.85rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 /* Contact Group */
@@ -419,9 +419,9 @@ const specialThanks = ref([
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
   font-size: 24px;
   cursor: pointer;
   z-index: 100;

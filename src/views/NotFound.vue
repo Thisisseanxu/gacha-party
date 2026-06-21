@@ -12,7 +12,6 @@
 </template>
 
 <script setup>
-import { colors } from '../styles/colors.js'
 </script>
 
 <style scoped>
@@ -22,8 +21,8 @@ import { colors } from '../styles/colors.js'
   justify-content: center;
   height: 100vh;
   width: 100%;
-  background-color: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
   text-align: center;
 }
 
@@ -34,22 +33,22 @@ import { colors } from '../styles/colors.js'
 .status-code {
   font-size: 10rem;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
-  text-shadow: 4px 4px 0px v-bind('colors.shadow.whiteHover');
+  color: var(--color-text-highlight);
+  text-shadow: 4px 4px 0px var(--color-shadow-white-hover);
   line-height: 1;
 }
 
 .title {
   font-size: 2.5rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin-top: 0;
   margin-bottom: 1rem;
-  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
+  text-shadow: 1px 1px 3px var(--color-text-shadow);
 }
 
 .description {
   font-size: 1.2rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-bottom: 2.5rem;
 }
 
@@ -58,8 +57,8 @@ import { colors } from '../styles/colors.js'
   padding: 12px 30px;
   font-size: 1.1rem;
   font-weight: bold;
-  color: v-bind('colors.text.black');
-  background-color: v-bind('colors.brand.primary');
+  color: var(--color-text-black);
+  background-color: var(--color-brand-primary);
   border: none;
   border-radius: 8px;
   text-decoration: none;
@@ -71,7 +70,7 @@ import { colors } from '../styles/colors.js'
 }
 
 .home-button:hover {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
   transform: translateY(-3px);
 }
 </style>

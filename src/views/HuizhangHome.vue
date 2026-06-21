@@ -161,7 +161,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { allCards } from '@/data/cards.js'
 import { getCharConfig, HUIZHANG_SHAPES, HUIZHANG_TYPES } from '@/data/huizhang.js'
-import { colors } from '@/styles/colors.js'
+import { themeVar } from '@/utils/themeColor.js'
 import CharacterSelector from '@/components/CharacterSelector.vue'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 import { setPendingCustomChar } from '@/utils/huizhangCustomCharStore.js'
@@ -309,14 +309,13 @@ const saveCustomChar = () => {
 }
 
 // 徽章摘要：合并相同稀有度+类型+等级的槽位
-// 颜色从 colors.badgeRarity 取，随主题切换自动更新
-const badgeRarityColors = computed(() => ({
-  0: colors.badgeRarity.empty,
-  1: colors.badgeRarity.blue,
-  2: colors.badgeRarity.purple,
-  3: colors.badgeRarity.gold,
-  4: colors.badgeRarity.red,
-}))
+const badgeRarityColors = {
+  0: themeVar('badgeRarity.empty'),
+  1: themeVar('badgeRarity.blue'),
+  2: themeVar('badgeRarity.purple'),
+  3: themeVar('badgeRarity.gold'),
+  4: themeVar('badgeRarity.red'),
+}
 
 const summarizeSlots = (slots) => {
   if (!slots?.length) return []
@@ -334,12 +333,12 @@ const summarizeSlots = (slots) => {
 <style scoped>
 .page-container {
   min-height: 100vh;
-  background: v-bind('colors.background.primary');
+  background: var(--color-background-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .content-wrap {
@@ -355,12 +354,12 @@ const summarizeSlots = (slots) => {
 
 .page-title {
   font-size: 1.8rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 0.3rem;
 }
 
 .hero-sub {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.9rem;
 }
@@ -381,7 +380,7 @@ const summarizeSlots = (slots) => {
   max-height: calc(100dvh - 1rem);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.scrollbar') transparent;
+  scrollbar-color: var(--color-scrollbar) transparent;
 }
 
 .featured-panel::-webkit-scrollbar {
@@ -393,7 +392,7 @@ const summarizeSlots = (slots) => {
 }
 
 .featured-panel::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 2px;
 }
 
@@ -403,7 +402,7 @@ const summarizeSlots = (slots) => {
 
 .section-title {
   font-size: 1.1rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 0.1rem;
   padding-left: 0.6rem;
 }
@@ -427,8 +426,8 @@ const summarizeSlots = (slots) => {
   align-items: flex-start;
   flex-direction: column;
   gap: 0.15rem;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   padding: 0.65rem;
   cursor: pointer;
@@ -436,8 +435,8 @@ const summarizeSlots = (slots) => {
 }
 
 .strategy-card:hover {
-  border-color: v-bind('colors.brand.primary');
-  box-shadow: 0 3px 12px v-bind('colors.shadow.primary');
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 3px 12px var(--color-shadow-primary);
   transform: translateY(-1px);
 }
 
@@ -454,14 +453,14 @@ const summarizeSlots = (slots) => {
   border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
 }
 
 .card-qban-placeholder {
   width: 56px;
   height: 56px;
   border-radius: 8px;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   flex-shrink: 0;
 }
 
@@ -475,11 +474,11 @@ const summarizeSlots = (slots) => {
 
 .card-char-name {
   font-size: 0.78rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .strategy-title-text {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-weight: bold;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -488,7 +487,7 @@ const summarizeSlots = (slots) => {
 }
 
 .strategy-author {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.72rem;
 }
 
@@ -500,14 +499,14 @@ const summarizeSlots = (slots) => {
 }
 
 .stars-label {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.68rem;
 }
 
 .star-chip {
   font-size: 0.68rem;
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-lighter);
+  color: var(--color-text-secondary);
   border-radius: 3px;
   padding: 1px 3px;
 }
@@ -526,7 +525,7 @@ const summarizeSlots = (slots) => {
   gap: 2px;
   font-size: 0.72rem;
   font-weight: 600;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   border-radius: 4px;
   padding: 1px 5px;
   white-space: nowrap;
@@ -558,7 +557,7 @@ const summarizeSlots = (slots) => {
     padding-bottom: 0.5rem;
     gap: 0.6rem;
     scrollbar-width: thin;
-    scrollbar-color: v-bind('colors.scrollbar') transparent;
+    scrollbar-color: var(--color-scrollbar) transparent;
   }
 
   .featured-list::-webkit-scrollbar {
@@ -570,7 +569,7 @@ const summarizeSlots = (slots) => {
   }
 
   .featured-list::-webkit-scrollbar-thumb {
-    background-color: v-bind('colors.scrollbar');
+    background-color: var(--color-scrollbar);
     border-radius: 2px;
   }
 
@@ -596,7 +595,7 @@ const summarizeSlots = (slots) => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: v-bind('colors.background.overlay');
+  background-color: var(--color-background-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -604,16 +603,16 @@ const summarizeSlots = (slots) => {
 }
 
 .custom-character-form {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px v-bind('colors.shadow.primary');
+  box-shadow: 0 5px 15px var(--color-shadow-primary);
   display: flex;
   flex-direction: column;
   gap: 14px;
   width: 90%;
   max-width: 400px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -621,7 +620,7 @@ const summarizeSlots = (slots) => {
 .custom-character-form h3 {
   text-align: center;
   margin: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
@@ -634,7 +633,7 @@ const summarizeSlots = (slots) => {
 .form-row label {
   font-weight: bold;
   font-size: 0.85rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .compact-row {
@@ -651,9 +650,9 @@ const summarizeSlots = (slots) => {
   width: 100%;
   padding: 7px 8px;
   border-radius: 6px;
-  border: 1px solid v-bind('colors.input.border');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   box-sizing: border-box;
   font-size: 0.88rem;
 }
@@ -690,27 +689,27 @@ const summarizeSlots = (slots) => {
   font-size: 0.88rem;
   font-weight: bold;
   transition: all 0.15s;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-lighter);
+  color: var(--color-text-primary);
 }
 
 .form-btn.primary {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-  border-color: v-bind('colors.brand.primary');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
+  border-color: var(--color-brand-primary);
 }
 
 .form-btn.primary:hover {
-  background: v-bind('colors.brand.hover');
+  background: var(--color-brand-hover);
 }
 
 .form-btn.cancel {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-btn.cancel:hover {
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .avatar-preview-small {
@@ -718,7 +717,7 @@ const summarizeSlots = (slots) => {
   height: 40px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   flex-shrink: 0;
 }
 </style>

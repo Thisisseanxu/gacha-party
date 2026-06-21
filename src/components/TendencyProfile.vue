@@ -23,7 +23,7 @@
 
 <script setup>
 import { tendencyPosition } from '@/utils/personalityMatch.js'
-import { colors } from '@/styles/colors.js'
+import { themeVar } from '@/utils/themeColor.js'
 
 defineProps({
   title: { type: String, required: true },
@@ -46,7 +46,7 @@ function fillStyle(value, axis) {
 
   return {
     ...dimensions,
-    backgroundColor: colors.personality[axis.id] || colors.brand.primary,
+    backgroundColor: themeVar(`personality.${axis.id}`, themeVar('brand.primary')),
   }
 }
 </script>
@@ -55,9 +55,9 @@ function fillStyle(value, axis) {
 .tendency-profile {
   min-width: 0;
   padding: 20px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 16px;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
 }
 
 h3 {
@@ -76,7 +76,7 @@ h3 {
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
 }
 
@@ -89,7 +89,7 @@ h3 {
 }
 
 .axis-labels strong {
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 0.9rem;
 }
 
@@ -97,7 +97,7 @@ h3 {
   position: relative;
   height: 8px;
   border-radius: 999px;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
 }
 
 .axis-center {
@@ -106,7 +106,7 @@ h3 {
   bottom: -3px;
   left: 50%;
   width: 1px;
-  background: v-bind('colors.text.tertiary');
+  background: var(--color-text-tertiary);
 }
 
 .axis-fill {

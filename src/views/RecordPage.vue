@@ -239,7 +239,6 @@ import { ref, onMounted, defineAsyncComponent } from 'vue'
 import pako from 'pako'
 import { logger } from '@/utils/logger.js'
 import { verifyLicense } from '@/utils/licenseManager.js'
-import { colors } from '@/styles/colors.js'
 
 const GachaAnalysis = defineAsyncComponent(() => import('@/components/GachaAnalysis.vue')) // 异步导入分析结果展示组件
 import PopUp from '@/components/PopUp.vue' // 导入弹窗组件
@@ -1071,8 +1070,8 @@ const resetView = () => {
 <style scoped>
 .background {
   min-height: 100vh;
-  background-color: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -1081,7 +1080,7 @@ const resetView = () => {
 }
 
 .gacha-analysis-container {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 0.5rem;
   margin: 1rem;
   min-width: 300px;
@@ -1103,21 +1102,21 @@ const resetView = () => {
 }
 
 .input-description {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin: 0;
 }
 
 .highlight {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .json-textarea {
   min-height: 200px;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   padding: 12px;
   font-size: 0.85rem;
   resize: vertical;
@@ -1126,7 +1125,7 @@ const resetView = () => {
 
 .json-textarea:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .button-group {
@@ -1144,21 +1143,21 @@ const resetView = () => {
 .split {
   margin-top: 16px;
   padding-top: 8px;
-  border-top: 1px solid v-bind('colors.background.light');
+  border-top: 1px solid var(--color-background-light);
 }
 
 .cloud-input {
   padding: 12px;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
 .cloud-input:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .action-button {
@@ -1167,8 +1166,8 @@ const resetView = () => {
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
-  background-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-black);
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -1176,19 +1175,19 @@ const resetView = () => {
 }
 
 .action-button:hover:not(:disabled) {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 .action-button:disabled {
-  background-color: v-bind('colors.background.light');
-  color: v-bind('colors.text.disabled');
+  background-color: var(--color-background-light);
+  color: var(--color-text-disabled);
   cursor: not-allowed;
 }
 
 .error-message {
-  color: v-bind('colors.status.error');
-  background-color: v-bind('colors.status.errorBg');
-  border: 1px solid v-bind('colors.status.error');
+  color: var(--color-status-error);
+  background-color: var(--color-status-error-bg);
+  border: 1px solid var(--color-status-error);
   padding: 10px;
   border-radius: 8px;
   margin: 0;
@@ -1197,9 +1196,9 @@ const resetView = () => {
 }
 
 .success-message {
-  color: v-bind('colors.status.success');
-  background-color: v-bind('colors.status.successBg');
-  border: 1px solid v-bind('colors.status.success');
+  color: var(--color-status-success);
+  background-color: var(--color-status-success-bg);
+  border: 1px solid var(--color-status-success);
   padding: 10px;
   border-radius: 8px;
   margin: 0;
@@ -1218,7 +1217,7 @@ const resetView = () => {
   /* 左侧留出空间给数字序号 */
   padding: 0 0 0 20px;
   border-radius: 8px;
-  background-color: v-bind('colors.shadow.primaryHover');
+  background-color: var(--color-shadow-primary-hover);
 }
 
 /* 列表项的样式 */
@@ -1240,7 +1239,7 @@ const resetView = () => {
 }
 
 .agreement-list::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 3px;
 }
 
@@ -1256,7 +1255,7 @@ const resetView = () => {
   justify-content: center;
   align-items: center;
   padding: 12px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
@@ -1299,14 +1298,14 @@ const resetView = () => {
   flex-direction: row;
   align-items: center;
   gap: 4px;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-right: none;
   border-radius: 8px 0 0 8px;
   padding: 6px 26px 6px 6px;
   margin-right: -20px;
   text-decoration: none;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-family: inherit;
   font-size: 0.8rem;
   font-weight: bold;

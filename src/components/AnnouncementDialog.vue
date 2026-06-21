@@ -20,7 +20,6 @@
 <script setup>
 import { computed } from 'vue'
 import PopUp from './PopUp.vue'
-import { colors } from '@/styles/colors.js'
 
 const props = defineProps({
   announcement: {
@@ -61,7 +60,7 @@ const isLast = computed(() => props.index >= props.total - 1)
 
 .announcement-paragraph {
   margin: 0;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.98rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -70,7 +69,7 @@ const isLast = computed(() => props.index >= props.total - 1)
 
 .announcement-count {
   align-self: flex-end;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.85rem;
 }
 
@@ -80,14 +79,14 @@ const isLast = computed(() => props.index >= props.total - 1)
   border: none;
   border-radius: 8px;
   padding: 0.65rem 1rem;
-  background: v-bind('colors.brand.confirm');
-  color: v-bind('colors.text.white');
+  background: var(--color-brand-confirm);
+  color: var(--color-text-white);
   font-weight: 700;
   cursor: pointer;
 }
 
 .announcement-confirm:hover {
-  background: v-bind('colors.brand.confirmHover');
+  background: var(--color-brand-confirm-hover);
 }
 
 .announcement-confirm:active {

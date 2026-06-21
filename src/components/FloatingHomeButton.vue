@@ -40,7 +40,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { HomeTwo, Moon, SunOne, PreviewCloseOne } from '@icon-park/vue-next'
-import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
+import { toggleTheme, currentTheme } from '@/styles/theme.js'
 import { isFloatingButtonHidden } from '@/utils/floatingButtonState.js'
 
 const props = defineProps({
@@ -176,8 +176,8 @@ watch(
   background-size: cover;
   background-position: center;
   cursor: pointer;
-  border: 2px solid v-bind('colors.shadow.whiteHover');
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+  border: 2px solid var(--color-shadow-white-hover);
+  box-shadow: 0 4px 12px var(--color-shadow-primary);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,
@@ -189,7 +189,7 @@ watch(
 .floating-home-button:hover,
 .floating-home-button.active {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px v-bind('colors.shadow.primaryHover');
+  box-shadow: 0 6px 16px var(--color-shadow-primary-hover);
 }
 
 .floating-home-button.stealth {
@@ -208,11 +208,11 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background-color: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   padding: 6px;
-  box-shadow: 0 4px 12px v-bind('colors.shadow.primary');
+  box-shadow: 0 4px 12px var(--color-shadow-primary);
 }
 
 .menu-btn {
@@ -221,7 +221,7 @@ watch(
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -232,7 +232,7 @@ watch(
 }
 
 .menu-btn:hover {
-  background-color: v-bind('colors.brand.primaryBackground');
+  background-color: var(--color-brand-primary-background);
   transform: scale(1.05);
 }
 
@@ -263,8 +263,8 @@ watch(
 
 .hint-bubble {
   pointer-events: auto;
-  background-color: v-bind('colors.shadow.primaryHover');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-shadow-primary-hover);
+  color: var(--color-text-primary);
   padding: 6px 12px;
   border-radius: 15px;
   font-size: 14px;

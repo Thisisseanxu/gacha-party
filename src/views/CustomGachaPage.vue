@@ -154,7 +154,6 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardMap, allCards } from '@/data/cards.js'
-import { colors } from '@/styles/colors.js'
 import pako from 'pako'
 import { logger } from '@/utils/logger'
 import { cardPools } from '@/data/cardPools'
@@ -368,10 +367,10 @@ const navigateToGachaPage = () => {
 /* 样式与之前版本保持一致 */
 .custom-gacha-page-background {
   position: relative;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
   min-height: 100vh;
   padding: 0.75rem 1rem 5rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .config-container {
@@ -379,27 +378,27 @@ const navigateToGachaPage = () => {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 1rem min(4vw, 2rem) 1.5rem;
   border-radius: 12px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
 }
 
 .config-title {
   font-size: 2rem;
   text-align: center;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   margin: 0;
 }
 
 .config-description {
   text-align: center;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin: 0.25rem 0 0;
 }
 
 .config-section {
-  border-top: 1px solid v-bind('colors.border.secondary');
+  border-top: 1px solid var(--color-border-secondary);
   margin-top: 1rem;
   padding-top: 1rem;
 }
@@ -417,16 +416,16 @@ const navigateToGachaPage = () => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-group input {
   width: 100%;
   padding: 0.75rem;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
   box-sizing: border-box;
 }
@@ -439,12 +438,12 @@ const navigateToGachaPage = () => {
 
 .advanced-rules {
   padding-top: 1rem;
-  border-top: 1px solid v-bind('colors.border.secondary');
+  border-top: 1px solid var(--color-border-secondary);
 }
 
 .subsection-title {
   font-size: 1.1rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
 }
 
@@ -455,16 +454,16 @@ const navigateToGachaPage = () => {
   transition: all 0.2s ease;
   font-weight: bold;
   border: none;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   padding: 1rem 1.5rem;
   font-size: 1.2rem;
-  background-color: v-bind('colors.brand.primary');
+  background-color: var(--color-brand-primary);
   text-align: center;
   text-decoration: none;
 }
 
 .finalize-button:hover {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 .back-home-button-config {
@@ -475,20 +474,20 @@ const navigateToGachaPage = () => {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: bold;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   padding: 0.4rem 0.7rem;
   border-radius: 20px;
   transition: all 0.3s ease;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   font-size: 0.85rem;
 }
 
 .back-home-button-config:hover {
   transform: translateX(-2px);
-  background-color: v-bind('colors.background.hover');
+  background-color: var(--color-background-hover);
 }
 
 .back-text {
@@ -509,16 +508,16 @@ const navigateToGachaPage = () => {
   transition: all 0.2s ease;
   font-weight: bold;
   border: none;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   padding: 0.85rem 1.1rem;
-  background-color: v-bind('colors.brand.primary');
+  background-color: var(--color-brand-primary);
   font-size: 0.95rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .reset-button-config:hover {
   transform: translateY(-2px);
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 .selected-summary,
@@ -535,9 +534,9 @@ const navigateToGachaPage = () => {
 
 .summary-chip,
 .rule-mode-tab {
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-light);
+  color: var(--color-text-secondary);
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
   font-size: 0.85rem;
@@ -545,19 +544,19 @@ const navigateToGachaPage = () => {
 }
 
 .summary-chip-sp {
-  color: v-bind('colors.rarity.sp');
+  color: var(--color-rarity-sp);
 }
 
 .summary-chip-ssr {
-  color: v-bind('colors.rarity.ssr');
+  color: var(--color-rarity-ssr);
 }
 
 .summary-chip-sr {
-  color: v-bind('colors.rarity.sr');
+  color: var(--color-rarity-sr);
 }
 
 .summary-chip-r {
-  color: v-bind('colors.rarity.r');
+  color: var(--color-rarity-r);
 }
 
 .rule-mode-tab {
@@ -566,14 +565,14 @@ const navigateToGachaPage = () => {
 }
 
 .rule-mode-tab.active {
-  background: v-bind('colors.brand.primary');
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .rule-hint {
   margin: 0.75rem 0 1rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.9rem;
   line-height: 1.6;
 }

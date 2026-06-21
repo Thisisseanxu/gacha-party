@@ -63,7 +63,6 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { colors } from '@/styles/colors.js' // 引入颜色常量
 
 const props = defineProps({
   // 用于 v-model 绑定，存储当前选中的值
@@ -178,17 +177,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
-const colorTriggerHover = colors.background.lighter
-const colorArrow = colors.text.secondary
-
-const colorDropdownBg = colors.background.light
-const colorDropdownBorder = colors.background.lighter
-
-const colorOptionText = colors.text.secondary
-const colorOptionTextHover = colors.text.primary
-const colorOptionHoverBg = colors.background.hover
-
-const colorScrollbar = colors.scrollbar
 </script>
 
 <style scoped>
@@ -213,7 +201,7 @@ const colorScrollbar = colors.scrollbar
 
 /* 悬停效果 */
 .select-trigger:hover {
-  background-color: v-bind(colorTriggerHover);
+  background-color: var(--color-background-lighter);
 }
 
 /* 箭头标识 */
@@ -221,7 +209,7 @@ const colorScrollbar = colors.scrollbar
   display: inline-block;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 6px solid v-bind(colorArrow);
+  border-top: 6px solid var(--color-text-secondary);
   transition: transform 0.3s ease;
   flex-shrink: 0;
 }
@@ -237,8 +225,8 @@ const colorScrollbar = colors.scrollbar
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
-  background-color: v-bind(colorDropdownBg);
-  border: 1px solid v-bind(colorDropdownBorder);
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-background-lighter);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
@@ -264,7 +252,7 @@ const colorScrollbar = colors.scrollbar
   transition: background-color 0.2s;
   border-radius: 4px;
   white-space: nowrap;
-  color: v-bind(colorOptionText);
+  color: var(--color-text-secondary);
 }
 
 .options-dropdown li > div {
@@ -272,19 +260,19 @@ const colorScrollbar = colors.scrollbar
 }
 
 .options-dropdown li:not(.option-divider):hover {
-  background-color: v-bind(colorOptionHoverBg);
-  color: v-bind(colorOptionTextHover);
+  background-color: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 .option-divider:hover {
-  background-color: v-bind(colorOptionHoverBg);
-  color: v-bind(colorOptionTextHover);
+  background-color: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 /* 当前选中的选项高亮 */
 .options-dropdown li.is-selected {
-  color: v-bind('colors.brand.primary');
-  background-color: v-bind('colors.brand.primaryBackground');
+  color: var(--color-brand-primary);
+  background-color: var(--color-brand-primary-background);
   font-weight: bold;
 }
 
@@ -298,22 +286,22 @@ const colorScrollbar = colors.scrollbar
 }
 
 .options-dropdown::-webkit-scrollbar-thumb {
-  background-color: v-bind(colorScrollbar);
+  background-color: var(--color-scrollbar);
   border-radius: 4px;
   /* 使用下拉框背景色作为边框，制造间距感 */
-  border: 2px solid v-bind(colorDropdownBg);
+  border: 2px solid var(--color-background-light);
 }
 
 .options-dropdown::-webkit-scrollbar-thumb:hover {
   /* 悬浮时使用一个更亮的颜色 */
-  background-color: v-bind(colorTriggerHover);
+  background-color: var(--color-background-lighter);
 }
 
 .option-divider {
   display: flex;
   flex-direction: row;
   align-items: center;
-  color: v-bind(colorOptionText);
+  color: var(--color-text-secondary);
   font-size: 1rem;
 }
 
@@ -322,7 +310,7 @@ const colorScrollbar = colors.scrollbar
   display: inline-block;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 5px solid v-bind(colorArrow);
+  border-top: 5px solid var(--color-text-secondary);
   transition: transform 0.3s ease;
   flex-shrink: 0;
   margin-left: 4px;

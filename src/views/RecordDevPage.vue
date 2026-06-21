@@ -83,7 +83,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import pako from 'pako'
-import { colors } from '@/styles/colors.js'
 import { verifyLicense } from '@/utils/licenseManager.js'
 
 const LICENSE_KEY = 'gachaLicenseKey'
@@ -373,8 +372,8 @@ function formatDate(date) {
 <style scoped>
 .dev-background {
   min-height: 100vh;
-  background: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
   padding: 28px 16px;
 }
 
@@ -394,7 +393,7 @@ function formatDate(date) {
 
 .eyebrow {
   margin: 0 0 6px;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -414,8 +413,8 @@ h2 {
 }
 
 .analysis-link {
-  color: v-bind('colors.text.black');
-  background: v-bind('colors.brand.primary');
+  color: var(--color-text-black);
+  background: var(--color-brand-primary);
   border-radius: 8px;
   padding: 10px 14px;
   text-decoration: none;
@@ -424,11 +423,11 @@ h2 {
 }
 
 .panel {
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
+  background: var(--color-background-content);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
   padding: 18px;
-  box-shadow: 0 10px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 10px 24px var(--color-shadow-primary);
 }
 
 .panel-title {
@@ -450,7 +449,7 @@ h2 {
   display: grid;
   gap: 8px;
   margin-top: 12px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -459,9 +458,9 @@ h2 {
   width: 100%;
   box-sizing: border-box;
   border-radius: 8px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   padding: 12px;
   font: inherit;
 }
@@ -469,41 +468,41 @@ h2 {
 .field input:focus,
 .file-input:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .role-badge {
   flex-shrink: 0;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 999px;
   padding: 5px 10px;
   font-size: 0.82rem;
-  color: v-bind('colors.text.secondary');
-  background: v-bind('colors.background.light');
+  color: var(--color-text-secondary);
+  background: var(--color-background-light);
 }
 
 .role-badge.admin {
-  border-color: v-bind('colors.brand.confirm');
-  color: v-bind('colors.status.success');
-  background: v-bind('colors.status.successBg');
+  border-color: var(--color-brand-confirm);
+  color: var(--color-status-success);
+  background: var(--color-status-success-bg);
 }
 
 .role-badge.normal {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.highlight');
-  background: v-bind('colors.brand.primaryBackground');
+  border-color: var(--color-brand-primary);
+  color: var(--color-text-highlight);
+  background: var(--color-brand-primary-background);
 }
 
 .hint {
   margin: 0 0 14px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   line-height: 1.7;
   font-size: 0.92rem;
 }
 
 .file-name {
   margin-top: 10px;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   word-break: break-all;
   font-size: 0.9rem;
 }
@@ -514,8 +513,8 @@ h2 {
   margin-top: 14px;
   border: none;
   border-radius: 8px;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -525,7 +524,7 @@ h2 {
 }
 
 .primary-button:hover:not(:disabled) {
-  background: v-bind('colors.brand.hover');
+  background: var(--color-brand-hover);
 }
 
 .primary-button:disabled {
@@ -541,15 +540,15 @@ h2 {
 }
 
 .status-message.success {
-  color: v-bind('colors.status.success');
-  background: v-bind('colors.status.successBg');
-  border: 1px solid v-bind('colors.status.success');
+  color: var(--color-status-success);
+  background: var(--color-status-success-bg);
+  border: 1px solid var(--color-status-success);
 }
 
 .status-message.error {
-  color: v-bind('colors.status.error');
-  background: v-bind('colors.status.errorBg');
-  border: 1px solid v-bind('colors.status.error');
+  color: var(--color-status-error);
+  background: var(--color-status-error-bg);
+  border: 1px solid var(--color-status-error);
 }
 
 @media (max-width: 720px) {

@@ -4,12 +4,16 @@ import { createRouter, createWebHistory } from 'vue-router' // 导入路由相�
 import { loadCards } from '@/data/cards.js'
 import { updatePageMeta } from '@/utils/pageMeta.js'
 import { installMobileQQShareSync } from '@/utils/qqShare.js'
+import { initializeTheme } from '@/styles/theme.js'
+import '@/styles/theme.css'
 
 // 路由组件
 import HomePage from './views/HomePage.vue'
 import { cardPoolsInOrder } from '@/data/cardPools'
 
 const latestPoolId = cardPoolsInOrder[0][0]
+
+initializeTheme()
 
 // 定义路由
 const routes = [

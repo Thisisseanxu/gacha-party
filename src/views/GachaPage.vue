@@ -7,8 +7,8 @@
       @click="HandleFloatingButton"
       title="返回主页"
     >
-      <BackOne v-if="isFullscreen" theme="outline" :size="26" :fill="colors.text.primary" />
-      <FullScreenOne v-else theme="outline" :size="26" :fill="colors.text.primary" />
+      <BackOne v-if="isFullscreen" theme="outline" :size="26" fill="var(--color-text-primary)" />
+      <FullScreenOne v-else theme="outline" :size="26" fill="var(--color-text-primary)" />
     </button>
 
     <div
@@ -108,7 +108,7 @@
               <div class="title-row">
                 <h1 class="pool-name">{{ currentPool.name }}</h1>
                 <button class="pool-info-btn" @click="showProbabilityPopup = true" title="概率公示">
-                  <Info theme="outline" :size="18" :fill="colors.text.secondary" />
+                  <Info theme="outline" :size="18" fill="var(--color-text-secondary)" />
                 </button>
                 <button
                   v-if="isCustomPool"
@@ -414,14 +414,14 @@
       v-if="showOrientationPrompt"
       class="gacha-orient-overlay"
       @click.self="showOrientationPrompt = false"
-      :style="{ backgroundColor: colors.background.overlay }"
+      :style="{ backgroundColor: 'var(--color-background-overlay)' }"
     >
       <div
         class="gacha-orient-box"
         :style="{
-          backgroundColor: colors.background.content,
-          border: `1px solid ${colors.border.primary}`,
-          color: colors.text.primary,
+          backgroundColor: 'var(--color-background-content)',
+          border: '1px solid var(--color-border-primary)',
+          color: 'var(--color-text-primary)',
         }"
       >
         <p style="font-size: 1rem; margin: 0; line-height: 1.5">
@@ -445,7 +445,6 @@ import { useGacha } from '@/utils/useGacha'
 import { SP, SSR, SR, R } from '@/data/constant.js'
 import { cardPools, cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools'
 import { cardMap } from '@/data/cards'
-import { colors } from '@/styles/colors.js'
 import { getGachaSource } from '@/utils/getGachaSource.js'
 import QRCode from 'qrcode'
 
@@ -1069,7 +1068,7 @@ const copyShareText = async (event) => {
 .gacha-bg-fill {
   position: fixed;
   inset: 0;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
 }
 
 /* ===== 返回主页按钮（屏幕左上角，不受画布 transform 影响） ===== */
@@ -1083,8 +1082,8 @@ const copyShareText = async (event) => {
   justify-content: center;
   padding: 6px;
   border-radius: 50%;
-  border: 1px solid v-bind('colors.border.primary');
-  background-color: v-bind('colors.background.content');
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-content);
   cursor: pointer;
   opacity: 0.75;
   transition:
@@ -1109,8 +1108,8 @@ const copyShareText = async (event) => {
   grid-template-columns: 200px 1fr;
   grid-template-rows: 675px;
   overflow: hidden;
-  background-color: v-bind('colors.background.primary');
-  color: v-bind('colors.text.primary');
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
 }
 
 /* 抽卡展示时隐藏布局，画布背景透明，让 bg-fill 的背景图无缝延伸到黑边区域 */
@@ -1161,7 +1160,7 @@ const copyShareText = async (event) => {
 }
 
 .pool-item.active {
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
   opacity: 1;
 }
 
@@ -1178,8 +1177,8 @@ const copyShareText = async (event) => {
   font-size: 0.975rem;
   font-weight: bold;
   text-align: center;
-  color: v-bind('colors.text.secondary');
-  background-color: v-bind('colors.background.content');
+  color: var(--color-text-secondary);
+  background-color: var(--color-background-content);
 }
 
 .pool-item-tag {
@@ -1228,15 +1227,15 @@ const copyShareText = async (event) => {
   background-color: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   font-weight: bold;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   transition: background-color 0.2s;
 }
 
 .ended-pools-header:hover {
-  background-color: v-bind('colors.background.hover');
+  background-color: var(--color-background-hover);
 }
 
 .ended-pools-icon {
@@ -1265,10 +1264,10 @@ const copyShareText = async (event) => {
   min-height: 65px;
   background: linear-gradient(
     135deg,
-    v-bind('colors.brand.primaryBackground'),
-    v-bind('colors.background.lighter')
+    var(--color-brand-primary-background),
+    var(--color-background-lighter)
   );
-  border: 1.5px dashed v-bind('colors.brand.primary');
+  border: 1.5px dashed var(--color-brand-primary);
   text-decoration: none;
   border-radius: 6px;
 }
@@ -1279,7 +1278,7 @@ const copyShareText = async (event) => {
 
 .custom-pool-icon {
   font-size: 1.75rem;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   line-height: 1;
   font-style: normal;
 }
@@ -1287,7 +1286,7 @@ const copyShareText = async (event) => {
 .custom-pool-label {
   font-size: 0.875rem;
   font-weight: bold;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 /* ===== 主内容区（两列：内容 + 历史） ===== */
@@ -1335,7 +1334,7 @@ const copyShareText = async (event) => {
 .pool-name {
   font-size: 2rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
 }
@@ -1348,8 +1347,8 @@ const copyShareText = async (event) => {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  border: 1px solid v-bind('colors.border.primary');
-  background-color: v-bind('colors.background.content');
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-content);
   cursor: pointer;
   opacity: 0.65;
   transition:
@@ -1374,13 +1373,13 @@ const copyShareText = async (event) => {
   z-index: 20;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px 8px;
   gap: 0.25rem;
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -1395,7 +1394,7 @@ const copyShareText = async (event) => {
   flex-shrink: 0;
   width: 100%;
   padding-bottom: 4px;
-  border-bottom: 1px solid v-bind('colors.border.primary');
+  border-bottom: 1px solid var(--color-border-primary);
 }
 
 .rarity-count-item {
@@ -1427,7 +1426,7 @@ const copyShareText = async (event) => {
 
 .history-empty {
   font-size: 0.75rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   text-align: center;
   margin: 0;
 }
@@ -1442,8 +1441,8 @@ const copyShareText = async (event) => {
 .hist-page-btn {
   cursor: pointer;
   background: transparent;
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
   border-radius: 4px;
   padding: 1px 5px;
   font-size: 0.75rem;
@@ -1457,7 +1456,7 @@ const copyShareText = async (event) => {
 
 .hist-page-info {
   font-size: 0.75rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -1486,7 +1485,7 @@ const copyShareText = async (event) => {
 .selection-label {
   font-size: 0.82rem;
   font-weight: bold;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   white-space: nowrap;
   align-self: flex-end;
   text-align: right;
@@ -1502,7 +1501,7 @@ const copyShareText = async (event) => {
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.scrollbar') transparent;
+  scrollbar-color: var(--color-scrollbar) transparent;
   padding: 10px 4px;
   max-height: 210px;
   min-width: 0;
@@ -1515,7 +1514,7 @@ const copyShareText = async (event) => {
 }
 
 .selection-scroll::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 2px;
 }
 
@@ -1545,11 +1544,11 @@ const copyShareText = async (event) => {
 }
 
 .up-card-option.selected.rarity-border-sp {
-  box-shadow: 0 0 2px v-bind('colors.rarity.sp');
+  box-shadow: 0 0 2px var(--color-rarity-sp);
 }
 
 .up-card-option.selected.rarity-border-ssr {
-  box-shadow: 0 0 2px v-bind('colors.rarity.ssr');
+  box-shadow: 0 0 2px var(--color-rarity-ssr);
 }
 
 .up-card-image {
@@ -1562,7 +1561,7 @@ const copyShareText = async (event) => {
 
 .up-card-name {
   font-size: 0.75rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
@@ -1594,14 +1593,14 @@ const copyShareText = async (event) => {
 }
 
 .wish-card-option.selected .image-wrapper {
-  border-color: v-bind('colors.rarity.sp');
-  box-shadow: 0 0 8px v-bind('colors.rarity.sp');
+  border-color: var(--color-rarity-sp);
+  box-shadow: 0 0 8px var(--color-rarity-sp);
   transform: scale(1.05);
 }
 
 .wish-card-option.current-up .image-wrapper {
-  border-color: v-bind('colors.text.highlight');
-  box-shadow: 0 0 12px v-bind('colors.text.highlight');
+  border-color: var(--color-text-highlight);
+  box-shadow: 0 0 12px var(--color-text-highlight);
 }
 
 .wish-card-option.current-up .image-wrapper::after {
@@ -1611,7 +1610,7 @@ const copyShareText = async (event) => {
   bottom: 0;
   padding: 2px 6px;
   border-top-right-radius: 8px;
-  background-color: v-bind('colors.text.highlight');
+  background-color: var(--color-text-highlight);
   color: #1f1200;
   font-size: 0.7rem;
   font-weight: bold;
@@ -1621,7 +1620,7 @@ const copyShareText = async (event) => {
   position: absolute;
   top: 0;
   right: 0;
-  background-color: v-bind('colors.rarity.sp');
+  background-color: var(--color-rarity-sp);
   color: white;
   width: 22px;
   height: 22px;
@@ -1650,7 +1649,7 @@ const copyShareText = async (event) => {
 
 .wish-card-name {
   font-size: 0.7rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -1676,10 +1675,10 @@ const copyShareText = async (event) => {
 
 .wish-up-option {
   cursor: pointer;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 6px;
-  background-color: v-bind('colors.background.content');
-  color: v-bind('colors.text.secondary');
+  background-color: var(--color-background-content);
+  color: var(--color-text-secondary);
   padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
   font-weight: bold;
@@ -1691,9 +1690,9 @@ const copyShareText = async (event) => {
 }
 
 .wish-up-option.selected {
-  border-color: v-bind('colors.text.highlight');
+  border-color: var(--color-text-highlight);
   background-color: rgba(255, 196, 74, 0.18);
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 /* UP组选项 */
@@ -1701,11 +1700,11 @@ const copyShareText = async (event) => {
   cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid v-bind('colors.border.primary');
+  border: 2px solid var(--color-border-primary);
   transition: all 0.2s;
   flex-shrink: 0;
   width: 140px;
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
 }
 
 .up-group-item:hover {
@@ -1714,8 +1713,8 @@ const copyShareText = async (event) => {
 }
 
 .up-group-item.selected {
-  border-color: v-bind('colors.rarity.ssr');
-  box-shadow: 0 0 16px -4px v-bind('colors.rarity.ssr');
+  border-color: var(--color-rarity-ssr);
+  box-shadow: 0 0 16px -4px var(--color-rarity-ssr);
 }
 
 .up-group-image {
@@ -1731,7 +1730,7 @@ const copyShareText = async (event) => {
   font-size: 0.75rem;
   font-weight: bold;
   text-align: center;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 /* ===== 底部操作栏（无分隔线，右对齐） ===== */
@@ -1767,7 +1766,7 @@ const copyShareText = async (event) => {
 .selection-label-sm {
   font-size: 0.75rem;
   font-weight: bold;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -1780,7 +1779,7 @@ const copyShareText = async (event) => {
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.scrollbar') transparent;
+  scrollbar-color: var(--color-scrollbar) transparent;
   padding: 4px 2px;
   max-height: 180px;
   align-content: flex-start;
@@ -1792,7 +1791,7 @@ const copyShareText = async (event) => {
 }
 
 .up-group-scroll::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.scrollbar');
+  background-color: var(--color-scrollbar);
   border-radius: 2px;
 }
 
@@ -1808,13 +1807,13 @@ const copyShareText = async (event) => {
 .pity-number {
   font-size: 1.6rem;
   font-weight: bold;
-  color: v-bind('colors.rarity.sp');
+  color: var(--color-rarity-sp);
   line-height: 1;
 }
 
 .pity-label {
   font-size: 0.65rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -1827,7 +1826,7 @@ const copyShareText = async (event) => {
 .wish-incomplete-warning {
   font-size: 0.9rem;
   font-weight: bold;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding: 0.65rem 0;
 }
 
@@ -1867,44 +1866,44 @@ const copyShareText = async (event) => {
 }
 
 .single-pull {
-  background-color: v-bind('colors.gacha.singlePull');
+  background-color: var(--color-gacha-single-pull);
 }
 
 .ten-pull {
-  background-color: v-bind('colors.gacha.tenPull');
+  background-color: var(--color-gacha-ten-pull);
 }
 
 .btn-confirm {
-  background-color: v-bind('colors.brand.confirm');
+  background-color: var(--color-brand-confirm);
 }
 
 .btn-confirm:hover {
-  background-color: v-bind('colors.brand.confirmHover');
+  background-color: var(--color-brand-confirm-hover);
 }
 
 .btn-primary {
-  background-color: v-bind('colors.brand.primary');
+  background-color: var(--color-brand-primary);
 }
 
 .btn-primary:hover {
-  background-color: v-bind('colors.brand.hover');
+  background-color: var(--color-brand-hover);
 }
 
 .btn-secondary {
-  background-color: v-bind('colors.button.secondaryBg');
-  color: v-bind('colors.button.secondaryText');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
+  border: 1px solid var(--color-border-primary);
 }
 
 .btn-secondary:hover {
-  background-color: v-bind('colors.background.hover');
+  background-color: var(--color-background-hover);
 }
 
 .loading-text {
   grid-column: 2;
   text-align: center;
   font-size: 1.1rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding: 4rem 0;
   align-self: center;
 }
@@ -1937,7 +1936,7 @@ const copyShareText = async (event) => {
 }
 
 .overlay-title {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 2.2em;
   margin-bottom: 1.5rem;
 }
@@ -2037,7 +2036,7 @@ const copyShareText = async (event) => {
   width: 80px;
   height: 80px;
   border-radius: 8px;
-  border: 3px solid v-bind('colors.rarity.ssr');
+  border: 3px solid var(--color-rarity-ssr);
   object-fit: cover;
   background-color: #2c2c2c;
 }
@@ -2045,7 +2044,7 @@ const copyShareText = async (event) => {
 .ssr-list-card-name {
   font-size: 0.78rem;
   margin-top: 0.4rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
@@ -2057,7 +2056,7 @@ const copyShareText = async (event) => {
   position: absolute;
   top: -6px;
   right: -6px;
-  background-color: v-bind('colors.brand.cancel');
+  background-color: var(--color-brand-cancel);
   color: white;
   padding: 2px 6px;
   border-radius: 10px;
@@ -2073,7 +2072,7 @@ const copyShareText = async (event) => {
   text-align: left;
   padding: 0.25rem 0.5rem;
   line-height: 1.8;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .probability-popup-content p {
@@ -2087,11 +2086,11 @@ const copyShareText = async (event) => {
 .probability-footer {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid v-bind('colors.border.primary');
+  border-top: 1px solid var(--color-border-primary);
 }
 
 .probability-footer a {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   text-decoration: none;
   font-weight: bold;
 }
@@ -2103,7 +2102,7 @@ const copyShareText = async (event) => {
 /* ===== 分享弹窗 ===== */
 .share-modal-text-info {
   font-size: 0.9rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
 }
 
@@ -2123,10 +2122,10 @@ const copyShareText = async (event) => {
   width: 100%;
   min-height: 100px;
   padding: 0.75rem;
-  background-color: v-bind('colors.background.primary');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: 8px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   resize: vertical;
   box-sizing: border-box;
@@ -2135,7 +2134,7 @@ const copyShareText = async (event) => {
 
 .copy-status-message {
   margin-top: 0.5rem;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-weight: bold;
   font-size: 0.9rem;
   min-height: 1.2em;
@@ -2166,26 +2165,26 @@ const copyShareText = async (event) => {
 /* ===== 稀有度颜色 ===== */
 .text-rarity-sp,
 .rarity-border-sp {
-  color: v-bind('colors.rarity.sp');
-  border-color: v-bind('colors.rarity.sp');
+  color: var(--color-rarity-sp);
+  border-color: var(--color-rarity-sp);
 }
 
 .text-rarity-ssr,
 .rarity-border-ssr {
-  color: v-bind('colors.rarity.ssr');
-  border-color: v-bind('colors.rarity.ssr');
+  color: var(--color-rarity-ssr);
+  border-color: var(--color-rarity-ssr);
 }
 
 .text-rarity-sr,
 .rarity-border-sr {
-  color: v-bind('colors.rarity.sr');
-  border-color: v-bind('colors.rarity.sr');
+  color: var(--color-rarity-sr);
+  border-color: var(--color-rarity-sr);
 }
 
 .text-rarity-r,
 .rarity-border-r {
-  color: v-bind('colors.rarity.r');
-  border-color: v-bind('colors.rarity.r');
+  color: var(--color-rarity-r);
+  border-color: var(--color-rarity-r);
 }
 
 .rarity-bg-sp {
@@ -2216,12 +2215,12 @@ const copyShareText = async (event) => {
 @keyframes highlight-flash-sp {
   0%,
   100% {
-    box-shadow: 0 0 10px 2px v-bind('colors.rarity.sp');
+    box-shadow: 0 0 10px 2px var(--color-rarity-sp);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 28px 8px v-bind('colors.rarity.sp');
+    box-shadow: 0 0 28px 8px var(--color-rarity-sp);
     transform: scale(1.08);
   }
 }
@@ -2229,12 +2228,12 @@ const copyShareText = async (event) => {
 @keyframes highlight-flash-ssr {
   0%,
   100% {
-    box-shadow: 0 0 10px 2px v-bind('colors.rarity.ssr');
+    box-shadow: 0 0 10px 2px var(--color-rarity-ssr);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 28px 8px v-bind('colors.rarity.ssr');
+    box-shadow: 0 0 28px 8px var(--color-rarity-ssr);
     transform: scale(1.08);
   }
 }

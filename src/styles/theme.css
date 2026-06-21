@@ -1,0 +1,214 @@
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  /* --- 基础背景色 --- */
+  --color-background-primary: #e6e5e3;
+  --color-background-content: #f0f0f0;
+  --color-background-light: #f8f9fa;
+  --color-background-lighter: #e5e7eb;
+  --color-background-hover: #d1d5db;
+  --color-background-avatar: #e5e7eb;
+  --color-background-darker: #e5e7eb;
+  --color-background-overlay: rgba(0, 0, 0, 0.2);
+
+  /* --- 文本颜色 --- */
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-black: #000000;
+  --color-text-disabled: #9ca3af;
+  --color-text-light: #4b5563;
+  --color-text-highlight: #083f77;
+
+  /* --- 品牌/功能色 --- */
+  --color-brand-primary: #fbbf24;
+  --color-brand-primary-background: rgba(251, 191, 36, 0.15);
+  --color-brand-hover: #f59e0b;
+  --color-brand-confirm: #10b981;
+  --color-brand-confirm-hover: #059669;
+  --color-brand-cancel: #ef4444;
+  --color-brand-cancel-hover: #dc2626;
+  --color-brand-disabled: #d1d5db;
+  --color-brand-warn: #92400e; /* 使用更深的琥珀色保证浅色背景上的对比度 */
+  --color-brand-warn-bg: rgba(245, 158, 11, 0.12); /* 警告背景色 */
+  --color-brand-warn-border: rgba(245, 158, 11, 0.35); /* 警告边框色 */
+
+  /* --- 性格倾向轴颜色 --- */
+  --color-personality-cuteness: #db2777;
+  --color-personality-tsundere: #7c3aed;
+  --color-personality-capability: #0284c7;
+  --color-personality-energy: #d97706;
+
+  /* --- 历史记录进度条颜色 --- */
+  --color-luck-very-low: rgba(52, 199, 89, 1); /* 更鲜艳的绿色 */
+  --color-luck-low: rgba(100, 210, 120, 1); /* 浅绿色 */
+  --color-luck-medium: rgba(255, 190, 0, 1); /* 明亮的黄色 */
+  --color-luck-high: rgba(255, 149, 0, 1); /* 明亮的橙色 */
+  --color-luck-very-high: rgba(255, 59, 48, 1); /* 明亮的红色 */
+  --color-luck-background: #e5e7eb; /* 进度条背景 */
+
+  /* --- 徽章稀有度颜色（浅色背景使用更深的颜色保证可读性） --- */
+  --color-badge-rarity-empty: #6b7280; /* 稀有度 0：深灰 */
+  --color-badge-rarity-blue: #1565c0; /* 稀有度 1：深蓝 */
+  --color-badge-rarity-purple: #7b1fa2; /* 稀有度 2：深紫 */
+  --color-badge-rarity-gold: #dfb52d; /* 稀有度 3：深金 */
+  --color-badge-rarity-red: #b91c1c; /* 稀有度 4：深红 */
+
+  /* --- 边框颜色 --- */
+  --color-border-primary: rgba(229, 231, 235, 1);
+  --color-border-secondary: rgba(209, 213, 219, 1);
+  --color-border-dashed: #9ca3af;
+  --color-border-lighter: rgba(174, 176, 189, 1);
+
+  /* --- 阴影与其他全局颜色 --- */
+  --color-shadow-primary: rgba(128, 128, 128, 0.3);
+  --color-shadow-primary-hover: rgba(128, 128, 128, 0.5);
+  --color-scrollbar: #d1d5db;
+  --color-text-shadow: none;
+
+  /* --- 输入框颜色 --- */
+  --color-input-background: #ffffff;
+  --color-input-text: #1f2937;
+  --color-input-border: #d1d5db;
+
+  /* --- 按钮颜色 --- */
+  --color-button-default-bg: #e5e7eb;
+  --color-button-default-text: #374151;
+  --color-button-hover-bg: #374151;
+  --color-button-hover-text: #e5e7eb;
+  --color-button-secondary-bg: #9b9b9b; /* 次要按钮背景 */
+  --color-button-secondary-text: #000000; /* 次要按钮文字 */
+  --color-button-danger-bg: #fef2f2;
+  --color-button-danger-text: #dc2626;
+  --color-button-danger-border: #fecaca;
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* --- 基础背景色 --- */
+  --color-background-primary: rgba(18, 18, 18, 1); /* 页面最外层背景 */
+  --color-background-content: rgba(26, 27, 32, 1); /* 内容容器背景 */
+  --color-background-light: rgba(44, 45, 50, 1); /* 输入框、统计框等较亮的背景 */
+  --color-background-lighter: rgba(58, 59, 64, 1); /* 按钮、边框等较浅背景 */
+  --color-background-hover: rgba(74, 75, 80, 1); /* 按钮悬浮状态背景 */
+  --color-background-avatar: rgba(51, 51, 51, 1); /* 头像占位背景 */
+  --color-background-darker: #111111; /* 更深的背景（用于预览区等） */
+  --color-background-overlay: rgba(0, 0, 0, 0.6); /* 遮罩层背景 */
+
+  /* --- 文本颜色 --- */
+  --color-text-primary: rgba(247, 244, 239, 1); /* 主要文字（白色） */
+  --color-text-secondary: rgba(204, 204, 204, 1); /* 次要文字（灰色） */
+  --color-text-tertiary: rgba(136, 136, 136, 1); /* 最次要的文字（更深的灰色） */
+  --color-text-black: rgba(26, 27, 32, 1); /* 用于亮色背景上的深色文字 */
+  --color-text-disabled: rgba(102, 102, 102, 1); /* 禁用状态的文字 */
+  --color-text-light: rgba(221, 221, 221, 1); /* 亮灰色文字 */
+  --color-text-highlight: rgb(235, 201, 80); /* 高亮文字 */
+  --color-text-white: #ffffff; /* 始终为白色的文字 */
+
+  /* --- 品牌/功能色 --- */
+  --color-brand-primary: rgba(232, 169, 100, 1); /* 主要高亮/按钮颜色 */
+  --color-brand-primary-background: rgba(232, 169, 100, 0.15); /* 主要高亮背景 */
+  --color-brand-hover: rgba(240, 195, 138, 1); /* 高亮色悬浮 */
+  --color-brand-confirm: rgba(76, 175, 80, 1); /* 确认/成功操作颜色 */
+  --color-brand-confirm-hover: rgba(67, 160, 71, 1); /* 确认悬浮 */
+  --color-brand-cancel: rgba(244, 67, 54, 1); /* 取消/删除操作颜色 */
+  --color-brand-cancel-hover: rgba(229, 57, 53, 1); /* 取消悬浮 */
+  --color-brand-disabled: #71717a; /* 品牌色禁用状态 */
+  --color-brand-warn: #c98a00; /* 警告文字色 */
+  --color-brand-warn-bg: rgba(255, 180, 0, 0.12); /* 警告背景色 */
+  --color-brand-warn-border: rgba(255, 180, 0, 0.35); /* 警告边框色 */
+
+  /* --- 游戏内特定颜色（浅色主题也保持一致） --- */
+  --color-game-primary: rgba(126, 12, 255, 1); /* 游戏主题色 */
+  --color-game-primary-text: rgba(128, 0, 255, 1); /* 白底上的游戏主题文字 */
+  --color-game-background-black: rgba(45, 39, 57, 1); /* 游戏黑色背景 */
+  --color-game-narrator-bg: #4b3f66; /* 旁白背景 */
+  --color-game-narrator-text: #c0bcc9; /* 旁白文字 */
+
+  /* --- 性格倾向轴颜色 --- */
+  --color-personality-cuteness: #f06c9b; /* 可爱 */
+  --color-personality-tsundere: #a78bfa; /* 傲娇 */
+  --color-personality-capability: #38bdf8; /* 能干 */
+  --color-personality-energy: #f59e0b; /* 活力 */
+
+  /* --- 稀有度颜色（浅色主题也保持一致） --- */
+  --color-rarity-sp: rgba(255, 85, 61, 1); /* SP 稀有度颜色 */
+  --color-rarity-ssr: rgba(255, 166, 40, 1); /* SSR 稀有度颜色 */
+  --color-rarity-sr: rgba(203, 45, 255, 1); /* SR 稀有度颜色 */
+  --color-rarity-r: rgba(86, 146, 255, 1); /* R 稀有度颜色 */
+
+  /* --- 状态与通知颜色（浅色主题也保持一致） --- */
+  --color-status-error: rgba(255, 107, 107, 1); /* 错误文字/边框 */
+  --color-status-error-bg: rgba(255, 107, 107, 0.1); /* 错误信息背景 */
+  --color-status-success: rgba(82, 196, 26, 1); /* 成功颜色 */
+  --color-status-success-bg: rgba(82, 196, 26, 0.1); /* 成功背景 */
+
+  /* --- 历史记录进度条颜色 --- */
+  --color-luck-very-low: rgba(40, 167, 69, 1); /* 绿色（低抽数） */
+  --color-luck-low: rgba(60, 180, 90, 1); /* 较浅的绿色（较低抽数） */
+  --color-luck-medium: rgba(192, 154, 39, 1); /* 黄色（中等抽数） */
+  --color-luck-high: rgba(199, 127, 32, 1); /* 橙色（较高抽数） */
+  --color-luck-very-high: rgba(201, 49, 64, 1); /* 红色（高抽数） */
+  --color-luck-background: rgba(74, 61, 76, 1); /* 进度条背景 */
+
+  /* --- 抽卡相关颜色（浅色主题也保持一致） --- */
+  --color-gacha-single-pull: rgba(225, 16, 208, 1); /* 单抽颜色 */
+  --color-gacha-single-pull-hover: rgba(182, 16, 194, 1); /* 单抽悬浮 */
+  --color-gacha-ten-pull: rgb(230, 195, 0); /* 十连颜色 */
+  --color-gacha-ten-pull-hover: rgb(200, 170, 0); /* 十连悬浮 */
+  --color-gacha-confirm: rgb(255, 215, 0); /* 确认颜色 */
+  --color-gacha-confirm-hover: rgb(240, 235, 143); /* 确认悬浮 */
+
+  /* --- 边框颜色 --- */
+  --color-border-primary: rgba(58, 59, 64, 1); /* 主要边框 */
+  --color-border-secondary: rgba(44, 45, 50, 1); /* 次要边框 */
+  --color-border-dashed: #555555; /* 虚线边框 */
+  --color-border-lighter: rgba(58, 59, 64, 1); /* 更浅的边框 */
+
+  /* --- 阴影 --- */
+  --color-shadow-primary: rgba(0, 0, 0, 0.3); /* 卡片、列表项的常规阴影 */
+  --color-shadow-primary-hover: rgba(0, 0, 0, 0.5); /* 悬浮时更明显的阴影 */
+  --color-shadow-white: rgba(255, 255, 255, 0.3); /* 深色背景上的浅色阴影 */
+  --color-shadow-white-hover: rgba(255, 255, 255, 0.5); /* 浅色阴影悬浮状态 */
+
+  /* --- 徽章稀有度颜色（用于徽章攻略界面的标签文字） --- */
+  --color-badge-rarity-empty: #888888; /* 稀有度 0：空/灰 */
+  --color-badge-rarity-blue: #64b5f6; /* 稀有度 1：蓝色 */
+  --color-badge-rarity-purple: #ce93d8; /* 稀有度 2：紫色 */
+  --color-badge-rarity-gold: #ffd54f; /* 稀有度 3：金色 */
+  --color-badge-rarity-red: #ef9a9a; /* 稀有度 4：红色 */
+
+  /* --- 其他全局颜色 --- */
+  --color-scrollbar: rgba(85, 85, 85, 1); /* 滚动条滑块颜色 */
+  --color-text-shadow: rgba(0, 0, 0, 0.6); /* 文本阴影 */
+
+  /* --- 输入框颜色 --- */
+  --color-input-background: #2c2e33; /* 输入框背景 */
+  --color-input-text: #ffffff; /* 输入框文字 */
+  --color-input-border: #3f3f46; /* 输入框边框 */
+
+  /* --- 按钮颜色 --- */
+  --color-button-default-bg: #cccccc; /* 默认按钮背景 */
+  --color-button-default-text: #344767; /* 默认按钮文字 */
+  --color-button-hover-bg: #344767; /* 默认按钮悬浮背景 */
+  --color-button-hover-text: #cccccc; /* 默认按钮悬浮文字 */
+  --color-button-secondary-bg: #444444; /* 次要按钮背景 */
+  --color-button-secondary-text: #ffffff; /* 次要按钮文字 */
+  --color-button-info-bg: #607d8b; /* 信息按钮背景 */
+  --color-button-danger-bg: #fff1f0; /* 危险按钮背景 */
+  --color-button-danger-text: #cf1322; /* 危险按钮文字 */
+  --color-button-danger-border: #ffa39e; /* 危险按钮边框 */
+
+  /* --- 导演模式预览颜色（始终保持深色游戏视觉） --- */
+  --color-preview-panel-bg: rgba(30, 30, 40, 0.9); /* 预览面板背景 */
+  --color-preview-text: #dddddd; /* 预览文字 */
+  --color-preview-highlight: #ffca28; /* 预览高亮 */
+  --color-preview-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* 预览阴影 */
+  --color-preview-watermark: rgba(255, 255, 255, 0.2); /* 水印 */
+  --color-preview-author: rgba(0, 0, 0, 0.2); /* 作者署名 */
+  --color-preview-overlay: rgba(0, 0, 0, 0.6); /* 推荐星级遮罩 */
+  --color-preview-secondary: rgba(204, 204, 204, 1); /* 次要文字 */
+  --color-preview-divideline: rgba(58, 59, 64, 1); /* 分隔线 */
+}

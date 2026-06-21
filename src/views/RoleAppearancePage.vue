@@ -198,7 +198,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Return } from '@icon-park/vue-next'
-import { colors } from '@/styles/colors.js'
 import { cardMap, cardNameMap } from '@/data/cards.js'
 import { cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools.js'
 import PopUp from '@/components/PopUp.vue'
@@ -487,7 +486,7 @@ function openRolePopup(role) {
   inset: 0;
   min-height: 100svh;
   height: 100dvh;
-  background-color: v-bind('colors.background.primary');
+  background-color: var(--color-background-primary);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -525,7 +524,7 @@ function openRolePopup(role) {
   width: 100%;
   max-width: 1600px;
   height: calc(100dvh - 1.3rem);
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -556,20 +555,20 @@ function openRolePopup(role) {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: bold;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
   padding: 0.4rem 0.7rem;
   border-radius: 20px;
   transition: all 0.3s ease;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   font-size: 0.85rem;
 }
 
 .back-btn:hover {
   transform: translateX(-2px);
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
 }
 
 /* 默认（窄屏）只显示「返回」短文本 */
@@ -604,13 +603,13 @@ function openRolePopup(role) {
 .title {
   font-size: 1.3rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 0.15rem 0;
 }
 
 .subtitle {
   font-size: 0.8rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin: 0 0 0.6rem 0;
 }
 
@@ -642,9 +641,9 @@ function openRolePopup(role) {
 .rarity-chip {
   padding: 6px 18px;
   border-radius: 20px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: bold;
@@ -652,25 +651,25 @@ function openRolePopup(role) {
 }
 
 .rarity-chip:hover {
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .rarity-chip.SP.active {
-  background: v-bind('colors.rarity.sp');
-  border-color: v-bind('colors.rarity.sp');
+  background: var(--color-rarity-sp);
+  border-color: var(--color-rarity-sp);
   color: white;
 }
 
 .rarity-chip.SSR.active {
-  background: v-bind('colors.rarity.ssr');
-  border-color: v-bind('colors.rarity.ssr');
+  background: var(--color-rarity-ssr);
+  border-color: var(--color-rarity-ssr);
   color: white;
 }
 
 /* --- 窄屏 panel 切换器 --- */
 .panel-tabs {
   display: flex;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   border-radius: 10px;
   padding: 3px;
   margin-bottom: 0.6rem;
@@ -684,7 +683,7 @@ function openRolePopup(role) {
   border: none;
   background: transparent;
   border-radius: 7px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: bold;
@@ -692,12 +691,12 @@ function openRolePopup(role) {
 }
 
 .panel-tab:hover {
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .panel-tab.active {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
@@ -732,7 +731,7 @@ function openRolePopup(role) {
 }
 
 .panels-wrapper::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.border.primary');
+  background-color: var(--color-border-primary);
   border-radius: 3px;
 }
 
@@ -746,7 +745,7 @@ function openRolePopup(role) {
 }
 
 .panel {
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   border-radius: 10px;
   padding: 0.6rem;
   display: flex;
@@ -771,7 +770,7 @@ function openRolePopup(role) {
 .panel-title {
   font-size: 1rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
   flex-shrink: 0;
   text-align: left;
@@ -803,13 +802,13 @@ function openRolePopup(role) {
     width: 6px;
   }
   .panel-body::-webkit-scrollbar-thumb {
-    background-color: v-bind('colors.border.primary');
+    background-color: var(--color-border-primary);
     border-radius: 3px;
   }
 }
 
 .empty {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   text-align: center;
   padding: 2rem 0;
   margin: 0;
@@ -831,7 +830,7 @@ function openRolePopup(role) {
   right: 0;
   bottom: 0;
   height: 1px;
-  background: v-bind('colors.background.hover');
+  background: var(--color-background-hover);
 }
 
 .count-row:last-child::after {
@@ -846,20 +845,20 @@ function openRolePopup(role) {
   min-width: 48px;
   padding: 0.4rem 0.5rem;
   border-radius: 8px;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   flex-shrink: 0;
 }
 
 .count-num {
   font-size: 1.4rem;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   line-height: 1;
 }
 
 .count-unit {
   font-size: 0.7rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin-top: 2px;
 }
 
@@ -889,22 +888,22 @@ function openRolePopup(role) {
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid transparent;
-  background: v-bind('colors.background.avatar');
+  background: var(--color-background-avatar);
 }
 
 .role-chip.SP .role-avatar {
-  border-image: linear-gradient(180deg, v-bind('colors.rarity.sp'), v-bind('colors.rarity.ssr')) 1;
+  border-image: linear-gradient(180deg, var(--color-rarity-sp), var(--color-rarity-ssr)) 1;
   border-style: solid;
   border-radius: 8px;
 }
 
 .role-chip.SSR .role-avatar {
-  border-color: v-bind('colors.rarity.ssr');
+  border-color: var(--color-rarity-ssr);
 }
 
 .role-name {
   font-size: 0.7rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   margin-top: 2px;
   text-align: center;
   line-height: 1.1;
@@ -921,7 +920,7 @@ function openRolePopup(role) {
   gap: 0.6rem;
   padding: 0.45rem 0.5rem;
   border-radius: 8px;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   text-decoration: none;
   color: inherit;
   transition: all 0.15s;
@@ -933,7 +932,7 @@ function openRolePopup(role) {
 
 .row-card.clickable:hover {
   transform: translateX(2px);
-  background: v-bind('colors.background.hover');
+  background: var(--color-background-hover);
 }
 
 .row-avatar {
@@ -942,17 +941,17 @@ function openRolePopup(role) {
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid transparent;
-  background: v-bind('colors.background.avatar');
+  background: var(--color-background-avatar);
   flex-shrink: 0;
 }
 
 .row-avatar.SP {
-  border-image: linear-gradient(180deg, v-bind('colors.rarity.sp'), v-bind('colors.rarity.ssr')) 1;
+  border-image: linear-gradient(180deg, var(--color-rarity-sp), var(--color-rarity-ssr)) 1;
   border-style: solid;
 }
 
 .row-avatar.SSR {
-  border-color: v-bind('colors.rarity.ssr');
+  border-color: var(--color-rarity-ssr);
 }
 
 .row-main {
@@ -964,7 +963,7 @@ function openRolePopup(role) {
 .row-name {
   font-size: 0.95rem;
   font-weight: bold;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -975,14 +974,14 @@ function openRolePopup(role) {
   font-size: 0.65rem;
   padding: 1px 6px;
   border-radius: 8px;
-  background: v-bind('colors.status.successBg');
-  color: v-bind('colors.status.success');
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success);
   font-weight: normal;
 }
 
 .row-sub {
   font-size: 0.75rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -1009,8 +1008,8 @@ function openRolePopup(role) {
   width: 1.1rem;
   height: 1.1rem;
   border-radius: 4px;
-  background: v-bind('colors.background.hover');
-  color: v-bind('colors.text.secondary');
+  background: var(--color-background-hover);
+  color: var(--color-text-secondary);
   font-size: 0.65rem;
   font-weight: bold;
   margin-top: 1px;
@@ -1026,13 +1025,13 @@ function openRolePopup(role) {
 .metric-num {
   font-size: 1.4rem;
   font-weight: bold;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   line-height: 1;
 }
 
 .metric-unit {
   font-size: 0.75rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
 }
 
 /* --- 间隔模式子切换 --- */
@@ -1047,18 +1046,18 @@ function openRolePopup(role) {
 .filter-chip {
   padding: 4px 12px;
   border-radius: 14px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.light');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-light);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.15s;
 }
 
 .filter-chip.active {
-  background: v-bind('colors.brand.primary');
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-text-black);
   font-weight: bold;
 }
 
@@ -1085,7 +1084,7 @@ function openRolePopup(role) {
 }
 
 .popup-body::-webkit-scrollbar-thumb {
-  background-color: v-bind('colors.border.primary');
+  background-color: var(--color-border-primary);
   border-radius: 2px;
 }
 
@@ -1095,16 +1094,16 @@ function openRolePopup(role) {
   object-fit: cover;
   border-radius: 12px;
   border: 3px solid transparent;
-  background: v-bind('colors.background.avatar');
+  background: var(--color-background-avatar);
 }
 
 .popup-avatar.SP {
-  border-image: linear-gradient(180deg, v-bind('colors.rarity.sp'), v-bind('colors.rarity.ssr')) 1;
+  border-image: linear-gradient(180deg, var(--color-rarity-sp), var(--color-rarity-ssr)) 1;
   border-style: solid;
 }
 
 .popup-avatar.SSR {
-  border-color: v-bind('colors.rarity.ssr');
+  border-color: var(--color-rarity-ssr);
 }
 
 .popup-stats {
@@ -1116,7 +1115,7 @@ function openRolePopup(role) {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: v-bind('colors.border.primary') transparent;
+  scrollbar-color: var(--color-border-primary) transparent;
 }
 
 .stat-row {
@@ -1125,13 +1124,13 @@ function openRolePopup(role) {
   gap: 0.25rem;
   align-items: flex-start;
   padding: 0.5rem 0.6rem;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
   border-radius: 8px;
 }
 
 .stat-row dt {
   font-size: 0.8rem;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   white-space: nowrap;
   flex-shrink: 0;
   margin: 0;
@@ -1140,7 +1139,7 @@ function openRolePopup(role) {
 
 .stat-row dd {
   font-size: 0.9rem;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   margin: 0;
   flex: 1;
   text-align: left;
@@ -1169,8 +1168,8 @@ function openRolePopup(role) {
   padding: 2px 8px;
   margin: 2px;
   border-radius: 6px;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   font-size: 0.85rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 </style>

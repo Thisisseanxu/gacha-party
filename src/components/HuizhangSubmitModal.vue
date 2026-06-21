@@ -73,7 +73,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { colors } from '@/styles/colors.js'
 import { decodeStrategy } from '@/utils/huizhangCode.js'
 import { useHuizhangGuides } from '@/composables/useHuizhangGuides.js'
 
@@ -174,7 +173,7 @@ const handleSubmit = async () => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: v-bind('colors.background.overlay');
+  background-color: var(--color-background-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -182,16 +181,16 @@ const handleSubmit = async () => {
 }
 
 .submit-modal {
-  background-color: v-bind('colors.background.content');
+  background-color: var(--color-background-content);
   padding: 1.4rem 1.6rem;
   border-radius: 14px;
-  box-shadow: 0 8px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 8px 24px var(--color-shadow-primary);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   width: 90%;
   max-width: 480px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -199,14 +198,14 @@ const handleSubmit = async () => {
 .modal-title {
   text-align: center;
   margin: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .modal-sub {
   text-align: center;
   margin: -0.5rem 0 0;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.8rem;
   line-height: 1.4;
 }
@@ -220,11 +219,11 @@ const handleSubmit = async () => {
 .form-label {
   font-weight: bold;
   font-size: 0.85rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .required {
-  color: v-bind('colors.brand.cancel');
+  color: var(--color-brand-cancel);
 }
 
 .input-with-eye {
@@ -236,9 +235,9 @@ const handleSubmit = async () => {
   width: 100%;
   padding: 8px 10px;
   border-radius: 7px;
-  border: 1px solid v-bind('colors.input.border');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   box-sizing: border-box;
   font-size: 0.9rem;
   flex: 1;
@@ -246,24 +245,24 @@ const handleSubmit = async () => {
 
 .form-input:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .eye-btn {
   flex-shrink: 0;
   padding: 8px 12px;
   border-radius: 7px;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.secondary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-lighter);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 0.82rem;
   white-space: nowrap;
 }
 
 .eye-btn:hover {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
 }
 
 .checkbox-row {
@@ -271,13 +270,13 @@ const handleSubmit = async () => {
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-weight: normal;
 }
 
 .checkbox-row input[type='checkbox'] {
-  accent-color: v-bind('colors.brand.primary');
+  accent-color: var(--color-brand-primary);
   cursor: pointer;
 }
 
@@ -285,9 +284,9 @@ const handleSubmit = async () => {
   width: 100%;
   padding: 8px 10px;
   border-radius: 7px;
-  border: 1px solid v-bind('colors.input.border');
-  background: v-bind('colors.input.background');
-  color: v-bind('colors.input.text');
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-background);
+  color: var(--color-input-text);
   box-sizing: border-box;
   font-size: 0.82rem;
   font-family: monospace;
@@ -297,11 +296,11 @@ const handleSubmit = async () => {
 
 .code-textarea:focus {
   outline: none;
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .hint-link {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-size: 0.78rem;
   text-decoration: none;
   align-self: flex-end;
@@ -329,13 +328,13 @@ const handleSubmit = async () => {
 }
 
 .error-msg {
-  background: v-bind('colors.status.errorBg');
-  color: v-bind('colors.status.error');
+  background: var(--color-status-error-bg);
+  color: var(--color-status-error);
 }
 
 .success-msg {
-  background: v-bind('colors.status.successBg');
-  color: v-bind('colors.status.success');
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success);
 }
 
 .form-actions {
@@ -352,19 +351,19 @@ const handleSubmit = async () => {
   font-size: 0.9rem;
   font-weight: bold;
   transition: all 0.15s;
-  border: 1px solid v-bind('colors.border.primary');
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.primary');
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-background-lighter);
+  color: var(--color-text-primary);
 }
 
 .form-btn.primary {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-  border-color: v-bind('colors.brand.primary');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
+  border-color: var(--color-brand-primary);
 }
 
 .form-btn.primary:hover:not(:disabled) {
-  background: v-bind('colors.brand.hover');
+  background: var(--color-brand-hover);
 }
 
 .form-btn.primary:disabled {
@@ -373,11 +372,11 @@ const handleSubmit = async () => {
 }
 
 .form-btn.cancel {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .form-btn.cancel:hover {
-  border-color: v-bind('colors.brand.primary');
-  color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
 }
 </style>

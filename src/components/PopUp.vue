@@ -13,7 +13,6 @@
 </template>
 
 <script setup>
-import { colors } from '@/styles/colors.js'
 defineProps({
   display: {
     type: Boolean,
@@ -44,7 +43,7 @@ const close = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: v-bind('colors.shadow.primary');
+  background-color: var(--color-shadow-primary);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,18 +60,18 @@ const close = () => {
   max-width: 800px;
   max-height: 90dvh;
   overflow: hidden;
-  background-color: v-bind('colors.background.light');
-  border: 1px solid v-bind('colors.border.primary');
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
 }
 
 .share-modal-content h2 {
   margin: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .share-modal-content p {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .close-modal-button {
@@ -83,13 +82,13 @@ const close = () => {
   border: none;
   font-size: 2rem;
   line-height: 1;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   cursor: pointer;
   padding: 0;
 }
 
 .close-modal-button:hover {
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 /* 过渡动画 */

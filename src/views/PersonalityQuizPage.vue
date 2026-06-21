@@ -186,7 +186,7 @@ import {
   dimensionEntries,
   findClosestCharacter,
 } from '@/utils/personalityMatch.js'
-import { colors } from '@/styles/colors.js'
+import { resolveThemeColor } from '@/utils/themeColor.js'
 
 const optionLetters = ['A', 'B', 'C', 'D']
 const currentIndex = ref(0)
@@ -395,7 +395,7 @@ async function prepareShareImage() {
     await waitForCaptureAssets(captureElement)
 
     const dataUrl = await toPng(captureElement, {
-      backgroundColor: colors.background.content,
+      backgroundColor: resolveThemeColor('background.content', '#1a1b20'),
       width: 822,
       height: captureElement.scrollHeight,
       pixelRatio: 2,
@@ -515,10 +515,10 @@ onBeforeUnmount(() => {
   min-height: 100dvh;
   padding: 48px 20px 80px;
   box-sizing: border-box;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   background:
-    radial-gradient(circle at 12% 8%, v-bind('colors.brand.primaryBackground'), transparent 34%),
-    v-bind('colors.background.primary');
+    radial-gradient(circle at 12% 8%, var(--color-brand-primary-background), transparent 34%),
+    var(--color-background-primary);
 }
 
 .quiz-shell {
@@ -532,7 +532,7 @@ onBeforeUnmount(() => {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -546,7 +546,7 @@ onBeforeUnmount(() => {
 
 .quiz-header > p:last-child {
   margin: 14px 0 0;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   line-height: 1.7;
 }
 
@@ -555,14 +555,14 @@ onBeforeUnmount(() => {
   margin-top: 28px;
   overflow: hidden;
   border-radius: 999px;
-  background: v-bind('colors.background.lighter');
+  background: var(--color-background-lighter);
 }
 
 .progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, v-bind('colors.brand.primary'), v-bind('colors.brand.hover'));
+  background: linear-gradient(90deg, var(--color-brand-primary), var(--color-brand-hover));
   transition: width 0.3s ease;
 }
 
@@ -570,16 +570,16 @@ onBeforeUnmount(() => {
 .result-panel {
   margin-top: 18px;
   padding: clamp(24px, 5vw, 48px);
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 20px;
-  background: v-bind('colors.background.content');
-  box-shadow: 0 22px 60px v-bind('colors.shadow.primary');
+  background: var(--color-background-content);
+  box-shadow: 0 22px 60px var(--color-shadow-primary);
 }
 
 .question-meta {
   display: flex;
   justify-content: space-between;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -604,10 +604,10 @@ onBeforeUnmount(() => {
   gap: 14px;
   width: 100%;
   padding: 16px;
-  border: 1px solid v-bind('colors.border.primary');
+  border: 1px solid var(--color-border-primary);
   border-radius: 12px;
-  color: v-bind('colors.text.primary');
-  background: v-bind('colors.background.light');
+  color: var(--color-text-primary);
+  background: var(--color-background-light);
   cursor: pointer;
   text-align: left;
   transition:
@@ -618,17 +618,17 @@ onBeforeUnmount(() => {
 
 .option-card:hover {
   transform: translateY(-2px);
-  border-color: v-bind('colors.brand.primary');
+  border-color: var(--color-brand-primary);
 }
 
 .option-list.suppress-hover .option-card:hover {
   transform: none;
-  border-color: v-bind('colors.border.primary');
+  border-color: var(--color-border-primary);
 }
 
 .option-card.selected {
-  border-color: v-bind('colors.brand.primary');
-  background: v-bind('colors.brand.primaryBackground');
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary-background);
 }
 
 .option-letter {
@@ -637,14 +637,14 @@ onBeforeUnmount(() => {
   height: 38px;
   place-items: center;
   border-radius: 10px;
-  color: v-bind('colors.text.secondary');
-  background: v-bind('colors.background.content');
+  color: var(--color-text-secondary);
+  background: var(--color-background-content);
   font-weight: 800;
 }
 
 .selected .option-letter {
-  color: v-bind('colors.text.black');
-  background: v-bind('colors.brand.primary');
+  color: var(--color-text-black);
+  background: var(--color-brand-primary);
 }
 
 .quiz-actions,
@@ -670,15 +670,15 @@ onBeforeUnmount(() => {
 }
 
 .primary-button {
-  border: 1px solid v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
-  background: v-bind('colors.brand.primary');
+  border: 1px solid var(--color-brand-primary);
+  color: var(--color-text-black);
+  background: var(--color-brand-primary);
 }
 
 .secondary-button {
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
-  background: v-bind('colors.background.content');
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  background: var(--color-background-content);
 }
 
 button:disabled {
@@ -694,8 +694,8 @@ button:disabled {
   padding: clamp(20px, 4vw, 36px);
   border-radius: 16px;
   background:
-    radial-gradient(circle at 10% 4%, v-bind('colors.brand.primaryBackground'), transparent 30%),
-    v-bind('colors.background.content');
+    radial-gradient(circle at 10% 4%, var(--color-brand-primary-background), transparent 30%),
+    var(--color-background-content);
 }
 
 .match-hero {
@@ -713,10 +713,10 @@ button:disabled {
   flex: 0 0 132px;
   overflow: hidden;
   place-items: center;
-  border: 3px solid v-bind('colors.brand.primary');
+  border: 3px solid var(--color-brand-primary);
   border-radius: 28px;
-  color: v-bind('colors.brand.primary');
-  background: v-bind('colors.background.light');
+  color: var(--color-brand-primary);
+  background: var(--color-background-light);
   font-size: 3rem;
   font-weight: 900;
 }
@@ -733,7 +733,7 @@ button:disabled {
 }
 
 .match-copy span {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .capture-match-label {
@@ -742,23 +742,23 @@ button:disabled {
 
 .match-copy h2 {
   margin: 4px 0 8px;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-size: clamp(2rem, 6vw, 3.5rem);
 }
 
 .personality-comment {
   margin: 0 0 20px;
   padding: 20px 22px;
-  border: 1px solid v-bind('colors.border.primary');
-  border-left: 4px solid v-bind('colors.brand.primary');
+  border: 1px solid var(--color-border-primary);
+  border-left: 4px solid var(--color-brand-primary);
   border-radius: 14px;
-  background: v-bind('colors.background.light');
+  background: var(--color-background-light);
   text-align: left;
 }
 
 .personality-comment p {
   margin: 0;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   line-height: 1.8;
 }
 
@@ -779,7 +779,7 @@ button:disabled {
   gap: 20px;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid v-bind('colors.border.primary');
+  border-top: 1px solid var(--color-border-primary);
   text-align: left;
 }
 
@@ -848,12 +848,12 @@ button:disabled {
 }
 
 .share-brand strong {
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
   font-size: 1.15rem;
 }
 
 .share-brand span {
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.72rem;
   overflow-wrap: anywhere;
 }
@@ -878,39 +878,39 @@ button:disabled {
 }
 
 .share-button {
-  color: v-bind('colors.text.white');
-  background: v-bind('colors.game.primary');
-  border-color: v-bind('colors.game.primary');
+  color: var(--color-text-white);
+  background: var(--color-game-primary);
+  border-color: var(--color-game-primary);
 }
 
 .share-status {
   margin: 14px auto 0;
-  color: v-bind('colors.status.success');
+  color: var(--color-status-success);
   font-size: 0.88rem;
 }
 
 .share-preparing-note {
   margin: 12px auto 0;
-  color: v-bind('colors.text.tertiary');
+  color: var(--color-text-tertiary);
   font-size: 0.82rem;
 }
 
 .share-status.is-error {
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
 }
 
 .share-status.is-neutral {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .result-loading,
 .result-error {
   margin: 40px 0 20px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .result-error {
-  color: v-bind('colors.status.error');
+  color: var(--color-status-error);
 }
 
 .share-preview-overlay {

@@ -315,7 +315,7 @@ import { ArrowLeft, PreviewCloseOne } from '@icon-park/vue-next'
 
 import { cardMap } from '@/data/cards.js'
 import { SP, SSR } from '@/data/constant.js'
-import { colors } from '@/styles/colors.js'
+import { themeVar } from '@/utils/themeColor.js'
 
 const props = defineProps({
   limitGachaData: { type: Array, required: true },
@@ -362,29 +362,29 @@ const expandedCardPools = ref({})
 const LIMITPOOL_TITLE_MAP = {
   32: {
     title: '天选之子',
-    text_color: colors.text.highlight,
-    background: colors.game.primary,
+    text_color: themeVar('text.highlight'),
+    background: themeVar('game.primary'),
   },
-  34.5: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  35.75: { title: '小欧皇', background: colors.colorOfLuck.low },
-  37.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
-  39: { title: '小非酋', background: colors.colorOfLuck.high },
-  41: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
-  120: { title: '面目全非', background: colors.colorOfLuck.veryHigh },
+  34.5: { title: '大欧皇', background: themeVar('colorOfLuck.veryLow') },
+  35.75: { title: '小欧皇', background: themeVar('colorOfLuck.low') },
+  37.5: { title: '平平无奇', background: themeVar('colorOfLuck.medium') },
+  39: { title: '小非酋', background: themeVar('colorOfLuck.high') },
+  41: { title: '大非酋', background: themeVar('colorOfLuck.veryHigh') },
+  120: { title: '面目全非', background: themeVar('colorOfLuck.veryHigh') },
 }
 
 const NORMALPOOL_TITLE_MAP = {
   8.75: {
     title: '天选之子',
-    text_color: colors.text.highlight,
-    background: colors.game.primary,
+    text_color: themeVar('text.highlight'),
+    background: themeVar('game.primary'),
   },
-  9.75: { title: '大欧皇', background: colors.colorOfLuck.veryLow },
-  10.5: { title: '小欧皇', background: colors.colorOfLuck.low },
-  11.5: { title: '平平无奇', background: colors.colorOfLuck.medium },
-  12.25: { title: '小非酋', background: colors.colorOfLuck.high },
-  13.25: { title: '大非酋', background: colors.colorOfLuck.veryHigh },
-  120: { title: '面目全非', background: colors.colorOfLuck.veryHigh },
+  9.75: { title: '大欧皇', background: themeVar('colorOfLuck.veryLow') },
+  10.5: { title: '小欧皇', background: themeVar('colorOfLuck.low') },
+  11.5: { title: '平平无奇', background: themeVar('colorOfLuck.medium') },
+  12.25: { title: '小非酋', background: themeVar('colorOfLuck.high') },
+  13.25: { title: '大非酋', background: themeVar('colorOfLuck.veryHigh') },
+  120: { title: '面目全非', background: themeVar('colorOfLuck.veryHigh') },
 }
 
 const countSameTimeTenPulls = (records, predicate = () => true) => {
@@ -848,8 +848,8 @@ const titleForValue = (value, titleMap = LIMITPOOL_TITLE_MAP, fallback = '静待
   if (!value)
     return {
       title: fallback,
-      background: colors.background.lighter,
-      text_color: colors.text.primary,
+      background: themeVar('background.lighter'),
+      text_color: themeVar('text.primary'),
     }
   const sortedKeys = Object.keys(titleMap)
     .map(Number)
@@ -881,7 +881,7 @@ const cardModePools = computed(() =>
       title: title?.title || '',
       titleStyle: {
         backgroundColor: title?.background,
-        color: title?.text_color || colors.text.primary,
+        color: title?.text_color || themeVar('text.primary'),
       },
       averageLabel: isNormal ? '每SSR花费' : '每SP花费',
       hitLabel: isNormal ? '出金数' : '出红数',
@@ -951,7 +951,7 @@ const achievementModeText = computed(() =>
 )
 const achievementStyle = computed(() => ({
   backgroundColor: achievement.value.background,
-  color: achievement.value.text_color || colors.text.primary,
+  color: achievement.value.text_color || themeVar('text.primary'),
 }))
 
 const maskedPlayerId = computed(() => {
@@ -1061,7 +1061,7 @@ const recentPools = computed(() => {
         title: title?.title || '',
         titleStyle: {
           backgroundColor: title?.background,
-          color: title?.text_color || colors.text.primary,
+          color: title?.text_color || themeVar('text.primary'),
         },
         spCards: buildCharacterCards(spHistory),
         ssrCards: analysis.ssrCards,
@@ -1082,11 +1082,11 @@ const recentPools = computed(() => {
 
 const getHistoryProgressColor = (count, isNormal = false) => {
   if ((isNormal && count < 10) || (!isNormal && count < 31)) {
-    return colors.colorOfLuck.veryLow
+    return themeVar('colorOfLuck.veryLow')
   } else if ((isNormal && count < 15) || (!isNormal && count < 41)) {
-    return colors.colorOfLuck.medium
+    return themeVar('colorOfLuck.medium')
   } else {
-    return colors.colorOfLuck.veryHigh
+    return themeVar('colorOfLuck.veryHigh')
   }
 }
 
@@ -1094,7 +1094,7 @@ const getHistoryItemStyle = (count, isNormal = false) => {
   const percentage = Math.min(count / 60, 1) * 95 + 5
   const progressBarColor = getHistoryProgressColor(count, isNormal)
   return {
-    background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${colors.colorOfLuck.background} ${percentage}%)`,
+    background: `linear-gradient(to right, ${progressBarColor} ${percentage}%, ${themeVar('colorOfLuck.background')} ${percentage}%)`,
   }
 }
 
@@ -1104,11 +1104,12 @@ const getPlaceholderAvatarStyle = (count, isNormal = false) => ({
 
 const getAlphaBgWith = (type) => {
   const colorMap = {
-    veryHigh: colors.colorOfLuck.veryHigh,
-    medium: colors.colorOfLuck.medium,
-    veryLow: colors.colorOfLuck.veryLow,
+    veryHigh: themeVar('colorOfLuck.veryHigh'),
+    medium: themeVar('colorOfLuck.medium'),
+    veryLow: themeVar('colorOfLuck.veryLow'),
   }
-  return (colorMap[type] || 'transparent').replace(/[\d.]+\)$/g, '0.3)')
+  const color = colorMap[type]
+  return color ? `color-mix(in srgb, ${color} 30%, transparent)` : 'transparent'
 }
 
 const getAlphaBgWithCount = (count, isNormal = false) => {
@@ -1128,7 +1129,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   width: min(100%, 1680px);
   margin: 0 auto;
   padding: 14px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
 }
 
 .analysis-toolbar {
@@ -1141,10 +1142,10 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid v-bind('colors.border.lighter');
+  border: 1px solid var(--color-border-lighter);
   border-radius: 999px;
-  background: v-bind('colors.background.overlay');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-overlay);
+  color: var(--color-text-primary);
   padding: 8px 14px;
   font-weight: 700;
   cursor: pointer;
@@ -1155,8 +1156,8 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   display: flex;
   justify-content: center;
   padding: 0 4px;
-  border-bottom: 2px solid v-bind('colors.border.lighter');
-  background: v-bind('colors.background.content');
+  border-bottom: 2px solid var(--color-border-lighter);
+  background: var(--color-background-content);
 }
 
 .group-tabs button {
@@ -1164,15 +1165,15 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   padding: 10px 8px;
   font-weight: 900;
   cursor: pointer;
 }
 
 .group-tabs button.active {
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
 }
 
 .dashboard-tabs button {
@@ -1181,7 +1182,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   border: 0;
   border-radius: 8px 8px 0 0;
   background: transparent;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   padding: 8px 8px 9px;
   font-weight: 900;
   cursor: pointer;
@@ -1191,13 +1192,13 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .dashboard-tabs button:hover {
-  background: v-bind('colors.background.hover');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 .dashboard-tabs button.active {
   background: transparent;
-  color: v-bind('colors.brand.primary');
+  color: var(--color-brand-primary);
 }
 
 .dashboard-nav-underline {
@@ -1205,7 +1206,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   bottom: -2px;
   height: 3px;
   border-radius: 999px;
-  background: v-bind('colors.brand.primary');
+  background: var(--color-brand-primary);
   transition:
     left 0.3s ease-in-out,
     width 0.3s ease-in-out;
@@ -1234,16 +1235,16 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .panel {
   min-width: 0;
-  border: 2px solid v-bind('colors.border.lighter');
+  border: 2px solid var(--color-border-lighter);
   border-radius: 14px;
   background: linear-gradient(
     180deg,
-    v-bind('colors.background.light') 0%,
-    v-bind('colors.background.content') 100%
+    var(--color-background-light) 0%,
+    var(--color-background-content) 100%
   );
   box-shadow:
-    inset 0 0 0 1px v-bind('colors.shadow.white'),
-    0 10px 28px v-bind('colors.shadow.primary');
+    inset 0 0 0 1px var(--color-shadow-white),
+    0 10px 28px var(--color-shadow-primary);
   overflow: hidden;
 }
 
@@ -1270,7 +1271,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .latest-sp span,
 .pool-name,
 .empty-text {
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
 }
 
 .uid-line,
@@ -1288,7 +1289,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 6px;
   padding: 0;
   background: transparent;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   text-align: left;
   white-space: nowrap;
 }
@@ -1302,7 +1303,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .uid-hidden-icon {
   flex: 0 0 auto;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .achievement-title {
@@ -1316,7 +1317,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   font-weight: 900;
   line-height: 1;
   word-break: keep-all;
-  box-shadow: 0 3px 0 v-bind('colors.shadow.primaryHover');
+  box-shadow: 0 3px 0 var(--color-shadow-primary-hover);
 }
 
 .achievement-mode {
@@ -1346,17 +1347,17 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 2px;
   min-height: 22px;
   padding: 2px 8px;
-  border: 1px solid v-bind('colors.border.lighter');
+  border: 1px solid var(--color-border-lighter);
   border-radius: 999px;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.78rem;
   font-weight: 800;
   line-height: 1.1;
-  background: v-bind('colors.brand.primaryBackground');
+  background: var(--color-brand-primary-background);
 }
 
 .achievement-badge b {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 0.76rem;
 }
 
@@ -1365,7 +1366,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .summary-stats b,
 .card-pool-stats b,
 .pool-stats b {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .latest-sp {
@@ -1379,7 +1380,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .latest-sp img {
   width: 96px;
   height: 96px;
-  border: 4px solid v-bind('colors.border.lighter');
+  border: 4px solid var(--color-border-lighter);
   border-radius: 50%;
   object-fit: cover;
 }
@@ -1415,7 +1416,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .card-pool-stats small,
 .pool-stats small {
   display: block;
-  color: v-bind('colors.text.light');
+  color: var(--color-text-light);
   font-weight: 700;
 }
 
@@ -1425,7 +1426,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   justify-content: space-between;
   gap: 12px;
   padding: 16px 18px;
-  background: v-bind('colors.background.darker');
+  background: var(--color-background-darker);
 }
 
 .panel-header h3,
@@ -1443,7 +1444,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   align-items: center;
   gap: 6px;
   padding: 10px 12px;
-  background: v-bind('colors.background.content');
+  background: var(--color-background-content);
 }
 
 .summary-panel .pool-switch-row {
@@ -1457,7 +1458,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 18px;
   overflow-x: auto;
   scrollbar-width: none;
-  border-bottom: 1px solid v-bind('colors.border.lighter');
+  border-bottom: 1px solid var(--color-border-lighter);
   cursor: grab;
   touch-action: pan-x pan-y;
   overscroll-behavior-inline: contain;
@@ -1480,7 +1481,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   padding: 8px 0 10px;
   border-radius: 0;
   background: transparent;
-  color: v-bind('colors.text.light');
+  color: var(--color-text-light);
 }
 
 .group-tabs.compact button {
@@ -1489,7 +1490,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .group-tabs button.active {
   background: transparent;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
 }
 
 .group-tabs-underline {
@@ -1497,7 +1498,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   bottom: -1px;
   height: 2px;
   border-radius: 999px;
-  background: v-bind('colors.text.highlight');
+  background: var(--color-text-highlight);
   content: '';
   pointer-events: none;
   transition:
@@ -1512,7 +1513,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 1.35rem;
   font-weight: 900;
   line-height: 1;
@@ -1523,13 +1524,13 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-weight: 900;
   white-space: nowrap;
 }
 
 .ssr-toggle input {
-  accent-color: v-bind('colors.brand.primary');
+  accent-color: var(--color-brand-primary);
 }
 
 .summary-stats {
@@ -1546,7 +1547,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .timeline-row {
   padding: 4px 0;
-  border-bottom: 1px solid v-bind('colors.border.secondary');
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .timeline-row.simple {
@@ -1570,7 +1571,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .avatar-lg.placeholder {
-  background-color: v-bind('colors.background.avatar');
+  background-color: var(--color-background-avatar);
 }
 
 .timeline-body,
@@ -1604,8 +1605,8 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   min-width: 0;
   overflow: hidden;
   font-weight: 900;
-  color: v-bind('colors.text.primary');
-  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
+  color: var(--color-text-primary);
+  text-shadow: 1px 1px 3px var(--color-text-shadow);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1620,11 +1621,11 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .pull-count {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 1.15rem;
   font-weight: 900;
   text-align: right;
-  text-shadow: 1px 1px 3px v-bind('colors.textShadow');
+  text-shadow: 1px 1px 3px var(--color-text-shadow);
 }
 
 .timeline-bottom {
@@ -1637,7 +1638,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .pool-name {
   min-width: 0;
-  color: v-bind('colors.text.secondary');
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1667,7 +1668,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .card-mode-panel > .panel-header {
   margin-bottom: 8px;
-  border: 2px solid v-bind('colors.border.lighter');
+  border: 2px solid var(--color-border-lighter);
   border-radius: 14px;
 }
 
@@ -1678,16 +1679,16 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .card-pool-card {
   overflow: hidden;
-  border: 2px solid v-bind('colors.border.lighter');
+  border: 2px solid var(--color-border-lighter);
   border-radius: 14px;
   background: linear-gradient(
     180deg,
-    v-bind('colors.background.light') 0%,
-    v-bind('colors.background.content') 100%
+    var(--color-background-light) 0%,
+    var(--color-background-content) 100%
   );
   box-shadow:
-    inset 0 0 0 1px v-bind('colors.shadow.white'),
-    0 10px 28px v-bind('colors.shadow.primary');
+    inset 0 0 0 1px var(--color-shadow-white),
+    0 10px 28px var(--color-shadow-primary);
 }
 
 .card-pool-header {
@@ -1697,7 +1698,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 6px;
   align-items: center;
   padding: 9px 10px;
-  background: v-bind('colors.background.darker');
+  background: var(--color-background-darker);
 }
 
 .card-pool-main {
@@ -1728,7 +1729,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1780,12 +1781,12 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   width: 52px;
   height: 52px;
   border-radius: 6px;
-  background-color: v-bind('colors.shadow.white');
+  background-color: var(--color-shadow-white);
   object-fit: cover;
 }
 
 .overview-pull-count {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   margin: 1px 0;
   font-size: 0.95rem;
   font-weight: 900;
@@ -1800,10 +1801,10 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .card-pool-actions button {
-  border: 1px solid v-bind('colors.brand.warnBorder');
+  border: 1px solid var(--color-brand-warn-border);
   border-radius: 999px;
-  background: v-bind('colors.brand.primaryBackground');
-  color: v-bind('colors.text.highlight');
+  background: var(--color-brand-primary-background);
+  color: var(--color-text-highlight);
   padding: 5px 14px;
   font-weight: 900;
   cursor: pointer;
@@ -1818,14 +1819,14 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .mini-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid v-bind('colors.brand.warnBorder');
+  border: 1px solid var(--color-brand-warn-border);
   border-radius: 8px;
   background: linear-gradient(
     180deg,
-    v-bind('colors.rarity.ssr') 0%,
-    v-bind('colors.rarity.ssr') 68%,
-    v-bind('colors.background.lighter') 68%,
-    v-bind('colors.background.lighter') 100%
+    var(--color-rarity-ssr) 0%,
+    var(--color-rarity-ssr) 68%,
+    var(--color-background-lighter) 68%,
+    var(--color-background-lighter) 100%
   );
 }
 
@@ -1839,7 +1840,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 .mini-card span {
   display: block;
   min-height: 24px;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   text-align: center;
   font-weight: 900;
 }
@@ -1851,16 +1852,16 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .pool-card {
   overflow: hidden;
-  border: 2px solid v-bind('colors.border.lighter');
+  border: 2px solid var(--color-border-lighter);
   border-radius: 14px;
   background: linear-gradient(
     180deg,
-    v-bind('colors.background.light') 0%,
-    v-bind('colors.background.content') 100%
+    var(--color-background-light) 0%,
+    var(--color-background-content) 100%
   );
   box-shadow:
-    inset 0 0 0 1px v-bind('colors.shadow.white'),
-    0 10px 28px v-bind('colors.shadow.primary');
+    inset 0 0 0 1px var(--color-shadow-white),
+    0 10px 28px var(--color-shadow-primary);
 }
 
 .pool-card-header {
@@ -1870,7 +1871,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 6px;
   align-items: center;
   padding: 9px 10px;
-  background: v-bind('colors.background.darker');
+  background: var(--color-background-darker);
 }
 
 .pool-card-main {
@@ -1884,13 +1885,13 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .pool-card h4 {
   margin: 0;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 900;
 }
 
 .pool-card-header span {
-  color: v-bind('colors.text.light');
+  color: var(--color-text-light);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -1909,14 +1910,14 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 
 .pool-stats b {
   display: block;
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 1rem;
   font-weight: 900;
 }
 
 .pool-stats small {
   display: block;
-  color: v-bind('colors.text.primary');
+  color: var(--color-text-primary);
   font-size: 0.75rem;
   font-weight: 900;
   line-height: 1.1;
@@ -1924,7 +1925,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .pool-not-pulled {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-size: 1rem;
   font-weight: 900;
 }
@@ -1936,7 +1937,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   gap: 4px;
   margin: 0;
   padding: 8px 10px 0;
-  color: v-bind('colors.text.light');
+  color: var(--color-text-light);
   font-size: 0.95rem;
   font-weight: 800;
   line-height: 1;
@@ -1944,7 +1945,7 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .pool-sp-summary span {
-  color: v-bind('colors.text.highlight');
+  color: var(--color-text-highlight);
   font-weight: 900;
 }
 
@@ -1996,12 +1997,12 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
 }
 
 .mini-card.sp-card {
-  background: v-bind('colors.rarity.sp');
+  background: var(--color-rarity-sp);
 }
 
 .mini-card.ssr-card {
   width: 46px;
-  background: v-bind('colors.rarity.ssr');
+  background: var(--color-rarity-ssr);
 }
 
 .mini-card img {
@@ -2021,8 +2022,8 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   width: 100%;
   min-height: 1.25rem;
   border-radius: 0 0 6px 6px;
-  background: v-bind('colors.background.lighter');
-  color: v-bind('colors.text.primary');
+  background: var(--color-background-lighter);
+  color: var(--color-text-primary);
   font-size: 0.82rem;
   font-weight: 900;
   line-height: 1.25rem;
@@ -2040,13 +2041,13 @@ const getAlphaBgWithCount = (count, isNormal = false) => {
   z-index: 10;
   width: 44px;
   height: 44px;
-  border: 2px solid v-bind('colors.border.lighter');
+  border: 2px solid var(--color-border-lighter);
   border-radius: 50%;
-  background: v-bind('colors.brand.primary');
-  color: v-bind('colors.text.black');
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
   font-size: 1.4rem;
   font-weight: 900;
-  box-shadow: 0 10px 24px v-bind('colors.shadow.primary');
+  box-shadow: 0 10px 24px var(--color-shadow-primary);
   cursor: pointer;
 }
 
