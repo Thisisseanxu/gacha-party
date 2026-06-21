@@ -1,5 +1,9 @@
 # HTML 必须每次检查更新，确保用户能拿到最新的 sw.js 和 资源入口
-/index.html
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/*/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/*/*/*.html
   Cache-Control: public, max-age=0, must-revalidate
 /manifest.webmanifest
   Cache-Control: public, max-age=0, must-revalidate

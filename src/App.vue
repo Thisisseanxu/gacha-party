@@ -34,13 +34,23 @@ export default {
 </script>
 
 <script setup>
-import { onBeforeUnmount, onMounted, watch, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, watch, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import { UpdateRotation } from '@icon-park/vue-next'
 import AnnouncementDialog from './components/AnnouncementDialog.vue'
 import FloatingHomeButton from './components/FloatingHomeButton.vue'
 import './styles/global.css'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { getActiveWebAnnouncements, markWebAnnouncementShown } from '@/utils/announcements.js'
+import { createPageHead } from '@/utils/pageMeta.js'
+
+const route = useRoute()
+const pageHead = computed(() => {
+  route.fullPath
+  return createPageHead(route)
+})
+useHead(pageHead)
 
 const showUpdateDialog = ref(false)
 const isUpdating = ref(false)
@@ -52,11 +62,21 @@ const currentAnnouncement = ref(null)
 let updateFallbackTimer = null
 let removeUpdateFoundListener = null
 
-const { needRefresh, updateServiceWorker } = useRegisterSW({
-  onRegisteredSW(_swScriptUrl, registration) {
-    watchForServiceWorkerUpdates(registration)
-  },
-})
+const needRefresh = ref(false)
+let updateServiceWorker = () => {}
+
+if (!import.meta.env.SSR) {
+  const registration = useRegisterSW({
+    onRegisteredSW(_swScriptUrl, swRegistration) {
+      watchForServiceWorkerUpdates(swRegistration)
+    },
+  })
+  needRefresh.value = registration.needRefresh.value
+  watch(registration.needRefresh, (value) => {
+    needRefresh.value = value
+  })
+  updateServiceWorker = registration.updateServiceWorker
+}
 
 onMounted(async () => {
   announcements.value = await getActiveWebAnnouncements()

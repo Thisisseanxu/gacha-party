@@ -962,15 +962,6 @@ const poolSsrCards = computed(() => {
     })
 })
 
-// 标题更新
-watch(
-  currentPool,
-  (newPool) => {
-    document.title = newPool?.name ? `${newPool.name}卡池模拟 | 织夜工具箱` : '抽卡模拟器'
-  },
-  { immediate: true, deep: true },
-)
-
 // UP卡选择
 const selectUpCard = (cardId) => {
   selectedUpCard.value = cardId

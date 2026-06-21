@@ -8,7 +8,9 @@
     "worker": "wrangler dev",
     "devhost": "vite --host",
     "workerhost": "wrangler dev --ip 0.0.0.0",
-    "build": "vite build",
+    "build": "vite-ssg build && node scripts/create-spa-fallbacks.mjs && node scripts/verify-ssg-build.mjs",
+    "build:ssg": "vite-ssg build",
+    "build:verify": "node scripts/verify-ssg-build.mjs",
     "preview": "vite preview",
     "previewhost": "vite preview --host",
     "edgeone:dev": "edgeone makers dev --skip-env-sync",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@unhead/vue": "^2.1.15",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^10.4.0",
@@ -51,6 +54,7 @@
     "recast": "^0.23.11",
     "vite": "^8.0.14",
     "vite-plugin-pwa": "^1.3.0",
-    "vite-plugin-vue-devtools": "^8.1.2"
+    "vite-plugin-vue-devtools": "^8.1.2",
+    "vite-ssg": "^28.3.0"
   }
 }

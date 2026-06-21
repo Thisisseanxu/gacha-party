@@ -192,10 +192,11 @@ const sectionWidth = ref(700)
 let _cardResizeObs = null
 
 // Window size for fullscreen scale (reactive)
-const windowWidth = ref(window.innerWidth)
-const windowHeight = ref(window.innerHeight)
+const windowWidth = ref(1280)
+const windowHeight = ref(720)
 
 onMounted(async () => {
+  onWindowResize()
   window.addEventListener('keyup', onKeyup)
   window.addEventListener('resize', onWindowResize)
   if (strategiesSectionRef.value) {

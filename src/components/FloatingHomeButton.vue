@@ -134,6 +134,8 @@ onUnmounted(() => {
 watch(
   () => route.path,
   (newPath) => {
+    if (import.meta.env.SSR) return
+
     menuOpen.value = false
 
     if (hintTimer) {
