@@ -2,7 +2,7 @@
   <div class="floating-wrapper" v-if="!isFullscreen && !isFloatingButtonHidden">
     <div
       class="floating-home-button"
-      :class="{ stealth: isStealth }"
+      :class="{ stealth: isStealth, active: menuOpen }"
       @click.stop="toggleMenu"
     ></div>
 
@@ -102,12 +102,12 @@ const onToggleStealth = () => {
   if (isStealth.value) {
     isStealth.value = false
     localStorage.removeItem(STEALTH_KEY)
-    showHintFor('已关闭隐身模式', 3000)
+    showHintFor('我回来了喵~', 3000)
   } else {
     isStealth.value = true
     const until = Date.now() + STEALTH_DURATION_MS
     localStorage.setItem(STEALTH_KEY, String(until))
-    showHintFor('已开启15分钟隐身模式', 3000)
+    showHintFor('已开启隐身，再次点我关闭喵~', 3000)
   }
   menuOpen.value = false
 }
@@ -186,7 +186,8 @@ watch(
   align-self: flex-end;
 }
 
-.floating-home-button:hover {
+.floating-home-button:hover,
+.floating-home-button.active {
   transform: scale(1.1);
   box-shadow: 0 6px 16px v-bind('colors.shadow.primaryHover');
 }

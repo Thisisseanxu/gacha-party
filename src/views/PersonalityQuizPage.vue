@@ -148,6 +148,7 @@ import {
   dimensionEntries,
   findClosestCharacter,
 } from '@/utils/personalityMatch.js'
+import { configureMobileQQShare, isMobileQQ, shareImageToQQ } from '@/utils/qqShare.js'
 import { colors } from '@/styles/colors.js'
 
 const optionLetters = ['A', 'B', 'C', 'D']
@@ -165,6 +166,7 @@ const isSharing = ref(false)
 const isPreparingShareImage = ref(false)
 const preparedShareImageBlob = shallowRef(null)
 const shareStatus = ref(null)
+const isQqEnvironment = isMobileQQ()
 let shareStatusTimer = null
 let sharePreparationTimer = null
 
@@ -182,11 +184,15 @@ const match = computed(() =>
 )
 const matchedCharacter = computed(() => match.value?.character || null)
 
-onMounted(loadCharacterScores)
+onMounted(() => {
+  loadCharacterScores()
+  configureQqShareCard()
+})
 
 watch([isFinished, matchedCharacter], async ([finished, character]) => {
   if (finished && character) {
     selectRandomMatchedCard(character)
+    configureQqShareCard(character)
     await generateShareQrCode()
     await nextTick()
     if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
@@ -313,6 +319,80 @@ function downloadShareImage(blob, filename) {
   showShareStatus('分享图片已保存，请在相册或浏览器下载内容中查看。')
 }
 
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('图片压缩失败'))),
+      type,
+      quality,
+    )
+  })
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => resolve(reader.result), { once: true })
+    reader.addEventListener('error', () => reject(reader.error || new Error('图片读取失败')), {
+      once: true,
+    })
+    reader.readAsDataURL(blob)
+  })
+}
+
+async function createQqShareImage(blob) {
+  const sourceUrl = URL.createObjectURL(blob)
+  try {
+    const image = new Image()
+    image.src = sourceUrl
+    await image.decode()
+
+    const maxWidth = 1280
+    const scale = Math.min(1, maxWidth / image.naturalWidth)
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(image.naturalWidth * scale)
+    canvas.height = Math.round(image.naturalHeight * scale)
+
+    const context = canvas.getContext('2d')
+    context.fillStyle = colors.background.content
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+    let quality = 0.88
+    let compressedBlob = await canvasToBlob(canvas, 'image/jpeg', quality)
+    while (compressedBlob.size > 950 * 1024 && quality > 0.5) {
+      quality -= 0.08
+      compressedBlob = await canvasToBlob(canvas, 'image/jpeg', quality)
+    }
+
+    if (compressedBlob.size > 1024 * 1024) {
+      throw new Error('结果图片超过 QQ 的 1 MB 分享限制')
+    }
+
+    return blobToDataUrl(compressedBlob)
+  } finally {
+    URL.revokeObjectURL(sourceUrl)
+  }
+}
+
+function configureQqShareCard(character = null) {
+  if (!isQqEnvironment) return
+
+  const title = character ? `我和${character['角色']}最匹配` : '盲盒派对角色性格测试'
+  const description = character
+    ? '来织夜工具箱测测你和哪位角色最匹配'
+    : '完成 30 道情境题，看看你和哪位角色最匹配'
+
+  configureMobileQQShare({
+    title,
+    description,
+    url: new URL('/quiz', window.location.origin).href,
+    imageUrl: new URL('/images/icons/icon-512x512.png', window.location.origin).href,
+  }).catch((error) => {
+    console.warn('配置手机 QQ 分享卡片失败:', error)
+  })
+}
+
 async function prepareShareImage() {
   if (preparedShareImageBlob.value) return preparedShareImageBlob.value
   if (!shareCaptureRef.value || isPreparingShareImage.value) return null
@@ -362,6 +442,23 @@ async function shareResult() {
     if (!blob) throw new Error('图片生成失败，请稍后重试')
 
     const filename = `盲盒派对性格匹配-${matchedCharacter.value['角色']}.png`
+
+    if (isQqEnvironment) {
+      const qqImageDataUrl = await createQqShareImage(blob)
+      await shareImageToQQ(qqImageDataUrl, (result) => {
+        const retCode = Number(result?.retCode ?? result?.data?.retCode)
+        if (retCode === 0) {
+          showShareStatus('已分享给 QQ 好友。')
+        } else if (retCode === -1 || retCode === -2 || retCode === 1 || retCode === 2) {
+          showShareStatus('已取消分享。', 'neutral')
+        } else if (Number.isFinite(retCode)) {
+          showShareStatus(`QQ 分享失败（${retCode}），请保存图片后分享。`, 'error')
+        }
+      })
+      showShareStatus('QQ 好友选择器已打开。', 'neutral')
+      return
+    }
+
     const file = new File([blob], filename, { type: 'image/png' })
     const shareData = {
       files: [file],
