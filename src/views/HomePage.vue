@@ -109,11 +109,6 @@
       </a>
     </div>
 
-    <button @click="toggleTheme" class="theme-toggle-btn" title="切换主题">
-      <Moon v-if="currentTheme.value === 'dark'" />
-      <SunOne v-else />
-    </button>
-
     <div class="social-buttons" :class="{ retracted: isRetracted }">
       <a
         v-for="(link, index) in socialLinks"
@@ -135,8 +130,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { colors, toggleTheme, currentTheme } from '@/styles/colors.js'
-import { GithubOne, TencentQq, Install, Info, Moon, SunOne } from '@icon-park/vue-next'
+import { colors } from '@/styles/colors.js'
+import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 import { cardPoolsInOrder } from '@/data/cardPools'
 
@@ -537,31 +532,6 @@ const handleComingSoon = () => {
 
 .footer-link:hover {
   filter: brightness(1.2);
-}
-
-.theme-toggle-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: v-bind('colors.background.content');
-  border: 1px solid v-bind('colors.border.primary');
-  color: v-bind('colors.text.primary');
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.theme-toggle-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .social-buttons {
