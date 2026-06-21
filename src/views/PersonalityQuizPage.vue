@@ -4,7 +4,7 @@
       <header class="quiz-header">
         <p class="eyebrow">盲盒派对 · 性格测试</p>
         <h1>你和哪位角色最匹配？</h1>
-        <p>完成 30 道情境选择题，看看你和盲盒派对哪位角色性格相符。</p>
+        <p>完成 30 道情境选择题，看看你和盲盒派对中哪位角色性格相符。</p>
       </header>
 
       <template v-if="!isFinished">
@@ -58,41 +58,75 @@
       </template>
 
       <section v-else class="result-panel">
-        <p class="eyebrow">性格匹配完成</p>
         <template v-if="matchedCharacter">
-          <div class="match-hero">
-            <div class="match-avatar">
-              <img
-                v-if="matchedCard"
-                :src="matchedCard.imageUrl"
-                :alt="`${matchedCharacter['角色']} · ${matchedCard.name}`"
-              />
-              <span v-else>{{ matchedCharacter['角色'].slice(0, 1) }}</span>
+          <div ref="shareCaptureRef" class="share-card">
+            <div class="match-hero">
+              <div class="match-avatar">
+                <img
+                  v-if="matchedCard"
+                  :src="matchedCard.imageUrl"
+                  :alt="`${matchedCharacter['角色']} · ${matchedCard.name}`"
+                />
+                <span v-else>{{ matchedCharacter['角色'].slice(0, 1) }}</span>
+              </div>
+              <div class="match-copy">
+                <span>与你最匹配的角色是</span>
+                <h2>{{ matchedCharacter['角色'] }}</h2>
+              </div>
             </div>
-            <div class="match-copy">
-              <span>与你最匹配的角色是</span>
-              <h2>{{ matchedCharacter['角色'] }}</h2>
-            </div>
-          </div>
 
-          <div class="profile-comparison">
-            <TendencyProfile
-              title="你的四维倾向"
-              :scores="quizProfile"
-              :axes="axes"
-              tone="player"
-            />
-            <TendencyProfile
-              :title="`${matchedCharacter['角色']}的四维倾向`"
-              :scores="matchedCharacter"
-              :axes="axes"
-              tone="character"
-            />
+            <article class="personality-comment">
+              <p>{{ matchedCharacter['性格评语'] }}</p>
+            </article>
+
+            <div class="profile-comparison">
+              <TendencyProfile
+                title="你的四维倾向"
+                :scores="quizProfile"
+                :axes="axes"
+                tone="player"
+              />
+              <TendencyProfile
+                :title="`${matchedCharacter['角色']}的四维倾向`"
+                :scores="matchedCharacter"
+                :axes="axes"
+                tone="character"
+              />
+            </div>
+
+            <footer class="share-card-footer">
+              <div class="share-brand">
+                <strong>织夜工具箱</strong>
+                <span>性格匹配测试</span>
+              </div>
+              <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="当前页面二维码" />
+              <span v-else class="qr-placeholder">二维码生成中</span>
+            </footer>
           </div>
 
           <div class="result-actions">
+            <button
+              type="button"
+              class="primary-button share-button"
+              :disabled="isSharing || isPreparingShareImage"
+              @click="shareResult"
+            >
+              {{ isSharing ? '正在分享…' : isPreparingShareImage ? '准备分享图片…' : '分享结果' }}
+            </button>
             <button type="button" class="primary-button" @click="restartQuiz">重新测试</button>
           </div>
+          <p v-if="isPreparingShareImage" class="share-preparing-note" role="status">
+            结果已生成，正在后台准备分享图片…
+          </p>
+          <p
+            v-if="shareStatus"
+            class="share-status"
+            :class="`is-${shareStatus.type}`"
+            role="status"
+            aria-live="polite"
+          >
+            {{ shareStatus.message }}
+          </p>
         </template>
         <p v-else-if="resultError" class="result-error">{{ resultError }}</p>
         <p v-else class="result-loading">正在寻找与你最匹配的角色…</p>
@@ -102,7 +136,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import FileSaver from 'file-saver'
+import { toPng } from 'html-to-image'
+import QRCode from 'qrcode'
 import { allCards } from '@/data/cards.js'
 import { personalityQuestions } from '@/data/personalityQuiz.js'
 import TendencyProfile from '@/components/TendencyProfile.vue'
@@ -117,16 +154,24 @@ const optionLetters = ['A', 'B', 'C', 'D']
 const currentIndex = ref(0)
 const answers = ref(personalityQuestions.map(() => null))
 const isFinished = ref(false)
-const shuffledQuestions = ref(createShuffledQuestions())
 const scoreData = ref(null)
 const matchedCard = ref(null)
 const resultError = ref('')
 const suppressOptionHover = ref(false)
+const shareCaptureRef = ref(null)
+const qrCodeDataUrl = ref('')
+const currentPageUrl = ref('')
+const isSharing = ref(false)
+const isPreparingShareImage = ref(false)
+const preparedShareImageBlob = shallowRef(null)
+const shareStatus = ref(null)
+let shareStatusTimer = null
+let sharePreparationTimer = null
 
 const axes = computed(() => dimensionEntries(scoreData.value))
 const dimensions = computed(() => axes.value.map((axis) => axis.key))
 const characters = computed(() => scoreData.value?.characters || [])
-const currentQuestion = computed(() => shuffledQuestions.value[currentIndex.value])
+const currentQuestion = computed(() => personalityQuestions[currentIndex.value])
 const answeredCount = computed(() => answers.value.filter((answer) => answer !== null).length)
 const progressPercent = computed(() => (answeredCount.value / personalityQuestions.length) * 100)
 const quizProfile = computed(() =>
@@ -139,8 +184,17 @@ const matchedCharacter = computed(() => match.value?.character || null)
 
 onMounted(loadCharacterScores)
 
-watch([isFinished, matchedCharacter], ([finished, character]) => {
-  if (finished && character) selectRandomMatchedCard(character)
+watch([isFinished, matchedCharacter], async ([finished, character]) => {
+  if (finished && character) {
+    selectRandomMatchedCard(character)
+    await generateShareQrCode()
+    await nextTick()
+    if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
+    sharePreparationTimer = window.setTimeout(() => {
+      sharePreparationTimer = null
+      prepareShareImage()
+    }, 0)
+  }
 })
 
 async function loadCharacterScores() {
@@ -168,20 +222,174 @@ function selectRandomMatchedCard(character) {
   matchedCard.value = cards.length ? cards[Math.floor(Math.random() * cards.length)] : null
 }
 
-function shuffleOptions(options) {
-  const shuffled = [...options]
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]]
+async function generateShareQrCode() {
+  currentPageUrl.value = window.location.href
+  try {
+    qrCodeDataUrl.value = await QRCode.toDataURL(currentPageUrl.value, {
+      width: 176,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#1a1b20',
+        light: '#ffffff',
+      },
+    })
+  } catch (error) {
+    console.error('二维码生成失败:', error)
+    qrCodeDataUrl.value = ''
   }
-  return shuffled
 }
 
-function createShuffledQuestions() {
-  return personalityQuestions.map((question) => ({
-    ...question,
-    options: shuffleOptions(question.options),
-  }))
+function showShareStatus(message, type = 'success') {
+  if (shareStatusTimer) window.clearTimeout(shareStatusTimer)
+  shareStatus.value = { message, type }
+  shareStatusTimer = window.setTimeout(() => {
+    shareStatus.value = null
+    shareStatusTimer = null
+  }, 4500)
+}
+
+async function waitForCaptureAssets(element) {
+  await document.fonts?.ready
+  const images = [...element.querySelectorAll('img')]
+  await Promise.all(
+    images.map((image) => {
+      if (image.complete) return image.decode?.().catch(() => undefined)
+      return new Promise((resolve) => {
+        image.addEventListener('load', resolve, { once: true })
+        image.addEventListener('error', resolve, { once: true })
+      })
+    }),
+  )
+}
+
+function dataUrlToBlob(dataUrl) {
+  const [header, encoded] = dataUrl.split(',')
+  const mimeType = header.match(/data:([^;]+)/)?.[1] || 'image/png'
+  const bytes = window.atob(encoded)
+  const buffer = new Uint8Array(bytes.length)
+  for (let index = 0; index < bytes.length; index += 1) {
+    buffer[index] = bytes.charCodeAt(index)
+  }
+  return new Blob([buffer], { type: mimeType })
+}
+
+async function assertImageHasContent(blob) {
+  const imageUrl = URL.createObjectURL(blob)
+  try {
+    const image = new Image()
+    image.src = imageUrl
+    await image.decode()
+    if (image.naturalWidth !== 1644 || image.naturalHeight < 600) {
+      throw new Error('生成的图片尺寸异常')
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = 32
+    canvas.height = 32
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
+    let minimum = 255
+    let maximum = 0
+    for (let index = 0; index < pixels.length; index += 4) {
+      const luminance =
+        pixels[index] * 0.2126 + pixels[index + 1] * 0.7152 + pixels[index + 2] * 0.0722
+      minimum = Math.min(minimum, luminance)
+      maximum = Math.max(maximum, luminance)
+    }
+
+    if (maximum - minimum < 40 || maximum < 140) {
+      throw new Error('生成的图片内容为空')
+    }
+  } finally {
+    URL.revokeObjectURL(imageUrl)
+  }
+}
+
+function downloadShareImage(blob, filename) {
+  FileSaver.saveAs(blob, filename)
+  showShareStatus('分享图片已保存，请在相册或浏览器下载内容中查看。')
+}
+
+async function prepareShareImage() {
+  if (preparedShareImageBlob.value) return preparedShareImageBlob.value
+  if (!shareCaptureRef.value || isPreparingShareImage.value) return null
+
+  isPreparingShareImage.value = true
+  let captureElement = null
+  try {
+    if (!qrCodeDataUrl.value) await generateShareQrCode()
+    await nextTick()
+
+    captureElement = shareCaptureRef.value.cloneNode(true)
+    captureElement.classList.add('share-capture-mode')
+    captureElement.setAttribute('aria-hidden', 'true')
+    shareCaptureRef.value.parentElement.appendChild(captureElement)
+    await waitForCaptureAssets(captureElement)
+
+    const dataUrl = await toPng(captureElement, {
+      backgroundColor: colors.background.content,
+      width: 822,
+      height: captureElement.scrollHeight,
+      pixelRatio: 2,
+      cacheBust: false,
+      // 页面已经使用系统字体完成排版，无需在每次截图时重新扫描、下载和嵌入字体。
+      skipFonts: true,
+    })
+    const blob = dataUrlToBlob(dataUrl)
+    await assertImageHasContent(blob)
+    preparedShareImageBlob.value = blob
+    return blob
+  } catch (error) {
+    console.error('生成分享图片失败:', error)
+    return null
+  } finally {
+    captureElement?.remove()
+    isPreparingShareImage.value = false
+  }
+}
+
+async function shareResult() {
+  if (!shareCaptureRef.value || isSharing.value || isPreparingShareImage.value) return
+
+  isSharing.value = true
+  shareStatus.value = null
+
+  try {
+    const blob = preparedShareImageBlob.value || (await prepareShareImage())
+    if (!blob) throw new Error('图片生成失败，请稍后重试')
+
+    const filename = `盲盒派对性格匹配-${matchedCharacter.value['角色']}.png`
+    const file = new File([blob], filename, { type: 'image/png' })
+    const shareData = {
+      files: [file],
+      title: '我的盲盒派对性格匹配结果',
+      text: `我和${matchedCharacter.value['角色']}最匹配！`,
+    }
+
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+      try {
+        await navigator.share(shareData)
+        showShareStatus('分享面板已打开。')
+        return
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          showShareStatus('已取消分享。', 'neutral')
+          return
+        }
+        console.warn('浏览器分享失败，已回退为下载:', error)
+      }
+    }
+
+    downloadShareImage(blob, filename)
+  } catch (error) {
+    console.error('生成分享图片失败:', error)
+    showShareStatus(`生成分享图片失败：${error.message || error}`, 'error')
+  } finally {
+    isSharing.value = false
+  }
 }
 
 function selectOption(optionId, event) {
@@ -210,14 +418,30 @@ function nextQuestion() {
 }
 
 function restartQuiz() {
+  if (sharePreparationTimer) {
+    window.clearTimeout(sharePreparationTimer)
+    sharePreparationTimer = null
+  }
+  if (shareStatusTimer) {
+    window.clearTimeout(shareStatusTimer)
+    shareStatusTimer = null
+  }
   answers.value = personalityQuestions.map(() => null)
-  shuffledQuestions.value = createShuffledQuestions()
   matchedCard.value = null
+  qrCodeDataUrl.value = ''
+  currentPageUrl.value = ''
+  preparedShareImageBlob.value = null
+  shareStatus.value = null
   suppressOptionHover.value = false
   currentIndex.value = 0
   isFinished.value = false
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+onBeforeUnmount(() => {
+  if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
+  if (shareStatusTimer) window.clearTimeout(shareStatusTimer)
+})
 </script>
 
 <style scoped>
@@ -400,6 +624,14 @@ button:disabled {
   text-align: center;
 }
 
+.share-card {
+  padding: clamp(20px, 4vw, 36px);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 10% 4%, v-bind('colors.brand.primaryBackground'), transparent 30%),
+    v-bind('colors.background.content');
+}
+
 .match-hero {
   display: flex;
   align-items: center;
@@ -444,10 +676,141 @@ button:disabled {
   font-size: clamp(2rem, 6vw, 3.5rem);
 }
 
+.personality-comment {
+  margin: 0 0 20px;
+  padding: 20px 22px;
+  border: 1px solid v-bind('colors.border.primary');
+  border-left: 4px solid v-bind('colors.brand.primary');
+  border-radius: 14px;
+  background: v-bind('colors.background.light');
+  text-align: left;
+}
+
+.personality-comment p {
+  margin: 0;
+  color: v-bind('colors.text.secondary');
+  line-height: 1.8;
+}
+
 .profile-comparison {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.share-card-footer {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid v-bind('colors.border.primary');
+  text-align: left;
+}
+
+.share-card.share-capture-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  display: block;
+  width: 822px;
+  max-width: none;
+  padding: 36px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.share-card.share-capture-mode .match-hero {
+  flex-direction: row;
+  gap: 24px;
+}
+
+.share-card.share-capture-mode .match-copy {
+  text-align: left;
+}
+
+.share-card.share-capture-mode .match-copy h2 {
+  font-size: 3.5rem;
+}
+
+.share-card.share-capture-mode .profile-comparison {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.share-card.share-capture-mode .share-card-footer {
+  display: flex;
+  align-items: center;
+}
+
+.share-card.share-capture-mode .share-card-footer img,
+.share-card.share-capture-mode .qr-placeholder {
+  width: 92px;
+  height: 92px;
+  flex-basis: 92px;
+}
+
+.share-brand {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.share-brand strong {
+  color: v-bind('colors.brand.primary');
+  font-size: 1.15rem;
+}
+
+.share-brand span {
+  color: v-bind('colors.text.tertiary');
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.share-card-footer img,
+.qr-placeholder {
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.qr-placeholder {
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  padding: 10px;
+  color: #666666;
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.share-button {
+  color: v-bind('colors.text.white');
+  background: v-bind('colors.game.primary');
+  border-color: v-bind('colors.game.primary');
+}
+
+.share-status {
+  margin: 14px auto 0;
+  color: v-bind('colors.status.success');
+  font-size: 0.88rem;
+}
+
+.share-preparing-note {
+  margin: 12px auto 0;
+  color: v-bind('colors.text.tertiary');
+  font-size: 0.82rem;
+}
+
+.share-status.is-error {
+  color: v-bind('colors.status.error');
+}
+
+.share-status.is-neutral {
+  color: v-bind('colors.text.secondary');
 }
 
 .result-loading,
@@ -476,6 +839,25 @@ button:disabled {
 
   .profile-comparison {
     grid-template-columns: 1fr;
+  }
+
+  .share-card-footer {
+    align-items: flex-end;
+  }
+
+  .share-card-footer img,
+  .qr-placeholder {
+    width: 84px;
+    height: 84px;
+    flex-basis: 84px;
+  }
+
+  .result-actions {
+    flex-direction: column;
+  }
+
+  .result-actions button {
+    width: 100%;
   }
 }
 </style>
