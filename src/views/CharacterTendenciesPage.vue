@@ -28,6 +28,7 @@
             </div>
           </div>
           <TendencyProfile title="四维倾向" :scores="character" :axes="axes" tone="character" />
+          <p v-if="character['性格评语']" class="comment">{{ character['性格评语'] }}</p>
         </article>
       </div>
     </section>
@@ -172,6 +173,18 @@ input {
 
 .error-text {
   color: v-bind('colors.status.error');
+}
+
+.comment {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid v-bind('colors.brand.primary');
+  border-radius: 8px;
+  background: v-bind('colors.background.light');
+  color: v-bind('colors.text.secondary');
+  font-size: 0.9rem;
+  line-height: 1.75;
+  text-align: left;
 }
 
 @media (max-width: 480px) {

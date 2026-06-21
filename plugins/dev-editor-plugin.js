@@ -280,7 +280,7 @@ function writeJson(filePath, data) {
   writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8')
 }
 
-function writeCharacterScores(characterName, scores) {
+function writeCharacterScores(characterName, scores, comment) {
   const data = readJson(CHARACTER_SCORES_FILE)
   if (!Array.isArray(data.characters)) throw new Error('character_scores.json 格式错误')
 
@@ -298,6 +298,8 @@ function writeCharacterScores(characterName, scores) {
     }
     character[dimension] = value
   }
+
+  if (comment !== undefined) character['性格评语'] = String(comment)
 
   writeJson(CHARACTER_SCORES_FILE, data)
 }
@@ -388,7 +390,7 @@ export function devEditorPlugin() {
             return respond(res, readJson(CHARACTER_SCORES_FILE))
           if (method === 'PUT' && url === '/character-scores') {
             const body = await readBody(req)
-            writeCharacterScores(body.character, body.scores)
+            writeCharacterScores(body.character, body.scores, body.comment)
             return respond(res, { ok: true })
           }
 

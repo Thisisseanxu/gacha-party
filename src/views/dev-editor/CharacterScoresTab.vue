@@ -70,6 +70,17 @@
           </div>
         </div>
 
+        <div class="comment-field">
+          <label for="character-comment">性格评语</label>
+          <textarea
+            id="character-comment"
+            v-model="form.comment"
+            class="de-input comment-input"
+            rows="4"
+            placeholder="character_scores.json 中的角色评语"
+          ></textarea>
+        </div>
+
         <div class="portrait-section">
           <div class="section-heading">对应卡牌头像</div>
           <div v-if="matchingCards.length" class="portrait-grid">
@@ -181,6 +192,7 @@ function selectCharacter(character) {
   selectedName.value = character['角色']
   saveMsg.value = null
   for (const dimension of dimensions.value) form[dimension] = character[dimension]
+  form.comment = character['性格评语'] || ''
 }
 
 function resetForm() {
@@ -230,6 +242,7 @@ async function save() {
         scores: Object.fromEntries(
           dimensions.value.map((dimension) => [dimension, Number(form[dimension])]),
         ),
+        comment: form.comment ?? '',
       }),
     })
     if (!response.ok) {
@@ -239,6 +252,7 @@ async function save() {
     for (const dimension of dimensions.value) {
       selectedCharacter.value[dimension] = Number(form[dimension])
     }
+    selectedCharacter.value['性格评语'] = form.comment ?? ''
     saveMsg.value = { ok: true, text: '保存成功！character_scores.json 已更新' }
   } catch (e) {
     saveMsg.value = { ok: false, text: `保存失败：${e.message}` }
@@ -395,6 +409,26 @@ onUnmounted(() => window.removeEventListener('keydown', handleGlobalKeyDown))
 
 .score-number {
   text-align: center;
+}
+
+.comment-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.comment-field label {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.comment-input {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px 10px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.6;
 }
 
 .duplicate-notice {
