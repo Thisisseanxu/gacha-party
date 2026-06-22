@@ -325,7 +325,7 @@ watch(
       form.value.id = makeUniqueAnnouncementId()
       saveMsg.value = {
         ok: true,
-        text: '内容已修改，已自动生成新 ID。保存后会作为新公告再次展示。',
+        text: '内容已修改，已自动生成新 ID。保存后会作为新公告再次展示',
       }
     }
   },

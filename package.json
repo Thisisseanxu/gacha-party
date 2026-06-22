@@ -18,6 +18,7 @@
     "quiz:calibrate": "node scripts/calibrate-personality-scores.mjs",
     "quiz:answer": "node scripts/verify-personality-quiz.mjs",
     "quiz:verify": "node scripts/validate-personality-quiz.mjs",
+    "quiz:shuffle": "node scripts/shuffle-personality-quiz.mjs",
     "lint": "eslint . --fix",
     "lint:fix": "eslint \"src/**/*.{vue,js,ts,jsx,tsx}\" --fix",
     "format": "prettier --write \"**/*.{js,json,vue}\"",

@@ -629,12 +629,8 @@ const buildCharacterCards = (history) => {
 
 const mergeAnalyses = (name, analyses) => {
   const totalPulls = analyses.reduce((total, item) => total + item.totalPulls, 0)
-  const spHistory = analyses
-    .flatMap((item) => item.spHistory)
-    .sort(sortHistoryDesc)
-  const ssrHistory = analyses
-    .flatMap((item) => item.ssrHistory)
-    .sort(sortHistoryDesc)
+  const spHistory = analyses.flatMap((item) => item.spHistory).sort(sortHistoryDesc)
+  const ssrHistory = analyses.flatMap((item) => item.ssrHistory).sort(sortHistoryDesc)
   const records = analyses.flatMap((item) => item.records).sort(sortHistoryDesc)
   const currentSpPity = analyses.reduce((total, item) => total + item.currentSpPity, 0)
   const currentSsrPity = analyses.reduce((total, item) => total + item.currentSsrPity, 0)
@@ -823,9 +819,7 @@ const totalOverview = computed(() => {
   const advancedGroups = groups.filter((group) => group.key !== 'normal')
   const normalPulls = groupAnalyses.value.normal.totalPulls
   const advancedPulls = advancedGroups.reduce((total, group) => total + group.totalPulls, 0)
-  const spHistory = groups
-    .flatMap((group) => group.spHistory)
-    .sort(sortHistoryDesc)
+  const spHistory = groups.flatMap((group) => group.spHistory).sort(sortHistoryDesc)
   const ssrHistory = groups.flatMap((group) => group.ssrHistory)
   const scoreSpHistory = advancedGroups
     .filter((group) => group.key !== 'advancedNormal')
@@ -888,7 +882,7 @@ const cardModePools = computed(() =>
       hitCount: isNormal ? group.ssrCount : group.spCount,
       canExpand: history.length > visibleCount,
       canCollapse: visibleCount > CARD_MODE_PAGE_SIZE,
-      emptyText: isNormal ? '暂无SSR记录。' : '暂无SP记录。',
+      emptyText: isNormal ? '暂无SSR记录' : '暂无SP记录',
     }
   }),
 )

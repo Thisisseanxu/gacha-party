@@ -1632,7 +1632,7 @@ const shareAnalysisImage = async () => {
       try {
         await navigator.share({ files: [file], title: '我的抽卡分析' })
       } catch (error) {
-        logger.warn('分享失败，可能是用户取消了操作。回退到下载。', error)
+        logger.warn('分享失败，可能是用户取消了操作。回退到下载', error)
         FileSaver.saveAs(blob, filename) // 用户取消分享或分享失败时，回退到下载
       }
     } else {

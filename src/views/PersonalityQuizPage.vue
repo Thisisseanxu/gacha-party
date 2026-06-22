@@ -4,7 +4,7 @@
       <header class="quiz-header">
         <p class="eyebrow">盲盒派对 · 性格测试</p>
         <h1>你和哪位角色最匹配？</h1>
-        <p>完成 30 道情境选择题，看看你和盲盒派对中哪位角色性格相符。</p>
+        <p>完成 25 道情境选择题，看看你和盲盒派对中哪位角色性格相符。</p>
       </header>
 
       <template v-if="!isFinished">

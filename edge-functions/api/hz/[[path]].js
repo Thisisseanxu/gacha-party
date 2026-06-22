@@ -176,7 +176,7 @@ async function saveAll(request, env) {
   if (String(body?.baseVersion ?? '') !== String(currentMeta.version || '0')) {
     return jsonResponse(
       {
-        message: '攻略数据已被其他窗口修改，请重新加载后再保存。',
+        message: '攻略数据已被其他窗口修改，请重新加载后再保存',
         currentVersion: currentMeta.version || '0',
       },
       409,
@@ -298,9 +298,7 @@ export async function onRequest({ request, env }) {
       return request.method === 'POST' ? submitGuide(request, env) : methodNotAllowed()
     }
     if (path === 'admin/bootstrap') {
-      return request.method === 'GET'
-        ? getAdminBootstrap(request, env)
-        : methodNotAllowed()
+      return request.method === 'GET' ? getAdminBootstrap(request, env) : methodNotAllowed()
     }
     if (path === 'admin/pending') {
       return request.method === 'GET' ? getPending(request, env) : methodNotAllowed()
