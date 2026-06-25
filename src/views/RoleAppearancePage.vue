@@ -23,6 +23,10 @@
         </button>
       </div>
 
+      <div class="special-pool-toggle">
+        <SwitchComponent v-model="includeSpecialPools" label="计算特殊卡池" />
+      </div>
+
       <!-- 窄屏模式下的 panel 切换器 -->
       <div class="panel-tabs" v-if="availablePanels.length > 1">
         <button
@@ -201,11 +205,15 @@ import { Return } from '@icon-park/vue-next'
 import { cardMap, cardNameMap } from '@/data/cards.js'
 import { cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools.js'
 import PopUp from '@/components/PopUp.vue'
+import SwitchComponent from '@/components/SwitchComponent.vue'
 
 const isReady = ref(false)
 const rarity = ref('SP')
 const intervalMode = ref('min')
 const popupRole = ref(null)
+const includeSpecialPools = ref(false)
+
+const CORE_UP_POOL_TYPES = new Set(['限定', '限定复刻', '联动', '联动复刻'])
 
 const intervalModes = [
   { value: 'min', label: '最快UP' },
@@ -217,6 +225,12 @@ function parseTimeMs(text) {
   if (!text) return null
   const ms = new Date(text.replace(' ', 'T')).getTime()
   return Number.isNaN(ms) ? null : ms
+}
+
+function shouldIncludeAppearancePool(pool, includeSpecial) {
+  if (pool.startTime == null || pool.finishTime == null) return false
+  if (includeSpecial) return true
+  return CORE_UP_POOL_TYPES.has(pool.type)
 }
 
 // 收集需要排除的 SP id —— 只要在 type 为「高级常驻」的卡池中作为 SP 出现，就视为高级常驻角色
@@ -235,11 +249,12 @@ function collectAdvancePermanentSpIds() {
 
 const excludedSpIds = collectAdvancePermanentSpIds()
 
-function buildRoleAppearances() {
+function buildRoleAppearances(includeSpecial) {
   const data = new Map()
 
   for (const [poolKey, pool] of cardPoolsInOrder) {
-    const isLimited = pool.startTime != null && pool.finishTime != null
+    if (!shouldIncludeAppearancePool(pool, includeSpecial)) continue
+
     const cardNamesByRarity = pool.cardNames || {}
 
     for (const rarityKey of ['SP', 'SSR']) {
@@ -261,16 +276,12 @@ function buildRoleAppearances() {
           data.set(card.id, entry)
         }
 
-        if (isLimited) {
-          entry.appearances.push({
-            poolKey,
-            poolName: pool.name,
-            startTime: pool.startTime,
-            finishTime: pool.finishTime,
-          })
-        } else {
-          entry.isInPermanent = true
-        }
+        entry.appearances.push({
+          poolKey,
+          poolName: pool.name,
+          startTime: pool.startTime,
+          finishTime: pool.finishTime,
+        })
 
         if (isCardPoolAvailable(pool)) {
           entry.isCurrentlyAvailable = true
@@ -342,7 +353,7 @@ function buildRoleAppearances() {
   return list
 }
 
-const roleAppearancesList = buildRoleAppearances()
+const roleAppearancesList = computed(() => buildRoleAppearances(includeSpecialPools.value))
 
 const today = ref(new Date())
 
@@ -366,7 +377,7 @@ onUnmounted(() => {
 })
 
 const filteredByRarity = computed(() =>
-  roleAppearancesList.filter((entry) => entry.rarity === rarity.value),
+  roleAppearancesList.value.filter((entry) => entry.rarity === rarity.value),
 )
 
 const countGroups = computed(() => {
@@ -465,9 +476,14 @@ const availablePanels = computed(() => {
 const activePanel = ref('daysSince')
 
 watch(rarity, () => {
+  popupRole.value = null
   if (!availablePanels.value.find((p) => p.id === activePanel.value)) {
     activePanel.value = availablePanels.value[0].id
   }
+})
+
+watch(includeSpecialPools, () => {
+  popupRole.value = null
 })
 
 function isPanelVisible(panelId) {
@@ -628,13 +644,13 @@ function openRolePopup(role) {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   flex-shrink: 0;
 }
 
 @media (min-width: 768px) {
   .rarity-toggle {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -664,6 +680,19 @@ function openRolePopup(role) {
   background: var(--color-rarity-ssr);
   border-color: var(--color-rarity-ssr);
   color: white;
+}
+
+.special-pool-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .special-pool-toggle {
+    margin-bottom: 1rem;
+  }
 }
 
 /* --- 窄屏 panel 切换器 --- */
