@@ -57,5 +57,13 @@
     "vite-plugin-pwa": "^1.3.0",
     "vite-plugin-vue-devtools": "^8.1.2",
     "vite-ssg": "^28.3.0"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true
+  },
+  "overrides": {
+    "workbox-build": {
+      "source-map": "0.7.6"
+    }
   }
 }
