@@ -5,7 +5,7 @@ export const SITE_ORIGIN = 'https://mhpd.fans'
 export const DEFAULT_TITLE = '织夜工具箱｜盲盒派对玩家工具站'
 export const DEFAULT_DESCRIPTION =
   '面向《盲盒派对》玩家的实用工具箱，提供抽卡模拟、抽卡记录分析、徽章攻略、UP 计时器与角色性格匹配等功能。'
-export const DEFAULT_IMAGE_PATH = '/images/icons/icon-512x512.png'
+export const DEFAULT_IMAGE_PATH = '/images/icons/icon-512px.png'
 
 function absoluteUrl(path) {
   return new URL(path || '/', SITE_ORIGIN).href

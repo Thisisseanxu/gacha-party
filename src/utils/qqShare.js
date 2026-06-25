@@ -132,7 +132,7 @@ function readCurrentShareData() {
     document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
   const imageUrl =
     document.querySelector('meta[itemprop="image"]')?.getAttribute('content') ||
-    new URL('/images/icons/icon-512x512.png', window.location.origin).href
+    new URL('/images/icons/icon-512px.png', window.location.origin).href
 
   return {
     title: document.title,

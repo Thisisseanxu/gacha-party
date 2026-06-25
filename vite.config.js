@@ -34,12 +34,12 @@ export default defineConfig({
         // 应用图标
         icons: [
           {
-            src: 'images/icons/icon-192x192.png',
+            src: 'images/icons/icon-192px.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'images/icons/icon-512x512.png',
+            src: 'images/icons/icon-512px.png',
             sizes: '512x512',
             type: 'image/png',
           },
