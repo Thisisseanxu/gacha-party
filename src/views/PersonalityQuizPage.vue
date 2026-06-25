@@ -4,7 +4,7 @@
       <header class="quiz-header">
         <p class="eyebrow">盲盒派对 · 性格测试</p>
         <h1>你和哪位角色最匹配？</h1>
-        <p>完成 25 道情境选择题，看看你和盲盒派对中哪位角色性格相符。</p>
+        <p>完成 30 道性格量表题，看看你和盲盒派对中哪位角色性格相符。</p>
       </header>
 
       <template v-if="!isFinished">
@@ -25,13 +25,9 @@
           </div>
           <h2>{{ currentQuestion.prompt }}</h2>
 
-          <div
-            class="option-list"
-            :class="{ 'suppress-hover': suppressOptionHover }"
-            @pointermove="restoreOptionHover"
-          >
+          <div class="option-list">
             <button
-              v-for="(option, optionIndex) in currentQuestion.options"
+              v-for="option in currentQuestion.options"
               :key="option.id"
               type="button"
               class="option-card"
@@ -39,7 +35,6 @@
               :aria-pressed="answers[currentIndex] === option.id"
               @click="selectOption(option.id, $event)"
             >
-              <span class="option-letter">{{ optionLetters[optionIndex] }}</span>
               <span>{{ option.text }}</span>
             </button>
           </div>
@@ -172,6 +167,16 @@
       </div>
     </div>
   </Teleport>
+
+  <Teleport to="body">
+    <span
+      v-for="ripple in ripples"
+      :key="ripple.id"
+      class="quiz-click-ripple"
+      :style="{ left: `${ripple.x}px`, top: `${ripple.y}px` }"
+      aria-hidden="true"
+    ></span>
+  </Teleport>
 </template>
 
 <script setup>
@@ -188,14 +193,13 @@ import {
 } from '@/utils/personalityMatch.js'
 import { resolveThemeColor } from '@/utils/themeColor.js'
 
-const optionLetters = ['A', 'B', 'C', 'D']
 const currentIndex = ref(0)
 const answers = ref(personalityQuestions.map(() => null))
 const isFinished = ref(false)
 const scoreData = ref(null)
 const matchedCard = ref(null)
 const resultError = ref('')
-const suppressOptionHover = ref(false)
+const ripples = ref([])
 const shareCaptureRef = ref(null)
 const qrCodeDataUrl = ref('')
 const currentPageUrl = ref('')
@@ -206,6 +210,8 @@ const shareStatus = ref(null)
 const sharePreviewUrl = ref('')
 let shareStatusTimer = null
 let sharePreparationTimer = null
+let nextRippleId = 0
+const rippleTimers = new Set()
 let previousBodyOverflow = ''
 
 const axes = computed(() => dimensionEntries(scoreData.value))
@@ -457,13 +463,24 @@ async function shareResult() {
 
 function selectOption(optionId, event) {
   event.currentTarget.blur()
-  suppressOptionHover.value = true
+  showClickRipple(event)
   answers.value[currentIndex.value] = optionId
   nextQuestion()
 }
 
-function restoreOptionHover() {
-  suppressOptionHover.value = false
+function showClickRipple(event) {
+  const ripple = {
+    id: `${Date.now()}-${nextRippleId}`,
+    x: event.clientX,
+    y: event.clientY,
+  }
+  nextRippleId += 1
+  ripples.value = [...ripples.value, ripple]
+  const timer = window.setTimeout(() => {
+    rippleTimers.delete(timer)
+    ripples.value = ripples.value.filter((item) => item.id !== ripple.id)
+  }, 360)
+  rippleTimers.add(timer)
 }
 
 function previousQuestion() {
@@ -496,7 +513,7 @@ function restartQuiz() {
   currentPageUrl.value = ''
   preparedShareImageBlob.value = null
   shareStatus.value = null
-  suppressOptionHover.value = false
+  clearRipples()
   currentIndex.value = 0
   isFinished.value = false
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -507,7 +524,14 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handlePreviewKeydown)
   if (sharePreparationTimer) window.clearTimeout(sharePreparationTimer)
   if (shareStatusTimer) window.clearTimeout(shareStatusTimer)
+  clearRipples()
 })
+
+function clearRipples() {
+  rippleTimers.forEach((timer) => window.clearTimeout(timer))
+  rippleTimers.clear()
+  ripples.value = []
+}
 </script>
 
 <style scoped>
@@ -598,12 +622,10 @@ onBeforeUnmount(() => {
 }
 
 .option-card {
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  align-items: center;
-  gap: 14px;
+  display: block;
   width: 100%;
-  padding: 16px;
+  min-height: 58px;
+  padding: 16px 18px;
   border: 1px solid var(--color-border-primary);
   border-radius: 12px;
   color: var(--color-text-primary);
@@ -621,30 +643,34 @@ onBeforeUnmount(() => {
   border-color: var(--color-brand-primary);
 }
 
-.option-list.suppress-hover .option-card:hover {
-  transform: none;
-  border-color: var(--color-border-primary);
-}
-
 .option-card.selected {
   border-color: var(--color-brand-primary);
   background: var(--color-brand-primary-background);
 }
 
-.option-letter {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 10px;
-  color: var(--color-text-secondary);
-  background: var(--color-background-content);
-  font-weight: 800;
+.quiz-click-ripple {
+  position: fixed;
+  z-index: 9999;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--color-brand-primary) 74%, white);
+  background: color-mix(in srgb, var(--color-brand-primary) 16%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-primary) 28%, transparent);
+  transform: translate(-50%, -50%) scale(0);
+  animation: quiz-click-ripple 0.34s ease-out forwards;
 }
 
-.selected .option-letter {
-  color: var(--color-text-black);
-  background: var(--color-brand-primary);
+@keyframes quiz-click-ripple {
+  62% {
+    opacity: 0.46;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(4.6);
+  }
 }
 
 .quiz-actions,

@@ -10,7 +10,7 @@ import {
 
 const sequence = process.argv[2]
 if (!sequence) {
-  console.error(`用法：npm run quiz:validate -- <${personalityQuestions.length} 位答案序列>`)
+  console.error(`用法：npm run quiz:verify -- <${personalityQuestions.length} 位 1-5 答案序列>`)
   process.exit(1)
 }
 

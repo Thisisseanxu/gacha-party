@@ -1,10 +1,7 @@
-// 一次性打乱性格测试的题目顺序与每题的选项顺序，并把结果写回
-// src/data/personalityQuiz.js。每个选项的语义权重（scores）会原样跟随其文本
-// 一起移动，绝不被改动或错配。
+// 一次性打乱性格测试的题目顺序，并把结果写回 src/data/personalityQuiz.js。
+// 量表题的五档选项固定不变，题目的 traits 与 weight 会跟随题面一起移动。
 //
-// 注意：文件末尾的 convertQuestionScores 会按题号/选项序号给非主维度补一层
-// 平衡噪声，因此单纯打乱顺序可能改变最终坐标、导致个别角色不可达。为此本脚本
-// 会从给定种子开始逐个尝试，只有当某个打乱顺序仍能让全部角色可达时才写入文件，
+// 脚本会从给定种子开始逐个尝试，只有当某个打乱顺序仍能让全部角色可达时才写入文件，
 // 从而既打乱了顺序，又不破坏匹配结果。
 //
 // 打乱使用固定随机种子，结果是确定的、可复现的，不会“每次打开都不一样”。
@@ -15,7 +12,7 @@ import process from 'node:process'
 import {
   personalityQuestionSource,
   quizDimensions,
-  convertQuestionScores,
+  quizScaleOptions,
 } from '../src/data/personalityQuiz.js'
 import { createSeededRandom, searchForCharacter } from './personality-quiz-tools.mjs'
 
@@ -27,8 +24,6 @@ if (!Number.isFinite(baseSeed)) {
 }
 
 const MAX_ATTEMPTS = 500
-const optionIds = ['A', 'B', 'C', 'D']
-
 const scoreData = JSON.parse(
   fs.readFileSync(new URL('../public/data/character_scores.json', import.meta.url), 'utf8'),
 )
@@ -44,7 +39,15 @@ function shuffleInPlace(items, random) {
 function cloneSource() {
   return personalityQuestionSource.map((question) => ({
     prompt: question.prompt,
-    options: question.options.map((option) => ({ ...option, scores: { ...option.scores } })),
+    weight: question.weight,
+    traits: question.traits.map((trait) => ({ ...trait })),
+  }))
+}
+
+function withScaleOptions(questions) {
+  return questions.map((question) => ({
+    ...question,
+    options: quizScaleOptions,
   }))
 }
 
@@ -68,27 +71,19 @@ function escapeForSingleQuote(value) {
   return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 }
 
-function serializeOption(option, position) {
-  const scoreLines = Object.entries(option.scores)
-    .map(([dimension, weight]) => `          ${dimension}: ${weight},`)
-    .join('\n')
-  return [
-    '      {',
-    `        id: '${optionIds[position]}',`,
-    `        text: '${escapeForSingleQuote(option.text)}',`,
-    '        scores: {',
-    scoreLines,
-    '        },',
-    '      },',
-  ].join('\n')
-}
-
 function serializeQuestion(question) {
+  const traits = question.traits
+    .map(
+      (trait) =>
+        `      { dimension: '${escapeForSingleQuote(trait.dimension)}', coefficient: ${trait.coefficient} },`,
+    )
+    .join('\n')
   return [
     '  {',
     `    prompt: '${escapeForSingleQuote(question.prompt)}',`,
-    '    options: [',
-    question.options.map((option, position) => serializeOption(option, position)).join('\n'),
+    `    weight: ${question.weight},`,
+    '    traits: [',
+    traits,
     '    ],',
     '  },',
   ].join('\n')
@@ -101,10 +96,8 @@ for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
   const random = createSeededRandom(seed)
   const questions = cloneSource()
   shuffleInPlace(questions, random)
-  questions.forEach((question) => shuffleInPlace(question.options, random))
 
-  const converted = questions.map(convertQuestionScores)
-  if (isFullyReachable(converted)) {
+  if (isFullyReachable(withScaleOptions(questions))) {
     chosenSeed = seed
     chosenQuestions = questions
     break
@@ -127,7 +120,7 @@ const serializedSource =
 const filePath = new URL('../src/data/personalityQuiz.js', import.meta.url)
 const fileText = fs.readFileSync(filePath, 'utf8')
 const startMarker = 'export const personalityQuestionSource = ['
-const endMarker = '\nconst signalWeights'
+const endMarker = '\nfunction createScaleOptions'
 const startIndex = fileText.indexOf(startMarker)
 const endIndex = fileText.indexOf(endMarker)
 if (startIndex < 0 || endIndex < 0) {
@@ -141,6 +134,6 @@ fs.writeFileSync(filePath, `${head}${serializedSource}${tail}`, 'utf8')
 
 const triedCount = chosenSeed - baseSeed + 1
 console.log(
-  `已用种子 ${chosenSeed}（第 ${triedCount} 次尝试）打乱 ${chosenQuestions.length} 道题及各自的选项，并写回 personalityQuiz.js。`,
+  `已用种子 ${chosenSeed}（第 ${triedCount} 次尝试）打乱 ${chosenQuestions.length} 道题，并写回 personalityQuiz.js。`,
 )
-console.log('每个选项的权重随文本原样保留，且已确认 88 位角色全部可达。')
+console.log('题目的 traits 与 weight 已随题面移动，且已确认 88 位角色全部可达。')

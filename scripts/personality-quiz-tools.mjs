@@ -1,3 +1,5 @@
+import { questionScore, quizDimensionMaximums } from '../src/utils/personalityMatch.js'
+
 export function createSeededRandom(seed = 0x5f3759df) {
   let state = seed >>> 0
   return () => {
@@ -10,16 +12,21 @@ export function createSeededRandom(seed = 0x5f3759df) {
 
 export function profileForOptionIndexes(questions, dimensions, answers) {
   const totals = Object.fromEntries(dimensions.map((dimension) => [dimension, 0]))
+  const maximums = quizDimensionMaximums(questions, dimensions)
   answers.forEach((optionIndex, questionIndex) => {
     const option = questions[questionIndex]?.options[optionIndex]
     if (!option) throw new Error(`第 ${questionIndex + 1} 题缺少有效答案`)
+    const scores = questionScore(questions[questionIndex], option, dimensions)
     dimensions.forEach((dimension) => {
-      totals[dimension] += Number(option.scores[dimension] || 0)
+      totals[dimension] += scores[dimension]
     })
   })
 
   return Object.fromEntries(
-    dimensions.map((dimension) => [dimension, Math.round(totals[dimension] / questions.length)]),
+    dimensions.map((dimension) => [
+      dimension,
+      Math.round((totals[dimension] / maximums[dimension]) * 50),
+    ]),
   )
 }
 
@@ -52,7 +59,9 @@ export function decodeAnswerSequence(questions, sequence) {
   return [...normalized].map((digit, questionIndex) => {
     const optionIndex = Number(digit) - 1
     if (!questions[questionIndex]?.options[optionIndex]) {
-      throw new Error(`答案序列第 ${questionIndex + 1} 位必须是 1 至 4`)
+      throw new Error(
+        `答案序列第 ${questionIndex + 1} 位必须是 1 至 ${questions[questionIndex].options.length}`,
+      )
     }
     return optionIndex
   })
