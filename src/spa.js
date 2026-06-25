@@ -15,10 +15,11 @@ async function bootstrap() {
     routes,
   })
 
+  initializeClientFeatures(router)
   app.use(router)
   app.use(createHead())
+  await router.isReady()
   app.mount('#app')
-  initializeClientFeatures(router)
 }
 
 bootstrap()

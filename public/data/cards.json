@@ -1,5 +1,23 @@
 [
   {
+    "id": "1613",
+    "name": "金牌平底锅",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1613.webp",
+    "realname": "茜拉",
+    "theme": "fire",
+    "qban_url": "/images/qban/1613.webp"
+  },
+  {
+    "id": "1614",
+    "name": "迷糊汉堡包",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1614.webp",
+    "realname": "帕蒂",
+    "theme": "fire",
+    "qban_url": "/images/qban/1614.webp"
+  },
+  {
     "id": "1715",
     "name": "波子汽水",
     "rarity": "SP",

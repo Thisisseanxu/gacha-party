@@ -1,6 +1,4 @@
-const ANNOUNCEMENTS_URL = import.meta.env.DEV
-  ? '/data/announcements.json'
-  : 'https://mhpd.fans/data/announcements.json'
+const ANNOUNCEMENTS_URL = '/data/announcements.json'
 const CACHE_KEY = 'mhpd_announcements_cache_v1'
 const SHOWN_KEY = 'mhpd_announcements_shown_v1'
 const CACHE_TTL = 30 * 60 * 1000

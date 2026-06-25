@@ -14,13 +14,17 @@ async function loadCardsForBuild() {
 export async function prepareAppData() {
   if (import.meta.env.SSR) {
     await loadCardsForBuild()
-  } else {
-    await loadCards()
   }
 }
 
 export function initializeClientFeatures(router) {
   if (import.meta.env.SSR) return
+
+  router?.beforeEach(async (route) => {
+    if (route.matched.some((record) => record.meta.needsCards)) {
+      await loadCards()
+    }
+  })
 
   router?.afterEach((route) => {
     syncClientShareMeta(route)

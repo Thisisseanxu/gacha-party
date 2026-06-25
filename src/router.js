@@ -47,6 +47,7 @@ export const routes = [
       title: '抽卡模拟器 | 织夜工具箱',
       description: '模拟《盲盒派对》卡池抽取，试试你的手气，体验不同卡池的抽卡结果',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -57,6 +58,7 @@ export const routes = [
       title: '自定义卡池 | 织夜工具箱',
       description: '自由配置角色、概率与保底规则，创建并分享你的《盲盒派对》自定义卡池',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -67,6 +69,7 @@ export const routes = [
       title: '测试抽卡页面',
       robots: 'noindex, nofollow',
       ssg: false,
+      needsCards: true,
     },
   },
   {
@@ -77,6 +80,7 @@ export const routes = [
       title: '抽卡记录分析 | 织夜工具箱',
       description: '导入并分析《盲盒派对》抽卡记录，查看出货率、保底分布与角色统计',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -87,6 +91,7 @@ export const routes = [
       title: '抽卡记录调试 | 织夜工具箱',
       robots: 'noindex, nofollow',
       ssg: false,
+      needsCards: true,
     },
   },
   {
@@ -97,6 +102,7 @@ export const routes = [
       title: '导演模式 | 织夜工具箱',
       description: '使用《盲盒派对》角色素材制作自定义聊天与剧情图片',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -107,6 +113,7 @@ export const routes = [
       title: '徽章攻略助手 | 织夜工具箱',
       description: '查询《盲盒派对》角色徽章搭配与属性攻略，快速筛选适合的徽章方案',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -117,6 +124,7 @@ export const routes = [
     meta: {
       title: '角色徽章攻略 | 织夜工具箱',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -127,6 +135,7 @@ export const routes = [
       title: '徽章攻略编辑器 | 织夜工具箱',
       robots: 'noindex, nofollow',
       ssg: false,
+      needsCards: true,
     },
   },
   {
@@ -137,6 +146,7 @@ export const routes = [
       title: '徽章攻略管理 | 织夜工具箱',
       robots: 'noindex, nofollow',
       ssg: false,
+      needsCards: true,
     },
   },
   {
@@ -156,6 +166,7 @@ export const routes = [
       title: 'UP计时器 | 织夜工具箱',
       description: '查看《盲盒派对》角色卡池登场与复刻间隔，辅助判断未来 UP 节奏',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -166,6 +177,7 @@ export const routes = [
       title: '角色性格匹配 | 织夜工具箱',
       description: '完成趣味性格测试，看看你与哪位《盲盒派对》角色最相似',
       ssg: true,
+      needsCards: true,
     },
   },
   {
@@ -176,6 +188,7 @@ export const routes = [
       title: '角色四维倾向一览 | 织夜工具箱',
       robots: 'noindex, nofollow',
       ssg: false,
+      needsCards: true,
     },
   },
   {
