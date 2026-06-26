@@ -208,6 +208,8 @@ const isPreparingShareImage = ref(false)
 const preparedShareImageBlob = shallowRef(null)
 const shareStatus = ref(null)
 const sharePreviewUrl = ref('')
+const SHARE_CAPTURE_WIDTH = 822 * 0.8
+const SHARE_CAPTURE_PIXEL_RATIO = 2
 let shareStatusTimer = null
 let sharePreparationTimer = null
 let nextRippleId = 0
@@ -329,7 +331,10 @@ async function assertImageHasContent(blob) {
     const image = new Image()
     image.src = imageUrl
     await image.decode()
-    if (image.naturalWidth !== 1644 || image.naturalHeight < 600) {
+    if (
+      image.naturalWidth !== Math.round(SHARE_CAPTURE_WIDTH * SHARE_CAPTURE_PIXEL_RATIO) ||
+      image.naturalHeight < 600
+    ) {
       throw new Error('生成的图片尺寸异常')
     }
 
@@ -402,9 +407,9 @@ async function prepareShareImage() {
 
     const dataUrl = await toPng(captureElement, {
       backgroundColor: resolveThemeColor('background.content', '#1a1b20'),
-      width: 822,
+      width: SHARE_CAPTURE_WIDTH,
       height: captureElement.scrollHeight,
-      pixelRatio: 2,
+      pixelRatio: SHARE_CAPTURE_PIXEL_RATIO,
       cacheBust: false,
       // 页面已经使用系统字体完成排版，无需在每次截图时重新扫描、下载和嵌入字体。
       skipFonts: true,
@@ -809,13 +814,14 @@ button:disabled {
   text-align: left;
 }
 
+/* vue-scoped-css/no-unused-selector */
 .share-card.share-capture-mode {
   position: fixed;
   top: 0;
   left: 0;
   z-index: -1;
   display: block;
-  width: 822px;
+  width: 657.6px;
   max-width: none;
   padding: 36px;
   box-sizing: border-box;
