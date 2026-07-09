@@ -1,5 +1,23 @@
 [
   {
+    "id": "1814",
+    "name": "涓流花洒\t",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1814.webp",
+    "realname": "清露",
+    "theme": "water",
+    "qban_url": "/images/qban/1814.webp"
+  },
+  {
+    "id": "1815",
+    "name": "绮彩泡泡",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1815.webp",
+    "realname": "小沫",
+    "theme": "water",
+    "qban_url": "/images/qban/1815.webp"
+  },
+  {
     "id": "1613",
     "name": "金牌平底锅",
     "rarity": "SP",
