@@ -73,7 +73,7 @@ const rawCardPoolsInOrder = [
           UpTrigger: true,
           SelectUpCards: true,
           UpCards: [
-            "涓流花洒\t",
+            "涓流花洒",
             "绮彩泡泡"
           ],
         },
@@ -81,7 +81,7 @@ const rawCardPoolsInOrder = [
       },
       cardNames: {
         [SP]: [
-          "涓流花洒\t",
+          "涓流花洒",
           "绮彩泡泡"
         ],
         [SSR]: [
