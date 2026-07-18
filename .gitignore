@@ -46,3 +46,4 @@ dev-dist
 .tef_dist/*
 
 hz-guides-export.json
+/.qqbot/
