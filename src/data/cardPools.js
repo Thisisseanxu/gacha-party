@@ -50,6 +50,77 @@ const SP_BASE_RATE = 0.0125 // SP 基础概率
  */
 const rawCardPoolsInOrder = [
   [
+    "139",
+    {
+      type: "联动",
+      name: "寂夜喧嚣",
+      isAvailable: true,
+      imageUrl: "/images/cardpools/139.webp",
+      startTime: "2026-07-23 00:00:00",
+      finishTime: "2026-08-30 23:59:59",
+      tag_type: 4,
+      tag_name: "联动",
+      rates: {
+        [SP]: SP_BASE_RATE,
+        [SSR]: 0.06,
+        [SR]: 0.2,
+      },
+      rules: {
+        [SP]: {
+          pity: 60,
+          boostAfter: 40,
+          boost: 0.02,
+          UpTrigger: true,
+          SelectUpCards: true,
+          UpCards: [
+            "邪恶小丑人"
+          ],
+        },
+        [SSR]: {
+          doubleRateCards: [
+            "嫦娥娃娃"
+          ],
+        },
+      },
+      cardNames: {
+        [SP]: [
+          "邪恶小丑人"
+        ],
+        [SSR]: [
+          "嫦娥娃娃",
+          "星星法师",
+          "深睡千竹",
+          "琉璃治疗师",
+          "航天娃娃"
+        ],
+        [SR]: [
+          "珍珠射手",
+          "饼干骑士",
+          "劈咔灯泡",
+          "弹幕发射姬",
+          "电音射手",
+          "家用喷火枪",
+          "液氮喷射器",
+          "雪球投掷姬",
+          "梦游月兔",
+          "拳头礼盒",
+          "消防栓",
+          "浅睡千竹",
+          "贝斯战士"
+        ],
+        [R]: [
+          "铁头娃娃",
+          "纸杯千竹",
+          "转转咖啡杯",
+          "迷你风扇",
+          "闪耀灯球",
+          "火柴女孩"
+        ],
+      },
+    },
+  ],
+
+  [
     "140",
     {
       type: "限定",
@@ -275,7 +346,7 @@ const rawCardPoolsInOrder = [
     {
       type: "限定",
       name: "滋滋煎香",
-      isAvailable: true,
+      isAvailable: false,
       imageUrl: "/images/cardpools/138.webp",
       startTime: "2026-06-25 00:00:00",
       finishTime: "2026-07-19 23:59:59",

@@ -6,7 +6,8 @@ import process from 'node:process'
 const PRIVATE_DIRECTORY = resolve('.qqbot')
 const CONFIG_FILE = resolve(PRIVATE_DIRECTORY, 'release-config.json')
 const STATE_FILE = resolve(PRIVATE_DIRECTORY, 'release-state.json')
-const VERSION_COMMIT_RE = /^docs(?:\([^)]*\))?!?:\s*更新补丁版本号v(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*$/
+const VERSION_COMMIT_RE =
+  /^docs(?:\([^)]*\))?!?:\s*更新补丁版本号v(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*$/
 const CONVENTIONAL_PREFIX_RE = /^[A-Za-z]+(?:\([^)]*\))?!?:\s*/
 
 function git(...args) {
@@ -21,7 +22,7 @@ function loadPrivateConfig() {
   try {
     config = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'))
   } catch (error) {
-    throw new Error(`无法读取 ${CONFIG_FILE}：${error.message}`)
+    throw new Error(`无法读取 ${CONFIG_FILE}：${error.message}`, { cause: error })
   }
   const required = ['groupId', 'sshHost', 'sshKey', 'remoteCommand']
   const missing = required.filter((key) => typeof config[key] !== 'string' || !config[key].trim())
@@ -38,7 +39,7 @@ function loadBaseCommit() {
     }
     return state.lastCommit
   } catch (error) {
-    throw new Error(`无法读取 ${STATE_FILE}：${error.message}`)
+    throw new Error(`无法读取 ${STATE_FILE}：${error.message}`, { cause: error })
   }
 }
 
@@ -51,10 +52,14 @@ function collectRelease(baseCommit) {
 
   const raw = git('log', '--reverse', '--format=%H%x1f%s%x1e', `${baseCommit}..${headCommit}`)
   const commits = raw
-    ? raw.split('\x1e').map((record) => record.trim()).filter(Boolean).map((record) => {
-        const separator = record.indexOf('\x1f')
-        return { sha: record.slice(0, separator), subject: record.slice(separator + 1).trim() }
-      })
+    ? raw
+        .split('\x1e')
+        .map((record) => record.trim())
+        .filter(Boolean)
+        .map((record) => {
+          const separator = record.indexOf('\x1f')
+          return { sha: record.slice(0, separator), subject: record.slice(separator + 1).trim() }
+        })
     : []
 
   if (commits.length === 0) {
@@ -138,7 +143,9 @@ async function main() {
     return
   }
 
-  console.log(`检测到 ${release.commits.length} 个 commit，其中 ${release.updates.length} 个更新项。`)
+  console.log(
+    `检测到 ${release.commits.length} 个 commit，其中 ${release.updates.length} 个更新项。`,
+  )
   console.log(`版本：${release.version}`)
   console.log('\n发送预览：\n')
   console.log(release.content)
@@ -153,7 +160,11 @@ async function main() {
     return
   }
 
-  const payload = JSON.stringify({ content: release.content, group_ids: [config.groupId], at_all: false })
+  const payload = JSON.stringify({
+    content: release.content,
+    group_ids: [config.groupId],
+    at_all: true,
+  })
   const result = spawnSync(
     'ssh',
     ['-i', config.sshKey, '-o', 'BatchMode=yes', config.sshHost, config.remoteCommand],

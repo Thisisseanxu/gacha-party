@@ -1,5 +1,14 @@
 [
   {
+    "id": "2104",
+    "name": "邪恶小丑人",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2104.webp",
+    "realname": "菲宝",
+    "theme": "eiji",
+    "qban_url": "/images/qban/2104.webp"
+  },
+  {
     "id": "1814",
     "name": "涓流花洒",
     "rarity": "SP",

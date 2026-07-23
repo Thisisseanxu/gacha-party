@@ -1214,6 +1214,17 @@ export const CHAR_HUIZHANG_CONFIG = {
     ],
   },
 
+  2104: {
+    shape: [
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.SHIELD,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND,
+      HUIZHANG_SHAPES.DIAMOND
+    ],
+  },
+
   11001: {
     shape: [
       HUIZHANG_SHAPES.SHIELD,
