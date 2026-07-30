@@ -1,153 +1,30 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createRequire } from 'node:module'
-
-// recast 是 CJS 包，用 createRequire 在 ESM 中引入
-const require = createRequire(import.meta.url)
-const recast = require('recast')
-const babelParser = require('recast/parsers/babel')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const CARDS_FILE = resolve(ROOT, 'public/data/cards.json')
-const CARD_POOLS_FILE = resolve(ROOT, 'src/data/cardPools.js')
-const HUIZHANG_FILE = resolve(ROOT, 'src/data/huizhang.js')
+const CARD_POOLS_FILE = resolve(ROOT, 'public/data/card_pools_full.json')
+const HUIZHANG_FILE = resolve(ROOT, 'public/data/huizhang.json')
 const GACHA_POOLS_FILE = resolve(ROOT, 'public/data/gacha_pools.json')
 const DATABASE_FILE = resolve(ROOT, 'public/data/gacha_info.json')
 const ANNOUNCEMENTS_FILE = resolve(ROOT, 'public/data/announcements.json')
 const CHARACTER_SCORES_FILE = resolve(ROOT, 'public/data/character_scores.json')
 
-// ── 符号映射：AST Identifier/MemberExpression → JSON 值 ────────────────────
-const SYMBOL_RESOLVE = {
-  SP: 'SP',
-  SSR: 'SSR',
-  SR: 'SR',
-  R: 'R',
-  SP_BASE_RATE: 0.0125,
-  'HUIZHANG_SHAPES.SHIELD': 'defence',
-  'HUIZHANG_SHAPES.DIAMOND': 'attack',
-  'HUIZHANG_SHAPES.CIRCLE': 'support',
-  'THEMES.cake': 'cake',
-  'THEMES.dream': 'dream',
-  'THEMES.elec': 'elec',
-  'THEMES.music': 'music',
-  'THEMES.ice': 'ice',
-  'THEMES.fire': 'fire',
-  'THEMES.water': 'water',
-  'THEMES.eiji': 'eiji',
+function readJson(filePath) {
+  return JSON.parse(readFileSync(filePath, 'utf8'))
 }
 
-const SHAPE_TO_PROP = { defence: 'SHIELD', attack: 'DIAMOND', support: 'CIRCLE' }
-const THEME_KEYS = new Set(['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'eiji'])
-const RARITY_KEYS = new Set(['SP', 'SSR', 'SR', 'R'])
-
-const b = recast.types.builders
-
-// ── JSON 值 → AST 节点 ──────────────────────────────────────────────────────
-function valueToAst(value) {
-  if (value === null || value === undefined) return b.literal(null)
-  if (typeof value === 'boolean') return b.literal(value)
-  if (typeof value === 'number') {
-    if (value === 0.0125) return b.identifier('SP_BASE_RATE')
-    return b.literal(value)
-  }
-  if (typeof value === 'string') {
-    if (RARITY_KEYS.has(value)) return b.identifier(value)
-    if (SHAPE_TO_PROP[value]) {
-      return b.memberExpression(b.identifier('HUIZHANG_SHAPES'), b.identifier(SHAPE_TO_PROP[value]))
-    }
-    if (THEME_KEYS.has(value)) {
-      return b.memberExpression(b.identifier('THEMES'), b.identifier(value))
-    }
-    return b.literal(value)
-  }
-  if (Array.isArray(value)) return b.arrayExpression(value.map(valueToAst))
-  if (typeof value === 'object') {
-    const props = Object.entries(value).map(([k, v]) => {
-      const isSymbolKey = RARITY_KEYS.has(k)
-      const prop = b.property('init', b.identifier(k), valueToAst(v))
-      if (isSymbolKey) prop.computed = true
-      return prop
-    })
-    return b.objectExpression(props)
-  }
-  return b.literal(null)
-}
-
-// ── AST 节点 → JSON 值 ──────────────────────────────────────────────────────
-function astToJson(node) {
-  if (!node) return null
-  const t = node.type
-  if (t === 'StringLiteral' || t === 'Literal') return node.value
-  if (t === 'NumericLiteral') return node.value
-  if (t === 'BooleanLiteral') return node.value
-  if (t === 'NullLiteral') return null
-  if (t === 'Identifier') {
-    return Object.prototype.hasOwnProperty.call(SYMBOL_RESOLVE, node.name)
-      ? SYMBOL_RESOLVE[node.name]
-      : node.name
-  }
-  if (t === 'MemberExpression') {
-    const key = `${node.object.name}.${node.property.name}`
-    return Object.prototype.hasOwnProperty.call(SYMBOL_RESOLVE, key) ? SYMBOL_RESOLVE[key] : key
-  }
-  if (t === 'UnaryExpression' && node.operator === '-') return -astToJson(node.argument)
-  if (t === 'ArrayExpression') return (node.elements || []).map(astToJson)
-  if (t === 'ObjectExpression') {
-    const obj = {}
-    for (const prop of node.properties) {
-      if (prop.type === 'SpreadElement') continue
-      let key
-      if (prop.computed) {
-        const raw = prop.key.name ?? prop.key.value
-        key = Object.prototype.hasOwnProperty.call(SYMBOL_RESOLVE, raw) ? SYMBOL_RESOLVE[raw] : raw
-      } else {
-        key = prop.key.name ?? prop.key.value
-      }
-      obj[key] = astToJson(prop.value)
-    }
-    return obj
-  }
-  return null
-}
-
-// ── AST 工具 ─────────────────────────────────────────────────────────────────
-function parseFile(filePath) {
-  const src = readFileSync(filePath, 'utf8')
-  return recast.parse(src, { parser: babelParser })
-}
-
-function findExportInit(ast, varName) {
-  let target = null
-  recast.visit(ast, {
-    visitVariableDeclarator(path) {
-      if (path.node.id.type === 'Identifier' && path.node.id.name === varName) {
-        target = path.node.init
-        this.abort()
-        return
-      }
-      this.traverse(path)
-    },
-  })
-  return target
+function writeJson(filePath, data) {
+  writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
 }
 
 // ── cards.json ────────────────────────────────────────────────────────────────
 function readCards() {
-  const cards = JSON.parse(readFileSync(CARDS_FILE, 'utf8'))
+  const cards = readJson(CARDS_FILE)
   if (!Array.isArray(cards)) throw new Error('cards.json 格式错误')
   return cards
-}
-
-function writeCard(cardData) {
-  const cards = readCards()
-  const idx = cards.findIndex((card) => String(card.id) === String(cardData.id))
-  const newCard = buildCardData(cardData)
-
-  if (idx >= 0) cards[idx] = newCard
-  else cards.push(newCard)
-  writeFileSync(CARDS_FILE, `${JSON.stringify(cards, null, 2)}\n`, 'utf8')
 }
 
 function buildCardData(data) {
@@ -160,126 +37,65 @@ function buildCardData(data) {
   return card
 }
 
-// ── cardPools.js ──────────────────────────────────────────────────────────────
-function readCardPools() {
-  const ast = parseFile(CARD_POOLS_FILE)
-  const entries = findCardPoolsEntries(ast)
-  return entries.elements.map((entry) => {
-    const [idNode, poolNode] = entry.elements
-    return [String(astToJson(idNode)), astToJson(poolNode)]
-  })
+function writeCard(cardData) {
+  const cards = readCards()
+  const idx = cards.findIndex((card) => String(card.id) === String(cardData.id))
+  const newCard = buildCardData(cardData)
+
+  if (idx >= 0) cards[idx] = newCard
+  else cards.push(newCard)
+  writeJson(CARDS_FILE, cards)
 }
 
-function findCardPoolsEntries(ast) {
-  for (const varName of ['rawCardPoolsInOrder', 'cardPoolsInOrder']) {
-    const entries = findExportInit(ast, varName)
-    if (entries?.type === 'ArrayExpression') return entries
+// ── card_pools_full.json ──────────────────────────────────────────────────────
+function readCardPoolsData() {
+  const data = readJson(CARD_POOLS_FILE)
+  const pools = Array.isArray(data) ? data : data?.pools
+  if (!Array.isArray(pools)) {
+    throw new Error('card_pools_full.json 格式错误：pools 必须是数组')
   }
+  return { data, pools }
+}
 
-  const obj = findExportInit(ast, 'cardPools')
-  if (obj?.type === 'ObjectExpression') {
-    return b.arrayExpression(
-      obj.properties.map((prop) =>
-        b.arrayExpression([b.literal(String(prop.key.name ?? prop.key.value)), prop.value]),
-      ),
-    )
-  }
-
-  throw new Error('cardPoolsInOrder 未找到')
+function readCardPools() {
+  return readCardPoolsData().pools
 }
 
 function writeCardPool(poolId, poolData) {
-  const ast = parseFile(CARD_POOLS_FILE)
-  const entries = findCardPoolsEntries(ast)
+  const { data, pools } = readCardPoolsData()
+  const normalizedId = String(poolId)
+  const idx = pools.findIndex(([id]) => String(id) === normalizedId)
+  const entry = [normalizedId, poolData]
 
-  const existing = entries.elements.find((entry) => {
-    if (entry?.type !== 'ArrayExpression') return false
-    return String(astToJson(entry.elements?.[0])) === String(poolId)
-  })
-  if (existing) {
-    existing.elements[1] = buildPoolNode(poolData)
-  } else {
-    entries.elements.unshift(
-      b.arrayExpression([b.literal(String(poolId)), buildPoolNode(poolData)]),
-    )
-  }
-  writeFileSync(CARD_POOLS_FILE, recast.print(ast).code, 'utf8')
+  if (idx >= 0) pools[idx] = entry
+  else pools.unshift(entry)
+
+  if (Array.isArray(data)) writeJson(CARD_POOLS_FILE, pools)
+  else writeJson(CARD_POOLS_FILE, { ...data, pools })
 }
 
-function buildPoolNode(data) {
-  const fieldOrder = [
-    'type',
-    'name',
-    'isAvailable',
-    'imageUrl',
-    'startTime',
-    'finishTime',
-    'tag_type',
-    'tag_name',
-    'rates',
-    'rules',
-    'cardNames',
-  ]
-  const props = []
-  for (const key of fieldOrder) {
-    if (data[key] != null) {
-      const val = key === 'isAvailable' ? b.literal(!!data[key]) : valueToAst(data[key])
-      props.push(b.property('init', b.identifier(key), val))
-    }
+// ── huizhang.json ─────────────────────────────────────────────────────────────
+function readHuizhangData() {
+  const data = readJson(HUIZHANG_FILE)
+  if (!data?.charConfig || typeof data.charConfig !== 'object') {
+    throw new Error('huizhang.json 格式错误：charConfig 必须是对象')
   }
-  return b.objectExpression(props)
+  return data
 }
 
-// ── huizhang.js ───────────────────────────────────────────────────────────────
 function readHuizhang() {
-  const ast = parseFile(HUIZHANG_FILE)
-  const obj = findExportInit(ast, 'CHAR_HUIZHANG_CONFIG')
-  if (!obj) throw new Error('CHAR_HUIZHANG_CONFIG 未找到')
-  const result = {}
-  for (const prop of obj.properties) {
-    result[prop.key.name ?? prop.key.value] = astToJson(prop.value)
-  }
-  return result
+  return readHuizhangData().charConfig
 }
 
 function writeHuizhang(charId, shapeValues) {
-  const ast = parseFile(HUIZHANG_FILE)
-  const obj = findExportInit(ast, 'CHAR_HUIZHANG_CONFIG')
-  if (!obj) throw new Error('CHAR_HUIZHANG_CONFIG 未找到')
+  if (!Array.isArray(shapeValues)) throw new Error('徽章形状必须是数组')
 
-  const newElements = shapeValues.map(valueToAst)
-  const existing = obj.properties.find((p) => String(p.key.name ?? p.key.value) === String(charId))
-
-  if (existing) {
-    const shapeProp = existing.value.properties?.find(
-      (p) => (p.key.name ?? p.key.value) === 'shape',
-    )
-    if (shapeProp) {
-      // 保留第一个元素上的 leading 注释
-      const firstComments = shapeProp.value.elements?.[0]?.comments
-      shapeProp.value.elements = newElements
-      if (firstComments?.length && newElements[0]) {
-        newElements[0].comments = firstComments
-      }
-    }
-  } else {
-    const shapeProp = b.property('init', b.identifier('shape'), b.arrayExpression(newElements))
-    const entryVal = b.objectExpression([shapeProp])
-    const newProp = b.property('init', b.literal(Number(charId)), entryVal)
-    obj.properties.push(newProp)
-  }
-  writeFileSync(HUIZHANG_FILE, recast.print(ast).code, 'utf8')
+  const data = readHuizhangData()
+  data.charConfig[String(charId)] = { shape: shapeValues }
+  writeJson(HUIZHANG_FILE, data)
 }
 
-// ── JSON 文件 ─────────────────────────────────────────────────────────────────
-function readJson(filePath) {
-  return JSON.parse(readFileSync(filePath, 'utf8'))
-}
-
-function writeJson(filePath, data) {
-  writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8')
-}
-
+// ── character_scores.json ─────────────────────────────────────────────────────
 function writeCharacterScores(characterName, scores, comment) {
   const data = readJson(CHARACTER_SCORES_FILE)
   if (!Array.isArray(data.characters)) throw new Error('character_scores.json 格式错误')
@@ -300,20 +116,18 @@ function writeCharacterScores(characterName, scores, comment) {
   }
 
   if (comment !== undefined) character['性格评语'] = String(comment)
-
   writeJson(CHARACTER_SCORES_FILE, data)
 }
 
-// ── HTTP 工具 ─────────────────────────────────────────────────────────────────
 function readBody(req) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolveBody, reject) => {
     let buf = ''
-    req.on('data', (c) => (buf += c))
+    req.on('data', (chunk) => (buf += chunk))
     req.on('end', () => {
       try {
-        resolve(buf ? JSON.parse(buf) : null)
-      } catch (e) {
-        reject(e)
+        resolveBody(buf ? JSON.parse(buf) : null)
+      } catch (error) {
+        reject(error)
       }
     })
     req.on('error', reject)
@@ -327,16 +141,14 @@ function respond(res, data, status = 200) {
   res.end(JSON.stringify(data))
 }
 
-// ── 插件导出 ──────────────────────────────────────────────────────────────────
 export function devEditorPlugin() {
   return {
     name: 'dev-editor',
     configureServer(server) {
       server.middlewares.use('/api/dev-editor', async (req, res) => {
-        const url = req.url // Vite 已去掉 /api/dev-editor 前缀
+        const url = req.url
         const method = req.method
 
-        // 处理 CORS preflight
         if (method === 'OPTIONS') {
           res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,OPTIONS')
           res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -365,39 +177,43 @@ export function devEditorPlugin() {
             return respond(res, { ok: true })
           }
 
-          if (method === 'GET' && url === '/gacha-pools')
+          if (method === 'GET' && url === '/gacha-pools') {
             return respond(res, readJson(GACHA_POOLS_FILE))
+          }
           if (method === 'PUT' && url === '/gacha-pools') {
             writeJson(GACHA_POOLS_FILE, await readBody(req))
             return respond(res, { ok: true })
           }
 
-          if (method === 'GET' && url === '/database36')
+          if (method === 'GET' && url === '/database36') {
             return respond(res, readJson(DATABASE_FILE))
+          }
           if (method === 'PUT' && url === '/database36') {
             writeJson(DATABASE_FILE, await readBody(req))
             return respond(res, { ok: true })
           }
 
-          if (method === 'GET' && url === '/announcements')
+          if (method === 'GET' && url === '/announcements') {
             return respond(res, readJson(ANNOUNCEMENTS_FILE))
+          }
           if (method === 'PUT' && url === '/announcements') {
             writeJson(ANNOUNCEMENTS_FILE, await readBody(req))
             return respond(res, { ok: true })
           }
 
-          if (method === 'GET' && url === '/character-scores')
+          if (method === 'GET' && url === '/character-scores') {
             return respond(res, readJson(CHARACTER_SCORES_FILE))
+          }
           if (method === 'PUT' && url === '/character-scores') {
             const body = await readBody(req)
             writeCharacterScores(body.character, body.scores, body.comment)
             return respond(res, { ok: true })
           }
 
-          respond(res, { error: '未知端点' }, 404)
-        } catch (e) {
-          console.error('[dev-editor]', e)
-          respond(res, { error: e.message }, 500)
+          return respond(res, { error: '未知端点' }, 404)
+        } catch (error) {
+          console.error('[dev-editor]', error)
+          return respond(res, { error: error.message }, 500)
         }
       })
     },

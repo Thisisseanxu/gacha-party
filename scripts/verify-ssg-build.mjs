@@ -42,10 +42,6 @@ async function exists(file) {
   }
 }
 
-function extractIds(source, pattern) {
-  return [...source.matchAll(pattern)].map((match) => match[1])
-}
-
 function count(html, pattern) {
   return [...html.matchAll(pattern)].length
 }
@@ -54,17 +50,14 @@ function assert(condition, message, errors) {
   if (!condition) errors.push(message)
 }
 
-const [poolSource, huizhangSource] = await Promise.all([
-  readFile(path.join(root, 'src/data/cardPools.js'), 'utf8'),
-  readFile(path.join(root, 'src/data/huizhang.js'), 'utf8'),
+const [poolData, huizhangData] = await Promise.all([
+  readFile(path.join(root, 'public/data/card_pools_full.json'), 'utf8').then(JSON.parse),
+  readFile(path.join(root, 'public/data/huizhang.json'), 'utf8').then(JSON.parse),
 ])
 
-const poolIds = extractIds(poolSource, /^\s{4}["']([^"']+)["'],\r?\n\s{4}\{/gm)
-const charConfigBlock = huizhangSource.slice(
-  huizhangSource.indexOf('export const CHAR_HUIZHANG_CONFIG'),
-  huizhangSource.indexOf('export const getCharConfig'),
-)
-const charIds = extractIds(charConfigBlock, /^\s{2}(\d+):\s*\{/gm)
+const poolEntries = Array.isArray(poolData) ? poolData : poolData.pools
+const poolIds = poolEntries.map(([id]) => String(id))
+const charIds = Object.keys(huizhangData.charConfig)
 
 const expectedRoutes = [
   ...fixedRoutes,
@@ -110,7 +103,11 @@ for (const route of spaOnlyRoutes) {
   if (!(await exists(file))) continue
 
   const html = await readFile(file, 'utf8')
-  assert(!html.includes('data-server-rendered="true"'), `SPA 页面不应包含 SSR 内容：${route}`, errors)
+  assert(
+    !html.includes('data-server-rendered="true"'),
+    `SPA 页面不应包含 SSR 内容：${route}`,
+    errors,
+  )
   assert(
     /<meta[^>]+name="robots"[^>]+content="noindex, nofollow"/.test(html),
     `SPA 页面缺少 noindex：${route}`,

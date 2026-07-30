@@ -6,10 +6,14 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import pkg from './package.json'
 import { devEditorPlugin } from './plugins/dev-editor-plugin.js'
+import { publicJsonDataPlugin } from './plugins/public-json-data-plugin.js'
+
+const root = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    publicJsonDataPlugin(root),
     devEditorPlugin(), // 可视化配置编辑器
     vueDevTools({
       componentInspector: true,
