@@ -14,5 +14,10 @@ export const THEMES = {
   ice: { id: 'ice', name: '寒冰', icon: '/images/huizhang/attr_color_ice.webp' },
   fire: { id: 'fire', name: '火焰', icon: '/images/huizhang/attr_color_fire.webp' },
   water: { id: 'water', name: '流水', icon: '/images/huizhang/attr_color_water.webp' },
+  appliance: {
+    id: 'appliance',
+    name: '家电',
+    icon: '/images/huizhang/attr_color_appliance.webp',
+  },
   eiji: { id: 'eiji', name: '异界', icon: '/images/huizhang/attr_color_eiji.webp' },
 }

@@ -121,6 +121,7 @@ const themes = [
   { value: 'ice', label: '寒冰 ice' },
   { value: 'fire', label: '火焰 fire' },
   { value: 'water', label: '流水 water' },
+  { value: 'appliance', label: '家电 appliance' },
   { value: 'eiji', label: '异界 eiji' },
 ]
 

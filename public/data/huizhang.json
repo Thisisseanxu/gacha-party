@@ -1,5 +1,4 @@
 {
-  "generated_at": "2026-07-30T21:11:49+08:00",
   "shapes": {
     "CIRCLE": "support",
     "DIAMOND": "attack",
@@ -131,6 +130,13 @@
       "act2": 4,
       "act4": 10,
       "icon": "/images/huizhang/510140.webp"
+    },
+    "wave": {
+      "id": "wave",
+      "name": "音波",
+      "act2": 8,
+      "act4": 20,
+      "icon": "/images/huizhang/510150.webp"
     }
   },
   "charConfig": {

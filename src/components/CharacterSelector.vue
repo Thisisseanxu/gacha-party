@@ -125,7 +125,17 @@ import { ref, computed } from 'vue'
 import { SP, SSR, SR, R } from '@/data/constant.js'
 import { THEMES } from '@/data/constant.js'
 
-const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'eiji']
+const THEME_ORDER = [
+  'cake',
+  'dream',
+  'elec',
+  'music',
+  'ice',
+  'fire',
+  'water',
+  'appliance',
+  'eiji',
+]
 const RARITY_ORDER = [SP, SSR, SR, R]
 
 const props = defineProps({
