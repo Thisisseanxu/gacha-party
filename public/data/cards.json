@@ -1,5 +1,41 @@
 [
   {
+    "id": "2004",
+    "name": "聚能吸尘器",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2004.webp",
+    "realname": "星尘",
+    "theme": "cake",
+    "qban_url": "/images/qban/2004.webp"
+  },
+  {
+    "id": "2006",
+    "name": "吞吞洗衣机",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2006.webp",
+    "realname": "蓝汐",
+    "theme": "cake",
+    "qban_url": "/images/qban/2006.webp"
+  },
+  {
+    "id": "2001",
+    "name": "蓄能插座",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2001.webp",
+    "realname": "柯蕾蒂",
+    "theme": "cake",
+    "qban_url": "/images/qban/2001.webp"
+  },
+  {
+    "id": "2002",
+    "name": "新风净化",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2002.webp",
+    "realname": "清岚",
+    "theme": "cake",
+    "qban_url": "/images/qban/2002.webp"
+  },
+  {
     "id": "2104",
     "name": "邪恶小丑人",
     "rarity": "SP",
@@ -898,6 +934,33 @@
     "realname": "辛西娅",
     "theme": "ice",
     "qban_url": "/images/qban/1709.webp"
+  },
+  {
+    "id": "1903",
+    "name": "风之铃",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1903.webp",
+    "realname": "芙泺",
+    "theme": "elec",
+    "qban_url": "/images/qban/1903.webp"
+  },
+  {
+    "id": "2003",
+    "name": "飞旋除尘机",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2003.webp",
+    "realname": "露娜",
+    "theme": "cake",
+    "qban_url": "/images/qban/2003.webp"
+  },
+  {
+    "id": "2005",
+    "name": "彩噪电视",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2005.webp",
+    "realname": "缇薇",
+    "theme": "cake",
+    "qban_url": "/images/qban/2005.webp"
   },
   {
     "id": "1103",

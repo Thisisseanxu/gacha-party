@@ -1,15 +1,38 @@
 {
-  "generated_at": "2026-07-27T13:58:39.487Z",
-  "shapes": { "CIRCLE": "support", "DIAMOND": "attack", "SHIELD": "defence" },
+  "generated_at": "2026-07-30T21:11:49+08:00",
+  "shapes": {
+    "CIRCLE": "support",
+    "DIAMOND": "attack",
+    "SHIELD": "defence"
+  },
   "rarity": {
-    "NONE": { "id": "0", "name": "无" },
-    "BLUE": { "id": "1", "name": "蓝" },
-    "PURPLE": { "id": "2", "name": "紫" },
-    "GOLD": { "id": "3", "name": "金" },
-    "RED": { "id": "4", "name": "红" }
+    "NONE": {
+      "id": "0",
+      "name": "无"
+    },
+    "BLUE": {
+      "id": "1",
+      "name": "蓝"
+    },
+    "PURPLE": {
+      "id": "2",
+      "name": "紫"
+    },
+    "GOLD": {
+      "id": "3",
+      "name": "金"
+    },
+    "RED": {
+      "id": "4",
+      "name": "红"
+    }
   },
   "types": {
-    "none": { "id": "none", "name": "无", "icon": "/images/huizhang/none.webp" },
+    "none": {
+      "id": "none",
+      "name": "无",
+      "icon": "/images/huizhang/none.webp"
+    },
     "cri": {
       "id": "cri",
       "name": "暴击",
@@ -111,124 +134,1199 @@
     }
   },
   "charConfig": {
-    "1101": { "shape": ["support", "support"] },
-    "1102": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1103": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1104": { "shape": ["defence", "defence", "defence", "defence"] },
-    "1105": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1106": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1107": { "shape": ["attack", "attack"] },
-    "1108": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1109": { "shape": ["support", "support", "support", "support"] },
-    "1110": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1111": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1112": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1113": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1114": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1115": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1201": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1202": { "shape": ["support", "support", "support", "support"] },
-    "1203": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1204": { "shape": ["attack", "attack"] },
-    "1205": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1206": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1207": { "shape": ["defence", "defence", "defence", "defence"] },
-    "1209": { "shape": ["support", "support"] },
-    "1210": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1211": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1212": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1213": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1214": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1301": { "shape": ["support", "support", "support", "support"] },
-    "1302": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1303": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1304": { "shape": ["defence", "attack", "attack", "defence"] },
-    "1305": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1306": { "shape": ["support", "support"] },
-    "1309": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1310": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1311": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1312": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1315": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1316": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1401": { "shape": ["support", "support", "support", "support"] },
-    "1402": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1403": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1404": { "shape": ["defence", "attack", "attack", "defence"] },
-    "1405": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1406": { "shape": ["attack", "attack"] },
-    "1407": { "shape": ["support", "support", "support", "support", "defence", "defence"] },
-    "1408": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1409": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1410": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1411": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1412": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1413": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1502": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1503": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1504": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1506": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1601": { "shape": ["support", "support", "support", "support"] },
-    "1602": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1603": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1604": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1605": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1606": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1607": { "shape": ["attack", "attack"] },
-    "1608": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1609": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1610": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1611": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1612": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1613": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1614": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1701": { "shape": ["support", "support", "support", "support"] },
-    "1702": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1703": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1704": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1706": { "shape": ["support", "support", "support", "support", "defence", "defence"] },
-    "1708": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1709": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1710": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1711": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1712": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1713": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1714": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1715": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1716": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1801": { "shape": ["support", "support", "support", "support"] },
-    "1803": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1805": { "shape": ["attack", "attack", "attack", "attack"] },
-    "1806": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1807": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1808": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1809": { "shape": ["support", "support", "support", "support", "defence", "defence"] },
-    "1810": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1811": { "shape": ["defence", "defence", "defence", "attack", "attack", "defence"] },
-    "1812": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1813": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1814": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1815": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "1902": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "1904": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "1905": { "shape": ["support", "support", "support", "support", "support", "support"] },
-    "1906": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "2101": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "2102": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "2103": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "2104": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11001": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11003": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11004": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11005": { "shape": ["support", "support", "support", "support", "defence", "defence"] },
-    "11006": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "11007": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "11008": { "shape": ["defence", "attack", "support", "defence", "attack", "support"] },
-    "11009": { "shape": ["attack", "attack", "attack", "attack", "attack", "attack"] },
-    "11010": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11101": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11103": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] },
-    "11104": { "shape": ["defence", "defence", "defence", "defence", "defence", "defence"] },
-    "11105": { "shape": ["defence", "defence", "attack", "attack", "attack", "attack"] }
+    "1101": {
+      "shape": [
+        "support",
+        "support"
+      ]
+    },
+    "1102": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1103": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1104": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1105": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1106": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1107": {
+      "shape": [
+        "attack",
+        "attack"
+      ]
+    },
+    "1108": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1109": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1110": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1111": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1112": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1113": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1114": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1115": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1201": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1202": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1203": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1204": {
+      "shape": [
+        "attack",
+        "attack"
+      ]
+    },
+    "1205": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1206": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1207": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1209": {
+      "shape": [
+        "support",
+        "support"
+      ]
+    },
+    "1210": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1211": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1212": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1213": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1214": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1301": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1302": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1303": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1304": {
+      "shape": [
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1305": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1306": {
+      "shape": [
+        "support",
+        "support"
+      ]
+    },
+    "1309": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1310": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1311": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1312": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1315": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1316": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1401": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1402": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1403": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1404": {
+      "shape": [
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1405": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1406": {
+      "shape": [
+        "attack",
+        "attack"
+      ]
+    },
+    "1407": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "defence",
+        "defence"
+      ]
+    },
+    "1408": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1409": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1410": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1411": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1412": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1413": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1502": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1503": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1504": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1506": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1601": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1602": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1603": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1604": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1605": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1606": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1607": {
+      "shape": [
+        "attack",
+        "attack"
+      ]
+    },
+    "1608": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1609": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1610": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1611": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1612": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1613": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1614": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1701": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1702": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1703": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1704": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1706": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "defence",
+        "defence"
+      ]
+    },
+    "1708": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1709": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1710": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1711": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1712": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1713": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1714": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1715": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1716": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1801": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1803": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1805": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1806": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1807": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1808": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1809": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "defence",
+        "defence"
+      ]
+    },
+    "1810": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1811": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "1812": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1813": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1814": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1815": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1902": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "1903": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1904": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "1905": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1906": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2001": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "2002": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "2003": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2004": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2005": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2006": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
+    "2101": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2102": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2103": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2104": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11001": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11003": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11004": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11005": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "defence",
+        "defence"
+      ]
+    },
+    "11006": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11007": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11008": {
+      "shape": [
+        "defence",
+        "attack",
+        "support",
+        "defence",
+        "attack",
+        "support"
+      ]
+    },
+    "11009": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11010": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11101": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11103": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "11104": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "11105": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    }
   }
 }
