@@ -163,7 +163,7 @@ export const routes = [
     name: '复刻计时器',
     component: () => import('./views/RoleAppearancePage.vue'),
     meta: {
-      title: 'UP计时器 | 织夜工具箱',
+      title: '复刻计时器 | 织夜工具箱',
       description: '查看《盲盒派对》角色卡池登场与复刻间隔，辅助判断未来 UP 节奏',
       ssg: true,
       needsCards: true,

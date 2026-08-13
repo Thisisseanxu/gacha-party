@@ -52,11 +52,29 @@ export default defineConfig({
       workbox: {
         skipWaiting: false, // 等待用户确认后再激活新 SW
         clientsClaim: true, // 让已经打开的页面使用新的 SW
-        navigateFallback: '/spa.html',
-        // 只预缓存应用骨架。图片交给 runtime cache，在用户真正访问到对应页面时再缓存。
-        globPatterns: ['**/*.{js,css,html,json}'],
-        globIgnores: ['data/cards.json'],
+        // vite-plugin-pwa 默认会回退到 index.html；SSG 下必须显式关闭，
+        // 否则它会先于下面的 NetworkFirst 导航规则接管所有页面。
+        navigateFallback: null,
+        // 不要把 SSG 生成的数百个 HTML 和业务 JSON 放进 precache。
+        // 它们会在每次发布时拖慢新 SW 的安装；图片也交给下面的 runtime cache。
+        globPatterns: ['**/*.{js,css}'],
         runtimeCaching: [
+          {
+            // SSG 页面按访问时缓存：在线优先拿最新 HTML，断网时回退到最近访问版本。
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages-cache',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
           // 匹配 *.onmicrosoft.cn 的 CDN 资源
           {
             // 优先匹配 CSS和 js，单独存储，防止被大量字体文件挤出缓存
@@ -98,6 +116,21 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 90, // 缓存有效期 90 天
               },
               // 允许跨域图片缓存
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // 本地字体体积较大，首次使用时缓存，避免阻塞 SW 更新。
+            urlPattern: /\.(?:woff2?|ttf|otf)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fonts-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
               cacheableResponse: {
                 statuses: [0, 200],
               },
