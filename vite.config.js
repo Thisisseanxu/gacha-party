@@ -55,9 +55,7 @@ export default defineConfig({
         // vite-plugin-pwa 默认会回退到 index.html；SSG 下必须显式关闭，
         // 否则它会先于下面的 NetworkFirst 导航规则接管所有页面。
         navigateFallback: null,
-        // 不要把 SSG 生成的数百个 HTML 放进 precache。
-        // 它们会在每次发布时拖慢新 SW 的安装；图片也交给下面的 runtime cache。
-        globPatterns: ['**/*.{json,js,css}'],
+        globPatterns: ['**/*.{js,css}'],
         runtimeCaching: [
           {
             // SSG 页面按访问时缓存：在线优先拿最新 HTML，断网时回退到最近访问版本。
@@ -101,6 +99,23 @@ export default defineConfig({
               },
               cacheableResponse: {
                 // 允许缓存跨域响应
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // data 目录中的 JSON 可独立发布：在线优先拿最新版本，断网时回退到最近版本。
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/data/') && url.pathname.endsWith('.json'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'data-json-cache',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+              cacheableResponse: {
                 statuses: [0, 200],
               },
             },
