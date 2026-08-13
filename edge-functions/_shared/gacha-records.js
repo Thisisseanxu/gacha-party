@@ -2,9 +2,9 @@ import nacl from 'tweetnacl'
 
 const RATE_LIMITS = {
   manualUpload: {
-    admin: 5 * 60 * 1000,
-    subscribed: 1 * 60 * 60 * 1000,
-    normal: 12 * 60 * 60 * 1000,
+    admin: 10 * 60 * 1000,
+    subscribed: 10 * 60 * 1000,
+    normal: 10 * 60 * 1000,
   },
 }
 

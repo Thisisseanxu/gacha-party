@@ -18,45 +18,16 @@
       :class="{ 'overlay-active': showGachaResultOverlay }"
     >
       <!-- 左侧卡池列表 -->
-      <aside class="pool-panel" v-show="!showGachaResultOverlay">
+      <aside ref="poolPanelRef" class="pool-panel" v-show="!showGachaResultOverlay">
         <nav class="pool-list">
           <div
-            v-for="[id, pool] in availablePools"
-            :key="id"
-            class="pool-item radius-8"
-            :class="{ active: route.params.poolId === id }"
-            @click="navigateToPool(id)"
+            ref="availablePoolsTransitionRef"
+            class="available-pools-transition"
+            :class="{ 'is-collapsed': showEndedPools }"
           >
-            <img
-              v-if="pool.imageUrl"
-              :src="pool.imageUrl"
-              :alt="pool.name"
-              class="pool-item-image"
-            />
-            <span v-else class="pool-item-name">{{ pool.name }}</span>
-            <span
-              v-if="pool.tag_type && pool.tag_name"
-              class="pool-item-tag"
-              :style="{ backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')` }"
-            >
-              <span
-                class="pool-item-tag-text"
-                :class="{ 'pool-item-tag-text--small': pool.tag_name.length === 3 }"
-              >
-                {{ pool.tag_name }}
-              </span>
-            </span>
-          </div>
-
-          <!-- 已结束卡池 -->
-          <div v-if="endedPools.length > 0" class="ended-pools-section">
-            <div class="ended-pools-header" @click="showEndedPools = !showEndedPools">
-              <span class="ended-pools-title">已结束卡池</span>
-              <span class="ended-pools-icon" :class="{ 'is-open': showEndedPools }">▼</span>
-            </div>
-            <div v-show="showEndedPools" class="ended-pools-list">
+            <div class="available-pools-inner">
               <div
-                v-for="[id, pool] in endedPools"
+                v-for="[id, pool] in availablePools"
                 :key="id"
                 class="pool-item radius-8"
                 :class="{ active: route.params.poolId === id }"
@@ -67,14 +38,12 @@
                   :src="pool.imageUrl"
                   :alt="pool.name"
                   class="pool-item-image"
-                />
+                >
                 <span v-else class="pool-item-name">{{ pool.name }}</span>
                 <span
                   v-if="pool.tag_type && pool.tag_name"
                   class="pool-item-tag"
-                  :style="{
-                    backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')`,
-                  }"
+                  :style="{ backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')` }"
                 >
                   <span
                     class="pool-item-tag-text"
@@ -83,6 +52,55 @@
                     {{ pool.tag_name }}
                   </span>
                 </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 已结束卡池 -->
+          <div
+            v-if="endedPools.length > 0"
+            class="ended-pools-section"
+            :class="{ 'is-expanded': showEndedPools }"
+          >
+            <button type="button" class="ended-pools-header" @click="toggleEndedPools">
+              <span class="ended-pools-title">已结束卡池</span>
+              <span class="ended-pools-icon" :class="{ 'is-open': showEndedPools }">▼</span>
+            </button>
+            <div
+              ref="endedPoolsListRef"
+              class="ended-pools-list"
+              :class="{ 'is-open': showEndedPools }"
+            >
+              <div class="ended-pools-list-inner">
+                <div
+                  v-for="[id, pool] in endedPools"
+                  :key="id"
+                  class="pool-item radius-8"
+                  :class="{ active: route.params.poolId === id }"
+                  @click="navigateToPool(id)"
+                >
+                  <img
+                    v-if="pool.imageUrl"
+                    :src="pool.imageUrl"
+                    :alt="pool.name"
+                    class="pool-item-image"
+                  >
+                  <span v-else class="pool-item-name">{{ pool.name }}</span>
+                  <span
+                    v-if="pool.tag_type && pool.tag_name"
+                    class="pool-item-tag"
+                    :style="{
+                      backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')`,
+                    }"
+                  >
+                    <span
+                      class="pool-item-tag-text"
+                      :class="{ 'pool-item-tag-text--small': pool.tag_name.length === 3 }"
+                    >
+                      {{ pool.tag_name }}
+                    </span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -481,6 +499,11 @@ const isFullscreen = ref(false)
 const landscapeRootRef = ref(null)
 const currentTimeMs = ref(Date.now())
 let currentTimeTimer = null
+const poolPanelRef = ref(null)
+const availablePoolsTransitionRef = ref(null)
+const endedPoolsListRef = ref(null)
+let poolSectionAnimationFrame = null
+let poolSectionAnimationTimer = null
 const touchScrollState = {
   el: null,
   startX: 0,
@@ -638,6 +661,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (currentTimeTimer) window.clearInterval(currentTimeTimer)
+  if (poolSectionAnimationFrame) window.cancelAnimationFrame(poolSectionAnimationFrame)
+  if (poolSectionAnimationTimer) window.clearTimeout(poolSectionAnimationTimer)
   window.removeEventListener('resize', updateLayout)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
   landscapeRootRef.value?.removeEventListener('touchstart', handleLandscapeTouchStart)
@@ -728,12 +753,57 @@ const endedPools = computed(() => {
 
 const showEndedPools = ref(false)
 
+const animatePoolSections = (showEnded) => {
+  const availablePoolsElement = availablePoolsTransitionRef.value
+  const endedPoolsElement = endedPoolsListRef.value
+  if (!availablePoolsElement || !endedPoolsElement) return
+
+  if (poolSectionAnimationFrame) window.cancelAnimationFrame(poolSectionAnimationFrame)
+  if (poolSectionAnimationTimer) window.clearTimeout(poolSectionAnimationTimer)
+
+  const availablePoolsHeight = availablePoolsElement.scrollHeight
+  const endedPoolsHeight = endedPoolsElement.scrollHeight
+
+  if (showEnded) {
+    availablePoolsElement.style.height = `${availablePoolsHeight}px`
+    endedPoolsElement.style.height = '0px'
+  } else {
+    availablePoolsElement.style.height = '0px'
+    endedPoolsElement.style.height = `${endedPoolsHeight}px`
+  }
+
+  // 强制浏览器先提交起始高度，下一帧再设置目标高度，确保触发 height 过渡。
+  void availablePoolsElement.offsetHeight
+  poolSectionAnimationFrame = window.requestAnimationFrame(() => {
+    if (showEnded) {
+      availablePoolsElement.style.height = '0px'
+      endedPoolsElement.style.height = `${endedPoolsHeight}px`
+    } else {
+      availablePoolsElement.style.height = `${availablePoolsHeight}px`
+      endedPoolsElement.style.height = '0px'
+    }
+  })
+
+  poolSectionAnimationTimer = window.setTimeout(() => {
+    availablePoolsElement.style.height = showEnded ? '0px' : 'auto'
+    endedPoolsElement.style.height = showEnded ? 'auto' : '0px'
+  }, 420)
+}
+
+const toggleEndedPools = () => {
+  showEndedPools.value = !showEndedPools.value
+  nextTick(() => {
+    animatePoolSections(showEndedPools.value)
+    if (!showEndedPools.value) {
+      poolPanelRef.value?.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+}
+
 watch(
   () => route.params.poolId,
   (newId) => {
-    if (endedPools.value.some(([id]) => id === newId)) {
-      showEndedPools.value = true
-    }
+    showEndedPools.value = endedPools.value.some(([id]) => id === newId)
   },
   { immediate: true },
 )
@@ -1204,6 +1274,26 @@ const copyShareText = async (event) => {
 }
 
 /* 已结束卡池折叠区 */
+.available-pools-transition,
+.ended-pools-list {
+  overflow: hidden;
+  height: auto;
+  transition: height 0.4s ease;
+}
+
+.available-pools-transition.is-collapsed,
+.ended-pools-list:not(.is-open) {
+  height: 0;
+  pointer-events: none;
+}
+
+.available-pools-inner,
+.ended-pools-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .ended-pools-section {
   display: flex;
   flex-direction: column;
@@ -1211,6 +1301,7 @@ const copyShareText = async (event) => {
 }
 
 .ended-pools-header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1222,7 +1313,15 @@ const copyShareText = async (event) => {
   font-size: 0.9rem;
   font-weight: bold;
   border: 1px solid var(--color-border-primary);
+  text-align: left;
   transition: background-color 0.2s;
+}
+
+.ended-pools-section.is-expanded .ended-pools-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--color-background-primary);
 }
 
 .ended-pools-header:hover {
@@ -1239,9 +1338,11 @@ const copyShareText = async (event) => {
 }
 
 .ended-pools-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  height: 0;
+}
+
+.ended-pools-list.is-open {
+  height: auto;
 }
 
 /* 自定义卡池入口 */

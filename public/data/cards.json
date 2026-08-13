@@ -1,5 +1,32 @@
 [
   {
+    "id": "2005",
+    "name": "彩噪电视",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2005.webp",
+    "realname": "缇薇",
+    "theme": "appliance",
+    "qban_url": "/images/qban/2005.webp"
+  },
+  {
+    "id": "2007",
+    "name": "超能微波炉",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2007.webp",
+    "realname": "暖橙",
+    "theme": "appliance",
+    "qban_url": "/images/qban/2007.webp"
+  },
+  {
+    "id": "2003",
+    "name": "飞旋除尘机",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2003.webp",
+    "realname": "露娜",
+    "theme": "appliance",
+    "qban_url": "/images/qban/2003.webp"
+  },
+  {
     "id": "2004",
     "name": "聚能吸尘器",
     "rarity": "SP",
@@ -943,24 +970,6 @@
     "realname": "芙泺",
     "theme": "elec",
     "qban_url": "/images/qban/1903.webp"
-  },
-  {
-    "id": "2003",
-    "name": "飞旋除尘机",
-    "rarity": "SSR",
-    "imageUrl": "/images/characters/2003.webp",
-    "realname": "露娜",
-    "theme": "appliance",
-    "qban_url": "/images/qban/2003.webp"
-  },
-  {
-    "id": "2005",
-    "name": "彩噪电视",
-    "rarity": "SP",
-    "imageUrl": "/images/characters/2005.webp",
-    "realname": "缇薇",
-    "theme": "appliance",
-    "qban_url": "/images/qban/2005.webp"
   },
   {
     "id": "1103",

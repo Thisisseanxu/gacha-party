@@ -55,9 +55,9 @@ export default defineConfig({
         // vite-plugin-pwa 默认会回退到 index.html；SSG 下必须显式关闭，
         // 否则它会先于下面的 NetworkFirst 导航规则接管所有页面。
         navigateFallback: null,
-        // 不要把 SSG 生成的数百个 HTML 和业务 JSON 放进 precache。
+        // 不要把 SSG 生成的数百个 HTML 放进 precache。
         // 它们会在每次发布时拖慢新 SW 的安装；图片也交给下面的 runtime cache。
-        globPatterns: ['**/*.{js,css}'],
+        globPatterns: ['**/*.{json,js,css}'],
         runtimeCaching: [
           {
             // SSG 页面按访问时缓存：在线优先拿最新 HTML，断网时回退到最近访问版本。

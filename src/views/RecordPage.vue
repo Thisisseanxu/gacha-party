@@ -140,7 +140,7 @@
       <div class="cloud-section">
         <p class="input-title">织夜云服务</p>
         <p class="input-description">手动将当前的抽卡记录上传至云端</p>
-        <p class="input-description highlight">普通用户每24小时在所有工具内只能上传一次！</p>
+        <p class="input-description highlight">所有用户每10分钟只能上传一次！</p>
         <input
           type="text"
           v-model="uploadLicenseInput"
@@ -376,9 +376,9 @@ const FRONTEND_COOLDOWNS = {
   },
   // 手动上传记录 (upload-record)
   uploadRecord: {
-    admin: 5 * 60 * 1000, // 管理员: 5分钟
-    subscribed: 1 * 60 * 60 * 1000, // 订阅用户: 1小时
-    normal: 12 * 60 * 60 * 1000, // 普通用户: 12小时
+    admin: 10 * 60 * 1000, // 管理员: 10分钟
+    subscribed: 10 * 60 * 1000, // 订阅用户: 10分钟
+    normal: 10 * 60 * 1000, // 普通用户: 10分钟
   },
 }
 

@@ -1164,6 +1164,16 @@
         "defence"
       ]
     },
+    "2007": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
     "2101": {
       "shape": [
         "defence",
