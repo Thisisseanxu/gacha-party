@@ -326,7 +326,24 @@ function buildRoleAppearances(includeSpecial) {
         ) / 10
       : null
 
-    const last = entry.appearances[entry.appearances.length - 1]
+    // “最近一次复刻”应以结束时间为准，而不是开始时间。
+    // 某些较早开始的卡池会比后开始的卡池更晚结束，不能因此把角色计为未复刻。
+    const last = entry.appearances.reduce((latest, appearance) => {
+      const latestFinish = parseTimeMs(latest.finishTime)
+      const appearanceFinish = parseTimeMs(appearance.finishTime)
+
+      if (appearanceFinish === null) return latest
+      if (latestFinish === null || appearanceFinish > latestFinish) return appearance
+
+      // 结束时间相同时保持较晚开始的卡池作为展示信息，保证结果稳定。
+      if (appearanceFinish === latestFinish) {
+        const latestStart = parseTimeMs(latest.startTime) ?? 0
+        const appearanceStart = parseTimeMs(appearance.startTime) ?? 0
+        if (appearanceStart > latestStart) return appearance
+      }
+
+      return latest
+    }, entry.appearances[0])
 
     list.push({
       ...entry,

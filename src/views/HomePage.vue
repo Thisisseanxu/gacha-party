@@ -281,6 +281,7 @@ const handleComingSoon = () => {
   max-width: min(100dvw, 700px);
   min-width: 0;
   max-height: 95dvh;
+  min-height: 10rem;
 }
 
 .home-container.smooth-transition {
@@ -411,9 +412,9 @@ const handleComingSoon = () => {
   flex-direction: column;
   gap: 0.6rem;
   width: 100%;
+  min-height: 3rem;
   flex: 1 1 auto;
   overflow-y: auto;
-  min-height: 0;
   padding-top: 0.25rem;
   box-sizing: border-box;
   scrollbar-width: thin;
