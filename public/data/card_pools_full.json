@@ -140,7 +140,7 @@
       {
         "type": "限定",
         "name": "海风拂暑",
-        "isAvailable": true,
+        "isAvailable": false,
         "imageUrl": "/images/cardpools/140.webp",
         "startTime": "2026-07-09 00:00:00",
         "finishTime": "2026-08-02 23:59:59",
