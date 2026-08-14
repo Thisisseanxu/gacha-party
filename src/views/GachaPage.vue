@@ -129,6 +129,26 @@
                   <Info theme="outline" :size="18" fill="var(--color-text-secondary)" />
                 </button>
                 <button
+                  type="button"
+                  class="pool-info-btn"
+                  :title="soundEnabled ? '关闭抽卡音效' : '开启抽卡音效'"
+                  :aria-label="soundEnabled ? '关闭抽卡音效' : '开启抽卡音效'"
+                  @click="soundEnabled = !soundEnabled"
+                >
+                  <VolumeNotice
+                    v-if="soundEnabled"
+                    theme="outline"
+                    :size="18"
+                    fill="var(--color-text-secondary)"
+                  />
+                  <VolumeMute
+                    v-else
+                    theme="outline"
+                    :size="18"
+                    fill="var(--color-text-secondary)"
+                  />
+                </button>
+                <button
                   v-if="isCustomPool"
                   @click="shareCustomPool"
                   class="gacha-button btn-confirm"
@@ -305,21 +325,23 @@
 
       <p v-else class="loading-text">卡池加载中或不存在...</p>
 
-      <!-- 结果动画 overlay（画布内，bg-fill 的背景图延伸到字母框区域） -->
+      <!-- 结果层位于固定画布内，跟随伪横屏旋转和缩放。 -->
       <div v-if="showGachaResultOverlay" class="gacha-result-overlay">
         <div class="overlay-content">
           <h2 class="overlay-title">恭喜获得</h2>
           <div class="pulled-cards-container" ref="cardsContainerRef">
-            <transition-group
-              name="card-reveal"
-              tag="div"
+            <div
               class="pulled-cards-grid"
               :class="{ 'grid-ten-pull': lastPullCount === 10 }"
             >
               <div
                 v-for="(card, index) in displayedCards"
-                :key="card.id + '_' + index"
-                :class="['card-item', `rarity-bg-${card.rarity.toLowerCase()}`]"
+                :key="resultAnimationKey + '_' + index"
+                :class="[
+                  'card-item',
+                  resultAnimationClass(index),
+                  `rarity-bg-${card.rarity.toLowerCase()}`,
+                ]"
               >
                 <div
                   :class="[
@@ -336,7 +358,7 @@
                 </div>
                 <p class="card-name">{{ card.name }}</p>
               </div>
-            </transition-group>
+            </div>
           </div>
           <div class="result-actions">
             <button
@@ -468,7 +490,7 @@ import QRCode from 'qrcode'
 
 import PopUp from '@/components/PopUp.vue'
 import SwitchComponent from '@/components/SwitchComponent.vue'
-import { BackOne, Info, FullScreenOne } from '@icon-park/vue-next'
+import { BackOne, Info, FullScreenOne, VolumeMute, VolumeNotice } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 
 // 模板有多个根节点（div + Teleport），禁用自动属性继承以消除 Vue 警告
@@ -478,7 +500,11 @@ defineOptions({ inheritAttrs: false })
 const showGachaResultOverlay = ref(false)
 const displayedCards = ref([])
 const isAnimating = ref(false)
+const resultAnimationKey = ref(0)
 let animationTimeout = null
+// 最后一张卡片：0.2667s 延迟 + 0.6667s 飞入，结束后立即允许继续抽取。
+const TEN_RESULT_ANIMATION_DURATION = 950
+const SINGLE_RESULT_ANIMATION_DURATION = 700
 const cardsContainerRef = ref(null)
 
 // 分享弹窗
@@ -492,6 +518,50 @@ const showSsrPopup = ref(false)
 
 // 概率公示弹窗
 const showProbabilityPopup = ref(false)
+
+// 抽卡音效默认关闭，避免进入页面后自动播放声音。
+const soundEnabled = ref(false)
+let gachaAudio = null
+let audioPreloadIdleCallback = null
+let audioPreloadTimer = null
+let audioLoadHandler = null
+
+const preloadGachaAudio = () => {
+  if (gachaAudio) return
+
+  gachaAudio = new Audio('/assets/gacha.m4a')
+  gachaAudio.preload = 'auto'
+  gachaAudio.load()
+}
+
+const scheduleGachaAudioPreload = () => {
+  const scheduleDuringIdle = () => {
+    if ('requestIdleCallback' in window) {
+      audioPreloadIdleCallback = window.requestIdleCallback(preloadGachaAudio, {
+        timeout: 3000,
+      })
+    } else {
+      audioPreloadTimer = window.setTimeout(preloadGachaAudio, 1000)
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    scheduleDuringIdle()
+  } else {
+    audioLoadHandler = scheduleDuringIdle
+    window.addEventListener('load', audioLoadHandler, { once: true })
+  }
+}
+
+const playGachaSound = () => {
+  if (!soundEnabled.value) return
+
+  if (!gachaAudio) {
+    gachaAudio = new Audio('/assets/gacha.m4a')
+  }
+  gachaAudio.currentTime = 0
+  gachaAudio.play().catch((error) => logger.error('抽卡音效播放失败:', error))
+}
 
 // 全屏/横屏提示
 const showOrientationPrompt = ref(true)
@@ -649,6 +719,7 @@ onMounted(() => {
   updateLayout()
   window.addEventListener('resize', updateLayout)
   document.addEventListener('fullscreenchange', onFullscreenChange)
+  scheduleGachaAudioPreload()
   landscapeRootRef.value?.addEventListener('touchstart', handleLandscapeTouchStart, {
     passive: true,
   })
@@ -663,6 +734,14 @@ onUnmounted(() => {
   if (currentTimeTimer) window.clearInterval(currentTimeTimer)
   if (poolSectionAnimationFrame) window.cancelAnimationFrame(poolSectionAnimationFrame)
   if (poolSectionAnimationTimer) window.clearTimeout(poolSectionAnimationTimer)
+  if (animationTimeout) window.clearTimeout(animationTimeout)
+  if (audioLoadHandler) window.removeEventListener('load', audioLoadHandler)
+  if (audioPreloadIdleCallback !== null && 'cancelIdleCallback' in window) {
+    window.cancelIdleCallback(audioPreloadIdleCallback)
+  }
+  if (audioPreloadTimer) window.clearTimeout(audioPreloadTimer)
+  gachaAudio?.pause()
+  gachaAudio = null
   window.removeEventListener('resize', updateLayout)
   document.removeEventListener('fullscreenchange', onFullscreenChange)
   landscapeRootRef.value?.removeEventListener('touchstart', handleLandscapeTouchStart)
@@ -853,51 +932,37 @@ watch(
 
 const isHighlightRarity = (rarity) => rarity === SP || rarity === SSR
 
-const getDelayTime = (rarity) => {
-  switch (rarity) {
-    case SP:
-      return 1000
-    case SSR:
-      return 500
-    default:
-      return 100
-  }
-}
-
 const startPullAnimation = () => {
-  displayedCards.value = []
+  if (animationTimeout) window.clearTimeout(animationTimeout)
+  resultAnimationKey.value += 1
+  displayedCards.value = [...lastPulledCards.value]
   isAnimating.value = true
-  const cardsToAnimate = lastPulledCards.value
-  let index = 0
-
-  function revealNextCard() {
-    if (index < cardsToAnimate.length) {
-      const card = cardsToAnimate[index]
-      const delay = getDelayTime(card.rarity)
-      displayedCards.value.push(card)
-      nextTick(() => {
-        if (cardsContainerRef.value) {
-          cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
-        }
-      })
-      index++
-      animationTimeout = setTimeout(revealNextCard, delay)
-    } else {
-      isAnimating.value = false
-    }
-  }
-  revealNextCard()
+  const duration =
+    lastPullCount.value === 1
+      ? SINGLE_RESULT_ANIMATION_DURATION
+      : TEN_RESULT_ANIMATION_DURATION
+  animationTimeout = window.setTimeout(() => {
+    animationTimeout = null
+    isAnimating.value = false
+  }, duration)
 }
 
 const stopAnimation = () => {
   if (animationTimeout) clearTimeout(animationTimeout)
+  animationTimeout = null
   isAnimating.value = false
-  displayedCards.value = lastPulledCards.value
+  displayedCards.value = [...lastPulledCards.value]
   nextTick(() => {
     if (cardsContainerRef.value) {
       cardsContainerRef.value.scrollTop = cardsContainerRef.value.scrollHeight
     }
   })
+}
+
+const resultAnimationClass = (index) => {
+  if (lastPullCount.value === 1) return 'result-card-single'
+  if (index < 5) return `result-card-from-left result-card-left-${index + 1}`
+  return `result-card-from-right result-card-right-${index - 4}`
 }
 
 const {
@@ -1063,6 +1128,7 @@ const checkAndPull = (count) => {
   } else {
     performTenPulls()
   }
+  playGachaSound()
   showGachaResultOverlay.value = true
   nextTick(startPullAnimation)
 }
@@ -2002,8 +2068,10 @@ const copyShareText = async (event) => {
 
 /* ===== 结果动画 overlay（背景透明，依赖 bg-fill 的背景图） ===== */
 .gacha-result-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   background: transparent;
   display: flex;
   justify-content: center;
@@ -2035,13 +2103,17 @@ const copyShareText = async (event) => {
 
 .pulled-cards-container {
   width: 100%;
-  overflow-y: auto;
+  min-width: 0;
+  overflow: hidden;
   padding: 1rem;
   margin: auto;
+  box-sizing: border-box;
 }
 
 .pulled-cards-grid {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
 }
@@ -2056,6 +2128,30 @@ const copyShareText = async (event) => {
   align-items: center;
   gap: 0.5rem;
 }
+
+.card-item.result-card-from-left {
+  animation: result-fly-in-left 0.6667s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+.card-item.result-card-from-right {
+  animation: result-fly-in-right 0.6667s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.card-item.result-card-single {
+  animation: result-scale-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* 与 FairyGUI tenGachaComponent.t0 对齐：0.1s 起播，间隔 1/24s。 */
+.card-item.result-card-left-1,
+.card-item.result-card-right-5 { animation-delay: 0.1s; }
+.card-item.result-card-left-2,
+.card-item.result-card-right-4 { animation-delay: 0.1417s; }
+.card-item.result-card-left-3,
+.card-item.result-card-right-3 { animation-delay: 0.1833s; }
+.card-item.result-card-left-4,
+.card-item.result-card-right-2 { animation-delay: 0.225s; }
+.card-item.result-card-left-5,
+.card-item.result-card-right-1 { animation-delay: 0.2667s; }
 
 .card-image-wrapper {
   width: 110px;
@@ -2104,6 +2200,39 @@ const copyShareText = async (event) => {
 
 .confirm-button:hover:not(:disabled) {
   transform: translateY(-2px);
+}
+
+@keyframes result-fly-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-85.6667vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes result-fly-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(85.6667vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes result-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ===== SSR弹窗内容 ===== */
@@ -2336,24 +2465,6 @@ const copyShareText = async (event) => {
 
 .highlight-rarity.rarity-border-ssr {
   animation: highlight-flash-ssr 0.5s ease-in-out;
-}
-
-/* ===== 卡片弹出动画 ===== */
-.card-reveal-enter-active {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card-reveal-enter-from {
-  opacity: 0;
-  transform: scale(0.5) translateY(50px);
-}
-
-.card-reveal-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.card-reveal-leave-to {
-  opacity: 0;
 }
 
 /* 竖屏旋转与缩放由 JS updateLayout() 动态计算并注入 canvasStyle */

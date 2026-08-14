@@ -95,7 +95,7 @@ const onHome = () => {
 
 const onToggleTheme = () => {
   toggleTheme()
-  menuOpen.value = false
+  showHintFor('换个主题~', 3000)
 }
 
 const onToggleStealth = () => {
@@ -107,7 +107,7 @@ const onToggleStealth = () => {
     isStealth.value = true
     const until = Date.now() + STEALTH_DURATION_MS
     localStorage.setItem(STEALTH_KEY, String(until))
-    showHintFor('已开启隐身，再次点我关闭喵~', 3000)
+    showHintFor('已隐身，还是可以点我返回喵~', 3000)
   }
   menuOpen.value = false
 }
