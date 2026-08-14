@@ -106,6 +106,17 @@ export const routes = [
     },
   },
   {
+    path: '/tier-list',
+    name: '角色榜单',
+    component: () => import('./views/TierListPage.vue'),
+    meta: {
+      title: '角色榜单 | 织夜工具箱',
+      description: '使用《盲盒派对》全部角色素材，自定义创建你的角色分级榜单',
+      ssg: true,
+      needsCards: true,
+    },
+  },
+  {
     path: '/huizhang',
     name: '徽章攻略助手',
     component: () => import('./views/HuizhangHome.vue'),

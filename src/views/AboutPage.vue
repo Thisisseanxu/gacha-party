@@ -2,7 +2,7 @@
   <div class="background" :class="{ 'smooth-transition': isReady }">
     <router-link to="/" class="back-btn">
       <return theme="outline" size="24" />
-      <span>返回首页</span>
+      <span>返回</span>
     </router-link>
 
     <div class="about-container" :class="{ 'smooth-transition': isReady }">

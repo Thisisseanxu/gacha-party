@@ -53,6 +53,14 @@
           </div>
         </router-link>
 
+        <router-link to="tier-list" class="btn btn-secondary">
+          <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
+          <div class="btn-text">
+            <span class="btn-title">角色榜单</span>
+            <span class="btn-subtitle">把所有角色自由放进你的专属排名榜单</span>
+          </div>
+        </router-link>
+
         <button
           @click="handleComingSoon"
           :disabled="isComingSoonClicked"
