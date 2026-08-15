@@ -106,9 +106,9 @@ export const routes = [
     },
   },
   {
-    path: '/tier-list',
+    path: '/ranking',
     name: '角色榜单',
-    component: () => import('./views/TierListPage.vue'),
+    component: () => import('./views/RankingPage.vue'),
     meta: {
       title: '角色榜单 | 织夜工具箱',
       description: '使用《盲盒派对》全部角色素材，自定义创建你的角色分级榜单',

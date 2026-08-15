@@ -1,11 +1,8 @@
 <template>
-  <main class="tier-list-page">
-    <div class="tier-list-shell">
+  <main class="ranking-page">
+    <div class="ranking-shell">
       <section class="workspace" aria-label="角色分级工作区">
-        <section
-          class="board-panel panel-card"
-          aria-labelledby="board-title"
-        >
+        <section class="board-panel panel-card" aria-labelledby="board-title">
           <div class="selection-hint" :class="{ active: selectedIds.size }">
             <span class="hint-dot"></span>
             <span v-if="selectedIds.size"
@@ -21,7 +18,13 @@
                 class="export-button"
                 type="button"
                 :disabled="isExporting"
-                @click="exportBoardImage"
+                title="点击直接导出 1080px 图片，长按自定义宽度"
+                @click="handleExportButtonClick"
+                @pointerdown="startExportLongPress"
+                @pointerup="clearExportLongPress"
+                @pointerleave="clearExportLongPress"
+                @pointercancel="clearExportLongPress"
+                @contextmenu.prevent
               >
                 {{ isExporting ? '生成中…' : '导出 PNG' }}
               </button>
@@ -31,8 +34,11 @@
           <div
             ref="boardCaptureRef"
             class="board-capture"
-            :class="{ 'manual-fullscreen': isManualFullscreen }"
+            :class="{ 'manual-fullscreen': isManualFullscreen, exporting: isExporting }"
           >
+            <div v-if="isExporting" class="export-watermark" aria-hidden="true">
+              织夜工具箱 · 角色榜单工具
+            </div>
             <div class="panel-heading">
               <div>
                 <h2
@@ -78,9 +84,6 @@
                   <span class="tier-name">{{ tier.name }}</span>
                 </div>
                 <div class="tier-dropzone">
-                  <div v-if="!cardsInTier(tier.id).length" class="empty-tier">
-                    点击此处放入选中角色
-                  </div>
                   <div
                     v-for="card in cardsInTier(tier.id)"
                     :key="card.id"
@@ -198,6 +201,56 @@
       </section>
     </div>
 
+    <div
+      v-if="exportWidthDialogOpen"
+      class="settings-backdrop"
+      @click.self="closeExportWidthDialog"
+    >
+      <section
+        class="settings-dialog export-width-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-width-title"
+      >
+        <div class="dialog-heading">
+          <div>
+            <h2 id="export-width-title">自定义导出宽度</h2>
+          </div>
+          <button
+            type="button"
+            class="close-button"
+            aria-label="关闭宽度设置"
+            @click="closeExportWidthDialog"
+          >
+            ×
+          </button>
+        </div>
+
+        <label class="setting-label" for="export-width-input">PNG 宽度（像素）</label>
+        <input
+          id="export-width-input"
+          ref="exportWidthInput"
+          v-model="exportWidthDraft"
+          class="title-setting-input"
+          type="number"
+          min="320"
+          max="4096"
+          step="1"
+          inputmode="numeric"
+          @keydown.enter.prevent="confirmCustomExport"
+          @keydown.esc.prevent="closeExportWidthDialog"
+        />
+        <p class="setting-tip export-width-tip">请输入 320–4096 之间的整数，点击导出后生成图片。</p>
+
+        <div class="dialog-footer export-width-footer">
+          <button type="button" class="subtle-button" @click="closeExportWidthDialog">取消</button>
+          <button type="button" class="confirm-button" @click="confirmCustomExport">
+            导出图片
+          </button>
+        </div>
+      </section>
+    </div>
+
     <button
       class="settings-fab"
       type="button"
@@ -241,7 +294,7 @@
               <span class="template-preview image-preview"
                 ><i>夯</i><i>顶级</i><i>人上人</i><i>NPC</i><i>拉完了</i></span
               >
-              <span>图片同款</span>
+              <span>由夯到拉</span>
             </button>
             <button
               type="button"
@@ -339,7 +392,13 @@ import { R, SR, SSR, SP, THEMES } from '@/data/constant.js'
 import { toPng } from 'html-to-image'
 import { logger } from '@/utils/logger.js'
 
-const STORAGE_KEY = 'gacha-party-tier-list'
+const STORAGE_KEY = 'gacha-party-ranking'
+// 540 CSS 像素 × pixelRatio 2 = 1080 实际 PNG 像素，兼顾清晰度与目标尺寸。
+const DEFAULT_EXPORT_WIDTH = 1080
+const EXPORT_PIXEL_RATIO = 2
+const MIN_EXPORT_WIDTH = 320
+const MAX_EXPORT_WIDTH = 4096
+const EXPORT_LONG_PRESS_DELAY = 550
 const RARITY_ORDER = [SP, SSR, SR, R]
 const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'appliance', 'eiji']
 
@@ -378,6 +437,11 @@ const imageMode = ref('portrait')
 const boardCaptureRef = ref(null)
 const isFullscreen = ref(false)
 const isExporting = ref(false)
+const exportWidthDialogOpen = ref(false)
+const exportWidthDraft = ref(String(DEFAULT_EXPORT_WIDTH))
+const exportWidthInput = ref(null)
+const exportLongPressTimer = ref(null)
+const suppressExportClick = ref(false)
 const settingsOpen = ref(false)
 const searchQuery = ref('')
 const activeTheme = ref(null)
@@ -437,6 +501,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  clearExportLongPress()
 })
 
 watch(
@@ -526,13 +591,75 @@ async function toggleFullscreen() {
   }
 }
 
-async function exportBoardImage() {
+function startExportLongPress() {
+  if (isExporting.value) return
+  clearExportLongPress()
+  exportLongPressTimer.value = window.setTimeout(() => {
+    exportLongPressTimer.value = null
+    suppressExportClick.value = true
+    exportWidthDraft.value = String(DEFAULT_EXPORT_WIDTH)
+    exportWidthDialogOpen.value = true
+    nextTick(() => {
+      exportWidthInput.value?.focus()
+      exportWidthInput.value?.select()
+    })
+  }, EXPORT_LONG_PRESS_DELAY)
+}
+
+function clearExportLongPress() {
+  if (exportLongPressTimer.value !== null) {
+    window.clearTimeout(exportLongPressTimer.value)
+    exportLongPressTimer.value = null
+  }
+}
+
+function handleExportButtonClick() {
+  if (suppressExportClick.value) {
+    suppressExportClick.value = false
+    return
+  }
+  exportBoardImage()
+}
+
+function closeExportWidthDialog() {
+  exportWidthDialogOpen.value = false
+  suppressExportClick.value = false
+}
+
+function confirmCustomExport() {
+  const exportWidth = Number(exportWidthDraft.value)
+  if (
+    !Number.isInteger(exportWidth) ||
+    exportWidth < MIN_EXPORT_WIDTH ||
+    exportWidth > MAX_EXPORT_WIDTH
+  ) {
+    alert(`请输入 ${MIN_EXPORT_WIDTH}–${MAX_EXPORT_WIDTH} 之间的整数宽度`)
+    return
+  }
+  exportWidthDialogOpen.value = false
+  suppressExportClick.value = false
+  exportBoardImage(exportWidth)
+}
+
+async function exportBoardImage(exportWidth = DEFAULT_EXPORT_WIDTH) {
   if (!boardCaptureRef.value || isExporting.value) return
 
   isExporting.value = true
+  const captureElement = boardCaptureRef.value
+  const exportCssWidth = exportWidth / EXPORT_PIXEL_RATIO
+  const originalStyles = {
+    width: captureElement.style.width,
+    minWidth: captureElement.style.minWidth,
+    maxWidth: captureElement.style.maxWidth,
+    boxSizing: captureElement.style.boxSizing,
+  }
+
   try {
+    captureElement.style.width = `${exportCssWidth}px`
+    captureElement.style.minWidth = `${exportCssWidth}px`
+    captureElement.style.maxWidth = 'none'
+    captureElement.style.boxSizing = 'border-box'
     await nextTick()
-    const captureElement = boardCaptureRef.value
     const pendingImages = Array.from(captureElement.querySelectorAll('img'))
       .filter((image) => !image.complete)
       .map(
@@ -548,16 +675,14 @@ async function exportBoardImage() {
     })
 
     const bounds = captureElement.getBoundingClientRect()
-    const exportWidth = Math.ceil(Math.max(bounds.width, captureElement.scrollWidth))
-    // html-to-image 会把 height 写回克隆节点；额外留出底部空间，避免 flex 换行后的最后一行被裁切。
-    const exportHeight = Math.ceil(Math.max(bounds.height, captureElement.scrollHeight)) + 24
+    const exportHeight = Math.ceil(bounds.height)
     const dataUrl = await toPng(captureElement, {
-      pixelRatio: 2,
+      pixelRatio: EXPORT_PIXEL_RATIO,
       backgroundColor: getComputedStyle(captureElement).backgroundColor,
-      width: exportWidth,
+      width: exportCssWidth,
       height: exportHeight,
       style: {
-        width: `${exportWidth}px`,
+        width: `${exportCssWidth}px`,
         height: `${exportHeight}px`,
         overflow: 'visible',
       },
@@ -573,6 +698,10 @@ async function exportBoardImage() {
     logger.error('生成榜单图片失败:', error)
     alert('导出失败，请稍后重试')
   } finally {
+    captureElement.style.width = originalStyles.width
+    captureElement.style.minWidth = originalStyles.minWidth
+    captureElement.style.maxWidth = originalStyles.maxWidth
+    captureElement.style.boxSizing = originalStyles.boxSizing
     isExporting.value = false
   }
 }
@@ -763,14 +892,14 @@ function removeTier(tierId) {
 </script>
 
 <style scoped>
-.tier-list-page {
+.ranking-page {
   min-height: 100dvh;
   padding: clamp(0.5rem, 1vw, 1rem);
   box-sizing: border-box;
   background: var(--color-background-primary);
 }
 
-.tier-list-shell {
+.ranking-shell {
   width: min(1500px, 100%);
   margin: 0 auto;
 }
@@ -837,11 +966,10 @@ p {
   box-sizing: border-box;
   overflow: auto;
   padding: clamp(1rem, 3vw, 2.5rem);
-  border: 0;
-  border-radius: 0;
   background: var(--color-background-primary);
 }
 .board-capture {
+  position: relative;
   width: 100%;
   box-sizing: border-box;
   padding: clamp(0.25rem, 1vw, 1rem);
@@ -849,8 +977,43 @@ p {
 }
 .board-capture.manual-fullscreen {
   position: fixed;
-  inset: 0;
   z-index: 100;
+}
+.board-capture.exporting .tier-row {
+  grid-template-columns: clamp(82px, 14%, 140px) minmax(0, 1fr);
+  min-height: 90px;
+  overflow: hidden;
+}
+.board-capture.exporting .tier-dropzone {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 60px));
+  grid-auto-rows: max-content;
+  align-content: start;
+  align-items: start;
+  justify-content: start;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  overflow: visible;
+}
+.board-capture.exporting .rank-card {
+  width: 60px;
+}
+.board-capture.exporting .rank-card span {
+  font-size: 0.61rem;
+}
+.export-watermark {
+  position: absolute;
+  top: 0.85rem;
+  right: 1rem;
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  color: var(--color-text-tertiary);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  pointer-events: none;
+  white-space: nowrap;
 }
 .selector-panel {
   position: sticky;
@@ -1034,10 +1197,12 @@ p {
   opacity: 0.65;
 }
 .tier-dropzone {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 60px));
+  grid-auto-rows: max-content;
   align-content: flex-start;
   align-items: flex-start;
-  flex-wrap: wrap;
+  justify-content: start;
   gap: 0.25rem;
   min-width: 0;
   padding: 0.2rem;
@@ -1525,6 +1690,16 @@ p {
   color: var(--color-text-tertiary);
   font-size: 0.72rem;
 }
+.export-width-dialog {
+  width: min(420px, 100%);
+}
+.export-width-tip {
+  margin: 0.45rem 0 0;
+}
+.export-width-footer {
+  gap: 0.55rem;
+  margin-top: 1.2rem;
+}
 .confirm-button {
   padding: 0.55rem 1.1rem;
   border: 0;
@@ -1548,7 +1723,7 @@ p {
 }
 
 @media (max-width: 640px) {
-  .tier-list-page {
+  .ranking-page {
     padding: 1rem 0.7rem 5.5rem;
   }
   .page-header {

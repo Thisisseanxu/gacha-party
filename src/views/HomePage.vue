@@ -29,13 +29,21 @@
           </div>
         </router-link>
 
-        <!-- <router-link to="quiz" class="btn btn-secondary">
+        <router-link to="ranking" class="btn btn-secondary">
+          <img src="/images/icons/ranking.webp" class="btn-icon" alt="icon" />
+          <div class="btn-text">
+            <span class="btn-title">角色榜单</span>
+            <span class="btn-subtitle">把所有角色自由放进你的专属排名榜单</span>
+          </div>
+        </router-link>
+
+        <router-link to="quiz" class="btn btn-secondary">
           <img src="/images/icons/quiz.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
             <span class="btn-title">角色性格匹配<sup class="beta-tag">NEW</sup></span>
             <span class="btn-subtitle">看看你最像盲盒派对中的哪位角色</span>
           </div>
-        </router-link> -->
+        </router-link>
 
         <router-link to="fuke" class="btn btn-secondary">
           <img src="/images/icons/fuke.webp" class="btn-icon" alt="icon" />
@@ -50,14 +58,6 @@
           <div class="btn-text">
             <span class="btn-title">导演模式</span>
             <span class="btn-subtitle">自己当导演！自由创作角色和班长的聊天</span>
-          </div>
-        </router-link>
-
-        <router-link to="tier-list" class="btn btn-secondary">
-          <img src="/images/icons/huizhang.webp" class="btn-icon" alt="icon" />
-          <div class="btn-text">
-            <span class="btn-title">角色榜单</span>
-            <span class="btn-subtitle">把所有角色自由放进你的专属排名榜单</span>
           </div>
         </router-link>
 
