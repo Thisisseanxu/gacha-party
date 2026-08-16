@@ -32,7 +32,7 @@
         <router-link to="ranking" class="btn btn-secondary">
           <img src="/images/icons/ranking.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
-            <span class="btn-title">角色榜单</span>
+            <span class="btn-title">角色榜单<sup class="beta-tag">NEW</sup></span>
             <span class="btn-subtitle">把所有角色自由放进你的专属排名榜单</span>
           </div>
         </router-link>

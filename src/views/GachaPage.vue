@@ -332,7 +332,10 @@
           <div class="pulled-cards-container" ref="cardsContainerRef">
             <div
               class="pulled-cards-grid"
-              :class="{ 'grid-ten-pull': lastPullCount === 10 }"
+              :class="{
+                'grid-single-pull': lastPullCount === 1,
+                'grid-ten-pull': lastPullCount === 10,
+              }"
             >
               <div
                 v-for="(card, index) in displayedCards"
@@ -574,6 +577,7 @@ const availablePoolsTransitionRef = ref(null)
 const endedPoolsListRef = ref(null)
 let poolSectionAnimationFrame = null
 let poolSectionAnimationTimer = null
+const POOL_SECTION_ANIMATION_DURATION = 420
 const touchScrollState = {
   el: null,
   startX: 0,
@@ -832,6 +836,16 @@ const endedPools = computed(() => {
 
 const showEndedPools = ref(false)
 
+const scrollPoolPanelToBoundary = (showEnded, behavior = 'smooth') => {
+  const poolPanel = poolPanelRef.value
+  if (!poolPanel) return
+
+  poolPanel.scrollTo({
+    top: showEnded ? 0 : poolPanel.scrollHeight,
+    behavior,
+  })
+}
+
 const animatePoolSections = (showEnded) => {
   const availablePoolsElement = availablePoolsTransitionRef.value
   const endedPoolsElement = endedPoolsListRef.value
@@ -844,6 +858,7 @@ const animatePoolSections = (showEnded) => {
   const endedPoolsHeight = endedPoolsElement.scrollHeight
 
   if (showEnded) {
+    // 展开后从列表顶部开始，确保第一个已结束卡池可见。
     availablePoolsElement.style.height = `${availablePoolsHeight}px`
     endedPoolsElement.style.height = '0px'
   } else {
@@ -857,25 +872,40 @@ const animatePoolSections = (showEnded) => {
     if (showEnded) {
       availablePoolsElement.style.height = '0px'
       endedPoolsElement.style.height = `${endedPoolsHeight}px`
+      scrollPoolPanelToBoundary(true)
     } else {
       availablePoolsElement.style.height = `${availablePoolsHeight}px`
       endedPoolsElement.style.height = '0px'
+      // 与折叠高度过渡在同一帧开始滚动，避免出现先收起再下滑。
+      scrollPoolPanelToBoundary(false)
     }
   })
 
   poolSectionAnimationTimer = window.setTimeout(() => {
     availablePoolsElement.style.height = showEnded ? '0px' : 'auto'
     endedPoolsElement.style.height = showEnded ? 'auto' : '0px'
-  }, 420)
+  }, POOL_SECTION_ANIMATION_DURATION)
 }
 
 const toggleEndedPools = () => {
-  showEndedPools.value = !showEndedPools.value
+  const nextShowEndedPools = !showEndedPools.value
+  const availablePoolsElement = availablePoolsTransitionRef.value
+  const endedPoolsElement = endedPoolsListRef.value
+
+  // 在切换 class 前先固定当前状态的高度，避免首次点击时从 auto/0 直接切换，
+  // 让 animatePoolSections 能稳定地建立过渡起点。
+  if (availablePoolsElement && endedPoolsElement) {
+    const availablePoolsHeight = availablePoolsElement.scrollHeight
+    const endedPoolsHeight = endedPoolsElement.scrollHeight
+    availablePoolsElement.style.height = nextShowEndedPools
+      ? `${availablePoolsHeight}px`
+      : '0px'
+    endedPoolsElement.style.height = nextShowEndedPools ? '0px' : `${endedPoolsHeight}px`
+  }
+
+  showEndedPools.value = nextShowEndedPools
   nextTick(() => {
-    animatePoolSections(showEndedPools.value)
-    if (!showEndedPools.value) {
-      poolPanelRef.value?.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    animatePoolSections(nextShowEndedPools)
   })
 }
 
@@ -2120,6 +2150,10 @@ const copyShareText = async (event) => {
 
 .pulled-cards-grid.grid-ten-pull {
   grid-template-columns: repeat(5, 1fr) !important;
+}
+
+.pulled-cards-grid.grid-single-pull {
+  grid-template-columns: 1fr;
 }
 
 .card-item {
