@@ -38,12 +38,14 @@
                   :src="pool.imageUrl"
                   :alt="pool.name"
                   class="pool-item-image"
-                >
+                />
                 <span v-else class="pool-item-name">{{ pool.name }}</span>
                 <span
                   v-if="pool.tag_type && pool.tag_name"
                   class="pool-item-tag"
-                  :style="{ backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')` }"
+                  :style="{
+                    backgroundImage: `url('/images/cardpools/tag_bg/${pool.tag_type}.webp')`,
+                  }"
                 >
                   <span
                     class="pool-item-tag-text"
@@ -84,7 +86,7 @@
                     :src="pool.imageUrl"
                     :alt="pool.name"
                     class="pool-item-image"
-                  >
+                  />
                   <span v-else class="pool-item-name">{{ pool.name }}</span>
                   <span
                     v-if="pool.tag_type && pool.tag_name"
@@ -148,6 +150,27 @@
                     fill="var(--color-text-secondary)"
                   />
                 </button>
+                <div class="pull-count-control" :class="{ 'is-insufficient': pullCountWarning }">
+                  <img
+                    :src="currentPool?.niudanUrl || '/images/niudan/8002.webp'"
+                    :alt="`${currentPool?.name || '当前卡池'}扭蛋`"
+                    class="pull-count-image"
+                  />
+                  <span class="pull-count-value">
+                    <span class="pull-count-number" :class="{ 'is-error': pullCountWarning }">
+                      {{ remainingPulls }}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    class="pull-count-add"
+                    title="增加100抽"
+                    aria-label="增加100抽"
+                    @click="addPulls"
+                  >
+                    ＋
+                  </button>
+                </div>
                 <button
                   v-if="isCustomPool"
                   @click="shareCustomPool"
@@ -524,6 +547,10 @@ const showProbabilityPopup = ref(false)
 
 // 抽卡音效默认关闭，避免进入页面后自动播放声音。
 const soundEnabled = ref(false)
+const remainingPulls = ref(200)
+const PULLS_PER_RECHARGE = 100
+const pullCountWarning = ref(false)
+let pullCountWarningTimer = null
 let gachaAudio = null
 let audioPreloadIdleCallback = null
 let audioPreloadTimer = null
@@ -564,6 +591,23 @@ const playGachaSound = () => {
   }
   gachaAudio.currentTime = 0
   gachaAudio.play().catch((error) => logger.error('抽卡音效播放失败:', error))
+}
+
+const addPulls = () => {
+  remainingPulls.value += PULLS_PER_RECHARGE
+}
+
+const triggerPullCountWarning = () => {
+  // 先移除再添加 class，确保连续点击时每次都能重新播放晃动动画。
+  pullCountWarning.value = false
+  nextTick(() => {
+    pullCountWarning.value = true
+  })
+  if (pullCountWarningTimer) window.clearTimeout(pullCountWarningTimer)
+  pullCountWarningTimer = window.setTimeout(() => {
+    pullCountWarning.value = false
+    pullCountWarningTimer = null
+  }, 650)
 }
 
 // 全屏/横屏提示
@@ -744,6 +788,7 @@ onUnmounted(() => {
     window.cancelIdleCallback(audioPreloadIdleCallback)
   }
   if (audioPreloadTimer) window.clearTimeout(audioPreloadTimer)
+  if (pullCountWarningTimer) window.clearTimeout(pullCountWarningTimer)
   gachaAudio?.pause()
   gachaAudio = null
   window.removeEventListener('resize', updateLayout)
@@ -897,9 +942,7 @@ const toggleEndedPools = () => {
   if (availablePoolsElement && endedPoolsElement) {
     const availablePoolsHeight = availablePoolsElement.scrollHeight
     const endedPoolsHeight = endedPoolsElement.scrollHeight
-    availablePoolsElement.style.height = nextShowEndedPools
-      ? `${availablePoolsHeight}px`
-      : '0px'
+    availablePoolsElement.style.height = nextShowEndedPools ? `${availablePoolsHeight}px` : '0px'
     endedPoolsElement.style.height = nextShowEndedPools ? '0px' : `${endedPoolsHeight}px`
   }
 
@@ -968,9 +1011,7 @@ const startPullAnimation = () => {
   displayedCards.value = [...lastPulledCards.value]
   isAnimating.value = true
   const duration =
-    lastPullCount.value === 1
-      ? SINGLE_RESULT_ANIMATION_DURATION
-      : TEN_RESULT_ANIMATION_DURATION
+    lastPullCount.value === 1 ? SINGLE_RESULT_ANIMATION_DURATION : TEN_RESULT_ANIMATION_DURATION
   animationTimeout = window.setTimeout(() => {
     animationTimeout = null
     isAnimating.value = false
@@ -1153,11 +1194,21 @@ const checkAndPull = (count) => {
   if (!canPullCurrentPool.value) {
     return
   }
+  if (remainingPulls.value < count) {
+    if (showGachaResultOverlay.value) {
+      showGachaResultOverlay.value = false
+      nextTick(triggerPullCountWarning)
+    } else {
+      triggerPullCountWarning()
+    }
+    return
+  }
   if (count === 1) {
     performSinglePull()
   } else {
     performTenPulls()
   }
+  remainingPulls.value -= count
   playGachaSound()
   showGachaResultOverlay.value = true
   nextTick(startPullAnimation)
@@ -1549,6 +1600,103 @@ const copyShareText = async (event) => {
 .pool-info-btn:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+/* 扭蛋余额提示 */
+.pull-count-control {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 2rem;
+  padding: 2px 4px 2px 2px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 999px;
+  background-color: var(--color-background-content);
+  flex-shrink: 0;
+}
+
+.pull-count-control.is-insufficient {
+  animation: pull-count-shake 0.5s ease;
+}
+
+.pull-count-image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pull-count-value {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  color: var(--color-text-primary);
+}
+
+.pull-count-number {
+  font-size: 1.05rem;
+  font-weight: bold;
+  line-height: 1;
+  transition: color 0.1s ease;
+}
+
+.pull-count-number.is-error {
+  color: #f04444;
+  animation: pull-count-number-flash 0.65s ease;
+}
+
+.pull-count-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--color-brand-primary);
+  border-radius: 50%;
+  background-color: var(--color-brand-primary-background);
+  color: var(--color-brand-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition:
+    background-color 0.2s,
+    transform 0.15s;
+}
+
+.pull-count-add:hover {
+  background-color: var(--color-brand-primary);
+  color: white;
+  transform: scale(1.08);
+}
+
+@keyframes pull-count-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pull-count-number-flash {
+  0%,
+  100% {
+    color: #f04444;
+  }
+  50% {
+    color: #ff8585;
+  }
 }
 
 /* ===== 右侧历史悬浮列 ===== */
@@ -2177,15 +2325,25 @@ const copyShareText = async (event) => {
 
 /* 与 FairyGUI tenGachaComponent.t0 对齐：0.1s 起播，间隔 1/24s。 */
 .card-item.result-card-left-1,
-.card-item.result-card-right-5 { animation-delay: 0.1s; }
+.card-item.result-card-right-5 {
+  animation-delay: 0.1s;
+}
 .card-item.result-card-left-2,
-.card-item.result-card-right-4 { animation-delay: 0.1417s; }
+.card-item.result-card-right-4 {
+  animation-delay: 0.1417s;
+}
 .card-item.result-card-left-3,
-.card-item.result-card-right-3 { animation-delay: 0.1833s; }
+.card-item.result-card-right-3 {
+  animation-delay: 0.1833s;
+}
 .card-item.result-card-left-4,
-.card-item.result-card-right-2 { animation-delay: 0.225s; }
+.card-item.result-card-right-2 {
+  animation-delay: 0.225s;
+}
 .card-item.result-card-left-5,
-.card-item.result-card-right-1 { animation-delay: 0.2667s; }
+.card-item.result-card-right-1 {
+  animation-delay: 0.2667s;
+}
 
 .card-image-wrapper {
   width: 110px;

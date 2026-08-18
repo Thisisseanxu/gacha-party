@@ -7,7 +7,7 @@ const PRIVATE_DIRECTORY = resolve('.qqbot')
 const CONFIG_FILE = resolve(PRIVATE_DIRECTORY, 'release-config.json')
 const STATE_FILE = resolve(PRIVATE_DIRECTORY, 'release-state.json')
 const VERSION_COMMIT_RE =
-  /^docs(?:\([^)]*\))?!?:\s*更新补丁版本号v(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*$/
+  /^docs(?:\([^)]*\))?!?:\s*更新(?:主要|次要|补丁)版本号v(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*$/
 const CONVENTIONAL_PREFIX_RE = /^[A-Za-z]+(?:\([^)]*\))?!?:\s*/
 
 function git(...args) {
@@ -78,7 +78,9 @@ function collectRelease(baseCommit) {
     if (summary) updates.push({ ...commit, summary })
   }
   if (!version) {
-    throw new Error('新增提交中没有找到“docs: 更新补丁版本号v...”提交，无法确定版本号')
+    throw new Error(
+      '新增提交中没有找到“docs: 更新主要/次要/补丁版本号v...”提交，无法确定版本号',
+    )
   }
   if (updates.length === 0) {
     throw new Error('除版本号提交外没有可发送的更新内容')
