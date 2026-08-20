@@ -1,5 +1,14 @@
 [
   {
+    "id": "2105",
+    "name": "鲸之圣女",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2105.webp",
+    "realname": "西丝特",
+    "theme": "eiji",
+    "qban_url": "/images/qban/2105.webp"
+  },
+  {
     "id": "2005",
     "name": "彩噪电视",
     "rarity": "SP",
