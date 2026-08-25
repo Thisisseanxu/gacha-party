@@ -117,6 +117,17 @@ export const routes = [
     },
   },
   {
+    path: '/oufei',
+    name: '欧非排行榜',
+    component: () => import('./views/LuckRankingPage.vue'),
+    meta: {
+      title: '欧非排行榜 | 织夜工具箱',
+      description: '查看《盲盒派对》总榜与各卡池最欧、最非玩家排行及 SP 出货明细',
+      ssg: true,
+      needsCards: true,
+    },
+  },
+  {
     path: '/huizhang',
     name: '徽章攻略助手',
     component: () => import('./views/HuizhangHome.vue'),

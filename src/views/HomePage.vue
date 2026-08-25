@@ -37,6 +37,14 @@
           </div>
         </router-link>
 
+        <router-link to="oufei" class="btn btn-secondary">
+          <img src="/images/icons/oufei.webp" class="btn-icon" alt="icon" />
+          <div class="btn-text">
+            <span class="btn-title">欧非排行榜<sup class="beta-tag">NEW</sup></span>
+            <span class="btn-subtitle">查看总榜及各卡池最欧、最非的玩家排行</span>
+          </div>
+        </router-link>
+
         <router-link to="quiz" class="btn btn-secondary">
           <img src="/images/icons/quiz.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
@@ -60,18 +68,6 @@
             <span class="btn-subtitle">自己当导演！自由创作角色和班长的聊天</span>
           </div>
         </router-link>
-
-        <button
-          @click="handleComingSoon"
-          :disabled="isComingSoonClicked"
-          class="btn btn-secondary coming-soon"
-        >
-          <img src="/images/icons/placeholder.webp" class="btn-icon" alt="icon" />
-          <div class="btn-text">
-            <span class="btn-title">{{ comingSoonText }}</span>
-            <span class="btn-subtitle">有建议可以加Q群或在github提出噢</span>
-          </div>
-        </button>
       </section>
 
       <div class="info-footer">
@@ -226,21 +222,6 @@ const handleInstallClick = async () => {
   const { outcome } = await deferredPrompt.value.userChoice
   logger.log(`PWA 安装提示的用户选择: ${outcome}`)
   deferredPrompt.value = null
-}
-
-// --- 开发中按钮控制逻辑 ---
-const originalComingSoonText = '功能开发中'
-const comingSoonText = ref(originalComingSoonText)
-const isComingSoonClicked = ref(false)
-
-const handleComingSoon = () => {
-  if (isComingSoonClicked.value) return
-  comingSoonText.value = '正在努力更新'
-  isComingSoonClicked.value = true
-  setTimeout(() => {
-    comingSoonText.value = originalComingSoonText
-    isComingSoonClicked.value = false
-  }, 1000)
 }
 </script>
 
@@ -499,12 +480,6 @@ const handleComingSoon = () => {
   flex: 1;
   height: 1px;
   background: var(--color-border-primary);
-}
-
-.coming-soon:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
 }
 
 @media (max-width: 480px) {
