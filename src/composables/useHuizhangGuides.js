@@ -49,6 +49,19 @@ function formatGuide(g) {
 }
 
 /**
+ * 攻略展示顺序：精选优先，同一分组内按审核时间从新到旧。
+ * 只在前端对读取到的数组排序，不改变缓存或服务端数据。
+ */
+function sortGuidesForDisplay(guides) {
+  return [...guides].sort((a, b) => {
+    const featuredDiff = Number(Boolean(b.is_featured)) - Number(Boolean(a.is_featured))
+    if (featuredDiff !== 0) return featuredDiff
+
+    return Number(b.approved_at || 0) - Number(a.approved_at || 0)
+  })
+}
+
+/**
  * 从 localStorage 加载缓存数据
  * @returns {boolean} 是否成功加载
  */
@@ -272,7 +285,9 @@ export function useHuizhangGuides() {
      * @returns {{ id, charId, code, title, authorName, userId, isFeatured, approvedAt, data }[]}
      */
     getGuidesForChar(charId) {
-      return _guides.value.filter((g) => g.char_id === String(charId)).map(formatGuide)
+      return sortGuidesForDisplay(
+        _guides.value.filter((g) => g.char_id === String(charId)),
+      ).map(formatGuide)
     },
 
     /**
@@ -280,7 +295,7 @@ export function useHuizhangGuides() {
      * @returns {{ id, charId, code, title, authorName, userId, isFeatured, approvedAt, data }[]}
      */
     getFeaturedGuides() {
-      return _guides.value.filter((g) => g.is_featured).map(formatGuide)
+      return sortGuidesForDisplay(_guides.value.filter((g) => g.is_featured)).map(formatGuide)
     },
 
     /**

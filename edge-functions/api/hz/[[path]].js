@@ -160,6 +160,12 @@ function normalizeKeyList(keys, prefix) {
   )
 }
 
+function guideContentChanged(before, after) {
+  return ['char_id', 'code', 'title', 'author_name', 'user_id'].some(
+    (field) => String(before?.[field] || '') !== String(after?.[field] || ''),
+  )
+}
+
 async function saveAll(request, env) {
   const denied = await requireAdminOrResponse(request, env)
   if (denied) return denied
@@ -172,7 +178,8 @@ async function saveAll(request, env) {
   }
 
   const kv = getHuizhangKv(env)
-  const currentMeta = await readMeta(kv)
+  const current = await readGuides(kv)
+  const currentMeta = current.meta
   if (String(body?.baseVersion ?? '') !== String(currentMeta.version || '0')) {
     return jsonResponse(
       {
@@ -183,9 +190,20 @@ async function saveAll(request, env) {
     )
   }
 
-  const guides = (Array.isArray(body?.guides) ? body.guides : []).map((guide) =>
-    normalizeGuide({ ...guide, id: guide.id || guideId() }),
-  )
+  const currentGuides = new Map(current.guides.map((guide) => [String(guide.id), guide]))
+  const guides = (Array.isArray(body?.guides) ? body.guides : []).map((guide) => {
+    const id = guide.id || guideId()
+    const previous = currentGuides.get(String(id))
+    const next = normalizeGuide({ ...guide, id })
+
+    if (previous) {
+      next.approved_at = guideContentChanged(previous, next)
+        ? Date.now()
+        : Number(previous.approved_at || next.approved_at)
+    }
+
+    return next
+  })
   for (const guide of guides) {
     const message = validateGuidePayload(guide)
     if (message) return jsonResponse({ message }, 400)
@@ -244,6 +262,7 @@ async function patchGuide(request, env, id) {
     ...(body.author_name !== undefined ? { author_name: body.author_name } : {}),
     ...(body.authorName !== undefined ? { authorName: body.authorName } : {}),
     ...(body.code ? { code: body.code } : {}),
+    approved_at: Date.now(),
   })
   const message = validateGuidePayload(next)
   if (message) return jsonResponse({ message }, 400)
