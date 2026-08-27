@@ -210,8 +210,29 @@
                   :class="[{ podium: index < 3 }, `rank-${index + 1}`]"
                 >
                   <span class="rank-cell">
-                    <i v-if="index < 3" class="medal">{{ medalFor(index) }}</i>
-                    <b v-else>{{ index + 1 }}</b>
+                    <img
+                      v-if="index < 3"
+                      class="rank-badge"
+                      :src="rankBadgeUrl(index + 1)"
+                      :alt="`第 ${index + 1} 名`"
+                    />
+                    <span v-else class="rank-number" :aria-label="`第 ${index + 1} 名`">
+                      <img
+                        class="rank-number-bg"
+                        src="/images/rank-icons/badge.png"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                      <span class="rank-number-digits" aria-hidden="true">
+                        <img
+                          v-for="(digit, digitIndex) in rankDigits(index + 1)"
+                          :key="`${index + 1}-${digitIndex}`"
+                          class="rank-number-digit"
+                          :src="rankDigitUrl(digit)"
+                          alt=""
+                        />
+                      </span>
+                    </span>
                   </span>
                   <span class="player-cell">
                     <strong>{{ entry.playerId }}</strong>
@@ -399,8 +420,18 @@ function formatPoolPeriod(start, end) {
   return `${formatDate(start)} — ${formatDate(end)}`
 }
 
-function medalFor(index) {
-  return ['1', '2', '3'][index]
+const RANK_ICON_BASE = '/images/rank-icons'
+
+function rankBadgeUrl(rank) {
+  return `${RANK_ICON_BASE}/badge_${rank}.png`
+}
+
+function rankDigits(rank) {
+  return String(rank).split('')
+}
+
+function rankDigitUrl(digit) {
+  return `${RANK_ICON_BASE}/rank_white/${digit}.png`
 }
 
 function getSpImage(drop) {
@@ -1211,36 +1242,48 @@ onBeforeUnmount(() => {
 
 .rank-cell {
   display: flex;
+  width: 32px;
+  height: 32px;
   align-items: center;
+  justify-content: center;
 }
 
-.rank-cell b {
-  width: 28px;
-  color: var(--color-text-tertiary);
-  font-size: 0.78rem;
-  text-align: center;
+.rank-badge {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
-.medal {
+.rank-number {
+  position: relative;
   display: grid;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #d9a72e;
-  color: #fff;
-  font-size: 0.72rem;
-  font-style: normal;
-  font-weight: 900;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.14);
+  width: 30px;
+  height: 30px;
   place-items: center;
 }
 
-.rank-2 .medal {
-  background: #8e9baa;
+.rank-number-bg {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  inset: 0;
 }
 
-.rank-3 .medal {
-  background: #b97950;
+.rank-number-digits {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-number-digit {
+  display: block;
+  width: auto;
+  height: 15px;
 }
 
 .player-cell {
