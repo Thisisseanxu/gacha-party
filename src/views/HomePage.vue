@@ -29,22 +29,21 @@
           </div>
         </router-link>
 
-        <router-link to="ranking" class="btn btn-secondary">
-          <img src="/images/icons/ranking.webp" class="btn-icon" alt="icon" />
-          <div class="btn-text">
-            <span class="btn-title">角色榜单<sup class="beta-tag">NEW</sup></span>
-            <span class="btn-subtitle">把所有角色自由放进你的专属排名榜单</span>
-          </div>
-        </router-link>
-
         <router-link to="oufei" class="btn btn-secondary">
           <img src="/images/icons/oufei.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">
             <span class="btn-title">欧非排行榜<sup class="beta-tag">NEW</sup></span>
-            <span class="btn-subtitle">查看总榜及各卡池最欧、最非的玩家排行</span>
+            <span class="btn-subtitle">看看每个卡池最欧和最非差了多少，你上榜了吗</span>
           </div>
         </router-link>
 
+        <router-link to="ranking" class="btn btn-secondary">
+          <img src="/images/icons/ranking.webp" class="btn-icon" alt="icon" />
+          <div class="btn-text">
+            <span class="btn-title">角色榜单<sup class="beta-tag">NEW</sup></span>
+            <span class="btn-subtitle">盲盒派对角色由夯到拉，自由定义</span>
+          </div>
+        </router-link>
         <router-link to="quiz" class="btn btn-secondary">
           <img src="/images/icons/quiz.webp" class="btn-icon" alt="icon" />
           <div class="btn-text">

@@ -7,7 +7,7 @@
       <header class="hero">
         <div class="hero-copy">
           <h1>欧非排行榜</h1>
-          <p>同一统计口径下，看看谁一发入魂，谁又把保底当作归宿。</p>
+          <p>是谁一发入魂，又是谁在负重前行</p>
         </div>
       </header>
 
@@ -58,8 +58,8 @@
           >
             <span class="pool-art total-art">∞</span>
             <span class="pool-copy">
-              <strong>总榜</strong>
-              <small>全部已收录记录</small>
+              <strong>全卡池总榜</strong>
+              <small>全部卡池数据</small>
             </span>
             <span class="option-arrow">›</span>
           </button>
@@ -132,17 +132,33 @@
           <template v-else-if="activeBoard && (isTotalScope || activeBoardHasEntries)">
             <div class="board-heading">
               <div class="scope-title">
-                <span class="scope-badge">{{ isTotalScope ? '总' : '池' }}</span>
-                <div>
+                <span v-if="isTotalScope" class="scope-badge">∞</span>
+                <span v-else class="scope-cover">
+                  <img
+                    v-if="activePoolImageUrl"
+                    :src="activePoolImageUrl"
+                    :alt="selectedPoolName"
+                  />
+                  <b v-else>池</b>
+                </span>
+                <div class="scope-copy">
                   <h2>{{ activeBoardTitle }}</h2>
                   <p>{{ rangeText }}</p>
                 </div>
               </div>
 
-              <div class="scope-stats">
-                <span
-                  ><strong>{{ formatInteger(activeBoard.sampleSize) }}</strong> 位玩家</span
+              <div v-if="activeBoardCanShowDrops || rankingData?.isSample" class="scope-stats">
+                <button
+                  v-if="activeBoardCanShowDrops"
+                  type="button"
+                  class="drop-visibility-toggle"
+                  role="switch"
+                  :aria-checked="showDropDetails"
+                  @click="showDropDetails = !showDropDetails"
                 >
+                  <span class="switch-track"><i></i></span>
+                  <span>显示抽到角色</span>
+                </button>
                 <em v-if="rankingData?.isSample">演示数据</em>
               </div>
             </div>
@@ -228,7 +244,7 @@
             <span class="state-icon">◇</span>
             <h2>{{ selectedPoolName }}暂未发布榜单</h2>
             <p>数据持续更新中...敬请期待！</p>
-            <button type="button" @click="selectScope('total')">查看总榜</button>
+            <button type="button" @click="selectScope('total')">查看全卡池总榜</button>
           </div>
         </section>
       </div>
@@ -260,6 +276,7 @@ const selectedScopeId = ref('total')
 const rankingMode = ref('lucky')
 const poolSearch = ref('')
 const mobilePoolOpen = ref(false)
+const showDropDetails = ref(true)
 
 let refreshTimer = null
 let requestSequence = 0
@@ -296,7 +313,8 @@ const poolOptions = computed(() => {
       startTime: '',
       finishTime: '',
       active: false,
-      hasData: !poolBoards.value.has(pool.poolId) || boardHasEntries(poolBoards.value.get(pool.poolId)),
+      hasData:
+        !poolBoards.value.has(pool.poolId) || boardHasEntries(poolBoards.value.get(pool.poolId)),
       periodText: '已发布榜单',
     }))
 
@@ -326,17 +344,19 @@ const activeBoard = computed(() => {
     : poolBoards.value.get(selectedScopeId.value) || null
 })
 const activeBoardTitle = computed(() =>
-  isTotalScope.value ? rankingData.value?.total.label || '总榜' : selectedPoolName.value,
+  isTotalScope.value ? '全卡池总榜' : selectedPoolName.value,
 )
 const selectedPoolName = computed(() => activePoolOption.value?.name || '该卡池')
+const activePoolImageUrl = computed(() => activePoolOption.value?.imageUrl || '')
 const activeScopeName = computed(() =>
-  isTotalScope.value ? '总榜 · 全部记录' : selectedPoolName.value,
+  isTotalScope.value ? '全卡池总榜 · 全部卡池数据' : selectedPoolName.value,
 )
 const currentEntries = computed(() => activeBoard.value?.[rankingMode.value] || [])
 const activeTargetRarity = computed(() => activeBoard.value?.targetRarity || 'SP')
-const activeBoardShowsDrops = computed(
+const activeBoardCanShowDrops = computed(
   () => !isTotalScope.value && activeTargetRarity.value === 'SP',
 )
+const activeBoardShowsDrops = computed(() => activeBoardCanShowDrops.value && showDropDetails.value)
 const activeBoardHasEntries = computed(
   () => (activeBoard.value?.lucky.length || 0) + (activeBoard.value?.unlucky.length || 0) > 0,
 )
@@ -712,7 +732,8 @@ onBeforeUnmount(() => {
 
 .pool-art {
   display: grid;
-  width: 42px;
+  width: 96px;
+  min-width: 54px;
   height: 42px;
   overflow: hidden;
   border: 1px solid var(--color-border-primary);
@@ -720,17 +741,22 @@ onBeforeUnmount(() => {
   background: var(--color-background-lighter);
   color: var(--color-text-secondary);
   font-weight: 900;
-  flex: 0 0 auto;
+  flex: 0 10 96px;
   place-items: center;
 }
 
 .pool-art img {
-  width: 100%;
-  height: 100%;
+  width: 96px;
+  max-width: none;
+  height: 42px;
   object-fit: cover;
+  object-position: left center;
 }
 
 .total-art {
+  width: 42px;
+  min-width: 42px;
+  flex-basis: 42px;
   border-color: color-mix(in srgb, var(--lucky) 45%, transparent);
   background: linear-gradient(145deg, var(--lucky-soft), var(--unlucky-soft));
   color: var(--lucky);
@@ -848,6 +874,7 @@ onBeforeUnmount(() => {
 .scope-title {
   display: flex;
   min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
   gap: 13px;
 }
@@ -860,10 +887,41 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   background: var(--lucky-soft);
   color: var(--lucky);
-  font-size: 0.64rem;
+  font-size: 1.35rem;
   font-weight: 900;
   letter-spacing: 0.1em;
   place-items: center;
+}
+
+.scope-cover {
+  display: grid;
+  width: 105px;
+  min-width: 54px;
+  height: 46px;
+  flex: 0 10 105px;
+  overflow: hidden;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 12px;
+  background: var(--color-background-light);
+  color: var(--lucky);
+  place-items: center;
+}
+
+.scope-cover img {
+  width: 105px;
+  max-width: none;
+  height: 46px;
+  object-fit: cover;
+  object-position: left center;
+}
+
+.scope-cover b {
+  font-size: 0.7rem;
+}
+
+.scope-copy {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .scope-title h2 {
@@ -886,7 +944,7 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
-.scope-stats > span,
+.drop-visibility-toggle,
 .scope-stats em {
   padding: 7px 9px;
   border: 1px solid var(--color-border-primary);
@@ -897,8 +955,46 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
-.scope-stats strong {
+.drop-visibility-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--color-background-light);
+  cursor: pointer;
+}
+
+.switch-track {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--color-border-primary);
+  transition: background-color 0.18s ease;
+}
+
+.switch-track i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-background-content);
+  box-shadow: 0 1px 3px var(--color-shadow-primary);
+  inset: 2px auto 2px 2px;
+  transition: transform 0.18s ease;
+}
+
+.drop-visibility-toggle[aria-checked='true'] {
+  border-color: color-mix(in srgb, var(--lucky) 42%, transparent);
   color: var(--color-text-primary);
+}
+
+.drop-visibility-toggle[aria-checked='true'] .switch-track {
+  background: var(--lucky);
+}
+
+.drop-visibility-toggle[aria-checked='true'] .switch-track i {
+  transform: translateX(12px);
 }
 
 .scope-stats em {
@@ -1050,13 +1146,22 @@ onBeforeUnmount(() => {
 .table-head,
 .ranking-row {
   display: grid;
-  grid-template-columns: 60px minmax(145px, 1.3fr) minmax(100px, 0.65fr) minmax(115px, 0.7fr);
+  grid-template-columns:
+    minmax(42px, 0.03fr)
+    minmax(78px, 0.08fr)
+    minmax(70px, 0.03fr)
+    minmax(100px, 1fr);
   align-items: center;
 }
 
 .table-head.with-sp,
 .ranking-row:has(.sp-cell) {
-  grid-template-columns: 60px minmax(145px, 1.05fr) 100px 115px minmax(210px, 1.4fr);
+  grid-template-columns:
+    minmax(42px, 0.03fr)
+    minmax(78px, 0.08fr)
+    minmax(70px, 0.03fr)
+    minmax(100px, 0.2fr)
+    minmax(180px, 2fr);
 }
 
 .table-head {
@@ -1290,6 +1395,16 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (min-width: 1041px) and (orientation: landscape) {
+  .page-shell {
+    width: min(1680px, 100%);
+  }
+
+  .ranking-layout {
+    grid-template-columns: 330px minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1040px) {
   .page-shell {
     padding-inline: 18px;
@@ -1299,13 +1414,19 @@ onBeforeUnmount(() => {
     grid-template-columns: 245px minmax(0, 1fr);
   }
 
-  .table-head.with-sp,
-  .ranking-row:has(.sp-cell) {
-    grid-template-columns: 54px minmax(125px, 1fr) 90px 105px minmax(160px, 1.2fr);
+  .pool-art:not(.total-art) {
+    width: 72px;
+    flex-basis: 72px;
   }
 
-  .scope-stats > span:nth-child(2) {
-    display: none;
+  .table-head.with-sp,
+  .ranking-row:has(.sp-cell) {
+    grid-template-columns:
+      minmax(40px, 0.03fr)
+      minmax(76px, 0.08fr)
+      minmax(68px, 0.03fr)
+      minmax(96px, 0.18fr)
+      minmax(150px, 1.7fr);
   }
 }
 
@@ -1320,6 +1441,11 @@ onBeforeUnmount(() => {
 
   .hero h1 {
     font-size: 2.6rem;
+  }
+
+  .pool-art:not(.total-art) {
+    width: 96px;
+    flex-basis: 96px;
   }
 
   .mobile-pool-picker {
@@ -1427,10 +1553,6 @@ onBeforeUnmount(() => {
     width: 100%;
   }
 
-  .scope-stats > span:nth-child(2) {
-    display: inline;
-  }
-
   .mode-tabs button {
     gap: 8px;
     padding: 10px;
@@ -1448,17 +1570,51 @@ onBeforeUnmount(() => {
   }
 
   .ranking-table {
-    overflow-x: auto;
+    overflow-x: hidden;
   }
 
   .table-head,
   .ranking-row {
-    min-width: 590px;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns:
+      minmax(34px, 0.45fr)
+      minmax(70px, 1fr)
+      minmax(58px, 0.75fr)
+      minmax(78px, 1fr);
   }
 
-  .table-head:not(.with-sp),
-  .ranking-row:not(:has(.sp-cell)) {
-    min-width: 510px;
+  .table-head.with-sp,
+  .ranking-row:has(.sp-cell) {
+    grid-template-columns:
+      minmax(34px, 0.45fr)
+      minmax(70px, 1fr)
+      minmax(58px, 0.75fr)
+      minmax(78px, 1fr);
+  }
+
+  .table-head {
+    padding-inline: 8px;
+  }
+
+  .table-head.with-sp > span:last-child {
+    display: none;
+  }
+
+  .ranking-row {
+    padding-inline: 8px;
+  }
+
+  .ranking-row:has(.sp-cell) {
+    row-gap: 5px;
+    padding-block: 8px;
+  }
+
+  .ranking-row .sp-cell {
+    grid-column: 2 / -1;
+    flex-wrap: wrap;
+    padding: 0;
+    overflow-x: visible;
   }
 
   .ranking-list {
