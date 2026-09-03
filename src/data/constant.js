@@ -20,4 +20,5 @@ export const THEMES = {
     icon: '/images/huizhang/attr_color_appliance.webp',
   },
   eiji: { id: 'eiji', name: '异界', icon: '/images/huizhang/attr_color_eiji.webp' },
+  toy: { id: 'toy', name: '玩具', icon: '/images/huizhang/attr_color_toy.webp' },
 }

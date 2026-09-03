@@ -1224,6 +1224,46 @@
         "attack"
       ]
     },
+    "2201": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence",
+        "defence"
+      ]
+    },
+    "2202": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2203": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2204": {
+      "shape": [
+        "defence",
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "defence"
+      ]
+    },
     "11001": {
       "shape": [
         "defence",

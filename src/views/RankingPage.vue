@@ -400,7 +400,7 @@ const MIN_EXPORT_WIDTH = 320
 const MAX_EXPORT_WIDTH = 4096
 const EXPORT_LONG_PRESS_DELAY = 550
 const RARITY_ORDER = [SP, SSR, SR, R]
-const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'appliance', 'eiji']
+const THEME_ORDER = ['cake', 'dream', 'elec', 'music', 'ice', 'fire', 'water', 'appliance', 'eiji', 'toy']
 
 const templates = {
   image: [

@@ -123,6 +123,7 @@ const themes = [
   { value: 'water', label: '流水 water' },
   { value: 'appliance', label: '家电 appliance' },
   { value: 'eiji', label: '异界 eiji' },
+  { value: 'toy', label: '玩具 toy' },
 ]
 
 const rarityFilter = ref('')

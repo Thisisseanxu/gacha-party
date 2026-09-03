@@ -135,6 +135,7 @@ const THEME_ORDER = [
   'water',
   'appliance',
   'eiji',
+  'toy',
 ]
 const RARITY_ORDER = [SP, SSR, SR, R]
 

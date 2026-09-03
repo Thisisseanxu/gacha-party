@@ -1,5 +1,41 @@
 [
   {
+    "id": "2203",
+    "name": "飞镖火箭",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2203.webp",
+    "realname": "菲洛",
+    "theme": "toy",
+    "qban_url": "/images/qban/2203.webp"
+  },
+  {
+    "id": "2204",
+    "name": "幸运夹爪",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2204.webp",
+    "realname": "芙妮",
+    "theme": "toy",
+    "qban_url": "/images/qban/2204.webp"
+  },
+  {
+    "id": "2201",
+    "name": "缤纷扭蛋",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2201.webp",
+    "realname": "青瑶",
+    "theme": "toy",
+    "qban_url": "/images/qban/2201.webp"
+  },
+  {
+    "id": "2202",
+    "name": "泪汪地鼠机",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2202.webp",
+    "realname": "咚咚栗",
+    "theme": "toy",
+    "qban_url": "/images/qban/2202.webp"
+  },
+  {
     "id": "2105",
     "name": "鲸之圣女",
     "rarity": "SP",
