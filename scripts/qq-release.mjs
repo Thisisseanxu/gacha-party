@@ -6,8 +6,9 @@ import process from 'node:process'
 const PRIVATE_DIRECTORY = resolve('.qqbot')
 const CONFIG_FILE = resolve(PRIVATE_DIRECTORY, 'release-config.json')
 const STATE_FILE = resolve(PRIVATE_DIRECTORY, 'release-state.json')
-const VERSION_COMMIT_RE =
-  /^docs(?:\([^)]*\))?!?:\s*更新(?:主要|次要|补丁)版本号v(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\s*$/
+const PACKAGE_FILE = resolve('package.json')
+const VERSION_RE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/
+const IGNORED_COMMIT_RE = /^ci(?:\([^)]*\))?!?:\s*/
 const CONVENTIONAL_PREFIX_RE = /^[A-Za-z]+(?:\([^)]*\))?!?:\s*/
 
 function git(...args) {
@@ -30,6 +31,21 @@ function loadPrivateConfig() {
   return Object.fromEntries(required.map((key) => [key, config[key].trim()]))
 }
 
+function loadProjectVersion() {
+  let project
+  try {
+    project = JSON.parse(readFileSync(PACKAGE_FILE, 'utf8'))
+  } catch (error) {
+    throw new Error(`无法读取 ${PACKAGE_FILE}：${error.message}`, { cause: error })
+  }
+
+  const version = typeof project.version === 'string' ? project.version.trim() : ''
+  if (!VERSION_RE.test(version)) {
+    throw new Error(`${PACKAGE_FILE} 中的 version 无效：${project.version ?? '(缺失)'}`)
+  }
+  return version
+}
+
 function loadBaseCommit() {
   if (!existsSync(STATE_FILE)) return null
   try {
@@ -43,7 +59,7 @@ function loadBaseCommit() {
   }
 }
 
-function collectRelease(baseCommit) {
+function collectRelease(baseCommit, version) {
   const headCommit = git('rev-parse', 'main')
   const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', baseCommit, headCommit])
   if (ancestor.status !== 0) {
@@ -66,24 +82,14 @@ function collectRelease(baseCommit) {
     return { baseCommit, headCommit, commits, updates: [], version: null, content: null }
   }
 
-  let version = null
   const updates = []
   for (const commit of commits) {
-    const versionMatch = commit.subject.match(VERSION_COMMIT_RE)
-    if (versionMatch) {
-      version = versionMatch[1]
-      continue
-    }
+    if (IGNORED_COMMIT_RE.test(commit.subject)) continue
     const summary = commit.subject.replace(CONVENTIONAL_PREFIX_RE, '').trim()
     if (summary) updates.push({ ...commit, summary })
   }
-  if (!version) {
-    throw new Error(
-      '新增提交中没有找到“docs: 更新主要/次要/补丁版本号v...”提交，无法确定版本号',
-    )
-  }
   if (updates.length === 0) {
-    throw new Error('除版本号提交外没有可发送的更新内容')
+    return { baseCommit, headCommit, commits, updates, version: null, content: null }
   }
 
   const content = `织夜工具箱v${version}更新\n${updates.map(({ summary }) => `- ${summary}`).join('\n')}`
@@ -138,7 +144,7 @@ async function main() {
     }
     return
   }
-  const release = collectRelease(baseCommit)
+  const release = collectRelease(baseCommit, loadProjectVersion())
 
   if (!release.content) {
     console.log('main 分支没有尚未发送的新提交。')
