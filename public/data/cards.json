@@ -1,5 +1,32 @@
 [
   {
+    "id": "2206",
+    "name": "奇迹陀螺",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2206.webp",
+    "realname": "桃尔丝",
+    "theme": "toy",
+    "qban_url": "/images/qban/2206.webp"
+  },
+  {
+    "id": "2207",
+    "name": "咔哒鳄口",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2207.webp",
+    "realname": "卡妲",
+    "theme": "toy",
+    "qban_url": "/images/qban/2207.webp"
+  },
+  {
+    "id": "2205",
+    "name": "迷幻魔方",
+    "rarity": "SSR",
+    "imageUrl": "/images/characters/2205.webp",
+    "realname": "艾璐",
+    "theme": "toy",
+    "qban_url": "/images/qban/2205.webp"
+  },
+  {
     "id": "2203",
     "name": "飞镖火箭",
     "rarity": "SP",
