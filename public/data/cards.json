@@ -1,5 +1,23 @@
 [
   {
+    "id": "1901",
+    "name": "太极宗师",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1901.webp",
+    "realname": "墨乾",
+    "theme": "water",
+    "qban_url": "/images/qban/1901.webp"
+  },
+  {
+    "id": "2106",
+    "name": "史莱姆猫娘",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2106.webp",
+    "realname": "垚垚",
+    "theme": "eiji",
+    "qban_url": "/images/qban/2106.webp"
+  },
+  {
     "id": "2206",
     "name": "奇迹陀螺",
     "rarity": "SP",

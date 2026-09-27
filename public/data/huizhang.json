@@ -1054,6 +1054,16 @@
         "attack"
       ]
     },
+    "1901": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
     "1902": {
       "shape": [
         "defence",
@@ -1215,6 +1225,16 @@
       ]
     },
     "2105": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2106": {
       "shape": [
         "defence",
         "defence",
