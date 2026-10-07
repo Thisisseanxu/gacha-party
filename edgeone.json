@@ -2,6 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "./dist",
   "nodeVersion": "24.5.0",
+  "rewrites": [{ "source": "/data/luck-ranking.json", "destination": "/api/luck-ranking-index" }],
   "headers": [
     {
       "source": "/*.html",
@@ -110,6 +111,32 @@
           "value": "public, max-age=7776000"
         }
       ]
+    }
+  ],
+  "cloudFunctions": {
+    "nodejs": { "maxDuration": 120 }
+  },
+  "schedules": [
+    {
+      "name": "luck-ranking-start",
+      "cron": "15 3 * * *",
+      "path": "/api/internal/luck-ranking-update",
+      "method": "POST",
+      "timezone": "Asia/Shanghai"
+    },
+    {
+      "name": "luck-ranking-continue-1",
+      "cron": "20 3 * * *",
+      "path": "/api/internal/luck-ranking-update",
+      "method": "POST",
+      "timezone": "Asia/Shanghai"
+    },
+    {
+      "name": "luck-ranking-continue-2",
+      "cron": "25 3 * * *",
+      "path": "/api/internal/luck-ranking-update",
+      "method": "POST",
+      "timezone": "Asia/Shanghai"
     }
   ]
 }

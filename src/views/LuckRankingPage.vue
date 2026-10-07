@@ -512,7 +512,7 @@ async function loadPoolBoard(poolId, { force = false } = {}) {
   setPoolError(poolId, '')
   try {
     const response = await fetch(
-      `${POOL_DATA_BASE_URL}/${encodeURIComponent(poolId)}.json?_=${Date.now()}`,
+      `${POOL_DATA_BASE_URL}/${encodeURIComponent(poolId)}.json?v=${encodeURIComponent(expectedGeneratedAt)}&_=${Date.now()}`,
       { cache: 'no-store', headers: { Accept: 'application/json' } },
     )
     if (!response.ok) throw new Error(`HTTP ${response.status}`)

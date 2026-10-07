@@ -47,3 +47,4 @@ dev-dist
 
 hz-guides-export.json
 /.qqbot/
+/.generated/

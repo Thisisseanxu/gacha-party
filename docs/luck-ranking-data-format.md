@@ -2,6 +2,8 @@
 
 排行榜使用一个轻量索引和按卡池拆分的详情文件。页面首次只读取总榜与卡池索引，用户选择卡池时才加载对应详情；浏览器不会重新计算或调整名次。
 
+`eodev` 已接入云端更新试验：公开 URL 和本文 JSON 格式保持不变，部署后由 Cloud Functions 从 Blob 提供数据，`public/data` 中的文件作为初始回退及验证基准。部署和验证见 [云端更新说明](luck-ranking-cloud.md)。
+
 ## 文件要求
 
 - 索引：`public/data/luck-ranking.json`
