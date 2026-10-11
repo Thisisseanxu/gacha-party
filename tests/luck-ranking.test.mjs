@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
+import { Buffer } from 'node:buffer'
 import { test } from 'node:test'
-import { gzipSync } from 'node:zlib'
+import { gzipSync, gunzipSync } from 'node:zlib'
 import { PreconditionFailedError } from '@edgeone/pages-blob'
 import {
   createRankingEngine,
@@ -18,7 +19,8 @@ import {
 } from '../cloud-functions/_shared/luck-ranking-job.js'
 import {
   publishRanking,
-  readRanking,
+  readRankingBundle,
+  migrateCurrentRanking,
   versionPrefix,
   seedRanking,
   cleanupRanking,
@@ -26,8 +28,16 @@ import {
 import { createRankingSource } from '../cloud-functions/_shared/luck-ranking-source.js'
 import { signSourceRequest, verifySourceRequest } from '../lib/luck-ranking/source-auth.js'
 import { onRequest as sourceHandler } from '../edge-functions/api/internal/luck-ranking-source.js'
-import { onRequestGet as indexHandler } from '../cloud-functions/api/luck-ranking-index.js'
-import { onRequestGet as poolHandler } from '../cloud-functions/data/luck-ranking-pools/[file].js'
+import {
+  onRequestGet as bundleHandler,
+  createRankingBundleHandler,
+} from '../cloud-functions/api/luck-ranking-bundle.js'
+import {
+  createLuckRankingClient,
+  LUCK_RANKING_CACHE_KEY,
+  LUCK_RANKING_REFRESH_MS,
+} from '../src/utils/luckRankingClient.js'
+import { encodeRankingBundle } from '../lib/luck-ranking/bundle.js'
 import { withRankingLock } from '../cloud-functions/_shared/luck-ranking-lock.js'
 import { createRankingUpdateHandler } from '../cloud-functions/_shared/luck-ranking-handler.js'
 import { signAdminToken } from '../edge-functions/_shared/admin-login.js'
@@ -111,6 +121,232 @@ class MemoryStore {
     }
   }
 }
+
+test('ETag revalidation reads only the current pointer and returns no gzip body', async () => {
+  const store = new MemoryStore()
+  await publishRanking(store, calculate({ 1234567: { 1: records(10, 5) } }))
+  const initial = await readRankingBundle(store)
+  const reads = []
+  const get = store.get.bind(store)
+  store.get = async (key, options) => {
+    reads.push(key)
+    return get(key, options)
+  }
+  const handle = createRankingBundleHandler({ getStore: () => store })
+  const response = await handle({
+    request: new Request('https://example.com/api/luck-ranking-bundle', {
+      headers: { 'If-None-Match': `"another-version", W/${initial.etag}` },
+    }),
+  })
+  assert.equal(response.status, 304)
+  assert.equal(response.headers.get('ETag'), initial.etag)
+  assert.equal(response.headers.get('Content-Encoding'), null)
+  assert.equal(await response.text(), '')
+  assert.deepEqual(reads, ['current.json'])
+  const next = calculate({ 1234567: { 1: records(20, 5) } })
+  next.index.generatedAt = '2026-10-08T07:00:00.000Z'
+  await publishRanking(store, next)
+  const changed = await handle({
+    request: new Request('https://example.com/api/luck-ranking-bundle', {
+      headers: { 'If-None-Match': initial.etag },
+    }),
+  })
+  assert.equal(changed.status, 200)
+  assert.notEqual(changed.headers.get('ETag'), initial.etag)
+  assert.deepEqual(JSON.parse(gunzipSync(await changed.arrayBuffer())).details, next.details)
+})
+
+test('old Blob snapshots remain downloadable and migrate even on a completed day', async () => {
+  const store = new MemoryStore()
+  const ranking = calculate({ 1234567: { 1: records(10, 5) } })
+  const prefix = versionPrefix(generatedAt)
+  const checkpointKey = `jobs/2026-10-07/${configVersion}/checkpoint.gz`
+  await store.setJSON(`${prefix}index.json`, ranking.index)
+  for (const [id, detail] of Object.entries(ranking.details))
+    await store.setJSON(`${prefix}pools/${id}.json`, detail)
+  await store.setJSON('current.json', { generatedAt, checkpointKey })
+  await store.setJSON('jobs/2026-10-07/completed.json', { generatedAt })
+  const legacy = await readRankingBundle(store)
+  assert.equal(legacy.source, 'blob-legacy')
+  assert.deepEqual(JSON.parse(gunzipSync(legacy.body)).details, ranking.details)
+  store.fail = (key) => key.endsWith('/bundle.json.gz')
+  await assert.rejects(migrateCurrentRanking(store))
+  assert.deepEqual(await store.get('current.json', { type: 'json' }), {
+    generatedAt,
+    checkpointKey,
+  })
+  store.fail = null
+  const result = await runRankingJob({
+    store,
+    config,
+    configVersion,
+    day: '2026-10-07',
+    slot: 'migration',
+    source: {
+      async list() {
+        throw new Error('Must not recompute completed day')
+      },
+    },
+    deadline: Date.now() + 100_000,
+  })
+  assert.equal(result.status, 'already-complete')
+  const pointer = await store.get('current.json', { type: 'json' })
+  assert.equal(pointer.bundleSchemaVersion, 1)
+  assert.equal(pointer.checkpointKey, checkpointKey)
+  assert.equal(pointer.etag, legacy.etag)
+  assert.equal((await readRankingBundle(store, legacy.etag)).status, 304)
+})
+
+test('the sole public route sends gzip seed data and does not expose old paths or private state', async () => {
+  const handle = createRankingBundleHandler({
+    getStore: () => {
+      throw new Error('No local Blob identity')
+    },
+  })
+  const response = await handle({
+    request: new Request('https://example.com/api/luck-ranking-bundle'),
+  })
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('Content-Encoding'), 'gzip')
+  const bundle = JSON.parse(gunzipSync(await response.arrayBuffer()))
+  assert.deepEqual(Object.keys(bundle), ['dataType', 'schemaVersion', 'index', 'details'])
+  assert.deepEqual(bundle.index, seedRanking.index)
+  assert.deepEqual(bundle.details, seedRanking.details)
+  for (const pathname of [
+    '/data/luck-ranking.json',
+    '/api/luck-ranking-index',
+    '/data/luck-ranking-pools/a.json',
+  ]) {
+    assert.equal(
+      (await bundleHandler({ request: new Request(`https://example.com${pathname}`) })).status,
+      404,
+    )
+  }
+  const broken = createRankingBundleHandler({
+    getStore: () => ({
+      async get() {
+        throw new Error('Blob unavailable')
+      },
+    }),
+  })
+  const error = await broken({
+    request: new Request('https://example.com/api/luck-ranking-bundle'),
+  })
+  assert.equal(error.status, 503)
+  assert.equal(error.headers.get('Content-Encoding'), null)
+})
+
+test('HTTP Fetch transparently decompresses the bundle for response.json()', async () => {
+  const { createServer } = await import('node:http')
+  const handle = createRankingBundleHandler({ getStore: () => new MemoryStore() })
+  const server = createServer(async (request, response) => {
+    const result = await handle({ request: new Request(`http://localhost${request.url}`) })
+    response.writeHead(result.status, Object.fromEntries(result.headers))
+    response.end(Buffer.from(await result.arrayBuffer()))
+  })
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:${server.address().port}/api/luck-ranking-bundle`,
+    )
+    assert.equal(response.headers.get('Content-Encoding'), 'gzip')
+    const bundle = await response.json()
+    assert.deepEqual(bundle.details, seedRanking.details)
+  } finally {
+    await new Promise((resolve) => server.close(resolve))
+  }
+})
+
+function browserStorage() {
+  const values = new Map()
+  return {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  }
+}
+
+function publicBundle(ranking) {
+  return JSON.parse(gunzipSync(encodeRankingBundle(ranking).body))
+}
+
+test('client downloads all pools once, shares an hourly cache and revalidates with 304', async () => {
+  let time = Date.parse(generatedAt)
+  const localStorage = browserStorage()
+  let calls = 0
+  const data = publicBundle(calculate({ 1234567: { 1: records(10, 5) } }))
+  const etag = encodeRankingBundle(data).etag
+  const fetcher = async (url, options) => {
+    calls++
+    assert.equal(url, '/api/luck-ranking-bundle')
+    assert.equal(options.cache, 'no-cache')
+    if (calls === 1) return Response.json(data, { headers: { ETag: etag } })
+    assert.equal(options.headers['If-None-Match'], etag)
+    return new Response(null, { status: 304, headers: { ETag: etag } })
+  }
+  const options = { fetcher, storage: () => localStorage, now: () => time }
+  const client = createLuckRankingClient(options)
+  const [a, b] = await Promise.all([client.load(), client.load()])
+  assert.equal(a, b)
+  assert.equal(a.normalized.details.size, data.index.pools.length)
+  assert.equal(calls, 1)
+  time += LUCK_RANKING_REFRESH_MS - 1
+  const revisit = createLuckRankingClient(options)
+  assert.deepEqual((await revisit.load()).data, data)
+  assert.equal(calls, 1)
+  time++
+  const checked = await revisit.load()
+  assert.equal(calls, 2)
+  assert.equal(checked.checkedAt, time)
+  assert.deepEqual(checked.data, data)
+  time += 1
+  await client.load()
+  assert.equal(calls, 2)
+})
+
+test('client atomically replaces versions and retains a valid bundle on broken responses', async () => {
+  let time = Date.parse(generatedAt)
+  const localStorage = browserStorage()
+  const old = publicBundle(calculate({ 1234567: { 1: records(10, 5) } }))
+  const next = publicBundle(calculate({ 1234567: { 1: records(20, 5) } }))
+  next.index.generatedAt = '2026-10-08T07:00:00.000Z'
+  let reply = Response.json(old, { headers: { ETag: '"old"' } })
+  const client = createLuckRankingClient({
+    fetcher: async () => reply,
+    storage: () => localStorage,
+    now: () => time,
+  })
+  await client.load()
+  time += LUCK_RANKING_REFRESH_MS
+  reply = new Response(null, { status: 503 })
+  await assert.rejects(client.load(), /503/)
+  assert.deepEqual(client.getCached().data, old)
+  const incomplete = structuredClone(next)
+  delete incomplete.details.a
+  reply = Response.json(incomplete)
+  await assert.rejects(client.load(), /数量/)
+  assert.deepEqual(JSON.parse(localStorage.getItem(LUCK_RANKING_CACHE_KEY)).data, old)
+  reply = Response.json(next, { headers: { ETag: '"new"' } })
+  const updated = await client.load()
+  assert.equal(updated.normalized.index.generatedAt, next.index.generatedAt)
+  assert.deepEqual(updated.normalized.details.get('a').lucky[0].averagePulls, 20)
+  assert.equal(updated.etag, '"new"')
+})
+
+test('disabled local storage still caches the full bundle in memory', async () => {
+  let calls = 0
+  const client = createLuckRankingClient({
+    fetcher: async () => {
+      calls++
+      return Response.json(publicBundle(seedRanking))
+    },
+    storage: () => {
+      throw new Error('Storage disabled')
+    },
+  })
+  await client.load()
+  await client.load()
+  assert.equal(calls, 1)
+})
 
 test('matches Python binary-float rounding, including half-even and inexact halves', () => {
   for (const [input, expected] of [
@@ -299,34 +535,48 @@ test('HTTP source integration paginates, splits oversized batches, and preserves
   assert.equal(reads, 2)
 })
 
-test('publication is atomic at the pointer; pinned old versions remain readable', async () => {
+test('publication writes only the gzip bundle and pointer; failed writes preserve the old snapshot', async () => {
   const store = new MemoryStore()
   const old = calculate({ 1234567: { 1: records(10, 5) } })
   await publishRanking(store, old)
   assert.equal(store.writes.at(-1), 'current.json')
+  assert.equal(store.writes.length, 2)
+  assert.ok(store.writes[0].endsWith('/bundle.json.gz'))
+  const oldBundle = await readBundleJSON(store)
+  assert.deepEqual(oldBundle.index, old.index)
+  assert.deepEqual(oldBundle.details, old.details)
   const next = calculate({ 1234567: { 1: records(20, 5) } })
   next.index.generatedAt = '2026-10-08T07:00:00.000Z'
-  store.fail = (key) =>
-    key.startsWith(versionPrefix(next.index.generatedAt)) && key.includes('/pools/')
-  await assert.rejects(publishRanking(store, next))
-  assert.deepEqual((await readRanking(store)).body, old.index)
+  for (const failedKey of [
+    versionPrefix(next.index.generatedAt) + 'bundle.json.gz',
+    'current.json',
+  ]) {
+    store.fail = (key) => key === failedKey
+    await assert.rejects(publishRanking(store, next))
+    assert.deepEqual((await readBundleJSON(store)).index, old.index)
+  }
   store.fail = null
   await publishRanking(store, next)
-  assert.deepEqual((await readRanking(store, 'a', old.index.generatedAt)).body, old.details.a)
-  assert.deepEqual((await readRanking(store)).body, next.index)
-  assert.equal((await readRanking(store, '../private')).status, 400)
-  assert.equal((await readRanking(store, 'a', 'bad')).status, 400)
-  assert.equal((await readRanking(store, 'a', '2026-10-09T07:00:00.000Z')).status, 404)
+  assert.deepEqual((await readBundleJSON(store)).index, next.index)
+  assert.deepEqual((await readBundleJSON(store)).details, next.details)
 })
 
-test('empty Blob uses the packaged seed and never substitutes a missing pinned version', async () => {
+async function readBundleJSON(store) {
+  const result = await readRankingBundle(store)
+  assert.equal(result.status, 200)
+  return JSON.parse(gunzipSync(result.body))
+}
+
+test('empty Blob uses the precompressed seed, but missing published bundles fail', async () => {
   const store = new MemoryStore()
-  assert.deepEqual((await readRanking(store)).body, seedRanking.index)
-  assert.equal(
-    (await readRanking(store, seedRanking.index.pools[0][0], seedRanking.index.generatedAt)).source,
-    'seed',
-  )
-  assert.equal((await readRanking(store, 'a', generatedAt)).status, 404)
+  const result = await readRankingBundle(store)
+  assert.equal(result.source, 'seed')
+  const bundle = JSON.parse(gunzipSync(result.body))
+  assert.deepEqual(bundle.index, seedRanking.index)
+  assert.deepEqual(bundle.details, seedRanking.details)
+  await publishRanking(store, calculate({ 1234567: { 1: records(10, 5) } }))
+  await store.delete(versionPrefix(generatedAt) + 'bundle.json.gz')
+  await assert.rejects(readRankingBundle(store), /missing/)
 })
 
 test('daily job resumes after its budget, de-duplicates ticks and publishes exactly once', async () => {
@@ -393,7 +643,7 @@ test('failed batches resume the last committed checkpoint without losing the pre
     deadline: Date.now() + 100_000,
   }
   await assert.rejects(runRankingJob({ ...options, slot: '03-15' }))
-  assert.deepEqual((await readRanking(store)).body, old.index)
+  assert.deepEqual((await readBundleJSON(store)).index, old.index)
   fail = false
   assert.equal((await runRankingJob({ ...options, slot: '03-20' })).players, 65)
 })
@@ -430,7 +680,7 @@ test('cleanup bounds deletion and keeps the active published version even when o
   await cleanupRanking(store, Date.parse(generatedAt))
   assert.equal(await store.get('jobs/2026-08-01/expired'), null)
   assert.equal(await store.get('versions/2026-08-02/unused/index.json'), null)
-  assert.deepEqual((await readRanking(store)).body, old.index)
+  assert.deepEqual((await readBundleJSON(store)).index, old.index)
 })
 
 test('preview performs no Blob writes and produces the same masked output', async () => {
@@ -553,7 +803,7 @@ test('authenticated manual handler publishes with automatic updates off and can 
   const pointer = await store.get('current.json', { type: 'json' })
   assert.notEqual(pointer.checkpointKey, oldPointer.checkpointKey)
   assert.notEqual(pointer.generatedAt, oldPointer.generatedAt)
-  assert.deepEqual((await readRanking(store, 'a')).body.lucky, [['12***67', 100, 20, [5, 0]]])
+  assert.deepEqual((await readBundleJSON(store)).details.a.lucky, [['12***67', 100, 20, [5, 0]]])
   assert.equal([...store.values.keys()].filter((key) => key.startsWith('locks/')).length, 0)
   assert.equal([...store.values.keys()].filter((key) => key.startsWith('ticks/')).length, 0)
 })
@@ -767,40 +1017,12 @@ test('manual handler preserves the old published version on Blob failure and res
     }),
     env,
   }
-  store.fail = (key) => key.startsWith('versions/2026-10-11/') && key.includes('/pools/')
+  store.fail = (key) => key.startsWith('versions/2026-10-11/') && key.endsWith('/bundle.json.gz')
   assert.equal((await handle(context)).status, 503)
-  assert.deepEqual((await readRanking(store)).body, old.index)
+  assert.deepEqual((await readBundleJSON(store)).index, old.index)
   store.fail = null
   assert.equal((await (await handle(context)).json()).status, 'published')
   assert.equal(lists, 1)
   assert.equal(reads, 1)
-  assert.deepEqual((await readRanking(store, 'a')).body.lucky, [['12***67', 100, 20, [5, 0]]])
-})
-
-test('dynamic data routes reject unrelated paths and serve the seed without Blob configuration', async () => {
-  const response = await indexHandler({
-    request: new Request('https://example.com/data/luck-ranking.json'),
-  })
-  assert.equal(response.status, 200)
-  assert.deepEqual(await response.json(), seedRanking.index)
-  assert.equal(
-    (await indexHandler({ request: new Request('https://example.com/data/private.json') })).status,
-    404,
-  )
-  const id = seedRanking.index.pools[0][0]
-  const pool = await poolHandler({
-    request: new Request(
-      `https://example.com/data/luck-ranking-pools/${id}.json?v=${encodeURIComponent(seedRanking.index.generatedAt)}`,
-    ),
-  })
-  assert.equal(pool.status, 200)
-  assert.deepEqual(await pool.json(), seedRanking.details[id])
-  assert.equal(
-    (
-      await poolHandler({
-        request: new Request('https://example.com/data/luck-ranking-pools/invalid.txt'),
-      })
-    ).status,
-    404,
-  )
+  assert.deepEqual((await readBundleJSON(store)).details.a.lucky, [['12***67', 100, 20, [5, 0]]])
 })

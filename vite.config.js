@@ -7,12 +7,14 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import pkg from './package.json'
 import { devEditorPlugin } from './plugins/dev-editor-plugin.js'
 import { publicJsonDataPlugin } from './plugins/public-json-data-plugin.js'
+import { luckRankingDevPlugin } from './plugins/luck-ranking-dev-plugin.js'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    luckRankingDevPlugin(root),
     publicJsonDataPlugin(root),
     devEditorPlugin(), // 可视化配置编辑器
     vueDevTools({

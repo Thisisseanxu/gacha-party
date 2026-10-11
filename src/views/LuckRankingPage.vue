@@ -114,19 +114,6 @@
             <button type="button" @click="loadRankingData()">重新加载</button>
           </div>
 
-          <div v-else-if="!isTotalScope && isActivePoolLoading" class="state-panel">
-            <span class="state-spinner"></span>
-            <h2>正在读取卡池榜单</h2>
-            <p>{{ selectedPoolName }}的数据正在加载。</p>
-          </div>
-
-          <div v-else-if="!isTotalScope && activePoolError" class="state-panel error-state">
-            <span class="state-icon">!</span>
-            <h2>卡池榜单加载失败</h2>
-            <p>{{ activePoolError }}</p>
-            <button type="button" @click="loadPoolBoard(selectedScopeId)">重新加载</button>
-          </div>
-
           <template v-else-if="activeBoard && (isTotalScope || activeBoardHasEntries)">
             <div class="board-heading">
               <div class="scope-title">
@@ -275,18 +262,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { cardMap } from '@/data/cards.js'
 import { cardPoolsInOrder, isCardPoolAvailable } from '@/data/cardPools.js'
-import { normalizeLuckRankingIndex, normalizeLuckRankingPoolData } from '@/utils/luckRankingData.js'
+import { createLuckRankingClient, LUCK_RANKING_REFRESH_MS } from '@/utils/luckRankingClient.js'
 
-const DATA_URL = '/data/luck-ranking.json'
-const POOL_DATA_BASE_URL = '/data/luck-ranking-pools'
-const REFRESH_INTERVAL_SECONDS = 60 * 60
-const CACHE_KEY = 'gacha-party-luck-ranking-index-cache-v2'
-const POOL_CACHE_PREFIX = 'gacha-party-luck-ranking-pool-cache-v2:'
+const rankingClient = createLuckRankingClient()
 
 const rankingData = ref(null)
 const poolBoards = ref(new Map())
-const loadingPoolIds = ref(new Set())
-const poolErrors = ref(new Map())
 const isInitialLoading = ref(true)
 const refreshError = ref('')
 const lastCheckedAt = ref(null)
@@ -298,9 +279,7 @@ const mobilePoolOpen = ref(false)
 const showDropDetails = ref(true)
 
 let refreshTimer = null
-let requestSequence = 0
-let indexRequestInFlight = false
-const poolRequestsInFlight = new Map()
+let bundleRequestInFlight = false
 
 const dataPoolsById = computed(
   () => new Map((rankingData.value?.pools || []).map((pool) => [pool.poolId, pool])),
@@ -381,8 +360,6 @@ const activeBoardShowsDrops = computed(() => activeBoardCanShowDrops.value && sh
 const activeBoardHasEntries = computed(
   () => (activeBoard.value?.lucky.length || 0) + (activeBoard.value?.unlucky.length || 0) > 0,
 )
-const isActivePoolLoading = computed(() => loadingPoolIds.value.has(selectedScopeId.value))
-const activePoolError = computed(() => poolErrors.value.get(selectedScopeId.value) || '')
 const rangeText = computed(() => {
   if (!activeBoard.value) return ''
   return `${formatDate(activeBoard.value.range.start)} — ${formatDate(activeBoard.value.range.end)}`
@@ -445,114 +422,21 @@ function getSpName(cardId) {
 function selectScope(scopeId) {
   selectedScopeId.value = scopeId
   mobilePoolOpen.value = false
-  if (scopeId !== 'total') loadPoolBoard(scopeId)
 }
 
-function loadLocalCache() {
-  try {
-    const cached = JSON.parse(window.localStorage.getItem(CACHE_KEY) || 'null')
-    if (!cached || !Number.isFinite(cached.cachedAt) || !cached.data) return false
-
-    if (lastCheckedAt.value && cached.cachedAt < lastCheckedAt.value) return false
-    const normalized = normalizeLuckRankingIndex(cached.data)
-    if (rankingData.value && rankingData.value.generatedAt !== normalized.generatedAt) {
-      poolBoards.value = new Map()
-      poolErrors.value = new Map()
-    }
-    rankingData.value = normalized
-    lastCheckedAt.value = cached.cachedAt
-    isInitialLoading.value = false
-    return true
-  } catch {
-    return false
-  }
-}
-
-function poolCacheKey(poolId) {
-  return `${POOL_CACHE_PREFIX}${poolId}`
-}
-
-function loadCachedPoolBoard(poolId) {
-  try {
-    const cached = JSON.parse(window.localStorage.getItem(poolCacheKey(poolId)) || 'null')
-    if (!cached || cached.generatedAt !== rankingData.value?.generatedAt || !cached.data)
-      return false
-    const board = normalizeLuckRankingPoolData(cached.data, poolId)
-    poolBoards.value = new Map(poolBoards.value).set(poolId, board)
-    return true
-  } catch {
-    return false
-  }
-}
-
-function savePoolCache(poolId, data, generatedAt) {
-  try {
-    window.localStorage.setItem(poolCacheKey(poolId), JSON.stringify({ generatedAt, data }))
-  } catch {
-    // 缓存不可用时仅影响离线读取，不影响当前页面。
-  }
-}
-
-function setPoolLoading(poolId, loading) {
-  const next = new Set(loadingPoolIds.value)
-  if (loading) next.add(poolId)
-  else next.delete(poolId)
-  loadingPoolIds.value = next
-}
-
-function setPoolError(poolId, message) {
-  const next = new Map(poolErrors.value)
-  if (message) next.set(poolId, message)
-  else next.delete(poolId)
-  poolErrors.value = next
-}
-
-async function loadPoolBoard(poolId) {
-  poolId = String(poolId)
-  if (!rankingData.value || !dataPoolsById.value.has(poolId)) return
-  if (poolBoards.value.has(poolId)) return
-  if (loadCachedPoolBoard(poolId)) return
-
-  const expectedGeneratedAt = rankingData.value.generatedAt
-  if (poolRequestsInFlight.get(poolId) === expectedGeneratedAt) return
-  poolRequestsInFlight.set(poolId, expectedGeneratedAt)
-  setPoolLoading(poolId, true)
-  setPoolError(poolId, '')
-  try {
-    const response = await fetch(
-      `${POOL_DATA_BASE_URL}/${encodeURIComponent(poolId)}.json?v=${encodeURIComponent(expectedGeneratedAt)}&_=${Date.now()}`,
-      { cache: 'no-store', headers: { Accept: 'application/json' } },
-    )
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const rawData = await response.json()
-    const board = normalizeLuckRankingPoolData(rawData, poolId)
-    if (rankingData.value?.generatedAt !== expectedGeneratedAt) return
-    poolBoards.value = new Map(poolBoards.value).set(poolId, board)
-    savePoolCache(poolId, rawData, expectedGeneratedAt)
-  } catch (error) {
-    if (rankingData.value?.generatedAt === expectedGeneratedAt)
-      setPoolError(poolId, error instanceof Error ? error.message : '未知错误')
-  } finally {
-    if (poolRequestsInFlight.get(poolId) === expectedGeneratedAt) {
-      poolRequestsInFlight.delete(poolId)
-      setPoolLoading(poolId, false)
-    }
-  }
-}
-
-function saveLocalCache(data, cachedAt) {
-  try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify({ cachedAt, data }))
-  } catch {
-    // 隐私模式或存储空间不足时仍可正常显示本次网络数据。
-  }
+function applySnapshot(snapshot) {
+  if (!snapshot) return
+  rankingData.value = snapshot.normalized.index
+  poolBoards.value = snapshot.normalized.details
+  lastCheckedAt.value = snapshot.checkedAt
+  isInitialLoading.value = false
 }
 
 function scheduleRefresh() {
   if (refreshTimer) window.clearTimeout(refreshTimer)
   const latestActivityAt = Math.max(lastCheckedAt.value || 0, lastRefreshAttemptAt.value || 0)
   const elapsed = latestActivityAt ? Date.now() - latestActivityAt : 0
-  const delay = Math.max(1000, REFRESH_INTERVAL_SECONDS * 1000 - elapsed)
+  const delay = Math.max(1000, LUCK_RANKING_REFRESH_MS - elapsed)
   refreshTimer = window.setTimeout(async () => {
     await loadRankingData()
     scheduleRefresh()
@@ -560,61 +444,22 @@ function scheduleRefresh() {
 }
 
 async function loadRankingData() {
-  if (indexRequestInFlight) return
-  // Re-read shared browser storage so revisits and other tabs reuse a fresh index.
-  loadLocalCache()
-  if (rankingCacheIsFresh()) {
-    if (selectedScopeId.value !== 'total') await loadPoolBoard(selectedScopeId.value)
-    return
-  }
-  indexRequestInFlight = true
-  const requestId = ++requestSequence
+  if (bundleRequestInFlight) return
+  const cached = rankingClient.getCached()
+  applySnapshot(cached)
+  const elapsed = Date.now() - (cached?.checkedAt || 0)
+  if (cached && elapsed >= 0 && elapsed < LUCK_RANKING_REFRESH_MS) return
+  bundleRequestInFlight = true
   lastRefreshAttemptAt.value = Date.now()
-  if (!rankingData.value) isInitialLoading.value = true
-
   try {
-    const url = `${DATA_URL}?_=${Date.now()}`
-    const response = await fetch(url, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const rawData = await response.json()
-    const normalized = normalizeLuckRankingIndex(rawData)
-    if (requestId !== requestSequence) return
-    const checkedAt = Date.now()
-    const versionChanged =
-      rankingData.value?.generatedAt && rankingData.value.generatedAt !== normalized.generatedAt
-    rankingData.value = normalized
-    if (versionChanged) {
-      poolBoards.value = new Map()
-      poolErrors.value = new Map()
-    }
+    applySnapshot(await rankingClient.load())
     refreshError.value = ''
-    lastCheckedAt.value = checkedAt
-    saveLocalCache(rawData, checkedAt)
-    if (selectedScopeId.value !== 'total' && dataPoolsById.value.has(selectedScopeId.value)) {
-      await loadPoolBoard(selectedScopeId.value)
-    }
   } catch (error) {
-    if (requestId !== requestSequence) return
     refreshError.value = error instanceof Error ? error.message : '未知错误'
   } finally {
-    indexRequestInFlight = false
-    if (requestId === requestSequence) {
-      isInitialLoading.value = false
-    }
+    bundleRequestInFlight = false
+    isInitialLoading.value = false
   }
-}
-
-function rankingCacheIsFresh() {
-  const elapsed = Date.now() - lastCheckedAt.value
-  return Boolean(
-    rankingData.value &&
-    lastCheckedAt.value &&
-    elapsed >= 0 &&
-    elapsed < REFRESH_INTERVAL_SECONDS * 1000,
-  )
 }
 
 async function manualRefresh() {
@@ -625,7 +470,7 @@ async function manualRefresh() {
 function refreshWhenVisible() {
   if (document.visibilityState !== 'visible') return
   const latestActivityAt = Math.max(lastCheckedAt.value || 0, lastRefreshAttemptAt.value || 0)
-  if (!latestActivityAt || Date.now() - latestActivityAt >= REFRESH_INTERVAL_SECONDS * 1000) {
+  if (!latestActivityAt || Date.now() - latestActivityAt >= LUCK_RANKING_REFRESH_MS) {
     manualRefresh()
   }
 }

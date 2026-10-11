@@ -2,7 +2,7 @@ import { PreconditionFailedError } from '@edgeone/pages-blob'
 import { randomBytes } from 'node:crypto'
 import { createRankingEngine } from './luck-ranking-engine.js'
 import { decodeRecord, decodeCheckpoint, encodeCheckpoint } from './luck-ranking-codec.js'
-import { publishRanking } from './luck-ranking-storage.js'
+import { publishRanking, migrateCurrentRanking } from './luck-ranking-storage.js'
 import { withRankingLock } from './luck-ranking-lock.js'
 
 export function automaticTick(now = Date.now()) {
@@ -28,6 +28,7 @@ async function runUnlockedJob({
   now = Date.now,
   manual = false,
 }) {
+  await migrateCurrentRanking(store)
   // Automatic retries in the same five-minute bucket are de-duplicated. The
   // shared lock, rather than wall-clock admission windows, prevents overlaps.
   if (!manual) {

@@ -1,4 +1,5 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises'
+import { encodeRankingBundle } from '../lib/luck-ranking/bundle.js'
 import {
   normalizeLuckRankingIndex,
   normalizeLuckRankingPoolData,
@@ -19,5 +20,10 @@ await mkdir(new URL('.generated/', root), { recursive: true })
 await writeFile(
   new URL('.generated/luck-ranking-seed.json', root),
   JSON.stringify({ index, details }),
+)
+const { body, etag } = encodeRankingBundle({ index, details })
+await writeFile(
+  new URL('.generated/luck-ranking-seed-gzip.json', root),
+  JSON.stringify({ data: body.toString('base64'), etag }),
 )
 console.log(`已打包排行榜初始回退数据：${index.pools.length} 个卡池。`)

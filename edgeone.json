@@ -2,7 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "./dist",
   "nodeVersion": "24.5.0",
-  "rewrites": [{ "source": "/data/luck-ranking.json", "destination": "/api/luck-ranking-index" }],
   "headers": [
     {
       "source": "/*.html",

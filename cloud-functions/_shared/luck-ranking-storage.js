@@ -1,13 +1,19 @@
 import { createHash } from 'node:crypto'
+import { Buffer } from 'node:buffer'
 import { getStore } from '@edgeone/pages-blob'
 import seed from '../../.generated/luck-ranking-seed.json' with { type: 'json' }
+import seedGzip from '../../.generated/luck-ranking-seed-gzip.json' with { type: 'json' }
+import { encodeRankingBundle, matchesRankingEtag } from '../../lib/luck-ranking/bundle.js'
 import {
+  BUNDLE_DATA_TYPE,
+  BUNDLE_SCHEMA_VERSION,
+  normalizeLuckRankingBundle,
   normalizeLuckRankingIndex,
-  normalizeLuckRankingPoolData,
 } from '../../src/utils/luckRankingData.js'
 
 export const STORE_NAME = 'luck-ranking'
 export const seedRanking = seed
+const seedBody = Buffer.from(seedGzip.data, 'base64')
 
 export function getRankingStore(env = {}) {
   return getStore(env.LUCK_RANKING_STORE_NAME || STORE_NAME)
@@ -26,63 +32,99 @@ export function versionPrefix(generatedAt) {
 }
 
 export function validateRanking({ index, details }) {
-  normalizeLuckRankingIndex(index)
-  if (Object.keys(details).length !== index.pools.length)
-    throw new Error('Incomplete ranking details')
-  for (const [id] of index.pools) {
-    if (!/^[A-Za-z0-9_-]+$/.test(id)) throw new Error('Invalid pool ID')
-    normalizeLuckRankingPoolData(details[id], id)
-  }
+  normalizeLuckRankingBundle({
+    dataType: BUNDLE_DATA_TYPE,
+    schemaVersion: BUNDLE_SCHEMA_VERSION,
+    index,
+    details,
+  })
 }
 
 export async function publishRanking(store, ranking, checkpointKey = null) {
-  validateRanking(ranking)
+  const { body, etag } = encodeRankingBundle(ranking)
   const prefix = versionPrefix(ranking.index.generatedAt)
-  const entries = Object.entries(ranking.details)
-  for (let offset = 0; offset < entries.length; offset += 8) {
-    await Promise.all(
-      entries
-        .slice(offset, offset + 8)
-        .map(([id, detail]) =>
-          store.setJSON(`${prefix}pools/${id}.json`, detail, { cacheControl: null }),
-        ),
-    )
-  }
-  await store.setJSON(`${prefix}index.json`, ranking.index, { cacheControl: null })
-  // The pointer is replaced only after every immutable detail and the index have been written.
+  await store.set(`${prefix}bundle.json.gz`, body, { cacheControl: null })
+  // Switch the pointer only after the complete compressed public snapshot is stored.
   await store.setJSON(
     'current.json',
-    { generatedAt: ranking.index.generatedAt, ...(checkpointKey ? { checkpointKey } : {}) },
+    {
+      generatedAt: ranking.index.generatedAt,
+      bundleSchemaVersion: BUNDLE_SCHEMA_VERSION,
+      etag,
+      ...(checkpointKey ? { checkpointKey } : {}),
+    },
     { cacheControl: null },
   )
 }
 
-export async function readRanking(store, poolId = null, generatedAt = null) {
-  if (poolId != null && !/^[A-Za-z0-9_-]+$/.test(poolId)) return { status: 400 }
-  if (generatedAt != null) {
-    try {
-      versionPrefix(generatedAt)
-    } catch {
-      return { status: 400 }
+export function readSeedBundle(ifNoneMatch = null) {
+  return {
+    status: matchesRankingEtag(ifNoneMatch, seedGzip.etag) ? 304 : 200,
+    body: seedBody,
+    etag: seedGzip.etag,
+    source: 'seed',
+  }
+}
+
+function isBundlePointer(pointer) {
+  return (
+    pointer?.bundleSchemaVersion === BUNDLE_SCHEMA_VERSION &&
+    /^"luck-[a-f0-9]{64}"$/.test(pointer.etag)
+  )
+}
+
+async function readLegacyRanking(store, pointer) {
+  const prefix = versionPrefix(pointer.generatedAt)
+  const index = await store.get(`${prefix}index.json`, { type: 'json', consistency: 'strong' })
+  normalizeLuckRankingIndex(index)
+  if (index.generatedAt !== pointer.generatedAt) throw new Error('Ranking version mismatch')
+  const details = {}
+  for (let offset = 0; offset < index.pools.length; offset += 8) {
+    const entries = await Promise.all(
+      index.pools
+        .slice(offset, offset + 8)
+        .map(async ([id]) => [
+          id,
+          await store.get(`${prefix}pools/${id}.json`, { type: 'json', consistency: 'strong' }),
+        ]),
+    )
+    for (const [id, detail] of entries) details[id] = detail
+  }
+  return { index, details }
+}
+
+// Called by update jobs under the publication lock, including on already-completed days.
+export async function migrateCurrentRanking(store) {
+  const pointer = await store.get('current.json', { type: 'json', consistency: 'strong' })
+  if (pointer && !isBundlePointer(pointer)) {
+    await publishRanking(store, await readLegacyRanking(store, pointer), pointer.checkpointKey)
+  }
+}
+
+export async function readRankingBundle(store, ifNoneMatch = null) {
+  const pointer = await store.get('current.json', { type: 'json', consistency: 'strong' })
+  if (!pointer) return readSeedBundle(ifNoneMatch)
+  const prefix = versionPrefix(pointer.generatedAt)
+  if (!isBundlePointer(pointer)) {
+    // Preserve the deployed live ranking until the first update migrates its storage.
+    // This compatibility read exposes only the bundle, never the former per-pool endpoints.
+    const { body, etag } = encodeRankingBundle(await readLegacyRanking(store, pointer))
+    return {
+      status: matchesRankingEtag(ifNoneMatch, etag) ? 304 : 200,
+      body,
+      etag,
+      source: 'blob-legacy',
     }
   }
-  let pointer = null
-  try {
-    if (!generatedAt)
-      pointer = await store.get('current.json', { type: 'json', consistency: 'strong' })
-    generatedAt ||= pointer?.generatedAt
-    if (generatedAt && generatedAt !== seed.index.generatedAt) {
-      const prefix = versionPrefix(generatedAt)
-      const key = poolId == null ? `${prefix}index.json` : `${prefix}pools/${poolId}.json`
-      const body = await store.get(key, { type: 'json', consistency: 'strong' })
-      return body ? { status: 200, body, source: 'blob' } : { status: 404 }
-    }
-  } catch {
-    // A pinned version must never silently receive a different generation's details.
-    if (generatedAt && generatedAt !== seed.index.generatedAt) return { status: 503 }
+  if (matchesRankingEtag(ifNoneMatch, pointer.etag)) {
+    return { status: 304, etag: pointer.etag, source: 'blob' }
   }
-  const body = poolId == null ? seed.index : seed.details[poolId]
-  return body ? { status: 200, body, source: 'seed' } : { status: 404 }
+  const body = await store.get(`${prefix}bundle.json.gz`, {
+    type: 'arrayBuffer',
+    consistency: 'strong',
+  })
+  if (!body) throw new Error('Published ranking bundle missing')
+  return { status: 200, body, etag: pointer.etag, source: 'blob' }
 }
 
 export async function cleanupRanking(store, now = Date.now()) {

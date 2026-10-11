@@ -1,6 +1,8 @@
 const DATA_TYPE = 'gacha-party-luck-ranking-index'
 const SCHEMA_VERSION = 2
 const MAX_RANKING_SIZE = 30
+export const BUNDLE_DATA_TYPE = 'gacha-party-luck-ranking-bundle'
+export const BUNDLE_SCHEMA_VERSION = 1
 
 function assert(condition, message) {
   if (!condition) throw new Error(`欧非排行榜数据格式错误：${message}`)
@@ -96,6 +98,7 @@ export function normalizeLuckRankingIndex(value) {
     const field = `pools[${index}]`
     assert(Array.isArray(pool) && pool.length === 3, `${field} 必须是 [卡池ID, 名称, 图片路径]`)
     const poolId = normalizeString(String(pool[0] ?? ''), `${field}[0]`)
+    assert(/^[A-Za-z0-9_-]+$/.test(poolId), `${field}.poolId 包含非法字符`)
     assert(!seenPoolIds.has(poolId), `${field}.poolId 与其他卡池重复`)
     seenPoolIds.add(poolId)
     return {
@@ -122,7 +125,8 @@ export function normalizeLuckRankingIndex(value) {
 export function normalizeLuckRankingPoolData(value, expectedPoolId = '') {
   assert(value && typeof value === 'object' && !Array.isArray(value), '卡池详情必须是对象')
   const poolId = normalizeString(String(expectedPoolId), '卡池详情对应的 poolId')
-  const targetRarity = value.targetRarity == null ? 'SP' : normalizeString(value.targetRarity, 'targetRarity')
+  const targetRarity =
+    value.targetRarity == null ? 'SP' : normalizeString(value.targetRarity, 'targetRarity')
   assert(targetRarity === 'SP' || targetRarity === 'SSR', 'targetRarity 只能是 SP 或 SSR')
   let spCards = []
   if (targetRarity === 'SP') {
@@ -138,6 +142,25 @@ export function normalizeLuckRankingPoolData(value, expectedPoolId = '') {
     spCards,
     ...normalizeBoard(value, `卡池 ${poolId}`, targetRarity === 'SP' ? spCards : null),
   }
+}
+
+export function normalizeLuckRankingBundle(value) {
+  assert(value && typeof value === 'object' && !Array.isArray(value), '整包必须是对象')
+  assert(value.dataType === BUNDLE_DATA_TYPE, `dataType 必须是 ${BUNDLE_DATA_TYPE}`)
+  assert(value.schemaVersion === BUNDLE_SCHEMA_VERSION, '整包版本不受支持')
+  const index = normalizeLuckRankingIndex(value.index)
+  assert(
+    value.details && typeof value.details === 'object' && !Array.isArray(value.details),
+    'details 必须是对象',
+  )
+  assert(Object.keys(value.details).length === index.pools.length, '整包卡池数量与索引不一致')
+  const details = new Map(
+    index.pools.map(({ poolId }) => [
+      poolId,
+      normalizeLuckRankingPoolData(value.details[poolId], poolId),
+    ]),
+  )
+  return { index, details }
 }
 
 export { DATA_TYPE, MAX_RANKING_SIZE, SCHEMA_VERSION }
