@@ -91,6 +91,7 @@ export async function cleanupRanking(store, now = Date.now()) {
   for (const [root, days] of [
     ['jobs/', 7],
     ['ticks/', 7],
+    ['locks/', 7],
     ['versions/', 30],
   ]) {
     const cutoff = new Date(now - days * 86400_000).toISOString().slice(0, 10)

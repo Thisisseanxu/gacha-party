@@ -124,9 +124,7 @@
             <span class="state-icon">!</span>
             <h2>卡池榜单加载失败</h2>
             <p>{{ activePoolError }}</p>
-            <button type="button" @click="loadPoolBoard(selectedScopeId, { force: true })">
-              重新加载
-            </button>
+            <button type="button" @click="loadPoolBoard(selectedScopeId)">重新加载</button>
           </div>
 
           <template v-else-if="activeBoard && (isTotalScope || activeBoardHasEntries)">
@@ -281,7 +279,7 @@ import { normalizeLuckRankingIndex, normalizeLuckRankingPoolData } from '@/utils
 
 const DATA_URL = '/data/luck-ranking.json'
 const POOL_DATA_BASE_URL = '/data/luck-ranking-pools'
-const REFRESH_INTERVAL_SECONDS = 30 * 60
+const REFRESH_INTERVAL_SECONDS = 60 * 60
 const CACHE_KEY = 'gacha-party-luck-ranking-index-cache-v2'
 const POOL_CACHE_PREFIX = 'gacha-party-luck-ranking-pool-cache-v2:'
 
@@ -301,6 +299,8 @@ const showDropDetails = ref(true)
 
 let refreshTimer = null
 let requestSequence = 0
+let indexRequestInFlight = false
+const poolRequestsInFlight = new Map()
 
 const dataPoolsById = computed(
   () => new Map((rankingData.value?.pools || []).map((pool) => [pool.poolId, pool])),
@@ -453,7 +453,13 @@ function loadLocalCache() {
     const cached = JSON.parse(window.localStorage.getItem(CACHE_KEY) || 'null')
     if (!cached || !Number.isFinite(cached.cachedAt) || !cached.data) return false
 
-    rankingData.value = normalizeLuckRankingIndex(cached.data)
+    if (lastCheckedAt.value && cached.cachedAt < lastCheckedAt.value) return false
+    const normalized = normalizeLuckRankingIndex(cached.data)
+    if (rankingData.value && rankingData.value.generatedAt !== normalized.generatedAt) {
+      poolBoards.value = new Map()
+      poolErrors.value = new Map()
+    }
+    rankingData.value = normalized
     lastCheckedAt.value = cached.cachedAt
     isInitialLoading.value = false
     return true
@@ -501,13 +507,15 @@ function setPoolError(poolId, message) {
   poolErrors.value = next
 }
 
-async function loadPoolBoard(poolId, { force = false } = {}) {
+async function loadPoolBoard(poolId) {
   poolId = String(poolId)
   if (!rankingData.value || !dataPoolsById.value.has(poolId)) return
-  if (!force && poolBoards.value.has(poolId)) return
-  if (!force && loadCachedPoolBoard(poolId)) return
+  if (poolBoards.value.has(poolId)) return
+  if (loadCachedPoolBoard(poolId)) return
 
   const expectedGeneratedAt = rankingData.value.generatedAt
+  if (poolRequestsInFlight.get(poolId) === expectedGeneratedAt) return
+  poolRequestsInFlight.set(poolId, expectedGeneratedAt)
   setPoolLoading(poolId, true)
   setPoolError(poolId, '')
   try {
@@ -522,9 +530,13 @@ async function loadPoolBoard(poolId, { force = false } = {}) {
     poolBoards.value = new Map(poolBoards.value).set(poolId, board)
     savePoolCache(poolId, rawData, expectedGeneratedAt)
   } catch (error) {
-    setPoolError(poolId, error instanceof Error ? error.message : '未知错误')
+    if (rankingData.value?.generatedAt === expectedGeneratedAt)
+      setPoolError(poolId, error instanceof Error ? error.message : '未知错误')
   } finally {
-    setPoolLoading(poolId, false)
+    if (poolRequestsInFlight.get(poolId) === expectedGeneratedAt) {
+      poolRequestsInFlight.delete(poolId)
+      setPoolLoading(poolId, false)
+    }
   }
 }
 
@@ -548,6 +560,14 @@ function scheduleRefresh() {
 }
 
 async function loadRankingData() {
+  if (indexRequestInFlight) return
+  // Re-read shared browser storage so revisits and other tabs reuse a fresh index.
+  loadLocalCache()
+  if (rankingCacheIsFresh()) {
+    if (selectedScopeId.value !== 'total') await loadPoolBoard(selectedScopeId.value)
+    return
+  }
+  indexRequestInFlight = true
   const requestId = ++requestSequence
   lastRefreshAttemptAt.value = Date.now()
   if (!rankingData.value) isInitialLoading.value = true
@@ -574,16 +594,27 @@ async function loadRankingData() {
     lastCheckedAt.value = checkedAt
     saveLocalCache(rawData, checkedAt)
     if (selectedScopeId.value !== 'total' && dataPoolsById.value.has(selectedScopeId.value)) {
-      await loadPoolBoard(selectedScopeId.value, { force: Boolean(versionChanged) })
+      await loadPoolBoard(selectedScopeId.value)
     }
   } catch (error) {
     if (requestId !== requestSequence) return
     refreshError.value = error instanceof Error ? error.message : '未知错误'
   } finally {
+    indexRequestInFlight = false
     if (requestId === requestSequence) {
       isInitialLoading.value = false
     }
   }
+}
+
+function rankingCacheIsFresh() {
+  const elapsed = Date.now() - lastCheckedAt.value
+  return Boolean(
+    rankingData.value &&
+    lastCheckedAt.value &&
+    elapsed >= 0 &&
+    elapsed < REFRESH_INTERVAL_SECONDS * 1000,
+  )
 }
 
 async function manualRefresh() {
@@ -600,13 +631,7 @@ function refreshWhenVisible() {
 }
 
 onMounted(async () => {
-  const hasLocalCache = loadLocalCache()
-  const cacheIsFresh =
-    hasLocalCache &&
-    Date.now() - lastCheckedAt.value >= 0 &&
-    Date.now() - lastCheckedAt.value < REFRESH_INTERVAL_SECONDS * 1000
-
-  if (!cacheIsFresh) await loadRankingData()
+  await loadRankingData()
   scheduleRefresh()
   document.addEventListener('visibilitychange', refreshWhenVisible)
 })

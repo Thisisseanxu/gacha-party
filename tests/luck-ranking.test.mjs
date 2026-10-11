@@ -13,7 +13,7 @@ import {
 } from '../cloud-functions/_shared/luck-ranking-codec.js'
 import {
   runRankingJob,
-  scheduledSlot,
+  automaticTick,
   previewRanking,
 } from '../cloud-functions/_shared/luck-ranking-job.js'
 import {
@@ -28,6 +28,11 @@ import { signSourceRequest, verifySourceRequest } from '../lib/luck-ranking/sour
 import { onRequest as sourceHandler } from '../edge-functions/api/internal/luck-ranking-source.js'
 import { onRequestGet as indexHandler } from '../cloud-functions/api/luck-ranking-index.js'
 import { onRequestGet as poolHandler } from '../cloud-functions/data/luck-ranking-pools/[file].js'
+import { withRankingLock } from '../cloud-functions/_shared/luck-ranking-lock.js'
+import { createRankingUpdateHandler } from '../cloud-functions/_shared/luck-ranking-handler.js'
+import { signAdminToken } from '../edge-functions/_shared/admin-login.js'
+import { onRequestPost as manualHandler } from '../cloud-functions/api/internal/luck-ranking-run.js'
+import { onRequestPost as automaticHandler } from '../cloud-functions/api/internal/luck-ranking-update.js'
 
 const cards = [
   { id: '1814', name: 'SP A', rarity: 'SP' },
@@ -447,14 +452,329 @@ test('preview performs no Blob writes and produces the same masked output', asyn
   assert.deepEqual(result.ranking, calculate(document))
 })
 
-test('Shanghai schedule starts only in the three one-minute windows', () => {
-  assert.deepEqual(scheduledSlot(Date.parse('2026-10-07T19:15:30Z')), {
-    day: '2026-10-08',
-    slot: '03-15',
+test('automatic ticks accept early, late and daytime requests, using the Shanghai calendar day', () => {
+  for (const instant of [
+    '2026-10-10T19:14:01Z',
+    '2026-10-10T19:19:00Z',
+    '2026-10-10T19:24:01Z',
+    '2026-10-11T12:00:00Z',
+  ]) {
+    assert.equal(automaticTick(Date.parse(instant)).day, '2026-10-11')
+  }
+  assert.equal(automaticTick(Date.parse('2026-10-11T15:59:59Z')).day, '2026-10-11')
+  assert.equal(automaticTick(Date.parse('2026-10-11T16:00:00Z')).day, '2026-10-12')
+  assert.equal(
+    automaticTick(Date.parse('2026-10-10T19:14:01Z')).slot,
+    automaticTick(Date.parse('2026-10-10T19:14:59Z')).slot,
+  )
+})
+
+function rankingSource(cost = 10) {
+  return {
+    async list() {
+      return ['record_1234567']
+    },
+    async read() {
+      return [['record_1234567', compressed({ 1234567: { 1: records(cost, 5) } })]]
+    },
+  }
+}
+
+test('deployed update handler publishes at all three previously rejected early trigger times', async () => {
+  for (const instant of ['2026-10-10T19:14:01Z', '2026-10-10T19:19:00Z', '2026-10-10T19:24:01Z']) {
+    const store = new MemoryStore()
+    const handle = createRankingUpdateHandler({
+      now: () => Date.parse(instant),
+      createSource: () => rankingSource(),
+      getStore: () => store,
+      config,
+      version: configVersion,
+    })
+    const response = await handle({
+      request: new Request('https://example.com/api/internal/luck-ranking-update', {
+        method: 'POST',
+      }),
+      env: { LUCK_RANKING_ENABLED: 'true' },
+    })
+    assert.equal(response.status, 200)
+    assert.equal((await response.json()).status, 'published')
+    assert.ok(await store.get('current.json'))
+  }
+})
+
+test('manual route rejects missing/forged tokens and request parameters cannot enable automatic updates', async () => {
+  const env = { ADMIN_SECRET: 'admin-test-secret-'.repeat(3) }
+  const token = await signAdminToken({ ADMIN_SECRET: 'another-secret' }, '330000001')
+  for (const headers of [{}, { Authorization: `Bearer ${token}` }]) {
+    const response = await manualHandler({
+      request: new Request('https://example.com/api/internal/luck-ranking-run', {
+        method: 'POST',
+        headers,
+      }),
+      env,
+    })
+    assert.equal(response.status, 401)
+  }
+  const response = await automaticHandler({
+    request: new Request('https://example.com/api/internal/luck-ranking-update?manual=1&force=1', {
+      method: 'POST',
+    }),
+    env,
   })
-  assert.equal(scheduledSlot(Date.parse('2026-10-07T19:16:00Z')), null)
-  assert.equal(scheduledSlot(Date.parse('2026-10-07T19:19:59Z')), null)
-  assert.equal(scheduledSlot(Date.parse('2026-10-07T19:20:00Z')).slot, '03-20')
+  assert.deepEqual(await response.json(), { status: 'disabled' })
+})
+
+test('authenticated manual handler publishes with automatic updates off and can refresh a completed day', async () => {
+  const store = new MemoryStore()
+  const env = { ADMIN_SECRET: 'admin-test-secret-'.repeat(3), LUCK_RANKING_ENABLED: 'false' }
+  const token = await signAdminToken(env, '330000001')
+  let time = Date.parse('2026-10-11T12:00:00Z')
+  let cost = 10
+  const handle = createRankingUpdateHandler({
+    manual: true,
+    now: () => time,
+    createSource: () => rankingSource(cost),
+    getStore: () => store,
+    config,
+    version: configVersion,
+  })
+  const context = {
+    request: new Request('https://example.com/api/internal/luck-ranking-run', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    env,
+  }
+  assert.equal((await (await handle(context)).json()).status, 'published')
+  const oldPointer = await store.get('current.json', { type: 'json' })
+  time += 1000
+  cost = 20
+  assert.equal((await (await handle(context)).json()).status, 'published')
+  const pointer = await store.get('current.json', { type: 'json' })
+  assert.notEqual(pointer.checkpointKey, oldPointer.checkpointKey)
+  assert.notEqual(pointer.generatedAt, oldPointer.generatedAt)
+  assert.deepEqual((await readRanking(store, 'a')).body.lucky, [['12***67', 100, 20, [5, 0]]])
+  assert.equal([...store.values.keys()].filter((key) => key.startsWith('locks/')).length, 0)
+  assert.equal([...store.values.keys()].filter((key) => key.startsWith('ticks/')).length, 0)
+})
+
+test('manual publication resumes its own checkpoint on a repeated call', async () => {
+  const store = new MemoryStore()
+  let time = Date.parse('2026-10-11T12:00:00Z')
+  const keys = Array.from({ length: 65 }, (_, i) => `record_${1234500 + i}`)
+  let lists = 0
+  let reads = 0
+  const source = {
+    async list() {
+      lists++
+      return keys
+    },
+    async read(batch) {
+      time += 6000
+      reads += batch.length
+      return batch.map((key) => [key, compressed({ [key.slice(7)]: { 1: records(10, 5) } })])
+    },
+  }
+  const options = {
+    store,
+    source,
+    config,
+    configVersion,
+    manual: true,
+    ...automaticTick(time),
+    now: () => time,
+  }
+  assert.equal((await runRankingJob({ ...options, deadline: time + 40_000 })).status, 'pending')
+  const active = await store.get('active-job.json', { type: 'json' })
+  const result = await runRankingJob({ ...options, deadline: time + 100_000 })
+  assert.equal(result.status, 'published')
+  assert.equal(result.players, 65)
+  assert.equal(lists, 1)
+  assert.equal(reads, 65)
+  assert.equal((await store.get('current.json', { type: 'json' })).checkpointKey, active.key)
+})
+
+test('automatic and manual jobs share a lock even across a minute boundary', async () => {
+  const store = new MemoryStore()
+  let time = Date.parse('2026-10-10T19:14:59Z')
+  let entered
+  let release
+  const ready = new Promise((resolve) => {
+    entered = resolve
+  })
+  const gate = new Promise((resolve) => {
+    release = resolve
+  })
+  const source = rankingSource()
+  const first = runRankingJob({
+    store,
+    source: {
+      ...source,
+      async list() {
+        entered()
+        await gate
+        return source.list()
+      },
+    },
+    config,
+    configVersion,
+    ...automaticTick(time),
+    now: () => time,
+    deadline: time + 100_000,
+  })
+  await ready
+  time += 2000
+  let scanned = false
+  const result = await runRankingJob({
+    store,
+    source: {
+      async list() {
+        scanned = true
+        throw new Error('Must not scan')
+      },
+    },
+    config,
+    configVersion,
+    ...automaticTick(time),
+    manual: true,
+    now: () => time,
+    deadline: time + 100_000,
+  })
+  assert.equal(result.status, 'busy')
+  assert.ok(result.retryAfterSeconds > 0)
+  assert.equal(scanned, false)
+  release()
+  assert.equal((await first).status, 'published')
+})
+
+test('abandoned lock reservations stop blocking after their minutes pass, without deleting another owner', async () => {
+  const store = new MemoryStore()
+  const time = Date.parse('2026-10-11T12:00:00Z')
+  const minute = Math.floor(time / 60_000)
+  const keys = Array.from({ length: 3 }, (_, i) => `locks/2026-10-11/${minute + i}.json`)
+  for (const key of keys) await store.setJSON(key, { expiresAt: time + 180_000 })
+  assert.equal(
+    (
+      await withRankingLock(
+        store,
+        () => 'wrong',
+        () => time + 120_000,
+      )
+    ).status,
+    'busy',
+  )
+  assert.equal(
+    await withRankingLock(
+      store,
+      () => 'released',
+      () => time + 180_000,
+    ),
+    'released',
+  )
+  for (const key of keys) assert.ok(await store.get(key))
+})
+
+test('manual preview remains authenticated and performs no Blob writes', async () => {
+  const store = new MemoryStore()
+  const env = { ADMIN_SECRET: 'admin-test-secret-'.repeat(3) }
+  const token = await signAdminToken(env, '330000001')
+  const handle = createRankingUpdateHandler({
+    manual: true,
+    config,
+    version: configVersion,
+    createSource: () => rankingSource(),
+    getStore: () => {
+      throw new Error('Preview must not access Blob')
+    },
+  })
+  const response = await handle({
+    request: new Request('https://example.com/api/internal/luck-ranking-run?preview=1', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    env,
+  })
+  assert.equal(response.status, 200)
+  assert.equal((await response.json()).status, 'preview')
+  assert.equal(store.writes.length, 0)
+})
+
+test('busy manual handler returns Retry-After and releases only its partial reservations', async () => {
+  const store = new MemoryStore()
+  const time = Date.parse('2026-10-11T12:00:00Z')
+  const minute = Math.floor(time / 60_000)
+  const ownerKey = `locks/2026-10-11/${minute + 1}.json`
+  await store.setJSON(ownerKey, { expiresAt: time + 180_000 })
+  const env = { ADMIN_SECRET: 'admin-test-secret-'.repeat(3) }
+  const token = await signAdminToken(env, '330000001')
+  const handle = createRankingUpdateHandler({
+    manual: true,
+    config,
+    version: configVersion,
+    now: () => time,
+    createSource: () => ({
+      async list() {
+        throw new Error('Busy job must not scan')
+      },
+    }),
+    getStore: () => store,
+  })
+  const response = await handle({
+    request: new Request('https://example.com/api/internal/luck-ranking-run', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    env,
+  })
+  assert.equal(response.status, 409)
+  const body = await response.json()
+  assert.equal(body.status, 'busy')
+  assert.equal(response.headers.get('Retry-After'), String(body.retryAfterSeconds))
+  assert.ok(await store.get(ownerKey))
+  assert.equal(await store.get(`locks/2026-10-11/${minute}.json`), null)
+})
+
+test('manual handler preserves the old published version on Blob failure and resumes without rescanning', async () => {
+  const store = new MemoryStore()
+  const old = calculate({ 1234567: { 1: records(10, 5) } })
+  await publishRanking(store, old)
+  const env = { ADMIN_SECRET: 'admin-test-secret-'.repeat(3) }
+  const token = await signAdminToken(env, '330000001')
+  let lists = 0
+  let reads = 0
+  const source = rankingSource(20)
+  const handle = createRankingUpdateHandler({
+    manual: true,
+    config,
+    version: configVersion,
+    now: () => Date.parse('2026-10-11T12:00:00Z'),
+    createSource: () => ({
+      async list() {
+        lists++
+        return source.list()
+      },
+      async read(keys) {
+        reads++
+        return source.read(keys)
+      },
+    }),
+    getStore: () => store,
+  })
+  const context = {
+    request: new Request('https://example.com/api/internal/luck-ranking-run', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    env,
+  }
+  store.fail = (key) => key.startsWith('versions/2026-10-11/') && key.includes('/pools/')
+  assert.equal((await handle(context)).status, 503)
+  assert.deepEqual((await readRanking(store)).body, old.index)
+  store.fail = null
+  assert.equal((await (await handle(context)).json()).status, 'published')
+  assert.equal(lists, 1)
+  assert.equal(reads, 1)
+  assert.deepEqual((await readRanking(store, 'a')).body.lucky, [['12***67', 100, 20, [5, 0]]])
 })
 
 test('dynamic data routes reject unrelated paths and serve the seed without Blob configuration', async () => {

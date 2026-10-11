@@ -1,16 +1,23 @@
 import { PreconditionFailedError } from '@edgeone/pages-blob'
+import { randomBytes } from 'node:crypto'
 import { createRankingEngine } from './luck-ranking-engine.js'
 import { decodeRecord, decodeCheckpoint, encodeCheckpoint } from './luck-ranking-codec.js'
 import { publishRanking } from './luck-ranking-storage.js'
+import { withRankingLock } from './luck-ranking-lock.js'
 
-export function scheduledSlot(now = Date.now()) {
+export function automaticTick(now = Date.now()) {
   const date = new Date(now + 8 * 3600_000)
-  const minute = date.getUTCMinutes()
-  if (date.getUTCHours() !== 3 || ![15, 20, 25].includes(minute)) return null
-  return { day: date.toISOString().slice(0, 10), slot: `03-${minute}` }
+  return {
+    day: date.toISOString().slice(0, 10),
+    slot: `auto-${Math.floor(now / 300_000)}`,
+  }
 }
 
-export async function runRankingJob({
+export async function runRankingJob(options) {
+  return withRankingLock(options.store, () => runUnlockedJob(options), options.now)
+}
+
+async function runUnlockedJob({
   store,
   source,
   config,
@@ -19,31 +26,35 @@ export async function runRankingJob({
   slot,
   deadline,
   now = Date.now,
+  manual = false,
 }) {
-  // Starts are restricted to one-minute windows spaced five minutes apart.
-  // Previous Cloud Function instances must have terminated (120s limit) before the next window.
-  try {
-    await store.setJSON(
-      `ticks/${day}/${slot}`,
-      { startedAt: now() },
-      { onlyIfNew: true, cacheControl: null },
-    )
-  } catch (error) {
-    if (error instanceof PreconditionFailedError) return { status: 'duplicate' }
-    throw error
+  // Automatic retries in the same five-minute bucket are de-duplicated. The
+  // shared lock, rather than wall-clock admission windows, prevents overlaps.
+  if (!manual) {
+    try {
+      await store.setJSON(
+        `ticks/${day}/${slot}`,
+        { startedAt: now() },
+        { onlyIfNew: true, cacheControl: null },
+      )
+    } catch (error) {
+      if (error instanceof PreconditionFailedError) return { status: 'duplicate' }
+      throw error
+    }
   }
   const completed = await store.get(`jobs/${day}/completed.json`, {
     type: 'json',
     consistency: 'strong',
   })
-  if (completed) return { status: 'already-complete', generatedAt: completed.generatedAt }
+  if (completed && !manual)
+    return { status: 'already-complete', generatedAt: completed.generatedAt }
 
   const active = await store.get('active-job.json', { type: 'json', consistency: 'strong' })
   const checkpointKey =
     active?.configVersion === configVersion &&
     /^jobs\/\d{4}-\d{2}-\d{2}\/[a-f0-9]{24}\/checkpoint\.gz$/.test(active.key)
       ? active.key
-      : `jobs/${day}/${configVersion}/checkpoint.gz`
+      : `jobs/${day}/${manual ? randomBytes(12).toString('hex') : configVersion}/checkpoint.gz`
   const published = await store.get('current.json', { type: 'json', consistency: 'strong' })
   if (published?.checkpointKey === checkpointKey) {
     await store.setJSON(
