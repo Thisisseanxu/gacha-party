@@ -639,7 +639,7 @@ test('failed batches resume the last committed checkpoint without losing the pre
     source,
     config,
     configVersion,
-    day: '2026-10-08',
+    day: '2026-10-10',
     deadline: Date.now() + 100_000,
   }
   await assert.rejects(runRankingJob({ ...options, slot: '03-15' }))
@@ -1025,4 +1025,156 @@ test('manual handler preserves the old published version on Blob failure and res
   assert.equal(lists, 1)
   assert.equal(reads, 1)
   assert.deepEqual((await readBundleJSON(store)).details.a.lucky, [['12***67', 100, 20, [5, 0]]])
+})
+
+test('automatic refresh skips two Shanghai dates, then publishes on the third date', async () => {
+  const store = new MemoryStore()
+  const old = calculate({ 1234567: { 1: records(10, 5) } })
+  old.index.generatedAt = '2026-10-11T12:00:00.000Z'
+  await publishRanking(store, old)
+  let lists = 0
+  const source = rankingSource(20)
+  const options = {
+    store,
+    config,
+    configVersion,
+    source: {
+      ...source,
+      async list() {
+        lists++
+        return source.list()
+      },
+    },
+  }
+  for (const day of ['2026-10-12', '2026-10-13']) {
+    const time = Date.parse(`${day}T03:14:01+08:00`)
+    const result = await runRankingJob({
+      ...options,
+      ...automaticTick(time),
+      now: () => time,
+      deadline: time + 100_000,
+    })
+    assert.equal(result.status, 'not-due')
+    assert.equal(result.nextUpdateDay, '2026-10-14')
+    assert.equal(lists, 0)
+  }
+  const time = Date.parse('2026-10-14T03:14:01+08:00')
+  const result = await runRankingJob({
+    ...options,
+    ...automaticTick(time),
+    now: () => time,
+    deadline: time + 100_000,
+  })
+  assert.equal(result.status, 'published')
+  assert.equal(lists, 1)
+  const next = time + 86400_000
+  const skipped = await runRankingJob({
+    ...options,
+    ...automaticTick(next),
+    now: () => next,
+    deadline: next + 100_000,
+  })
+  assert.equal(skipped.status, 'not-due')
+  assert.equal(skipped.nextUpdateDay, '2026-10-17')
+  assert.equal(lists, 1)
+})
+
+test('three-day refresh uses Shanghai dates across month, year and leap-day boundaries', async () => {
+  for (const [publishedAt, skipDay, dueDay] of [
+    ['2026-10-30T19:14:01.000Z', '2026-11-02', '2026-11-03'],
+    ['2026-12-30T19:14:01.000Z', '2027-01-02', '2027-01-03'],
+    ['2028-02-27T19:14:01.000Z', '2028-03-01', '2028-03-02'],
+  ]) {
+    const store = new MemoryStore()
+    const old = calculate({ 1234567: { 1: records(10, 5) } })
+    old.index.generatedAt = publishedAt
+    await publishRanking(store, old)
+    const options = { store, config, configVersion, source: rankingSource() }
+    const time = Date.parse(`${skipDay}T03:14:01+08:00`)
+    const result = await runRankingJob({
+      ...options,
+      ...automaticTick(time),
+      now: () => time,
+      deadline: time + 100_000,
+    })
+    assert.equal(result.status, 'not-due')
+    assert.equal(result.nextUpdateDay, dueDay)
+    const due = Date.parse(`${dueDay}T03:14:01+08:00`)
+    assert.equal(
+      (
+        await runRankingJob({
+          ...options,
+          ...automaticTick(due),
+          now: () => due,
+          deadline: due + 100_000,
+        })
+      ).status,
+      'published',
+    )
+  }
+})
+
+test('automatic refresh resumes a recent manual checkpoint even with a same-day completion marker', async () => {
+  const store = new MemoryStore()
+  let time = Date.parse('2026-10-11T12:00:00Z')
+  const old = calculate({ 1234567: { 1: records(10, 5) } })
+  old.index.generatedAt = new Date(time).toISOString()
+  await publishRanking(store, old)
+  await store.setJSON('jobs/2026-10-11/completed.json', { generatedAt: old.index.generatedAt })
+  const keys = Array.from({ length: 65 }, (_, index) => `record_${1234500 + index}`)
+  let lists = 0
+  const source = {
+    async list() {
+      lists++
+      return keys
+    },
+    async read(batch) {
+      time += 6000
+      return batch.map((key) => [key, compressed({ [key.slice(7)]: { 1: records(20, 5) } })])
+    },
+  }
+  const options = { store, source, config, configVersion, now: () => time }
+  const pending = await runRankingJob({
+    ...options,
+    ...automaticTick(time),
+    manual: true,
+    deadline: time + 40_000,
+  })
+  assert.equal(pending.status, 'pending')
+  const resumed = await runRankingJob({
+    ...options,
+    ...automaticTick(time),
+    deadline: time + 100_000,
+  })
+  assert.equal(resumed.status, 'published')
+  assert.equal(resumed.players, 65)
+  assert.equal(lists, 1)
+  assert.equal(await store.get('active-job.json'), null)
+})
+
+test('manual publication can refresh before three days and restarts the automatic interval', async () => {
+  const store = new MemoryStore()
+  const old = calculate({ 1234567: { 1: records(10, 5) } })
+  old.index.generatedAt = '2026-10-11T12:00:00.000Z'
+  await publishRanking(store, old)
+  const time = Date.parse('2026-10-12T12:00:00Z')
+  const options = {
+    store,
+    source: rankingSource(20),
+    config,
+    configVersion,
+    now: () => time,
+    deadline: time + 100_000,
+  }
+  const result = await runRankingJob({ ...options, ...automaticTick(time), manual: true })
+  assert.equal(result.status, 'published')
+  const check = Date.parse('2026-10-14T03:14:01+08:00')
+  const skipped = await runRankingJob({
+    ...options,
+    ...automaticTick(check),
+    now: () => check,
+    deadline: check + 100_000,
+  })
+  assert.equal(skipped.status, 'not-due')
+  assert.equal(skipped.nextUpdateDay, '2026-10-15')
 })

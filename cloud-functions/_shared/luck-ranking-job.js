@@ -5,6 +5,16 @@ import { decodeRecord, decodeCheckpoint, encodeCheckpoint } from './luck-ranking
 import { publishRanking, migrateCurrentRanking } from './luck-ranking-storage.js'
 import { withRankingLock } from './luck-ranking-lock.js'
 
+export const RANKING_UPDATE_INTERVAL_DAYS = 3
+
+function nextAutomaticUpdateDay(generatedAt) {
+  const publishedDay = Math.floor((Date.parse(generatedAt) + 8 * 3600_000) / 86400_000)
+  if (!Number.isFinite(publishedDay)) throw new Error('Invalid published ranking time')
+  return new Date((publishedDay + RANKING_UPDATE_INTERVAL_DAYS) * 86400_000)
+    .toISOString()
+    .slice(0, 10)
+}
+
 export function automaticTick(now = Date.now()) {
   const date = new Date(now + 8 * 3600_000)
   return {
@@ -29,6 +39,24 @@ async function runUnlockedJob({
   manual = false,
 }) {
   await migrateCurrentRanking(store)
+  const active = await store.get('active-job.json', { type: 'json', consistency: 'strong' })
+  const resumeActive =
+    active?.configVersion === configVersion &&
+    /^jobs\/\d{4}-\d{2}-\d{2}\/[a-f0-9]{24}\/checkpoint\.gz$/.test(active.key)
+  const published = await store.get('current.json', { type: 'json', consistency: 'strong' })
+  if (!manual && !resumeActive) {
+    const completed = await store.get(`jobs/${day}/completed.json`, {
+      type: 'json',
+      consistency: 'strong',
+    })
+    if (completed) return { status: 'already-complete', generatedAt: completed.generatedAt }
+    if (published) {
+      const nextUpdateDay = nextAutomaticUpdateDay(published.generatedAt)
+      if (day < nextUpdateDay) {
+        return { status: 'not-due', generatedAt: published.generatedAt, nextUpdateDay }
+      }
+    }
+  }
   // Automatic retries in the same five-minute bucket are de-duplicated. The
   // shared lock, rather than wall-clock admission windows, prevents overlaps.
   if (!manual) {
@@ -43,20 +71,9 @@ async function runUnlockedJob({
       throw error
     }
   }
-  const completed = await store.get(`jobs/${day}/completed.json`, {
-    type: 'json',
-    consistency: 'strong',
-  })
-  if (completed && !manual)
-    return { status: 'already-complete', generatedAt: completed.generatedAt }
-
-  const active = await store.get('active-job.json', { type: 'json', consistency: 'strong' })
-  const checkpointKey =
-    active?.configVersion === configVersion &&
-    /^jobs\/\d{4}-\d{2}-\d{2}\/[a-f0-9]{24}\/checkpoint\.gz$/.test(active.key)
-      ? active.key
-      : `jobs/${day}/${manual ? randomBytes(12).toString('hex') : configVersion}/checkpoint.gz`
-  const published = await store.get('current.json', { type: 'json', consistency: 'strong' })
+  const checkpointKey = resumeActive
+    ? active.key
+    : `jobs/${day}/${manual ? randomBytes(12).toString('hex') : configVersion}/checkpoint.gz`
   if (published?.checkpointKey === checkpointKey) {
     await store.setJSON(
       `jobs/${day}/completed.json`,
