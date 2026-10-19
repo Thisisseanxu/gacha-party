@@ -1,5 +1,23 @@
 [
   {
+    "id": "2008",
+    "name": "旋风吹吹",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2008.webp",
+    "realname": "呼莉",
+    "theme": "appliance",
+    "qban_url": "/images/qban/2008.webp"
+  },
+  {
+    "id": "2009",
+    "name": "信号捕手",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2009.webp",
+    "realname": "希格",
+    "theme": "appliance",
+    "qban_url": "/images/qban/2009.webp"
+  },
+  {
     "id": "1901",
     "name": "太极宗师",
     "rarity": "SP",

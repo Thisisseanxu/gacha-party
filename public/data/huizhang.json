@@ -1184,6 +1184,26 @@
         "attack"
       ]
     },
+    "2008": {
+      "shape": [
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
+    "2009": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
     "2101": {
       "shape": [
         "defence",
