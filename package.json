@@ -68,6 +68,11 @@
   "overrides": {
     "workbox-build": {
       "source-map": "0.7.6"
-    }
+    },
+    "source-map-js": "^1.2.2",
+    "minimatch@^10": {
+      "brace-expansion": "^5.0.12"
+    },
+    "serialize-javascript": "^7.1.4"
   }
 }
