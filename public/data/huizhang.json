@@ -392,6 +392,26 @@
         "defence"
       ]
     },
+    "1215": {
+      "shape": [
+        "support",
+        "support",
+        "support",
+        "support",
+        "support",
+        "support"
+      ]
+    },
+    "1216": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
     "1301": {
       "shape": [
         "support",

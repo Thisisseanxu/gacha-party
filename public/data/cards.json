@@ -1,5 +1,23 @@
 [
   {
+    "id": "1215",
+    "name": "夜灯守护者",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1215.webp",
+    "realname": "米莉",
+    "theme": "dream",
+    "qban_url": "/images/qban/1215.webp"
+  },
+  {
+    "id": "1216",
+    "name": "星夜床头柜",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/1216.webp",
+    "realname": "予安",
+    "theme": "dream",
+    "qban_url": "/images/qban/1216.webp"
+  },
+  {
     "id": "2008",
     "name": "旋风吹吹",
     "rarity": "SP",
