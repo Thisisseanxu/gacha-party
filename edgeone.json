@@ -76,26 +76,38 @@
       ]
     },
     {
-      "source": "/images/characters/*",
+      "source": "/data/cards.json",
       "headers": [
         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://www.bilibili.com"
+        },
+        {
           "key": "Cache-Control",
-          "value": "public, max-age=7776000"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     },
     {
-      "source": "/images/qban/*",
+      "source": "/data/card_pools_full.json",
       "headers": [
         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://www.bilibili.com"
+        },
+        {
           "key": "Cache-Control",
-          "value": "public, max-age=7776000"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     },
     {
       "source": "/images/*",
       "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://www.bilibili.com"
+        },
         {
           "key": "Cache-Control",
           "value": "public, max-age=7776000"

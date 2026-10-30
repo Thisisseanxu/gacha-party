@@ -98,6 +98,14 @@
 
 ---
 
+## bilibili Toy 静态资源
+
+`edgeone.json` 与 `public/_headers` 为 `/data/cards.json`、`/data/card_pools_full.json` 和 `/images/*`（含嵌套目录）设置 `Access-Control-Allow-Origin: https://www.bilibili.com`，允许 Toy 不带凭据读取。Origin 值不带结尾 `/`；不开放其他 JSON 或 API。
+
+两份 JSON 使用 `public, max-age=0, must-revalidate`，保留 ETag 更新校验；图片保留 90 天缓存。Toy 自行保存 15 分钟数据快照，网络失败时使用缓存或包内数据。配置需随网站部署后生效；Vite 的本地预览不会自动应用 EdgeOne 响应头规则。
+
+部署后可用 `curl.exe -I -H "Origin: https://www.bilibili.com" https://mhpd.fans/data/cards.json` 检查响应头，并同样检查另一份 JSON 及 `/images/gacha_bg.webp`。缺失图片返回的路由 HTML 不会因为 CORS 变成图片，Toy 会继续使用本地兜底。
+
 ## :gear: 项目结构
 
 .
