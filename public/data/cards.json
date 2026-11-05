@@ -1,5 +1,14 @@
 [
   {
+    "id": "2107",
+    "name": "天鹅魔女",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2107.webp",
+    "realname": "希丝奈",
+    "theme": "eiji",
+    "qban_url": "/images/qban/2107.webp"
+  },
+  {
     "id": "1215",
     "name": "夜灯守护者",
     "rarity": "SP",

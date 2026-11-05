@@ -1284,6 +1284,16 @@
         "attack"
       ]
     },
+    "2107": {
+      "shape": [
+        "defence",
+        "defence",
+        "attack",
+        "attack",
+        "attack",
+        "attack"
+      ]
+    },
     "2201": {
       "shape": [
         "defence",
