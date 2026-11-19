@@ -22,11 +22,16 @@ export function createActivationRateLimiter(now = Date.now) {
   }
 }
 
-export function createRecordActivationHandler({ fetchImpl = fetch, allowRequest = createActivationRateLimiter() } = {}) {
-  return async function ({ request, env = {} }) {
+export function createRecordActivationHandler({
+  fetchImpl = fetch,
+  allowRequest = createActivationRateLimiter(),
+  reportError = (details) => console.error('[record-activate] request failed', details),
+} = {}) {
+  return async function ({ request, env = {}, server, uuid }) {
     if (!env.PRIVATE_KEY) {
       return jsonResponse({ success: false, message: '服务端未配置 PRIVATE_KEY' }, 503)
     }
+    let stage = 'read_request'
     try {
       if (!allowRequest('all', 60)) {
         const response = jsonResponse({ success: false, code: 'RATE_LIMITED', message: '验证过于频繁，请稍后重试。' }, 429)
@@ -34,6 +39,7 @@ export function createRecordActivationHandler({ fetchImpl = fetch, allowRequest 
         return response
       }
       const body = await readBoundedJson(request)
+      stage = 'decode_record_id'
       const { playerId, uploadToken } = decodeRecordId(body?.record_id)
       const digest = createHash('sha256').update(uploadToken).digest('hex')
       if (!allowRequest(digest, 6)) {
@@ -41,7 +47,9 @@ export function createRecordActivationHandler({ fetchImpl = fetch, allowRequest 
         response.headers.set('Retry-After', '60')
         return response
       }
+      stage = 'verify_owner'
       const verifiedId = await verifyRecordOwner(playerId, uploadToken, fetchImpl)
+      stage = 'sign_license'
       const activationKey = await generateActivationKey(verifiedId, env.PRIVATE_KEY)
       const expiry = Number(Buffer.from(activationKey, 'base64url').readBigUInt64LE(4))
       return jsonResponse({
@@ -51,6 +59,18 @@ export function createRecordActivationHandler({ fetchImpl = fetch, allowRequest 
         expires_at: expiry,
       })
     } catch (error) {
+      if (!error.statusCode) {
+        // Keep logs useful for production failures without logging exception
+        // messages/stacks that can contain credentials or upstream bodies.
+        const safeNames = ['Error', 'TypeError', 'RangeError', 'SyntaxError', 'ReferenceError', 'InvalidCharacterError']
+        try {
+          reportError({
+            stage,
+            errorName: safeNames.includes(error.name) ? error.name : 'Error',
+            requestId: server?.requestId || uuid || '',
+          })
+        } catch { /* Logging must not replace the original response. */ }
+      }
       // Do not reflect upstream bodies, credentials, or signing-key errors.
       return jsonResponse({
         success: false,

@@ -16,7 +16,11 @@ export async function readBoundedJson(request, maxBytes = MAX_REQUEST_BYTES) {
   if (Number(request.headers.get('Content-Length')) > maxBytes) {
     throw recordAuthError('请求数据过大。', 413, 'BODY_TOO_LARGE')
   }
-  const reader = request.body?.getReader()
+  // Makers shadows Request.body with parsed JSON (or a Promise). Read the
+  // native Fetch body getter so byte limits apply to the original stream.
+  // This helper also reads ordinary fetch Responses from the official API.
+  const body = request instanceof Request ? Reflect.get(Request.prototype, 'body', request) : request.body
+  const reader = typeof body?.getReader === 'function' ? body.getReader() : null
   if (!reader) throw recordAuthError('请求体格式错误。', 400, 'INVALID_BODY')
   const chunks = []
   let length = 0

@@ -9,6 +9,7 @@ import { onRequestGet } from '../edge-functions/get-record.js'
 import { onRequestPost } from '../edge-functions/upload-record.js'
 import { onRequest as hzRequest } from '../edge-functions/api/hz/[[path]].js'
 import { generateActivationKey } from '../cloud-functions/_shared/activation.js'
+import { readBoundedJson } from '../cloud-functions/_shared/record-activation.js'
 
 const pair = generateKeyPairSync('ed25519')
 const env = {
@@ -23,6 +24,47 @@ const request = (id = recordId) => new Request('https://example.test/api/record-
   method: 'POST', body: JSON.stringify({ record_id: id }),
 })
 const accepted = (records = [{ player_id: playerId }]) => Response.json({ code: 0, data: { records } })
+
+// Makers wraps a native Request and shadows .body with parsed JSON or a Promise.
+// Its native json()/text() methods and underlying body stream are still intact.
+function makersRequest(rawBody, parsedBody) {
+  const value = new Request('https://example.test/api/record-activate', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: rawBody,
+  })
+  Object.defineProperty(value, 'body', { get: () => parsedBody, configurable: true })
+  return value
+}
+
+test('Makers request with a parsed JSON body returns validation errors instead of 500', async () => {
+  let calls = 0
+  const handler = createRecordActivationHandler({ fetchImpl: async () => { calls++; return accepted() } })
+  for (const parsedBody of [{}, Promise.resolve({})]) {
+    const response = await handler({ request: makersRequest('{}', parsedBody), env })
+    assert.equal(response.status, 400)
+    assert.equal((await response.json()).code, 'INVALID_RECORD_ID')
+  }
+  assert.equal(calls, 0)
+})
+
+test('Makers request with a Promise or parsed object still validates ownership and issues a ten-day license', async () => {
+  const data = { record_id: recordId }
+  for (const parsedBody of [data, Promise.resolve(data)]) {
+    const handler = createRecordActivationHandler({ fetchImpl: async () => accepted() })
+    const response = await handler({ request: makersRequest(JSON.stringify(data), parsedBody), env })
+    assert.equal(response.status, 200)
+    const body = await response.json()
+    assert.equal(verifyLicenseForEdgeOne(body.activation_key, env.PUBLIC_KEY).userId, Number(playerId))
+  }
+})
+
+test('Makers compatibility retains raw byte limits and rejects malformed JSON rather than trusting the parsed body', async () => {
+  const claimed = { record_id: recordId }
+  await assert.rejects(readBoundedJson(makersRequest('not-json', claimed)), { statusCode: 400, code: 'INVALID_BODY' })
+  await assert.rejects(readBoundedJson(makersRequest('x'.repeat(13000), claimed)), { statusCode: 413, code: 'BODY_TOO_LARGE' })
+  const value = makersRequest('{}', null)
+  Object.defineProperty(value, 'body', { get() { throw new SyntaxError('runtime parser failed') } })
+  assert.deepEqual(await readBoundedJson(value), {})
+})
 
 test('checks official record UIDs and issues a compatible signed license for exactly ten days', async () => {
   let calls = 0
@@ -117,11 +159,16 @@ test('bounds request and decompression sizes, validates the legacy uint32 UID, a
 })
 
 test('reports missing or invalid signing configuration safely', async () => {
-  const handler = createRecordActivationHandler({ fetchImpl: async () => accepted() })
+  const reports = []
+  const handler = createRecordActivationHandler({ fetchImpl: async () => accepted(), reportError: details => reports.push(details) })
   assert.equal((await handler({ request: request(), env: {} })).status, 503)
-  const response = await handler({ request: request(), env: { PRIVATE_KEY: 'signing.secret.fixture' } })
+  const response = await handler({ request: request(), env: { PRIVATE_KEY: 'signing.secret.fixture' }, server: { requestId: 'fixture-request-id' } })
   assert.equal(response.status, 500)
   assert.equal((await response.text()).includes('signing.secret.fixture'), false)
+  assert.equal(reports.length, 1)
+  assert.equal(reports[0].stage, 'sign_license')
+  assert.equal(reports[0].requestId, 'fixture-request-id')
+  assert.equal(JSON.stringify(reports).includes('signing.secret.fixture'), false)
 })
 
 test('rate limits issuance before making more upstream requests and resets on the next minute', async () => {
