@@ -1,5 +1,23 @@
 [
   {
+    "id": "2208",
+    "name": "流星弹姬",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2208.webp",
+    "realname": "洛小星",
+    "theme": "toy",
+    "qban_url": "/images/qban/2208.webp"
+  },
+  {
+    "id": "2209",
+    "name": "寻宝向导",
+    "rarity": "SP",
+    "imageUrl": "/images/characters/2209.webp",
+    "realname": "露西",
+    "theme": "toy",
+    "qban_url": "/images/qban/2209.webp"
+  },
+  {
     "id": "2107",
     "name": "天鹅魔女",
     "rarity": "SP",
