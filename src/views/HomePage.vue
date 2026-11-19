@@ -5,10 +5,29 @@
       <h2 class="subtitle" :class="{ 'smooth-transition': isReady }">盲盒派对小助手</h2>
 
       <section class="primary-actions">
-        <router-link to="fenxi" class="btn btn-primary fenxi">
-          <img src="/images/icons/fenxi.webp" class="btn-icon" alt="icon" />
-          <span class="btn-label">抽卡记录分析</span>
-        </router-link>
+        <div class="analysis-action">
+          <router-link to="fenxi" class="btn btn-primary fenxi">
+            <img src="/images/icons/fenxi.webp" class="btn-icon" alt="icon" />
+            <span class="btn-label">抽卡记录分析</span>
+          </router-link>
+          <a
+            class="assistant-download-badge"
+            :href="RECORD_ASSISTANT_APK_PATH"
+            download="盲盒派对助手.apk"
+            aria-label="下载助手（安卓 APK）"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>下载助手</span>
+          </a>
+        </div>
         <router-link
           :to="{ name: '抽卡模拟器', params: { poolId: latestPoolId } }"
           class="btn btn-primary chouka"
@@ -136,6 +155,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { GithubOne, TencentQq, Install, Info } from '@icon-park/vue-next'
 import { logger } from '@/utils/logger'
 import { cardPoolsInOrder } from '@/data/cardPools'
+import { RECORD_ASSISTANT_APK_PATH } from '@/utils/recordAssistantDownload.js'
 
 const appVersion = __VERSION__
 
@@ -365,6 +385,49 @@ const handleInstallClick = async () => {
   gap: 0.75rem;
   width: 100%;
   flex-shrink: 0;
+}
+
+.analysis-action {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.analysis-action .fenxi {
+  padding-top: 1.125rem;
+}
+
+.assistant-download-badge {
+  position: absolute;
+  top: -1rem;
+  right: -0.25rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-background-content);
+  border-radius: 999px;
+  background: var(--color-brand-primary);
+  color: var(--color-text-black);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  font-size: 0.75rem;
+  font-weight: bold;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.assistant-download-badge:hover {
+  background: var(--color-brand-hover);
+}
+
+.assistant-download-badge:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
 }
 
 .btn-primary {
