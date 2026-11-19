@@ -31,6 +31,23 @@
       ]
     },
     {
+      "source": "/downloads/gacha-record-helper.apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"gacha-record-helper.apk\"; filename*=UTF-8''%E7%9B%B2%E7%9B%92%E6%B4%BE%E5%AF%B9%E5%8A%A9%E6%89%8B.apk"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/test-gacha",
       "headers": [
         {

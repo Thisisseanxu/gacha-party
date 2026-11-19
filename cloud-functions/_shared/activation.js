@@ -8,6 +8,7 @@ const GAME_MAIL_HEADERS = {
 }
 
 const textEncoder = new TextEncoder()
+export const ACTIVATION_LIFETIME_SECONDS = 10 * 24 * 3600
 
 export function corsHeaders() {
   return {
@@ -23,6 +24,7 @@ export function jsonResponse(body, status = 200) {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
       ...corsHeaders(),
     },
   })
@@ -149,12 +151,12 @@ export async function generateActivationKey(uid, base64PrivateKey) {
     throw new Error('PRIVATE_KEY 未设置。')
   }
 
-  const uidInt = Number.parseInt(String(uid), 10)
-  if (!Number.isSafeInteger(uidInt) || uidInt < 0 || uidInt > 0xffffffff) {
+  const uidInt = Number(uid)
+  if (!/^[1-9]\d*$/.test(String(uid)) || !Number.isSafeInteger(uidInt) || uidInt > 0xffffffff) {
     throw new Error('UID 超出 uint32 范围')
   }
 
-  const expiry = BigInt(Math.floor(Date.now() / 1000) + 45 * 24 * 3600)
+  const expiry = BigInt(Math.floor(Date.now() / 1000) + ACTIVATION_LIFETIME_SECONDS)
   const payload = new Uint8Array(12)
   const dataView = new DataView(payload.buffer)
   dataView.setUint32(0, uidInt, true)

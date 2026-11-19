@@ -1,10 +1,10 @@
 {
-  "version": 4,
+  "version": 7,
   "announcements": [
     {
-      "id": "announcement-20260604160444",
-      "title": "小程序可以分析记录啦！",
-      "content": "现在小程序内已经可以直接查看和网页端一样的抽卡分析，无需再反复切换软件！获取记录后点击查看抽卡分析即可，记得先获取再查看噢！",
+      "id": "announcement-20261119200944389-owhl",
+      "title": "抽卡记录获取方式更改说明",
+      "content": "游戏内的抽卡记录已加密，现在必须配合软件才能导出抽卡记录，请前往mhpd.fans下载",
       "startDate": "",
       "endDate": "",
       "enabled": true,

@@ -38,7 +38,8 @@
 
 ### :mag: 抽卡记录分析
 
-- **便捷的数据导入**: 支持直接粘贴或上传由官方PC端“抽卡记录导出工具”生成的`.json`文件，快速开始分析。
+- **云端记录分析**: 使用玩家ID和小程序激活码读取云端抽卡记录并分析，不再提供粘贴 JSON、上传文件和手动开始分析入口。
+- **安卓取号助手下载**: 小程序码上方和右下角浮窗提供 APK 直接下载，小程序码上方另附下载二维码；使用教程视频及首次教程弹窗暂时隐藏，保留代码。
 - **多维度统计分析**:
     * 自动区分 **限定池** 与 **常驻池** 数据，并分别进行统计。
     * 清晰展示总抽数、抽卡时间范围，以及当前距离上一个限定（SP）和SSR的垫抽数。
@@ -105,6 +106,26 @@
 两份 JSON 使用 `public, max-age=0, must-revalidate`，保留 ETag 更新校验；图片保留 90 天缓存。Toy 自行保存 15 分钟数据快照，网络失败时使用缓存或包内数据。配置需随网站部署后生效；Vite 的本地预览不会自动应用 EdgeOne 响应头规则。
 
 部署后可用 `curl.exe -I -H "Origin: https://www.bilibili.com" https://mhpd.fans/data/cards.json` 检查响应头，并同样检查另一份 JSON 及 `/images/gacha_bg.webp`。缺失图片返回的路由 HTML 不会因为 CORS 变成图片，Toy 会继续使用本地兜底。
+
+## 安卓助手下载
+
+下载地址固定为 `https://mhpd.fans/downloads/gacha-record-helper.apk`。当前文件为「盲盒派对助手」1.0.4，来自 `../gacha-record-id-android/release/盲盒派对助手-1.0.4.apk`，随网站静态资源构建和部署。更新时替换 `public/downloads/gacha-record-helper.apk`，下载链接和 `public/images/record-assistant-download-qr.png` 无需改变。
+
+`edgeone.json` 与 `public/_headers` 对该文件配置 Android APK 类型、附件下载和每次校验缓存，扫码会直接访问 APK。PWA 页面导航缓存排除 `/downloads/`，避免下载被当成网页缓存。响应头配置需随网站部署后生效。
+
+视频教程由 `src/views/RecordPage.vue` 中的 `showVideoTutorial` 开关控制，当前为 `false`，同时隐藏正文视频、浮窗入口和首次使用弹窗；改回 `true` 即可恢复。
+
+## 抽卡记录id验证与小程序同步
+
+`POST /api/record-activate`（Cloud Function）接受 JSON `{ "record_id": "MHPD1.…" }`。服务端限制请求体及 GZIP 解压大小，从记录id提取 UID 和 upload_token，只向固定官方地址查询常驻池（9）的第一页。常驻池为空时尝试高级常驻池（10000）；要求返回的每条记录均包含与 UID 一致的 `player_id`，两池都为空时返回 422，不签发凭证。令牌失效返回 401，归属不匹配返回 403，官方服务异常返回 502。
+
+验证通过后使用现有 `PRIVATE_KEY` 签发旧格式 Ed25519 激活码，返回 `player_id`、`activation_key`、`expires_at`，响应禁止缓存。新激活码有效期为10天，邮箱验证码签发也调整为10天；已签发的旧激活码仍按原到期时间有效。保留旧的 `PUBLIC_KEY` 验签，可直接访问相同 UID 的原云端存档及徽章投稿接口。自动签发禁止使用旧管理权限保留的 UID 范围（33开头的9位数），管理员凭证继续单独管理。
+
+小程序在登录页输入记录id，主页恢复登录/账号入口，首次进入抽卡分析会跳转登录。登录成功后保存激活码，并允许复制到网站使用；过期后重新登录验证。签发失败时提示“登录失败：云端存档等功能不可用”，保留仅用于官方查询的会话，允许继续获取记录并跳过云端读写。同一 UID 只保留最新输入的记录id。云端下载、上传发送 `X-License-Key` 与 `X-Player-ID`。存储接口不再接受 `X-Upload-Token`，上传仍覆盖 `record_<UID>`，原10分钟上传冷却不变。徽章投稿使用同一激活码，保留审核、封禁与投稿频率限制。官方查询仍直接使用临时 upload_token；10天激活码不能延长官方令牌的寿命。
+
+部署时先发布本仓库的 Cloud Functions 和 Edge Functions，沿用匹配的 `PRIVATE_KEY`/`PUBLIC_KEY` 及 `gacha_data`、`huizhang_data` 绑定，再发布小程序。不要将记录id、请求正文、`X-Token` 或激活码写入日志；为 `/api/record-activate` 配置 EdgeOne WAF 的跨实例频率限制。代码另提供实例内每分钟60次总请求、每枚令牌6次的限制，该限制不替代跨实例防刷规则。
+
+验证命令：`node --test tests/record-activation.test.mjs tests/record-token.test.mjs`。安卓助手显示有效记录id后，可运行 `node scripts/verify-record-activation.mjs`，用真实官方响应验证 UID 归属和10天签名；该脚本仅使用临时测试密钥，不保存或输出凭证，不写入实际云端存档。
 
 ## :gear: 项目结构
 

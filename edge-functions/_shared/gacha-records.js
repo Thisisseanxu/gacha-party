@@ -39,6 +39,7 @@ export function textResponse(message, status = 200, extraHeaders = {}) {
     status,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
       ...corsHeaders(),
       ...extraHeaders,
     },
@@ -170,7 +171,7 @@ export function verifyLicenseForEdgeOne(licenseKey, base64PublicKey) {
   const publicKey = derKey.slice(derKey.length - 32)
   const fullData = base64ToBytes(base64UrlToStandard(licenseKey))
   const signatureLength = 64
-  if (fullData.length <= signatureLength) {
+  if (fullData.length !== 12 + signatureLength) {
     throw new Error('激活码格式不正确。')
   }
 
@@ -186,11 +187,28 @@ export function verifyLicenseForEdgeOne(licenseKey, base64PublicKey) {
   const userId = dataView.getUint32(0, true)
   const expiryTimestamp = Number(dataView.getBigUint64(4, true))
 
-  if (expiryTimestamp < Math.floor(Date.now() / 1000)) {
+  if (expiryTimestamp <= Math.floor(Date.now() / 1000)) {
     throw new Error('激活码已过期')
   }
 
   return {
     userId,
   }
+}
+
+function authError(message, statusCode) {
+  return Object.assign(new Error(message), { statusCode })
+}
+
+// Both clients use the legacy signed license. Official-token validation and
+// issuance happen only in the Cloud Function, never in the edge storage APIs.
+export async function authenticateRecordRequest(request, env = {}) {
+  const playerId = String(request.headers.get('X-Player-Id') || '').trim()
+  if (!/^[1-9]\d{0,19}$/.test(playerId)) throw authError('缺少有效的 X-Player-Id', 400)
+
+  const licenseKey = request.headers.get('X-License-Key')
+  if (!licenseKey) throw authError('请求头中缺少查询凭证', 401)
+  const identity = verifyLicenseForEdgeOne(licenseKey, env.PUBLIC_KEY)
+  if (!canAccessPlayer(playerId, identity.userId)) throw authError('查询凭证与玩家ID不匹配', 403)
+  return { ...identity, playerId }
 }

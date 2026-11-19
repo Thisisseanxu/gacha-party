@@ -11,6 +11,12 @@
 /sw.js
   Cache-Control: public, max-age=0, must-revalidate, no-cache
 
+# APK 以附件直接下载；固定地址每次校验更新，二维码无需随版本更换
+/downloads/gacha-record-helper.apk
+  Content-Type: application/vnd.android.package-archive
+  Content-Disposition: attachment; filename="gacha-record-helper.apk"; filename*=UTF-8''%E7%9B%B2%E7%9B%92%E6%B4%BE%E5%AF%B9%E5%8A%A9%E6%89%8B.apk
+  Cache-Control: public, max-age=0, must-revalidate
+
 # 字体文件长期缓存
 /*.ttf
   Cache-Control: public, max-age=31536000, immutable

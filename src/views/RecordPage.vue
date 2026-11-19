@@ -40,33 +40,6 @@
         </div>
         <p v-if="cloudMessage" class="success-message">{{ cloudMessage }}</p>
         <p v-if="cloudErrorMessage" class="error-message">{{ cloudErrorMessage }}</p>
-      </div>
-
-      <div class="input-section split">
-        <p class="input-description">
-          请在下方文本框粘贴您的抽卡记录数据<br />或上传旧版本json文件。
-        </p>
-        <textarea
-          v-model="jsonInput"
-          id="jsonInput"
-          class="json-textarea"
-          placeholder='请在此处粘贴小程序复制的数据，注意输入法有时会截断，建议长按粘贴，正确格式为：{"cloud":true,"compressed":true,"data":"XXXXXXXXXXXXXXXX...XXXXXXXXXXXX"}'
-        ></textarea>
-        <div class="button-group">
-          <button @click="handleJsonAnalysis" class="action-button" :disabled="isFetchingOnline">
-            开始分析
-          </button>
-          <button @click="triggerFileUpload" class="action-button" :disabled="isFetchingOnline">
-            上传文件
-          </button>
-          <input
-            type="file"
-            ref="fileUploader"
-            @change="handleFileUpload"
-            accept=".json,application/json"
-            style="display: none"
-          />
-        </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </div>
       <p class="input-description">
@@ -84,24 +57,27 @@
       <p class="input-description">当前版本：v{{ appVersion }}</p>
     </div>
     <div v-if="viewState === 'input'" class="gacha-analysis-container">
+      <RecordAssistantDownload />
       <div class="mp-weixin">
         <p>
           使用小程序获取抽卡记录<br /><span class="highlight"
             >微信搜索“织夜工具箱”或扫描小程序码</span
           >
         </p>
-        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
-        <p>使用教程</p>
-        <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
-          <iframe
-            :src="tutorialVideoSrc"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-            scrolling="no"
-            frameborder="no"
-            framespacing="0"
-            allowfullscreen="true"
-          ></iframe>
-        </div>
+        <img src="/images/mp_weixin.webp" class="mp-weixin-image" alt="织夜工具箱小程序码" />
+        <template v-if="showVideoTutorial">
+          <p>使用教程</p>
+          <div style="width: 100%; position: relative; padding-bottom: 56.25%; height: 0">
+            <iframe
+              :src="tutorialVideoSrc"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+              scrolling="no"
+              frameborder="no"
+              framespacing="0"
+              allowfullscreen="true"
+            ></iframe>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -126,11 +102,24 @@
     />
 
     <div v-if="viewState === 'input'" class="record-floating-buttons">
-      <button class="record-floating-btn" type="button" @click="openTutorialPopUp">
+      <a class="record-floating-btn" :href="RECORD_ASSISTANT_APK_PATH" download="盲盒派对助手.apk">
+        <img src="/images/icons/icon-192px.png" class="record-floating-icon" alt="" />
+        <span>软件下载</span>
+      </a>
+      <button
+        v-if="showVideoTutorial"
+        class="record-floating-btn record-floating-mobile-only"
+        type="button"
+        @click="openTutorialPopUp"
+      >
         <img src="/images/bili_avatar.webp" class="record-floating-icon" alt="视频教程" />
         <span>视频教程</span>
       </button>
-      <button class="record-floating-btn" type="button" @click="openMpPopUp">
+      <button
+        class="record-floating-btn record-floating-mobile-only"
+        type="button"
+        @click="openMpPopUp"
+      >
         <img src="/images/mp_weixin.webp" class="record-floating-icon" alt="小程序码" />
         <span>小程序码</span>
       </button>
@@ -198,6 +187,7 @@
       <button @click="closeAgreementPopUp" class="action-button">我已阅读并同意</button>
     </PopUp>
     <PopUp
+      v-if="showVideoTutorial"
       :display="showTutorialPopUp"
       :title="tutorialPopUpTitle"
       :show-close-button="!isFirstUseTutorialPopUp"
@@ -222,13 +212,16 @@
       </button>
     </PopUp>
     <PopUp :display="showMpPopUp" title="小程序码" @close="closeMpPopUp">
-      <div class="mp-weixin mp-weixin-modal">
-        <p>
-          使用小程序获取抽卡记录<br /><span class="highlight"
-            >微信搜索“织夜工具箱”或扫描小程序码</span
-          >
-        </p>
-        <img src="/images/mp_weixin.webp" class="mp-weixin-image" />
+      <div class="record-help-content">
+        <RecordAssistantDownload />
+        <div class="mp-weixin mp-weixin-modal">
+          <p>
+            使用小程序获取抽卡记录<br /><span class="highlight"
+              >微信搜索“织夜工具箱”或扫描小程序码</span
+            >
+          </p>
+          <img src="/images/mp_weixin.webp" class="mp-weixin-image" alt="织夜工具箱小程序码" />
+        </div>
       </div>
     </PopUp>
   </div>
@@ -239,6 +232,8 @@ import { ref, onMounted, defineAsyncComponent } from 'vue'
 import pako from 'pako'
 import { logger } from '@/utils/logger.js'
 import { verifyLicense } from '@/utils/licenseManager.js'
+import RecordAssistantDownload from '@/components/RecordAssistantDownload.vue'
+import { RECORD_ASSISTANT_APK_PATH } from '@/utils/recordAssistantDownload.js'
 
 const GachaAnalysis = defineAsyncComponent(() => import('@/components/GachaAnalysis.vue')) // 异步导入分析结果展示组件
 import PopUp from '@/components/PopUp.vue' // 导入弹窗组件
@@ -259,6 +254,8 @@ const OTHER_CARD_POOLS_ID = ref([]) // 其他未分类卡池ID列表
 
 const errorMessage = ref('')
 const showAgreementPopUp = ref(false) // 控制用户协议弹窗显示
+// 暂时隐藏教程，恢复此开关即可重新显示视频入口及首次使用弹窗。
+const showVideoTutorial = false
 const showTutorialPopUp = ref(false)
 const tutorialPopUpTitle = ref('视频教程')
 const isFirstUseTutorialPopUp = ref(false)
@@ -382,12 +379,6 @@ const FRONTEND_COOLDOWNS = {
   },
 }
 
-// 通过按钮来驱动Input
-const fileUploader = ref(null)
-const triggerFileUpload = () => {
-  fileUploader.value.click()
-}
-
 const loadInputData = () => {
   const savedKey = localStorage.getItem(LICENSE_KEY)
   const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY)
@@ -411,7 +402,7 @@ const saveInputData = (key = null, playerId = null) => {
 }
 
 onMounted(async () => {
-  if (localStorage.getItem(FIRST_USE_TUTORIAL_KEY) !== 'true') {
+  if (showVideoTutorial && localStorage.getItem(FIRST_USE_TUTORIAL_KEY) !== 'true') {
     tutorialPopUpTitle.value = '首次使用？请查看视频教程：'
     isFirstUseTutorialPopUp.value = true
     showTutorialPopUp.value = true
@@ -645,21 +636,6 @@ const handleJsonAnalysis = () => {
   viewState.value = 'analysis' // 切换到分析视图
 }
 
-// 处理文件上传
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    jsonInput.value = e.target.result // 这里为了方便处理，直接把文件内容放进文本框，这样不用做两个逻辑，我真是个天才
-    handleJsonAnalysis()
-  }
-  reader.onerror = () => (errorMessage.value = '读取文件时发生错误。')
-  reader.readAsText(file)
-  // 清空事件
-  event.target.value = ''
-}
-
 const WorkerUrl = ref('')
 onMounted(() => {
   WorkerUrl.value = import.meta.env.VITE_WORKER_BASE_URL || window.location.origin
@@ -840,6 +816,7 @@ const fetchRecordWithRetry = async (url, headers) => {
 
 // 处理云端获取抽卡记录的函数
 const handleGetRecord = async () => {
+  errorMessage.value = ''
   cloudMessage.value = ''
   cloudErrorMessage.value = ''
   if (!fetchLicenseInput.value.trim()) {
@@ -1111,23 +1088,6 @@ const resetView = () => {
   color: var(--color-text-highlight);
 }
 
-.json-textarea {
-  min-height: 200px;
-  background-color: var(--color-background-light);
-  border: 1px solid var(--color-border-primary);
-  border-radius: 8px;
-  color: var(--color-text-primary);
-  padding: 12px;
-  font-size: 0.85rem;
-  resize: vertical;
-  width: auto;
-}
-
-.json-textarea:focus {
-  outline: none;
-  border-color: var(--color-brand-primary);
-}
-
 .button-group {
   display: flex;
   gap: 12px;
@@ -1138,12 +1098,6 @@ const resetView = () => {
   flex-direction: column;
   gap: 12px;
   padding-top: 0.5rem;
-}
-
-.split {
-  margin-top: 16px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-background-light);
 }
 
 .cloud-input {
@@ -1282,12 +1236,18 @@ const resetView = () => {
   padding-top: 0;
 }
 
+.record-help-content {
+  max-height: calc(90dvh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .record-floating-buttons {
   position: fixed;
   right: 0;
   bottom: 2rem;
   z-index: 100;
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
@@ -1332,8 +1292,12 @@ const resetView = () => {
   flex-shrink: 0;
 }
 
+.record-floating-mobile-only {
+  display: none;
+}
+
 @media (max-width: 1099px) {
-  .record-floating-buttons {
+  .record-floating-mobile-only {
     display: flex;
   }
 }

@@ -1,5 +1,5 @@
 import {
-  canAccessPlayer,
+  authenticateRecordRequest,
   enforceUploadRateLimit,
   EDGEONE_BODY_LIMIT_BYTES,
   getGachaKv,
@@ -10,7 +10,6 @@ import {
   saveRecordMeta,
   SAFE_RECORD_LIMIT_BYTES,
   utf8Bytes,
-  verifyLicenseForEdgeOne,
 } from './_shared/gacha-records.js'
 
 export function onRequestOptions() {
@@ -21,25 +20,7 @@ export async function onRequestPost({ request, env }) {
   const responseBody = { message: '', timeLeft: 0 }
 
   try {
-    const licenseKey = request.headers.get('X-License-Key')
-    const playerId = request.headers.get('X-Player-Id')
-
-    if (!licenseKey) {
-      responseBody.message = '请求头中缺少 X-License-Key'
-      return jsonResponse(responseBody, 400)
-    }
-
-    if (!playerId) {
-      responseBody.message = '请求头中缺少 X-Player-Id'
-      return jsonResponse(responseBody, 400)
-    }
-
-    const { userId, isExpired } = await verifyLicenseForEdgeOne(licenseKey, env.PUBLIC_KEY)
-
-    if (!canAccessPlayer(playerId, userId)) {
-      responseBody.message = '上传的抽卡记录不属于激活码对应的玩家！'
-      return jsonResponse(responseBody, 403)
-    }
+    const { playerId, userId, isExpired } = await authenticateRecordRequest(request, env)
 
     const payload = await request.text()
     if (!payload) {
@@ -80,6 +61,6 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse(responseBody, 503)
     }
     responseBody.message = `验证失败：${error.message}`
-    return jsonResponse(responseBody, 403)
+    return jsonResponse(responseBody, error.statusCode || 403)
   }
 }

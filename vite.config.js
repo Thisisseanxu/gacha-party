@@ -61,7 +61,8 @@ export default defineConfig({
         runtimeCaching: [
           {
             // SSG 页面按访问时缓存：在线优先拿最新 HTML，断网时回退到最近访问版本。
-            urlPattern: ({ request }) => request.mode === 'navigate',
+            urlPattern: ({ request, url }) =>
+              request.mode === 'navigate' && !url.pathname.startsWith('/downloads/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'pages-cache',
